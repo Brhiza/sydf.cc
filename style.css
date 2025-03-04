@@ -1,0 +1,141 @@
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f7f7f7;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+h1 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 20px;
+}
+#container {
+    width: 90%;
+    max-width: 800px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    box-sizing: border-box;
+}
+input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+button {
+    width: 100%;
+    padding: 12px;
+    background-color: #27ae60;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+button:hover {
+    background-color: #219653;
+}
+#outputText {
+    margin-top: 20px;
+    display: none;
+    padding: 15px;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+.hexagram {
+    font-size: 20px;
+    margin: 8px 0;
+    text-align: center;
+    color: #777;
+}
+.ai-response {
+    background-color: #f9f9f9;
+    border: 1px solid #eee;
+    padding: 15px;
+    border-radius: 6px;
+    margin-top: 15px;
+    font-size: 16px;
+    line-height: 1.6;
+    color: #555;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+.hexagram-container {
+    display: flex;
+    justify-content: space-around;
+    border-top: 2px solid #27ae60;
+    padding-top: 15px;
+    margin-top: 15px;
+}
+.hexagram-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 45%;
+}
+.hexagram-symbol {
+    font-size: 48px;
+    line-height: 1.0;
+    text-align: center;
+}
+.hexagram-symbol div {
+    display: block;
+}
+.moving-yaos {
+    text-align: center;
+    margin: 15px 0;
+    padding: 10px;
+    background-color: #f5f5f5;
+    border-radius: 6px;
+    color: #e74c3c;
+    font-weight: bold;
+}
+
+/* 塔罗牌特有样式 */
+.hexagram-container.tarot {
+    justify-content: center;  /* 默认居中对齐（用于单牌） */
+    border-top: none;
+    width: 100%;
+}
+
+.hexagram-container.tarot.three-cards {  /* 三牌布局 */
+    justify-content: space-between;
+}
+
+.hexagram-item.tarot {
+    width: 80%;  /* 默认宽度（用于单牌） */
+    max-width: 300px;
+}
+
+.hexagram-container.three-cards .hexagram-item.tarot {
+    width: 30%;  /* 三牌布局时的宽度 */
+}
+
+.hexagram-item.tarot img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin-top: 10px;
+}
+
+/* 梅花易数特有样式 */
+.hexagram-container.meihua {
+    justify-content: space-around;
+    border-top: 2px solid #27ae60;
+}
+
+.hexagram-item.meihua {
+    width: 45%;
+} 
