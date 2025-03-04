@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>胡湘怡的大阿卡纳</title>
+    <style>
+        /* 背景样式 */
+        body {
+              font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #87CEFA;
+            background: linear-gradient(to bottom right, #9370DB 0, #483D8B 100%);
+            overflow: auto;
+            position: relative;
+            padding-top: 100px
+        }
+
+/* 电脑设备（屏幕宽度大于 768px） */
+@media (min-width: 769px) {
+    body {
+        padding-top: 50px; /* 电脑设备留白 */
+    }
+}
+
+/* 手机设备（屏幕宽度小于等于 768px） */
+@media (max-width: 768px) {
+    body {
+        padding-top: 50px; /* 手机设备留白 */
+    }
+}
+
+        
+        /* 背景气泡动画 */
+        .bg-bubbles {
+            position: fixed; /* 改为 fixed，固定在背景上 */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0; /* 背景气泡的 z-index 设置为 0 */
+        }
+
+        .bg-bubbles li {
+            position: absolute;
+            list-style: none;
+            display: block;
+            width: 40px;
+            height: 40px;
+            background-color: hsla(0, 0%, 100%, .15);
+            bottom: -160px;
+            animation: square 25s infinite;
+            transition-timing-function: linear;
+        }
+
+        .bg-bubbles li:nth-child(1) {
+            left: 10%;
+        }
+
+        .bg-bubbles li:nth-child(2) {
+            left: 20%;
+            width: 80px;
+            height: 80px;
+            animation-delay: 2s;
+            animation-duration: 17s;
+        }
+
+        .bg-bubbles li:nth-child(3) {
+            left: 25%;
+            animation-delay: 4s;
+        }
+
+        .bg-bubbles li:nth-child(4) {
+            left: 40%;
+            width: 60px;
+            height: 60px;
+            animation-duration: 22s;
+            background-color: hsla(0, 0%, 100%, .25);
+        }
+
+        .bg-bubbles li:nth-child(5) {
+            left: 70%;
+        }
+
+        .bg-bubbles li:nth-child(6) {
+            left: 80%;
+            width: 120px;
+            height: 120px;
+            animation-delay: 3s;
+            background-color: hsla(0, 0%, 100%, .2);
+        }
+
+        .bg-bubbles li:nth-child(7) {
+            left: 32%;
+            width: 160px;
+            height: 160px;
+            animation-delay: 7s;
+        }
+
+        .bg-bubbles li:nth-child(8) {
+            left: 55%;
+            width: 20px;
+            height: 20px;
+            animation-delay: 15s;
+            animation-duration: 40s;
+        }
+
+        .bg-bubbles li:nth-child(9) {
+            left: 25%;
+            width: 10px;
+            height: 10px;
+            animation-delay: 2s;
+            animation-duration: 40s;
+            background-color: hsla(0, 0%, 100%, .3);
+        }
+
+        .bg-bubbles li:nth-child(10) {
+            left: 90%;
+            width: 160px;
+            height: 160px;
+            animation-delay: 11s;
+        }
+
+        @keyframes square {
+            0% {
+                transform: translateY(0);
+            }
+            to {
+                transform: translateY(-700px) rotate(600deg);
+            }
+        }
+
+        /* 内容框样式 */
+        .content-box {
+            width: 90%;
+            max-width: 1200px;
+            min-width: 300px;
+                padding: 20px; /* 减少 padding */
+    box-sizing: border-box; /* 确保 padding 不会增加宽度 */
+            border-radius: 20px; /* 圆角矩形 */
+            background: rgba(255, 255, 255, 0.2); /* 毛玻璃背景 */
+            backdrop-filter: blur(10px); /* 毛玻璃效果 */
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2); /* 阴影 */
+            z-index: 2; /* 确保内容框在背景气泡之上 */
+            position: relative; /* 相对定位 */
+        }
+
+    .card-container {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      overflow: visible;
+    }
+
+    .card-row {
+      display: flex;
+      justify-content: center;
+      gap: -1rem;
+      flex-wrap: wrap;
+    }
+
+    .card {
+      width: 6rem;
+      height: 9rem;
+      border: 1px solid #ccc;
+      margin: 0.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+      position: relative;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      transition: opacity 0.5s ease-in-out, transform 0.3s ease-in-out;
+      border-radius: 5px;
+    }
+
+    @media (max-width: 768px) {
+      .card {
+        width: 2.5rem;
+        height: 4rem;
+      }
+
+      .card-row {
+        gap: 0rem;
+      }
+
+      .input-container input {
+        width: 90%;
+        max-width: 100%;
+      }
+    }
+
+    @media (min-width: 769px) {
+      .card {
+        width: 6rem;
+        height: 9rem;
+      }
+    }
+
+    .card.hidden {
+      opacity: 0;
+    }
+
+        .result-container {
+            width: 90%;
+            max-width: 1200px;
+            overflow: auto; /* 超出部分滚动 */
+            box-sizing: border-box; /* 包含 padding 和 border */
+            display: flex;
+            flex-wrap: wrap; /* 允许换行 */
+            gap: 10px; /* 子元素间距 */
+            align-items: center;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+        .result-container img {
+            max-width: 100%; /* 图片宽度不超过容器 */
+            height: auto; /* 高度自适应 */
+        }
+        .result-container p {
+            word-wrap: break-word; /* 允许长单词换行 */
+            margin: 0;
+        }
+
+    .reset-button,
+    .copy-button,
+    .ai-button {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 25px;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        margin: 5px;
+    }
+
+    .reset-button:hover,
+    .copy-button:hover,
+    .ai-button:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .reset-button:active,
+    .copy-button:active,
+    .ai-button:active {
+        background: rgba(138, 43, 226, 0.6);
+        border-color: rgba(138, 43, 226, 0.8);
+        box-shadow: 0 0 15px rgba(138, 43, 226, 0.3);
+    }
+
+    @media (max-width: 768px) {
+        .content-box {
+          background: rgba(255, 255, 255, 0.2); /* 毛玻璃背景 */
+          backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: none;
+        }
+        
+        .reset-button,
+        .copy-button,
+        .ai-button {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            margin: 3px;
+        }
+    }
+
+    .centered {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+
+h1 {
+  font-size: 48px; /* 默认字体大小 */
+  color: #fff;
+  margin-bottom: 30px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* 针对手机设备的样式 */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 32px; /* 手机端字体大小 */
+  }
+}
+        
+    .input-container {
+            font-size: 24px;
+            color: #fff;
+            margin-bottom: 30px;
+                  flex-direction: column;
+      align-items: center;
+      text-align: center;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .input-container input {
+      width: 90%;
+      max-width: 100%;
+      padding: 1rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+            
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+      margin-top: 0.5rem;
+    }
+
+    .input-container input:focus {
+      outline: none;
+      border-color: #007bff;
+      box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
+    }
+
+    .output-text {
+      margin-top: 2rem;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #F5F5F5;
+      padding: 1rem;
+      border-radius: 5px;
+    }
+
+    .output-text strong {
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: #F5F5F5;
+    }
+
+    .output-text em {
+      font-size: 1.1rem;
+      font-style: italic;
+      color: #F5F5F5;
+    }
+
+    .button-container {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .loading-animation {
+      display: none;
+      margin-top: 2rem;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #FFF;
+      text-align: center;
+            background: rgba(255, 255, 255, 0.2); /* 毛玻璃背景 */
+            backdrop-filter: blur(10px);
+      padding: 1rem;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .loading-animation::after {
+      content: 'AI疯狂思考中...';
+      animation: loading 1s infinite;
+    }
+
+    @keyframes loading {
+      0% {
+        content: 'AI疯狂思考中.';
+      }
+
+      33% {
+        content: 'AI疯狂思考中..';
+      }
+
+      66% {
+        content: 'AI疯狂思考中...';
+      }
+
+      100% {
+        content: 'AI疯狂思考中.';
+      }
+    }
+
+    #outputText .highlight {
+      background-color: #fff3cd;
+      padding: 2px 4px;
+      border-radius: 4px;
+    }
+
+    #outputText blockquote {
+      border-left: 4px solid #6c757d;
+      padding-left: 1em;
+      margin-left: 0;
+      color: #6c757d;
+    }
+    </style>
+        <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <!-- 背景气泡动画 -->
+    <ul class="bg-bubbles">
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+    </ul>
+
+    <!-- 内容框 -->
+    <h1>胡湘怡的大阿卡纳</h1>
+    <div class="content-box">
+    <div class="input-container">
+
+      1.写下您的问题
+      <br><br>
+      <input type="text" id="inputText" placeholder="只能提问能用Yes/No回答的问题哦" value="今日运势" autofocus>
+      <br><br>
+      2.头脑中想着您的问题，并抽取 3 张塔罗牌
+      <br>
+    </div>
+  </header>
+  <main class="centered">
+    <div class="card-container" id="cardContainer"></div>
+    <div class="result-container" id="resultContainer"></div>
+    <div class="button-container">
+      <button class="copy-button centered" id="copyButton" onclick="copyResult()" style="display: none;">复制结果</button>
+      <button class="reset-button centered" id="resetButton" onclick="resetCards()" style="display: none;">重新抽牌</button>
+      <button class="ai-button centered" id="aiButton" onclick="aiInterpretation()" style="display: none;">AI解读</button>
+    </div>
+    <div class="output-text" id="outputText"></div>
+    <div class="loading-animation" id="loadingAnimation"></div>
+  </main>
+    </div>
+
+    <script>
+const majorArcanaCardNames = ["愚人", "魔术师", "女祭司", "皇后", "皇帝", "教皇", "恋人", "战车", "力量", "隐士", "命运之轮", "正义", "倒吊人", "死亡", "节制", "恶魔", "高塔", "星星", "月亮", "太阳", "审判", "世界"];
+    const cardDescriptions = [{
+        upright: "开端、自由、纯真、独创性、冒险、理想主义、自发性",
+        reversed: "鲁莽、粗心、分心、幼稚、愚蠢、容易上当、陈旧、迟钝"
+      },
+      {
+        upright: "意志力、欲望、足智多谋、技能、能力、专注、表现",
+        reversed: "操纵、狡猾、诡计、浪费天赋、错觉、欺骗"
+      },
+      {
+        upright: "无意识、直觉、神秘、灵性、更高的力量、内在的声音",
+        reversed: "被压抑的直觉、隐藏的动机、肤浅、困惑、认知失调"
+      },
+      {
+        upright: "神圣的女性、性感、生育力、培育、创造力、美丽、丰富、自然",
+        reversed: "不安全、专横、疏忽、窒息、缺乏成长、缺乏进步"
+      },
+      {
+        upright: "稳定性、结构、保护、权威、控制、实用性、重点、纪律",
+        reversed: "暴君、霸道、死板、固执、缺乏纪律、鲁莽"
+      },
+      {
+        upright: "传统、社会群体、约定俗成、从众、教育、知识、信仰",
+        reversed: "叛逆、非常规、不循规蹈矩、新方法、无知"
+      },
+      {
+        upright: "爱、工会、伙伴关系、关系、选择、浪漫、平衡、团结",
+        reversed: "不和谐、不平衡、冲突、超脱、错误的选择、优柔寡断"
+      },
+      {
+        upright: "成功、雄心、决心、意志力、控制力、自律、专注",
+        reversed: "有力、没有方向、没有控制、无力、侵略、障碍"
+      },
+      {
+        upright: "勇气、勇敢、自信、同情、自信、内在力量",
+        reversed: "自我怀疑、软弱、低信心、不足、怯懦、强硬"
+      },
+      {
+        upright: "自我反省、内省、沉思、退缩、孤独、寻找自我",
+        reversed: "孤独、孤立、隐居、反社会、拒绝、回归社会"
+      },
+      {
+        upright: "变化、周期、命运、决定性时刻、运气、财富、突发事件",
+        reversed: "运气不好、缺乏控制、执着于控制、不受欢迎的变化、延误"
+      },
+      {
+        upright: "正义、业力、后果、责任、法律、真相、诚实、正直、因果",
+        reversed: "不公正、报复、不诚实、腐败、不诚实、不公平、逃避责任"
+      },
+      {
+        upright: "牺牲、等待、不确定、缺乏方向、视角、沉思",
+        reversed: "拖延、漠不关心、停滞不前、避免牺牲、冷漠"
+      },
+      {
+        upright: "转变、结局、改变、过渡、放手、释放",
+        reversed: "害怕改变、重复消极的模式、抵制改变、停滞不前、腐朽"
+      },
+      {
+        upright: "平衡、和平、耐心、适度、平静、安宁、和谐、宁静",
+        reversed: "不平衡、过度、极端、不和谐、鲁莽、仓促"
+      },
+      {
+        upright: "压迫、成瘾、痴迷、依赖、过度、无力、局限",
+        reversed: "独立、自由、启示、释放、收回权力、收回控制"
+      },
+      {
+        upright: "灾难、破坏、剧变、创伤、突变、混乱",
+        reversed: "避免灾难、延迟不可避免的、抵制变化"
+      },
+      {
+        upright: "希望、灵感、积极性、信念、更新、治愈、复兴",
+        reversed: "绝望、绝望、消极、缺乏信心、沮丧"
+      },
+      {
+        upright: "错觉、直觉、不确定性、困惑、复杂性、秘密、无意识",
+        reversed: "恐惧、欺骗、焦虑、误解、曲解、清晰、理解"
+      },
+      {
+        upright: "幸福、成功、乐观、活力、喜悦、自信、真理",
+        reversed: "幸福受阻、过度热情、悲观、不切实际的期望、自负"
+      },
+      {
+        upright: "自我评价、觉醒、更新、目的、反思、清算",
+        reversed: "自我怀疑、缺乏自我意识、未能吸取教训、自我厌恶"
+      },
+      {
+        upright: "完成、成就、成就感、归属感、整体性、和谐",
+        reversed: "缺乏封闭感、缺乏成就感、感觉不完整、空虚"
+      }
+    ];
+        const cdnBaseUrl = "./img/mx/";
+        const defaultCardImage = `${cdnBaseUrl}00.jpg`;
+        let cards = [];
+        let drawnCards = [];
+        let drawCount = 0;
+        let isCardClickable = true;
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function initCards() {
+            console.log("initCards called"); // 调试
+            cards = shuffleArray(Array.from({ length: 22 }, (_, i) => i));
+        }
+
+        function createCardElement(cardNumber) {
+            const cardElement = document.createElement('div');
+            cardElement.classList.add('card');
+            cardElement.dataset.number = cardNumber;
+            cardElement.style.backgroundImage = `url(${defaultCardImage})`;
+            cardElement.addEventListener('click', drawCard);
+            return cardElement;
+        }
+
+        function displayCards() {
+            console.log("displayCards called"); // 调试
+            const cardContainer = document.getElementById('cardContainer');
+            cardContainer.innerHTML = '';
+            const row1 = document.createElement('div');
+            row1.classList.add('card-row');
+            const row2 = document.createElement('div');
+            row2.classList.add('card-row');
+            cards.forEach((cardNumber, index) => {
+                const cardElement = createCardElement(cardNumber);
+                if (index < 11) {
+                    row1.appendChild(cardElement);
+                } else {
+                    row2.appendChild(cardElement);
+                }
+            });
+            cardContainer.appendChild(row1);
+            cardContainer.appendChild(row2);
+        }
+
+    function generateResultContent(card) {
+      const imgPath = `${cdnBaseUrl}${Number(card.number) + 1}.jpg`;
+      const transformStyle = card.reversed ? "rotate(180deg)" : "none";
+      const cardWidth = window.innerWidth <= 768 ? '3.5rem' : '7rem';
+      const cardHeight = window.innerWidth <= 768 ? '5.5rem' : '10rem';
+      const cardName = `${card.reversed ? "逆位" : ""}${majorArcanaCardNames[card.number]}`;
+      return `<div style="display: flex; flex-direction: column; align-items: center; margin: 0.5rem;">
+        <img src='${imgPath}' style='width: ${cardWidth}; height: ${cardHeight}; transform:${transformStyle}; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);' alt='${cardName}'>
+        <p style="margin-top: 0.5rem; font-size: ${window.innerWidth <= 768 ? '0.8rem' : '1rem'};">${cardName}</p>
+      </div>`;
+    }
+
+    function drawCard() {
+      if (!isCardClickable) return;
+      isCardClickable = false;
+      const inputText = document.getElementById('inputText').value;
+      if (!inputText.trim()) {
+        alert("你还没有写下问题呢");
+        isCardClickable = true;
+        return;
+      }
+      const cardNumber = this.dataset.number;
+      const isReversed = Math.random() < 0.5;
+      const cardImagePath = `${cdnBaseUrl}${Number(cardNumber) + 1}.jpg`;
+      if (!this.classList.contains('flipped')) {
+        this.style.backgroundImage = `url(${cardImagePath})`;
+        this.style.transform = isReversed ? "rotate(180deg)" : "none";
+      }
+      drawnCards.push({
+        number: cardNumber,
+        reversed: isReversed,
+        description: isReversed ? cardDescriptions[cardNumber].reversed : cardDescriptions[cardNumber].upright
+      });
+      drawCount++;
+      this.classList.add('flipped');
+      const resultContainer = document.getElementById('resultContainer');
+      resultContainer.innerHTML += generateResultContent({
+        number: cardNumber,
+        reversed: isReversed
+      });
+      this.classList.add('hidden');
+      this.removeEventListener('click', drawCard);
+      setTimeout(() => {
+        isCardClickable = true;
+      }, 500);
+      if (drawCount === 3) {
+        const resetButton = document.getElementById('resetButton');
+        resetButton.style.display = 'block';
+        const copyButton = document.getElementById('copyButton');
+        copyButton.style.display = 'block';
+        const aiButton = document.getElementById('aiButton');
+        aiButton.style.display = 'block';
+        const cardElements = document.querySelectorAll('.card');
+        cardElements.forEach(card => card.removeEventListener('click', drawCard));
+        const outputText = document.getElementById('outputText');
+        const cardNames = drawnCards.map(card => `<strong>${card.reversed ? "逆位" : ""}${majorArcanaCardNames[card.number]}</strong>`).join('、');
+        const cardDescriptionsText = drawnCards.map(card => `<em>${card.reversed ? "逆位" : ""}${majorArcanaCardNames[card.number]}，代表${card.description}</em>`).join('<br>');
+        const resultText = `${cardNames}<br>${inputText}<br><br><strong>牌意简介</strong><br>${cardDescriptionsText}`;
+        outputText.innerHTML = resultText;
+        setTimeout(() => {
+          window.scrollTo({
+            top: document.documentElement.scrollHeight,
+            behavior: 'smooth'
+          });
+        }, 100);
+      }
+    }
+
+    function resetCards() {
+      drawnCards = [];
+      drawCount = 0;
+      isCardClickable = true;
+      const cardElements = document.querySelectorAll('.card');
+      cardElements.forEach(card => {
+        card.classList.remove('flipped');
+        card.classList.remove('hidden');
+        card.style.backgroundImage = `url(${defaultCardImage})`;
+        card.style.transform = 'none';
+        card.addEventListener('click', drawCard);
+      });
+      const resultContainer = document.getElementById('resultContainer');
+      resultContainer.innerHTML = '';
+      const resetButton = document.getElementById('resetButton');
+      resetButton.style.display = 'none';
+      const copyButton = document.getElementById('copyButton');
+      copyButton.style.display = 'none';
+      const aiButton = document.getElementById('aiButton');
+      aiButton.style.display = 'none';
+      const outputText = document.getElementById('outputText');
+      outputText.textContent = '';
+      const inputText = document.getElementById('inputText');
+      inputText.value = '';
+      initCards();
+      displayCards();
+    }
+
+    function copyResult() {
+      const outputText = document.getElementById('outputText').innerText;
+      navigator.clipboard.writeText(outputText).then(() => {
+        alert("结果已复制到剪贴板");
+      }).catch(err => {
+        alert("复制失败: " + err);
+      });
+    }
+
+async function aiInterpretation() {
+    let inputText = document.getElementById('inputText').value;
+    // 如果是默认问题，去掉（默认）后缀
+    inputText = inputText.replace('（默认）', '');
+
+    const cardNames = drawnCards.map(card =>
+        `${card.reversed ? "逆位" : ""}${majorArcanaCardNames[card.number]}`
+    ).join('、');
+    const cardDescriptionsText = drawnCards.map(card =>
+        `${card.reversed ? "逆位" : ""}${majorArcanaCardNames[card.number]}：${card.description}`
+    ).join('\n');
+
+    const prompt = `你是一个专业的塔罗师，你会根据我的问题和抽的牌给我解决问题，\n 问题：${inputText}\n\n抽取的卡牌：\n${cardDescriptionsText}\n`;
+
+    const outputText = document.getElementById('outputText');
+    const aiButton = document.getElementById('aiButton');
+    outputText.style.display = 'none';
+    aiButton.classList.add('loading');
+    aiButton.textContent = '';
+
+    try {
+        // 创建 AbortController 实例
+        const controller = new AbortController();
+        window.currentAIRequest = controller;
+
+        const response = await fetch('https://flow.onlyikun.com/ai', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                prompt: prompt,
+                model: "Pro/deepseek-ai/DeepSeek-R1"
+            }),
+            signal: controller.signal // 添加 signal
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+        }
+
+        if (!response.body) {
+            throw new Error('Response body is null');
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let accumulatedText = '';
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            const chunk = decoder.decode(value);
+            const lines = chunk.split('\n').filter(line => line.trim() !== '');
+
+            for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                    try {
+                        const jsonData = JSON.parse(line.slice(6));
+                        if (jsonData.choices && jsonData.choices[0].delta && jsonData.choices[0].delta.content) {
+                            const content = jsonData.choices[0].delta.content;
+                            accumulatedText += content;
+                            outputText.style.display = 'block';
+                            outputText.innerHTML = marked.parse(accumulatedText);
+
+                            const scrollTarget = document.documentElement.scrollHeight;
+                            window.scrollTo({
+                                top: scrollTarget,
+                                behavior: 'smooth'
+                            });
+                        }
+                    } catch (e) {
+                        console.debug('跳过非 JSON 数据:', line, e); // 打印错误信息，方便调试
+                    }
+                } else {
+                    console.debug('跳过非 data: 开头的行:', line); // 打印非 data: 开头的行，方便调试
+                }
+            }
+        }
+
+        // 只在没有收到任何内容时抛出错误
+        if (accumulatedText.trim() === '') {
+            throw new Error('AI未返回有效的解读结果');
+        }
+
+    } catch (error) {
+        // 如果是中止请求导致的错误，就不显示错误信息
+        if (error.name === 'AbortError') {
+            return;
+        }
+
+        console.error("AI解读失败: ", error);
+        outputText.style.display = 'block';
+        outputText.innerHTML = `<div style="color: #ff4081; padding: 10px; border: 1px solid #ff4081; border-radius: 5px; margin: 10px 0;">
+      <p>😔 AI解读遇到了一些问题：</p>
+      <p>${error.message}</p>
+      <p>您可以：</p>
+      <ul>
+        <li>检查网络连接</li>
+        <li>稍等片刻后重试</li>
+        <li>如果问题持续存在，请刷新页面</li>
+      </ul>
+    </div>`;
+    } finally {
+        // 清除当前请求引用
+        if (window.currentAIRequest) {
+            window.currentAIRequest = null;
+        }
+        aiButton.classList.remove('loading');
+        aiButton.textContent = 'AI解读';
+    }
+}
+
+
+    function typeWriter(text, element, minSpeed = 10, maxSpeed = 40) {
+      let i = 0;
+      element.innerHTML = '';
+      
+      function type() {
+        if (i < text.length) {
+          const currentText = text.substring(0, i + 1);
+          element.innerHTML = marked.parse(currentText);
+          
+          // 修改滚动逻辑，确保每次打字都滚动到底部
+          const scrollTarget = document.documentElement.scrollHeight;
+          if (window.innerHeight + window.scrollY < scrollTarget) {
+            window.scrollTo({
+              top: scrollTarget,
+              behavior: 'smooth'
+            });
+          }
+          
+          i++;
+          const randomSpeed = Math.floor(Math.random() * (maxSpeed - minSpeed + 1)) + minSpeed;
+          setTimeout(type, randomSpeed);
+        }
+      }
+      
+      type();
+    }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initCards();
+            displayCards();
+            
+            // 添加输入框事件处理
+            const inputText = document.getElementById('inputText');
+            
+            inputText.addEventListener('click', function() {
+                if (this.value === '今日运势') {
+                    this.value = '';
+                }
+            });
+            
+            inputText.addEventListener('blur', function() {
+                if (this.value === '') {
+                    this.value = '今日运势';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
