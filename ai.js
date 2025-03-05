@@ -10,7 +10,7 @@ async function queryAI(prompt) {
             },
             body: JSON.stringify({
                 prompt: prompt,
-                model: "ep-20250228144601-xv4p8"
+                model: "癸水少女"
             }),
             signal: controller.signal
         });
