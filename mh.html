@@ -135,7 +135,7 @@
                 <div class="ai-response"></div>
             `;
 
-            const prompt = `你是一个梅花易数大师，当前时间：${ganzhiInfo}\n主卦: ${mainHexagram.name}，变卦: ${changingHexagram.name}\n问题: ${userInput}\n请帮我解读一下，但不需要告诉我盘的信息。以如下格式回复\n此卦象意味着：\n你可以：`;
+            const prompt = `你是一个梅花易数大师，当前时间：${ganzhiInfo}\n主卦: ${mainHexagram.name}，变卦: ${changingHexagram.name}\n问题: ${userInput}\n请帮我解读一下，并以如下格式回复\n此卦象意味着：\n你可以：`;
 
             const aiResponseDiv = outputText.querySelector('.ai-response');
             aiResponseDiv.innerHTML = "";
