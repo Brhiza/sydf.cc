@@ -27,7 +27,7 @@
             const lunar = Lunar.fromDate(date);
             const ganzhiInfo = `年：${lunar.getYearInGanZhi()}，月：${lunar.getMonthInGanZhi()}，日：${lunar.getDayInGanZhi()}，时：${lunar.getTimeInGanZhi()}`;
 
-            const prompt = `你是一个奇门遁甲大师，当前时间：${ganzhiInfo}\n问题: ${userInput}\n请帮我把这些信息起一个完整的八门遁甲盘，并帮我以以下格式解读\n基本信息：\n解读：`;
+            const prompt = `你是一个奇门遁甲大师，当前时间：${ganzhiInfo}\n问题: ${userInput}\n请帮我把这些信息起一个完整的八门遁甲盘，并帮我以以下格式解读\n此盘意味着：\n你可以：`;
 
             const outputText = document.getElementById('outputText');
             outputText.style.display = 'block';
