@@ -43,7 +43,8 @@
             try {
                 const aiResponse = await queryAI(prompt);
                 for await (const content of aiResponse.streamResponse()) {
-                    aiResponseDiv.innerHTML += content;
+                    const processedContent = content.replace(/[*#]/g, '');
+                    aiResponseDiv.innerHTML += processedContent;
                 }
             } catch (error) {
                 console.error('请求失败:', error);
