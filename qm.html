@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale: 1.0">
+    <title>奇门遁甲丨癸水少女</title>
+    <link rel="icon" href="static/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="static/favicon.png" type="image/png">
+    <link rel="apple-touch-icon" sizes="180x180" href="static/apple-touch-icon.png">
+    <script src="lunar.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="container">
+        <h1>奇门遁甲·时家奇门</h1>
+        <input type="text" id="userInput" placeholder="请输入您的问题">
+        <button id="submitButton">询问赛博大师</button>
+        <div id="outputText"></div>
+    </div>
+
+    <script src="ai.js"></script>
+    <script>
+        document.getElementById('submitButton').addEventListener('click', async () => {
+            const userInput = document.getElementById('userInput').value;
+            
+            const date = new Date();
+            const lunar = Lunar.fromDate(date);
+            const ganzhiInfo = `年：${lunar.getYearInGanZhi()}，月：${lunar.getMonthInGanZhi()}，日：${lunar.getDayInGanZhi()}，时：${lunar.getTimeInGanZhi()}`;
+
+            const prompt = `你是一个奇门遁甲大师，当前时间：${ganzhiInfo}
+问题: ${userInput}
+请帮我把这些信息起一个完整的八门遁甲盘，并帮我以以下格式解读
+基本信息：
+解读：
+`;
+
+            const outputText = document.getElementById('outputText');
+            outputText.style.display = 'block';
+            
+            const aiResponseDiv = outputText;
+            aiResponseDiv.innerHTML = "";
+
+            try {
+                const aiResponse = await queryAI(prompt);
+                for await (const content of aiResponse.streamResponse()) {
+                    aiResponseDiv.innerHTML += content;
+                }
+            } catch (error) {
+                console.error('请求失败:', error);
+                aiResponseDiv.innerHTML = "哈哈，AI开小差了";
+            }
+        });
+    </script>
+</body>
+</html>
