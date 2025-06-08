@@ -55,7 +55,7 @@
             outline: none;
             box-shadow: 0 0 0 2px rgba(63, 81, 181, 0.2);
         }
-        .ai-question-button, .ai-merge-button {
+        .ai-question-button {
             background-color: #3f51b5; /* 主题蓝色 */
             color: white;
             padding: 12px 20px;
@@ -69,11 +69,6 @@
             width: 100%;
             max-width: 200px; /* 按钮最大宽度 */
             margin: 20px auto 0; /* 上边距，并水平居中 */
-        }
-        
-        .ai-merge-button {
-            background-color: #7e57c2;
-            display: none;
         }
         .ai-question-button:hover {
             background-color: #303f9f; /* 悬停时深一点的蓝色 */
@@ -381,8 +376,6 @@
         </div>
         <!-- 新增向AI提问按钮 -->
         <button class="ai-question-button hidden" onclick="askAI()">向 AI 提问</button>
-        <!-- 新增AI合盘按钮 -->
-        <button class="ai-merge-button hidden" id="aiMergeBtn" onclick="askAIMerge()">AI 合盘</button>
         <input type="hidden" id="aiQuestionInput">
     </div>
 
@@ -462,18 +455,6 @@
             const result1 = document.getElementById('result').innerHTML;
             const result2 = document.getElementById('result2').innerHTML;
             const prompt = `你是一个紫微斗数大师，以下是排盘结果：\n第一个人：${result1}\n问题: ${userInput}\n请帮我解读一下。`;
-        }
-        
-        async function askAIMerge() {
-            const result1 = document.getElementById('result').innerHTML;
-            const result2 = document.getElementById('result2').innerHTML;
-            
-            if (!result1 || !result2) {
-                alert('请先完成两个人的排盘！');
-                return;
-            }
-            
-            const prompt = `你是一个紫微斗数大师，以下是两个人的合盘结果：\n第一个人：${result1}\n第二个人：${result2}\n请帮我分析两人的合盘情况。`;
 
             // 创建或获取AI响应显示区域
             let aiResponseDiv = document.getElementById('aiResponse');

@@ -159,20 +159,6 @@ function generateAstrolabe() {
             if (!result2) {
                 allSuccess = false;
             }
-            // 隐藏AI提问选项和按钮
-            const aiQuestionOptions = document.getElementById('aiQuestionOptions');
-            const aiQuestionBtn = document.querySelector('.ai-question-button');
-            if(aiQuestionOptions) {
-                aiQuestionOptions.style.display = 'none';
-                aiQuestionOptions.classList.add('hidden');
-            }
-            if(aiQuestionBtn) {
-                aiQuestionBtn.style.display = 'none';
-                aiQuestionBtn.classList.add('hidden');
-            }
-            // 显示合盘按钮
-            const aiMergeBtn = document.getElementById('aiMergeBtn');
-            if(aiMergeBtn) aiMergeBtn.style.display = 'block';
         } else {
             result2Div.innerHTML = '<p style="color: red;">请输入第二个人的完整出生信息！</p>';
             result2Div.style.display = 'block';
@@ -183,22 +169,6 @@ function generateAstrolabe() {
             result2Div.innerHTML = '';
             result2Div.style.display = 'none'; // 确保未勾选时第二个结果区隐藏
         }
-        // 完全移除AI提问选项和按钮
-        const aiQuestionOptions = document.getElementById('aiQuestionOptions');
-        const aiQuestionBtn = document.querySelector('.ai-question-button');
-        if(aiQuestionOptions) {
-            aiQuestionOptions.style.display = 'none';
-            aiQuestionOptions.classList.add('hidden');
-            aiQuestionOptions.remove();
-        }
-        if(aiQuestionBtn) {
-            aiQuestionBtn.style.display = 'none';
-            aiQuestionBtn.classList.add('hidden');
-            aiQuestionBtn.remove();
-        }
-        // 隐藏合盘按钮
-        const aiMergeBtn = document.getElementById('aiMergeBtn');
-        if(aiMergeBtn) aiMergeBtn.style.display = 'none';
     }
     if (year1 && month1 && day1 && hour1 && gender1) {
         const result1 = generateAstrolabeForPerson(1, year1, month1, day1, hour1, gender1, 'result');
@@ -214,8 +184,7 @@ function generateAstrolabe() {
         }
     }
 
-    // 仅在非合盘模式下显示相关按钮和 AI 提问按钮
-    if (!(enableSecondPersonCheckbox && enableSecondPersonCheckbox.checked && gender2)) {
+    // 排盘结束后显示相关按钮和 AI 提问按钮
         const unifiedButtons = document.querySelectorAll('.unified-button');
         unifiedButtons.forEach(button => {
             button.classList.remove('hidden');
@@ -232,7 +201,6 @@ function generateAstrolabe() {
             aiQuestionOptions.style.display = 'flex';
             setDefaultOption();
         }
-    }
 }
     function setDefaultOption() {
         const defaultButton = document.querySelector('#aiQuestionOptions button:first-child');
