@@ -190,16 +190,29 @@ function generateAstrolabe() {
             button.classList.remove('hidden');
         });
 
-        const aiButton = document.querySelector('button[onclick="askAI()"]');
-        if (aiButton) {
-            aiButton.classList.remove('hidden');
-        }
+        // 检查是否勾选了合盘
+        const isCombined = document.getElementById('enableSecondPerson').checked;
         
-        // 显示 AI 问题选项
-        const aiQuestionOptions = document.getElementById('aiQuestionOptions');
-        if (aiQuestionOptions) {
-            aiQuestionOptions.style.display = 'flex';
-            setDefaultOption();
+        if (!isCombined) {
+            // 显示 AI 提问容器
+            const aiQuestionContainer = document.getElementById('aiQuestionContainer');
+            if (aiQuestionContainer) {
+                aiQuestionContainer.style.display = 'block';
+                document.getElementById('aiQuestionOptions').style.display = 'flex';
+                setDefaultOption();
+            }
+        } else {
+            // 创建并显示合盘按钮
+            const combinedButton = document.createElement('button');
+            combinedButton.className = 'ai-question-button';
+            combinedButton.textContent = 'AI 合盘分析';
+            combinedButton.onclick = function() {
+                askAIForCompatibility();
+                };
+            const result2Div = document.getElementById('result2');
+             if (result2Div) {
+                 result2Div.appendChild(combinedButton);
+             }
         }
 }
     function setDefaultOption() {

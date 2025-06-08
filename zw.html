@@ -357,31 +357,29 @@
         <h2>排盘结果:</h2>
         <div id="result" style="display:none;"></div> <!-- 初始隐藏且无内容 -->
         <div id="result2" style="margin-top: 20px; display:none;"></div>
-        <!-- 新增选项和输入框 -->
-        <div id="aiQuestionOptions" >
-                <button class="unified-button hidden" onclick="setAIPrompt('综合', '请综合分析我的排盘结果。'); selectOption(this)" selected>综合</button>
-                <button class="unified-button hidden" onclick="setAIPrompt('2025', '请分析我在 2025 年的运势，结合我的排盘结果。'); selectOption(this)">2025</button>
-                <button class="unified-button hidden" onclick="setAIPrompt('事业财运', '请分析我的事业和财运，结合我的排盘结果。'); selectOption(this)">事业财运</button>
-                <button class="unified-button hidden" onclick="setAIPrompt('感情婚姻', '请分析我的感情和婚姻状况，结合我的排盘结果。'); selectOption(this)">感情婚姻</button>
-                <button class="unified-button hidden" onclick="setAIPrompt('健康', '请分析我的健康状况，结合我的排盘结果。'); selectOption(this)">健康</button>
-                <button class="unified-button hidden" onclick="showCustomInput(); selectOption(this); setCustomAIPrompt()">自定义</button>
+        <!-- AI提问容器 -->
+        <div id="aiQuestionContainer" style="display:none;">
+            <div id="aiQuestionOptions">
+                <button class="unified-button" onclick="setAIPrompt('综合', '请综合全面的分析我的排盘结果，包括命盘格局、宫位解读、大运关键节点、注意事项、总结和建议。'); selectOption(this)" selected>综合</button>
+                <button class="unified-button" onclick="setAIPrompt('2025', '请分析我在 2025 年的运势，包括、事业、财运、感情婚姻、健康、总结和建议。'); selectOption(this)">2025</button>
+                <button class="unified-button" onclick="setAIPrompt('事业财运', '请分析我的事业和财运，并给出总结和建议'); selectOption(this)">事业财运</button>
+                <button class="unified-button" onclick="setAIPrompt('感情婚姻', '请分析我的感情和婚姻状况，并给出总结和建议。'); selectOption(this)">感情婚姻</button>
+                <button class="unified-button" onclick="setAIPrompt('健康', '请分析我的健康状况，并给出总结和建议。'); selectOption(this)">健康</button>
+                <button class="unified-button" onclick="showCustomInput(); selectOption(this); setCustomAIPrompt()">自定义</button>
             </div>
-            <!-- 新增自定义问题容器 -->
             <div id="customQuestionContainer" style="width: 100%; margin-top: 10px;">
-                <!-- 删除确定按钮 -->
-                <div style="width: 100%; clear: both;">
-                    <input type="text" id="customQuestion" placeholder="请输入您的问题" style="display: none; width: 100%; padding: 12px; border: 1px solid #c5cae9; border-radius: 6px; box-sizing: border-box; font-size: 16px;">
-                </div>
+                <input type="text" id="customQuestion" placeholder="请输入您的问题" style="display: none; width: 100%; padding: 12px; border: 1px solid #c5cae9; border-radius: 6px; box-sizing: border-box; font-size: 16px;">
             </div>
+            <button class="ai-question-button" onclick="askAI()" style="margin-top: 10px;">向 AI 提问</button>
         </div>
-        <!-- 新增向AI提问按钮 -->
-        <button class="ai-question-button hidden" onclick="askAI()">向 AI 提问</button>
-        <input type="hidden" id="aiQuestionInput">
+
+        </div>
+
     </div>
 
     <script src="ai.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/iztro@latest/dist/iztro.min.js"></script>
-    <script src="script.js"></script>
+    <script src="zw.js"></script>
     <script>
         function toggleSecondPersonInputs() {
             const checkbox = document.getElementById('enableSecondPerson');
@@ -399,12 +397,17 @@
         }
 
         function setAIPrompt(option, defaultText) {
-            document.getElementById('aiQuestionInput').value = defaultText;
+            const buttons = document.querySelectorAll('.unified-button');
+            buttons.forEach(button => {
+                if (button.textContent === option) {
+                    button.dataset.defaultText = defaultText;
+                }
+            });
         }
 
         function setCustomAIPrompt() {
             const customText = document.getElementById('customQuestion').value;
-            document.getElementById('aiQuestionInput').value = customText || '请分析我的排盘结果。';
+            return customText || '请分析我的排盘结果。';
             // 确保自定义输入框显示
             document.getElementById('customQuestion').style.display = 'block';
         }
@@ -440,21 +443,15 @@
             }
         }
         async function askAI() {
-            let userInput = document.getElementById('aiQuestionInput').value;
-            // 优先使用自定义输入
-            const customInput = document.getElementById('customQuestion');
-            if (customInput && customInput.style.display === 'block' && customInput.value) {
-                userInput = customInput.value;
-            }
-            
-            if (!userInput) {
-                alert('请输入您的问题');
-                return;
-            }
-
+            // 移除输入验证
             const result1 = document.getElementById('result').innerHTML;
             const result2 = document.getElementById('result2').innerHTML;
-            const prompt = `你是一个紫微斗数大师，以下是排盘结果：\n第一个人：${result1}\n问题: ${userInput}\n请帮我解读一下。`;
+            const customInput = document.getElementById('customQuestion');
+            let userInput = customInput && customInput.style.display === 'block' ? customInput.value : '';
+            const selectedOption = document.querySelector('.unified-button.selected');
+            const defaultText = selectedOption ? selectedOption.dataset.defaultText : '';
+            const currentDate = new Date().toLocaleString();
+            const prompt = `你是一个紫微斗数大师，现在是${currentDate}，以下是排盘结果：\n${result1}\n问题: ${userInput || defaultText}\n`;
 
             // 创建或获取AI响应显示区域
             let aiResponseDiv = document.getElementById('aiResponse');
@@ -473,6 +470,36 @@
 
             try {
                 const aiResponse = await queryAI(prompt);
+                for await (const content of aiResponse.streamResponse()) {
+                    aiResponseDiv.innerHTML += content;
+                    // 自动滚动到底部
+                    aiResponseDiv.scrollTop = aiResponseDiv.scrollHeight;
+                }
+            } catch (error) {
+                console.error('请求失败:', error);
+                aiResponseDiv.innerHTML = "哈哈，AI开小差了";
+            }
+        }
+        async function askAIForCompatibility() {
+            const result1 = document.getElementById('result').innerHTML;
+            const result2 = document.getElementById('result2').innerHTML;
+            const currentDate = new Date().toLocaleString();
+            const compatibilityPrompt = `你是一个紫微斗数大师，现在是${currentDate}，以下是排盘结果：\n第一人排盘结果:\n${result1}\n\n第二人排盘结果:\n${result2}\n请分析两个人命盘合不合，双方是否互补，双方性格怎么样，在一起几率高不高，有利和不利的婚姻因素，需要注意的年份，婚姻总结和建议，`;
+            // 创建或获取AI响应显示区域
+            let aiResponseDiv = document.getElementById('aiResponse');
+            if (!aiResponseDiv) {
+                aiResponseDiv = document.createElement('div');
+                aiResponseDiv.id = 'aiResponse';
+                aiResponseDiv.style.marginTop = '20px';
+                aiResponseDiv.style.padding = '15px';
+                aiResponseDiv.style.borderRadius = '8px';
+                aiResponseDiv.style.backgroundColor = '#f8f9fa';
+                document.querySelector('.container').appendChild(aiResponseDiv);
+            }
+            aiResponseDiv.style.display = 'block';
+            aiResponseDiv.innerHTML = '';
+            try {
+                const aiResponse = await queryAI(compatibilityPrompt);
                 for await (const content of aiResponse.streamResponse()) {
                     aiResponseDiv.innerHTML += content;
                     // 自动滚动到底部
