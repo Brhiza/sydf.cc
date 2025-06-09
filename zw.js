@@ -202,17 +202,124 @@ function generateAstrolabe() {
                 setDefaultOption();
             }
         } else {
-            // 创建并显示合盘按钮
-            const combinedButton = document.createElement('button');
-            combinedButton.className = 'ai-question-button';
-            combinedButton.textContent = 'AI 合盘分析';
-            combinedButton.onclick = function() {
-                askAIForCompatibility();
+            // 显示合盘分析选项
+                const combinedOptions = document.createElement('div');
+                combinedOptions.id = 'combinedQuestionOptions';
+                combinedOptions.style.display = 'flex';
+                combinedOptions.style.flexWrap = 'nowrap';
+                combinedOptions.style.overflowX = 'auto';
+                combinedOptions.style.gap = '10px';
+                combinedOptions.style.padding = '20px 0';
+                combinedOptions.style.marginTop = '20px';
+                combinedOptions.style.borderTop = '1px solid #eee';
+                
+                const marriageButton = document.createElement('button');
+                marriageButton.className = 'unified-button';
+                marriageButton.textContent = '合婚';
+                marriageButton.onclick = function() {
+                    setAIPrompt('合婚', '请分析两个人命盘合不合，双方是否互补，双方性格怎么样，在一起几率高不高，有利和不利的婚姻因素，需要注意的年份，并给出总结和建议');
+                    selectOption(this);
                 };
-            const result2Div = document.getElementById('result2');
-             if (result2Div) {
-                 result2Div.appendChild(combinedButton);
-             }
+                
+                const cooperationButton = document.createElement('button');
+                cooperationButton.className = 'unified-button';
+                cooperationButton.textContent = '合作';
+                cooperationButton.onclick = function() {
+                    setAIPrompt('合作', '请分析我们在事业合作方面的匹配度，并给出总结和建议。');
+                    selectOption(this);
+                };
+                
+                const customButton = document.createElement('button');
+                customButton.className = 'unified-button';
+                customButton.textContent = '自定义';
+                customButton.onclick = function() {
+                    showCustomInput();
+                    selectOption(this);
+                };
+                
+                combinedOptions.appendChild(marriageButton);
+                combinedOptions.appendChild(cooperationButton);
+                combinedOptions.appendChild(customButton);
+                result2Div.appendChild(combinedOptions);
+                
+                // 添加自定义输入框
+                const customInputContainer = document.createElement('div');
+                customInputContainer.id = 'customCombinedQuestionContainer';
+                customInputContainer.style.width = '100%';
+                customInputContainer.style.marginTop = '10px';
+                
+                const customInput = document.createElement('input');
+                customInput.type = 'text';
+                customInput.id = 'customCombinedQuestion';
+                customInput.placeholder = '请输入您的问题';
+                
+                customInput.style.width = '100%';
+customInput.style.display = 'none'; // 初始隐藏自定义输入框
+                customInput.style.padding = '12px';
+                customInput.style.border = '1px solid #c5cae9';
+                customInput.style.borderRadius = '6px';
+                customInput.style.boxSizing = 'border-box';
+                customInput.style.fontSize = '16px';
+                
+                
+                // 添加自定义选项点击事件
+// 为所有非自定义按钮添加点击事件，隐藏自定义输入框
+const nonCustomButtons = document.querySelectorAll('#combinedQuestionOptions button:not(:last-child)');
+nonCustomButtons.forEach(btn => {
+    btn.addEventListener('click', function() {
+        customInputContainer.style.display = 'none';
+        customInput.style.display = 'none';
+    });
+});
+                const customOption = document.querySelector('#combinedQuestionOptions button:last-child');
+                if (customOption) {
+                    customOption.addEventListener('click', function() {
+                        // 完全参照AI提问的逻辑
+                        customInputContainer.style.display = 'block';
+                        customInput.style.display = 'block';
+                        customInput.focus();
+                        // 清除其他选项的选中状态
+                        document.querySelectorAll('#combinedQuestionOptions button').forEach(btn => {
+                            if (btn !== customOption) {
+                                btn.classList.remove('selected');
+                            }
+                        });
+                        // 清空自定义输入框
+                        customInput.value = '';
+                        console.log('自定义输入框已显示');
+                    });
+                }
+                
+                // 默认选择合婚选项
+                const defaultOption = document.querySelector('#combinedQuestionOptions button:first-child');
+                if (defaultOption) {
+                    defaultOption.click();
+                    defaultOption.classList.add('selected');
+                }
+                
+                customInputContainer.appendChild(customInput);
+                result2Div.appendChild(customInputContainer);
+                
+                // 添加提问按钮
+                const combinedAskButton = document.createElement('button');
+                combinedAskButton.className = 'ai-question-button';
+                combinedAskButton.textContent = 'AI 合盘分析';
+                combinedAskButton.style.marginTop = '10px';
+                combinedAskButton.onclick = function() {
+                    askAIForCompatibility();
+                };
+                result2Div.appendChild(combinedAskButton);
+                
+                // 确保按钮在结果生成后仍然显示
+                combinedOptions.style.display = 'flex';
+                customInputContainer.style.display = 'block';
+                combinedAskButton.style.display = 'block';
+                
+                // 确保只显示合盘分析按钮
+                const aiQuestionContainer = document.getElementById('aiQuestionContainer');
+                if (aiQuestionContainer) {
+                    aiQuestionContainer.style.display = 'none';
+                }
         }
 }
     function setDefaultOption() {
@@ -221,10 +328,4 @@ function generateAstrolabe() {
             defaultButton.click();
         }
     }
-    // 排盘结束后显示 AI 提问按钮
-    const aiButton = document.querySelector('button[onclick="askAI()"]');
-    if (aiButton) {
-        // 删除多余的显示 AI 提问按钮代码
-        // aiButton.style.display = 'block';
-    }
-// 删除多余的 } 符号
+

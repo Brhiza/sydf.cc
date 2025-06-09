@@ -492,7 +492,17 @@
             const result1 = document.getElementById('result').innerHTML;
             const result2 = document.getElementById('result2').innerHTML;
             const currentDate = new Date().toLocaleString();
-            const compatibilityPrompt = `你是一个紫微斗数大师，现在是${currentDate}，以下是排盘结果：\n第一人排盘结果:\n${result1}\n\n第二人排盘结果:\n${result2}\n请分析两个人命盘合不合，双方是否互补，双方性格怎么样，在一起几率高不高，有利和不利的婚姻因素，需要注意的年份，婚姻总结和建议，`;
+            let questionText = '';
+            const customInput = document.getElementById('customCombinedQuestion');
+            const selectedOption = document.querySelector('#combinedQuestionOptions .unified-button.selected');
+            
+            if (customInput && customInput.style.display === 'block' && customInput.value) {
+                questionText = customInput.value;
+            } else if (selectedOption && selectedOption.dataset.defaultText) {
+                questionText = selectedOption.dataset.defaultText;
+            }
+            
+            const compatibilityPrompt = `你是一个紫微斗数大师，现在是${currentDate}，以下是排盘结果：\n第一人排盘结果:\n${result1}\n\n第二人排盘结果:\n${result2}\n问题：${questionText}`;
             // 创建或获取AI响应显示区域
             let aiResponseDiv = document.getElementById('aiResponse');
             if (!aiResponseDiv) {
