@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>在线排盘</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            max-width: 600px;
+            margin: 20px auto;
+        }
+        h1 {
+            color: #1a237e; /* 深蓝色标题 */
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #283593; /* 稍浅的蓝色副标题 */
+            margin-top: 30px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #e8eaf6; /* 淡蓝色下划线 */
+            padding-bottom: 8px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600; /* 稍粗的字体 */
+            color: #3949ab; /* 标签颜色 */
+        }
+        input[type="number"],
+        select {
+            width: 100%; /* 改为100%配合box-sizing */
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #c5cae9; /* 边框颜色 */
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        input[type="number"]:focus,
+        select:focus {
+            border-color: #3f51b5; /* 焦点时边框颜色 */
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(63, 81, 181, 0.2);
+        }
+        .ai-question-button {
+            background-color: #3f51b5; /* 主题蓝色 */
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+            display: block; /* 让按钮独占一行并居中 */
+            width: 100%;
+            max-width: 200px; /* 按钮最大宽度 */
+            margin: 20px auto 0; /* 上边距，并水平居中 */
+        }
+        .ai-question-button:hover {
+            background-color: #303f9f; /* 悬停时深一点的蓝色 */
+        }
+
+        .unified-button {
+            background-color: white;
+            color: #3f51b5;
+            border: 1px solid #3f51b5;
+            padding: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 16px;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+            display: block;
+            width: 100%;
+            max-width: 200px;
+            margin: 20px auto 0;
+        }
+        .ai-question-button.selected {
+            background-color: #3f51b5;
+            color: white;
+            border: 1px solid #3f51b5;
+        }
+        .ai-question-button:not(.selected):hover {
+            background-color: #e8eaf6;
+        }
+
+        .unified-button.selected {
+            background-color: #3f51b5;
+            color: white;
+            border: none;
+        }
+        .unified-button:hover {
+            background-color: #303f9f;
+        }
+    
+        .hidden {
+            display: none;
+        }
+
+
+        
+        .ai-question-button.selected {
+            background-color: #3f51b5;
+            color: white;
+            border: none;
+        }
+
+        .ai-question-button:not(.selected):hover {
+            background-color: #e8eaf6;
+        }
+
+        /* 移除了 #result 和 #result2 的详细美化样式 */
+        #result,
+        #result2 {
+            margin-top: 30px;
+            padding: 10px; /* 可以保留一些基本内边距 */
+            border: 1px solid #ccc; /* 可以保留一个简单的边框 */
+            border-radius: 4px; /* 可以保留一个小的圆角 */
+            white-space: normal;
+            word-wrap: break-word;
+            /* background-color: #e8eaf6; */ /* 注释掉或删除背景色 */
+        }
+
+        #result h3,
+        #result2 h3 {
+            /* margin-top: 0; */
+            /* margin-bottom: 15px; */
+            /* color: #1a237e; */
+            /* font-size: 1.2em; */
+            /* 恢复到更基础的标题样式，或根据需要调整 */
+            margin-top: 10px;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+            color: #333;
+        }
+
+        #result p,
+        #result2 p {
+            /* margin-bottom: 8px; */
+            /* color: #2c3e50; */
+            /* 恢复到更基础的段落样式 */
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        #result strong,
+        #result2 strong {
+            /* color: #303f9f; */
+            /* 恢复到浏览器默认的 strong 样式，或根据需要调整 */
+            color: inherit; /* 继承父元素颜色 */
+            font-weight: bold;
+        }
+
+        #result ul,
+        #result2 ul {
+            /* padding-left: 20px; */
+            /* margin-top: 10px; */
+            /* margin-bottom: 15px; */
+            /* list-style-type: none; */ /* 如果希望显示列表符号，可以注释或改为 disc/circle 等 */
+            list-style-type: disc; /* 例如，改回默认的项目符号 */
+            padding-left: 30px; /* 为项目符号留出空间 */
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+
+        #result li,
+        #result2 li {
+            /* margin-bottom: 12px; */
+            /* padding-left: 15px; */
+            /* position: relative; */
+            /* border-left: 3px solid #7986cb; */
+            /* padding-top: 5px; */
+            /* padding-bottom: 5px; */
+            /* background-color: #fff; */
+            /* border-radius: 4px; */
+            /* box-shadow: 0 2px 4px rgba(0,0,0,0.05); */
+            /* 恢复到更基础的列表项样式 */
+            margin-bottom: 5px;
+            padding: 2px 0;
+        }
+
+        .gender-buttons {
+            display: flex;
+            gap: 10px; /* 按钮之间的间距 */
+            margin-bottom: 20px;
+        }
+
+        .gender-button {
+            flex-grow: 1; /* 让按钮平分宽度 */
+            padding: 12px;
+            border: 1px solid #c5cae9;
+            border-radius: 6px;
+            background-color: #fff;
+            color: #3f51b5;
+            cursor: pointer;
+            text-align: center;
+            font-size: 16px;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .gender-button.selected {
+            background-color: #3f51b5; /* 选中时的背景色 */
+            color: #fff; /* 选中时的文字颜色 */
+            border-color: #3f51b5; /* 选中时的边框颜色 */
+        }
+
+        .gender-button:not(.selected):hover {
+            background-color: #e8eaf6; /* 未选中时悬停背景色 */
+        }
+        .date-inputs-row {
+            display: flex;
+            gap: 15px; /* 年月日输入框之间的间距 */
+            align-items: flex-start; /* 如果标签和输入框高度不一致，按顶部对齐 */
+            margin-bottom: 20px; /* 与下方元素的间距 */
+        }
+
+        .date-input-group {
+            flex: 1; /* 让每个输入组平分宽度 */
+            min-width: 0; /* 允许 flex item 收缩 */
+        }
+
+        /* 确保标签和输入框在 date-input-group 内正确显示 */
+        .date-input-group label {
+            margin-bottom: 8px; /* 保持标签和输入框的间距 */
+        }
+
+        .date-input-group input[type="number"] {
+            width: 100%; /* 输入框宽度充满其父容器 .date-input-group */
+            margin-bottom: 0; /* 因为 .date-inputs-row 已经有 margin-bottom */
+        }
+        #aiQuestionOptions {
+                display: none;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                gap: 10px;
+                padding: 20px 0;
+                margin-top: 20px;
+                border-top: 1px solid #eee;
+            }
+            
+            #aiQuestionOptions .unified-button {
+                display: inline-block;
+                min-width: fit-content;
+                margin: 0;
+            }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>紫微斗数排盘</h1>
+        
+        <div class="date-inputs-row">
+            <div class="date-input-group">
+                <label for="year">年</label>
+                <input type="number" id="year" name="year" placeholder="2000" required>
+            </div>
+            <div class="date-input-group">
+                <label for="month">月</label>
+                <input type="number" id="month" name="month" min="1" max="12" placeholder="1-12" required>
+            </div>
+            <div class="date-input-group">
+                <label for="day">日</label>
+                <input type="number" id="day" name="day" min="1" max="31" placeholder="1-31" required>
+            </div>
+        </div>
+
+        <div>
+            <label for="hour">时:</label>
+            <input type="number" id="hour" name="hour" min="0" max="23" placeholder="0-23" required>
+        </div>
+        <div>
+            <label>性别:</label>
+            <div class="gender-buttons">
+                <button type="button" class="gender-button" id="genderMale">男</button>
+                <button type="button" class="gender-button" id="genderFemale">女</button>
+            </div>
+        </div>
+
+        <div>
+            <input type="checkbox" id="enableSecondPerson" onchange="toggleSecondPersonInputs()">
+            <label for="enableSecondPerson" style="display: inline; margin-left: 5px;">合盘</label>
+        </div>
+
+        <div id="secondPersonInputs" style="display:none; margin-top: 20px; padding-top:20px; border-top: 1px dashed #ccc;">
+            <h2>第二人信息</h2>
+            <div class="date-inputs-row">
+                <div class="date-input-group">
+                    <label for="year2">年</label>
+                    <input type="number" id="year2" name="year2" placeholder="2000">
+                </div>
+                <div class="date-input-group">
+                    <label for="month2">月</label>
+                    <input type="number" id="month2" name="month2" min="1" max="12" placeholder="1-12">
+                </div>
+                <div class="date-input-group">
+                    <label for="day2">日</label>
+                    <input type="number" id="day2" name="day2" min="1" max="31" placeholder="1-31">
+                </div>
+            </div>
+            <div>
+                <label for="hour2">时:</label>
+                <input type="number" id="hour2" name="hour2" min="0" max="23" placeholder="0-23">
+            </div>
+            <div>
+                <label>性别:</label>
+                <div class="gender-buttons">
+                    <button type="button" class="gender-button" id="genderMale2">男</button>
+                    <button type="button" class="gender-button" id="genderFemale2">女</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="secondPersonInputs" style="display:none; margin-top: 20px; padding-top:20px; border-top: 1px dashed #ccc;">
+            <h2>第二人信息</h2>
+            <div class="date-inputs-row">
+                <div class="date-input-group">
+                    <label for="year2">年</label>
+                    <input type="number" id="year2" name="year2" placeholder="2000">
+                </div>
+                <div class="date-input-group">
+                    <label for="month2">月</label>
+                    <input type="number" id="month2" name="month2" min="1" max="12" placeholder="1-12">
+                </div>
+                <div class="date-input-group">
+                    <label for="day2">日</label>
+                    <input type="number" id="day2" name="day2" min="1" max="31" placeholder="1-31">
+                </div>
+            </div>
+            <div>
+                <label for="hour2">时:</label>
+                <input type="number" id="hour2" name="hour2" min="0" max="23" placeholder="0-23">
+            </div>
+            <div>
+                <label>性别:</label>
+                <div class="gender-buttons">
+                    <button type="button" class="gender-button" id="genderMale2">男</button>
+                    <button type="button" class="gender-button" id="genderFemale2">女</button>
+                </div>
+            </div>
+        </div>
+
+        <button class="ai-question-button" onclick="generateAstrolabe()">开始排盘</button>
+        <h2>排盘结果:</h2>
+        <div id="result" style="display:none;"></div> <!-- 初始隐藏且无内容 -->
+        <div id="result2" style="margin-top: 20px; display:none;"></div>
+
+
+        </div>
+
+    </div>
+
+    <script src="ai.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/iztro@latest/dist/iztro.min.js"></script>
+    <script src="zw.js"></script>
+    <script>
+        function toggleSecondPersonInputs() {
+            const checkbox = document.getElementById('enableSecondPerson');
+            const secondPersonInputsDiv = document.getElementById('secondPersonInputs');
+            const result2Div = document.getElementById('result2');
+            if (checkbox.checked) {
+                secondPersonInputsDiv.style.display = 'block';
+            } else {
+                secondPersonInputsDiv.style.display = 'none';
+                if(result2Div) {
+                    result2Div.innerHTML = '';
+                    result2Div.style.display = 'none';
+                }
+            }
+        }
+
+        function setAIPrompt(option, defaultText) {
+            const buttons = document.querySelectorAll('.unified-button');
+            buttons.forEach(button => {
+                if (button.textContent === option) {
+                    button.dataset.defaultText = defaultText;
+                }
+            });
+        }
+
+        function setCustomAIPrompt() {
+            const customText = document.getElementById('customQuestion').value;
+            return customText || '请分析我的排盘结果。';
+            // 确保自定义输入框显示
+            document.getElementById('customQuestion').style.display = 'block';
+        }
+
+        function showCustomInput() {
+            const customInput = document.getElementById('customQuestion');
+            customInput.style.display = 'block';
+            customInput.style.width = '100%';
+            customInput.style.marginTop = '10px';
+            customInput.style.padding = '12px';
+            customInput.style.border = '1px solid #c5cae9';
+            customInput.style.borderRadius = '6px';
+            customInput.style.boxSizing = 'border-box';
+            customInput.style.fontSize = '16px';
+            customInput.style.clear = 'both';
+            customInput.style.float = 'none';
+        }
+
+        function selectOption(button) {
+            const buttons = document.querySelectorAll('.unified-button');
+            buttons.forEach(btn => {
+                if (btn === button) {
+                    btn.classList.add('selected');
+                } else {
+                    btn.classList.remove('selected');
+                }
+            });
+            if (button.textContent === '自定义') {
+                document.getElementById('customQuestion').style.display = 'inline-block';
+                setCustomAIPrompt(); // 立即设置AI提示语
+            } else {
+                document.getElementById('customQuestion').style.display = 'none';
+            }
+        }
+        async function askAI() {
+            // 移除输入验证
+            const result1 = document.getElementById('result').innerHTML;
+            const result2 = document.getElementById('result2').innerHTML;
+            const customInput = document.getElementById('customQuestion');
+            let userInput = customInput && customInput.style.display === 'block' ? customInput.value : '';
+            const selectedOption = document.querySelector('.unified-button.selected');
+            const defaultText = selectedOption ? selectedOption.dataset.defaultText : '';
+            const currentDate = new Date().toLocaleString();
+            const prompt = `你是一个紫微斗数大师，现在是${currentDate}，以下是排盘结果：\n${result1}\n问题: ${userInput || defaultText}\n`;
+
+            // 创建或获取AI响应显示区域
+            let aiResponseDiv = document.getElementById('aiResponse');
+            if (!aiResponseDiv) {
+                aiResponseDiv = document.createElement('div');
+                aiResponseDiv.id = 'aiResponse';
+                aiResponseDiv.style.marginTop = '20px';
+                aiResponseDiv.style.padding = '15px';
+                aiResponseDiv.style.borderRadius = '8px';
+                aiResponseDiv.style.backgroundColor = '#f8f9fa';
+                aiResponseDiv.style.whiteSpace = 'pre-wrap';
+                aiResponseDiv.style.wordWrap = 'break-word';
+                aiResponseDiv.style.overflowY = 'auto'; 
+                document.querySelector('.container').appendChild(aiResponseDiv);
+            }
+            
+            aiResponseDiv.style.display = 'block';
+            aiResponseDiv.innerHTML = '';
+
+            try {
+                const aiResponse = await queryAI(prompt);
+                for await (const content of aiResponse.streamResponse()) {
+                    aiResponseDiv.innerHTML += content;
+                    // 自动滚动到底部
+                    aiResponseDiv.scrollTop = aiResponseDiv.scrollHeight;
+                }
+            } catch (error) {
+                console.error('请求失败:', error);
+                aiResponseDiv.innerHTML = "哈哈，AI开小差了";
+            }
+        }
+        async function askAIForCompatibility() {
+            const result1 = document.getElementById('result').innerHTML;
+            const result2 = document.getElementById('result2').innerHTML;
+            const currentDate = new Date().toLocaleString();
+            const compatibilityPrompt = `你是一个紫微斗数大师，现在是${currentDate}，以下是排盘结果：\n第一人排盘结果:\n${result1}\n\n第二人排盘结果:\n${result2}\n请分析两个人命盘合不合，双方是否互补，双方性格怎么样，在一起几率高不高，有利和不利的婚姻因素，需要注意的年份，婚姻总结和建议，`;
+            // 创建或获取AI响应显示区域
+            let aiResponseDiv = document.getElementById('aiResponse');
+            if (!aiResponseDiv) {
+                aiResponseDiv = document.createElement('div');
+                aiResponseDiv.id = 'aiResponse';
+                aiResponseDiv.style.marginTop = '20px';
+                aiResponseDiv.style.padding = '15px';
+                aiResponseDiv.style.borderRadius = '8px';
+                aiResponseDiv.style.backgroundColor = '#f8f9fa';
+                aiResponseDiv.style.whiteSpace = 'pre-wrap';
+                aiResponseDiv.style.wordWrap = 'break-word';
+                aiResponseDiv.style.overflowY = 'auto'; 
+                document.querySelector('.container').appendChild(aiResponseDiv);
+            }
+            aiResponseDiv.style.display = 'block';
+            aiResponseDiv.innerHTML = '';
+            try {
+                const aiResponse = await queryAI(compatibilityPrompt);
+                for await (const content of aiResponse.streamResponse()) {
+                    aiResponseDiv.innerHTML += content;
+                    // 自动滚动到底部
+                    aiResponseDiv.scrollTop = aiResponseDiv.scrollHeight;
+                }
+            } catch (error) {
+                console.error('请求失败:', error);
+                aiResponseDiv.innerHTML = "哈哈，AI开小差了";
+            }
+        }
+
+    </script>
+</body>
+</html>
