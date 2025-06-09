@@ -3,7 +3,7 @@ async function queryAI(prompt) {
         const controller = new AbortController();
         window.currentAIRequest = controller;
 
-        const response = await fetch('https://flow.onlyikun.com/ai', {
+        const response = await fetch('https://flow.ovo.gs/ai', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
