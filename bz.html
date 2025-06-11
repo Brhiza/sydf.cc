@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>紫薇斗数</title>
+    <title>八字</title>
     <link rel="icon" href="static/favicon.ico" type="image/x-icon">
     <link rel="icon" href="static/favicon.png" type="image/png">
     <link rel="apple-touch-icon" sizes="180x180" href="static/apple-touch-icon.png">
@@ -225,7 +225,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>紫微斗数排盘</h1>
+        <h1>八字排盘</h1>
         
         <div class="date-inputs-row">
             <div class="date-input-group">
@@ -324,7 +324,7 @@
         <!-- AI提问容器 -->
         <div id="aiQuestionContainer" style="display:none;">
             <div id="aiQuestionOptions">
-                <button class="unified-button" data-default-text="请综合全面的分析我的排盘结果，包括命盘格局、宫位解读、大运关键节点、注意事项、总结和建议。" onclick="selectOption(this, 'single')">综合</button>
+                <button class="unified-button" data-default-text="请进行全面分析八字格局和五行喜忌，然后分析心性性格、事业、财运、感情、身体健康。" onclick="selectOption(this, 'single')">综合</button>
                 <button class="unified-button" data-default-text="请分析我在当前大运的运势，并给出总结和建议。" onclick="selectOption(this, 'single')">大运</button>
                 <button class="unified-button" data-default-text="请分析我在今年的运势，并给出总结和建议。" onclick="selectOption(this, 'single')">流年</button>
                 <button class="unified-button" data-default-text="请分析我今、明、后三年的运势，并给出总结和建议。" onclick="selectOption(this, 'single')">三年</button>
@@ -438,20 +438,6 @@
                 htmlResult += `<p><strong>干支：</strong>${astrolabe.chineseDate}</p>`;
                 htmlResult += `<p><strong>性别：</strong>${astrolabe.gender}</p>`;
                 htmlResult += `<p><strong>时辰：</strong>${astrolabe.time}</p>`;
-                htmlResult += `<p><strong>命主：</strong>${astrolabe.soul}</p>`;
-                htmlResult += `<p><strong>身主：</strong>${astrolabe.body}</p>`;
-                htmlResult += `<p><strong>五行局：</strong>${astrolabe.fiveElementsClass}</p>`;
-                htmlResult += `<p><strong>星座：</strong>${astrolabe.sign}</p>`;
-                htmlResult += `<p><strong>生肖：</strong>${astrolabe.zodiac}</p>`;
-                htmlResult += `<h3>${personNumber === 1 ? '宫位信息：' : `第${personNumber}人 - 宫位信息：`}</h3>`;
-                htmlResult += '<ul>';
-                astrolabe.palaces.forEach(palace => {
-                    htmlResult += `<li><strong>${palace.name}宫 (${palace.heavenlyStem}${palace.earthlyBranch}):</strong>`;
-                    htmlResult += ` 主星: ${palace.majorStars.map(s => s.name).join(', ') || '无'}`;
-                    htmlResult += `; 副星: ${palace.minorStars.map(s => s.name).join(', ') || '无'}`;
-                    htmlResult += `; 小星: ${palace.adjectiveStars.map(s => s.name).join(', ') || '无'}`;
-                    htmlResult += `</li>`;
-                });
                 htmlResult += '</ul>';
 
                 resultDiv.innerHTML = htmlResult;
@@ -595,7 +581,7 @@
             const selectedOption = dom.aiQuestionOptions.querySelector('.unified-button.selected');
             const isCustom = selectedOption.textContent.trim() === '自定义';
             const questionText = isCustom ? dom.customQuestion.value : selectedOption.dataset.defaultText;
-            const prompt = `你是一个紫微斗数大师，现在是${new Date().toLocaleString()}，以下是排盘结果：\n${dom.result1Div.innerHTML}\n问题: ${questionText}\n`;
+            const prompt = `你是一个八字大师，现在是${new Date().toLocaleString()}，以下是排盘结果：\n${dom.result1Div.innerHTML}\n问题: ${questionText}\n`;
             handleAIQuery(prompt);
         }
 
@@ -603,7 +589,7 @@
             const selectedOption = dom.combinedQuestionOptions.querySelector('.unified-button.selected');
             const isCustom = selectedOption.textContent.trim() === '自定义';
             const questionText = isCustom ? dom.customCombinedQuestion.value : selectedOption.dataset.defaultText;
-            const prompt = `你是一个紫微斗数大师，现在是${new Date().toLocaleString()}，以下是排盘结果：\n第一人排盘结果:\n${dom.result1Div.innerHTML}\n\n第二人排盘结果:\n${dom.result2Div.innerHTML}\n问题：${questionText}`;
+            const prompt = `你是一个八字大师，现在是${new Date().toLocaleString()}，以下是排盘结果：\n第一人排盘结果:\n${dom.result1Div.innerHTML}\n\n第二人排盘结果:\n${dom.result2Div.innerHTML}\n问题：${questionText}`;
             handleAIQuery(prompt);
         }
 
