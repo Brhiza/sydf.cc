@@ -324,13 +324,13 @@
         <!-- AI提问容器 -->
         <div id="aiQuestionContainer" style="display:none;">
             <div id="aiQuestionOptions">
-                <button class="unified-button" data-default-text="请综合全面的分析我的排盘结果，包括命盘格局、宫位解读、大运关键节点、注意事项、总结和建议。" onclick="selectOption(this, 'single')">综合</button>
-                <button class="unified-button" data-default-text="请分析我在当前大运的运势，并给出总结和建议。" onclick="selectOption(this, 'single')">大运</button>
-                <button class="unified-button" data-default-text="请分析我在今年的运势，并给出总结和建议。" onclick="selectOption(this, 'single')">流年</button>
-                <button class="unified-button" data-default-text="请分析我今、明、后三年的运势，并给出总结和建议。" onclick="selectOption(this, 'single')">三年</button>
-                <button class="unified-button" data-default-text="请分析我的事业和财运，并给出总结和建议" onclick="selectOption(this, 'single')">事业财运</button>
-                <button class="unified-button" data-default-text="请分析我的感情和婚姻状况，并给出总结和建议。" onclick="selectOption(this, 'single')">感情婚姻</button>
-                <button class="unified-button" data-default-text="请分析我的健康状况，并给出总结和建议。" onclick="selectOption(this, 'single')">健康</button>
+                <button class="unified-button" data-default-text="请综合全面的分析我的排盘结果，包括命盘格局、宫位解读、大运关键节点、注意事项、总结和建议以及注意事项。" onclick="selectOption(this, 'single')">综合</button>
+                <button class="unified-button" data-default-text="请分析我在当前大运的运势，并给出总结和建议以及注意事项。" onclick="selectOption(this, 'single')">大运</button>
+                <button class="unified-button" data-default-text="请分析我在今年的运势，并给出总结和建议以及注意事项。" onclick="selectOption(this, 'single')">流年</button>
+                <button class="unified-button" data-default-text="请分析我今、明、后三年的运势，并给出总结和建议以及注意事项。" onclick="selectOption(this, 'single')">三年</button>
+                <button class="unified-button" data-default-text="请分析我的事业和财运，并给出总结和建议以及注意事项。" onclick="selectOption(this, 'single')">事业财运</button>
+                <button class="unified-button" data-default-text="请分析我的感情和婚姻状况，并给出总结和建议以及注意事项。" onclick="selectOption(this, 'single')">感情婚姻</button>
+                <button class="unified-button" data-default-text="请分析我的健康状况，并给出总结和建议以及注意事项。" onclick="selectOption(this, 'single')">健康</button>
                 <button class="unified-button" onclick="showCustomInput('single'); selectOption(this, 'single');">自定义</button>
             </div>
             <div id="customQuestionContainer" style="width: 100%; margin-top: 10px;">
@@ -342,8 +342,8 @@
         <!-- 合盘分析容器 -->
         <div id="combinedAnalysisContainer" style="display:none;">
             <div id="combinedQuestionOptions">
-                <button class="unified-button" data-default-text="请分析两个人命盘合不合，双方是否互补，双方性格怎么样，在一起几率高不高，有利和不利的婚姻因素，需要注意的年份，并给出总结和建议" onclick="selectOption(this, 'combined');">合婚</button>
-                <button class="unified-button" data-default-text="请分析我们在事业合作方面的匹配度，并给出总结和建议。" onclick="selectOption(this, 'combined');">合作</button>
+                <button class="unified-button" data-default-text="请分析两个人命盘合不合，双方是否互补，双方性格怎么样，在一起几率高不高，有利和不利的婚姻因素，需要注意的年份，并给出总结和建议以及注意事项。" onclick="selectOption(this, 'combined');">合婚</button>
+                <button class="unified-button" data-default-text="请分析我们在事业合作方面的匹配度，并给出总结和建议以及注意事项。" onclick="selectOption(this, 'combined');">合作</button>
                 <button class="unified-button" onclick="showCustomInput('combined'); selectOption(this, 'combined');">自定义</button>
             </div>
             <div id="customCombinedQuestionContainer" style="width: 100%; margin-top: 10px;">
@@ -595,7 +595,7 @@
             const selectedOption = dom.aiQuestionOptions.querySelector('.unified-button.selected');
             const isCustom = selectedOption.textContent.trim() === '自定义';
             const questionText = isCustom ? dom.customQuestion.value : selectedOption.dataset.defaultText;
-            const prompt = `你是一个紫微斗数大师，现在是${new Date().toLocaleString()}，以下是排盘结果：\n${dom.result1Div.innerHTML}\n问题: ${questionText}\n`;
+            const prompt = `你是一个紫微斗数大师，现在是${new Date().toLocaleString()}，以下是排盘结果：\n${dom.result1Div.innerHTML}\n问题: ${questionText}\n请尽量详细的说明`;
             handleAIQuery(prompt);
         }
 
@@ -603,7 +603,7 @@
             const selectedOption = dom.combinedQuestionOptions.querySelector('.unified-button.selected');
             const isCustom = selectedOption.textContent.trim() === '自定义';
             const questionText = isCustom ? dom.customCombinedQuestion.value : selectedOption.dataset.defaultText;
-            const prompt = `你是一个紫微斗数大师，现在是${new Date().toLocaleString()}，以下是排盘结果：\n第一人排盘结果:\n${dom.result1Div.innerHTML}\n\n第二人排盘结果:\n${dom.result2Div.innerHTML}\n问题：${questionText}`;
+            const prompt = `你是一个紫微斗数大师，现在是${new Date().toLocaleString()}，以下是排盘结果：\n第一人排盘结果:\n${dom.result1Div.innerHTML}\n\n第二人排盘结果:\n${dom.result2Div.innerHTML}\n问题：${questionText}\n请尽量详细的说明`;
             handleAIQuery(prompt);
         }
 
