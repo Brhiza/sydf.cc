@@ -412,9 +412,9 @@
 
         function setCustomAIPrompt() {
             const customText = document.getElementById('customQuestion').value;
-            return customText || '请分析我的排盘结果。';
             // 确保自定义输入框显示
             document.getElementById('customQuestion').style.display = 'block';
+            return customText || '请分析我的排盘结果。';
         }
 
         function showCustomInput() {
