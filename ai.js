@@ -10,7 +10,8 @@ async function queryAI(prompt) {
             },
             body: JSON.stringify({
                 prompt: prompt,
-                model: "癸水少女"
+                model: "癸水少女",
+                max_tokens: 86400
             }),
             signal: controller.signal
         });
