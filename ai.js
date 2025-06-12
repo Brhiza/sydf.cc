@@ -62,48 +62,34 @@ async function queryAI(prompt) {
 } 
 
 if (typeof window !== 'undefined') {
-    const autoScrollObserver = new MutationObserver((mutationsList) => {
-        for (const mutation of mutationsList) {
-            if (mutation.type === 'childList' || mutation.type === 'characterData') {
-                let target = mutation.target;
+    const scrollContent = () => {
+        // In iframes, scrolling documentElement is often more reliable.
+        document.documentElement.scrollTop = document.documentElement.scrollHeight;
+    };
 
-                // We need to find the element that contains the AI response.
-                // Let's assume it has a class 'ai-response'.
-                // The observer is on document.body, so target could be anything.
-                // We need to find the '.ai-response' div that is an ancestor of or is the target.
-                let aiResponseDiv = target.nodeType === Node.ELEMENT_NODE ? target.closest('.ai-response') : null;
-
-                if (aiResponseDiv) {
-                    // Now find the actual scrollable container
-                    let scrollContainer = aiResponseDiv;
-                    while (scrollContainer && scrollContainer !== document.body) {
-                        // Check if the element is scrollable
-                        if (scrollContainer.scrollHeight > scrollContainer.clientHeight) {
-                            break; // Found it
-                        }
-                        scrollContainer = scrollContainer.parentElement;
-                    }
-
-                    // If no specific scrollable container is found, default to the window/body scrolling
-                    if (scrollContainer && scrollContainer !== document.body) {
-                        scrollContainer.scrollTop = scrollContainer.scrollHeight;
-                    } else {
-                        // Fallback for cases where the body is the scroller
-                        window.scrollTo(0, document.body.scrollHeight);
-                    }
-                    return; // Optimization: once we've handled a relevant mutation, we can stop.
-                }
+    const observer = new MutationObserver((mutations) => {
+        let relevantMutation = false;
+        for (const mutation of mutations) {
+            // Check if the mutation happened inside an element we care about.
+            if (mutation.target.closest && mutation.target.closest('.ai-response')) {
+                relevantMutation = true;
+                break;
             }
+        }
+        if (relevantMutation) {
+            // Use requestAnimationFrame to wait for the next repaint,
+            // ensuring scrollHeight is updated before we try to scroll.
+            window.requestAnimationFrame(scrollContent);
         }
     });
 
-    // Start observing the document body for changes when the DOM is ready
     document.addEventListener('DOMContentLoaded', () => {
-        autoScrollObserver.observe(document.body, {
+        const targetNode = document.body;
+        const config = {
             childList: true,
             subtree: true,
-            characterData: true,
-            characterDataOldValue: false // Don't need old value
-        });
+            characterData: true
+        };
+        observer.observe(targetNode, config);
     });
 }
