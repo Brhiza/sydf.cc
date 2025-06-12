@@ -125,7 +125,7 @@
             }
             .container {
                 padding-top: 60px; /* For mobile-header */
-                padding-bottom: 50px; /* For footer */
+                padding-bottom: 0; /* For footer */
                 flex-direction: column;
                 height: auto;
             }
@@ -171,7 +171,7 @@
             }
             main {
                 width: 100%;
-                height: calc(100vh - 110px); /* Full viewport height minus header and footer */
+                height: calc(100vh - 60px); /* Full viewport height minus header */
                 display: none; /* Initially hide the iframe on mobile */
             }
             main.active {
@@ -184,7 +184,7 @@
                 align-items: center;
                 text-align: center;
                 padding: 20px;
-                height: calc(100vh - 110px); /* Full viewport height minus header and footer */
+                height: calc(100vh - 60px); /* Full viewport height minus header */
                 box-sizing: border-box;
             }
             .mobile-welcome.hidden {
@@ -236,18 +236,7 @@
                 display: none;
             }
             footer {
-                display: block;
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                background: #f8f8f8;
-                color: #777;
-                text-align: center;
-                padding: 15px;
-                font-size: 12px;
-                z-index: 1000; /* Lower than overlay and header */
-                box-sizing: border-box;
+                display: none;
             }
             footer a {
                 color: inherit;
@@ -292,9 +281,6 @@
             <iframe name="content-frame" src="ly.html"></iframe>
         </main>
     </div>
-    <footer>
-        <p>© <span id="year-mobile"></span> By <a href="about.html" target="_blank">少女的美丽忧伤</a></p>
-    </footer>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -367,7 +353,6 @@
             
             // 设置年份
             document.getElementById('year-desktop').textContent = new Date().getFullYear();
-            document.getElementById('year-mobile').textContent = new Date().getFullYear();
         });
     </script>
 </body>
