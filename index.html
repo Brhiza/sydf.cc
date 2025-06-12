@@ -324,12 +324,28 @@
                 if (mobileWelcome) mobileWelcome.classList.add('hidden');
             } else {
                 // Mobile view
+                iframe.src = 'about:blank';
                 mainContent.classList.remove('active');
                 if (mobileWelcome) mobileWelcome.classList.remove('hidden');
             }
  
              const quickNavContainer = document.querySelector('.quick-nav');
- 
+
+             function navigateTo(url, linkElement) {
+                 iframe.src = url;
+
+                 navLinks.forEach(l => l.classList.remove('active'));
+                 if (linkElement) {
+                     linkElement.classList.add('active');
+                 }
+
+                 if (window.innerWidth <= 768) {
+                     closeMenu();
+                     mainContent.classList.add('active');
+                     if (mobileWelcome) mobileWelcome.classList.add('hidden');
+                 }
+             }
+
              navLinks.forEach((link, index) => {
                  // Create quick nav buttons for mobile view
                  if (quickNavContainer) {
@@ -337,23 +353,14 @@
                      btn.textContent = link.textContent;
                      btn.className = 'quick-nav-btn';
                      btn.addEventListener('click', () => {
-                         // Simulate a click on the corresponding nav link
-                         link.click();
+                         navigateTo(link.getAttribute('href'), link);
                      });
                      quickNavContainer.appendChild(btn);
                  }
- 
+
                  link.addEventListener('click', function(e) {
-                     // Set the clicked link as active
-                     navLinks.forEach(l => l.classList.remove('active'));
-                     this.classList.add('active');
-                     
-                     // On mobile, close the menu and show the content
-                     if (window.innerWidth <= 768) {
-                         closeMenu();
-                         mainContent.classList.add('active');
-                         if (mobileWelcome) mobileWelcome.classList.add('hidden');
-                     }
+                    e.preventDefault();
+                    navigateTo(this.getAttribute('href'), this);
                  });
              });
             
