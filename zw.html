@@ -324,7 +324,11 @@
         <!-- AI提问容器 -->
         <div id="aiQuestionContainer" style="display:none;">
             <div id="aiQuestionOptions">
-                <button class="unified-button" data-default-text="请综合全面的分析我的排盘结果，包括命盘格局、宫位解读、大运关键节点、注意事项、总结和建议以及注意事项。" onclick="selectOption(this, 'single')">综合</button>
+                <button class="unified-button" data-default-text="请综合全面的分析我的排盘结果，1.星曜解读 - 主星：紫微、天机等14主星特性及庙旺落陷 - 辅星：文昌、文曲等吉星影响 - 煞星：擎羊、陀罗等煞星制化 - 四化：禄权科忌在各宫位的影响 
+2.宫位分析 - 命宫：先天命格与性格特质 - 财帛宫：财富格局与赚钱方式 - 官禄宫：事业发展与职业倾向 - 夫妻宫：感情模式与婚姻状况 - 迁移宫：外出运与贵人运
+3.大限流年推演 - 当前大限（10年运势）分析 - 今年流年运势详解 - 未来5年关键时间节点
+4.补救建议 - 有利方位 - 适合职业 - 流年注意事项 - 风水调理建议
+                    5.总结和建议以及注意事项。" onclick="selectOption(this, 'single')">综合</button>
                 <button class="unified-button" data-default-text="请分析我在当前大运的运势，并给出总结和建议以及注意事项。" onclick="selectOption(this, 'single')">大运</button>
                 <button class="unified-button" data-default-text="请分析我在今年的运势，并给出总结和建议以及注意事项。" onclick="selectOption(this, 'single')">流年</button>
                 <button class="unified-button" data-default-text="请分析我今、明、后三年的运势，并给出总结和建议以及注意事项。" onclick="selectOption(this, 'single')">三年</button>
@@ -595,7 +599,20 @@
             const selectedOption = dom.aiQuestionOptions.querySelector('.unified-button.selected');
             const isCustom = selectedOption.textContent.trim() === '自定义';
             const questionText = isCustom ? dom.customQuestion.value : selectedOption.dataset.defaultText;
-            const prompt = `你是一个紫微斗数大师，现在是${new Date().toLocaleString()}，以下是排盘结果：\n${dom.result1Div.innerHTML}\n问题: ${questionText}\n请尽量详细的说明`;
+            const prompt = `你是一个紫微斗数大师，现在是${new Date().toLocaleString()}，以下是排盘结果：\n${dom.result1Div.innerHTML}\n问题: ${questionText}\n请尽量详细的说明，需要注意1. 结构清晰
+- 先总论命格特点
+- 再分述各宫位运势
+- 最后给出具体建议
+
+2. 现代诠释
+- 结合当代社会环境
+- 给出可操作建议
+- 避免宿命论表述
+
+3. 验证体系
+- 星曜印证度
+- 宫位契合度
+- 现实可解释性`;
             handleAIQuery(prompt);
         }
 
