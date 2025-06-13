@@ -136,7 +136,12 @@
                 <div class="ai-response"></div>
             `;
 
-            const prompt = `你是一个梅花易数大师，当前时间：${ganzhiInfo}\n主卦: ${mainHexagram.name}，变卦: ${changingHexagram.name}\n问题: ${userInput}\n请帮我解读一下，并以如下格式回复\n此卦象意味着：\n你可以：`;
+            const prompt = `你是一个梅花易数大师，根据用户提供的卦象和问题，提供准确的卦象解读和实用建议
+任务要求：逻辑清晰，语气得当
+1. 解读卦象：解读整体趋势和吉凶
+2. 关联问题：针对用户问题，结合卦象信息，提供具体分析
+3. 提供建议：根据卦象启示，给出切实可行的建议，帮助用户解决实际问题
+当前时间：${ganzhiInfo}\n主卦: ${mainHexagram.name}，变卦: ${changingHexagram.name}\n问题: ${userInput}\n请帮我解读一下，并以如下格式回复\n此卦象意味着：\n你可以：`;
 
             const aiResponseDiv = outputText.querySelector('.ai-response');
             aiResponseDiv.innerHTML = "";

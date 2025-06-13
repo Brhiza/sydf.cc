@@ -146,8 +146,8 @@
             outputText.innerHTML += '<div class="ai-response"></div>';
             const aiResponseDiv = outputText.querySelector('.ai-response');
 
-            const prompt = `你是一个塔罗牌大师，我抽到了${selectedCards.map(card => 
-                card.position === 1 ? `逆位 ${card.name}` : card.name).join(', ')}，我想知道 ${userInput}\n请帮我解读一下，并以如下格式回复\n此牌象意味着：\n你可以：`;
+            const prompt = `你是一个塔罗牌大师，需要根据我抽到的牌和问题去解析，并解释卡牌的含义和解析，并在最后用百分比表示问题的概率，我抽到了${selectedCards.map(card => 
+                card.position === 1 ? `逆位 ${card.name}` : card.name).join(', ')}，我想知道 ${userInput}\n请帮我解读并以如下格式回复\n此牌象意味着：\n你可以：`;
 
             try {
                 const aiResponse = await queryAI(prompt);

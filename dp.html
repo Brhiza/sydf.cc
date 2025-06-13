@@ -129,7 +129,7 @@
                 <div class="ai-response"></div>
             `;
 
-            const prompt = `你是一个塔罗牌大师，我抽到了${displayName}，我想知道 ${userInput}\n请帮我解读一下，并以如下格式回复\n此牌象意味着：\n你可以：`;
+            const prompt = `你是一个塔罗牌大师，需要根据我抽到的牌和问题去解析，并解释卡牌的含义和解析，并在最后用百分比表示问题的概率，我抽到了${displayName}，我想知道 ${userInput}\n请帮我解读一下，并以如下格式回复\n此牌象意味着：\n你可以：`;
 
             const aiResponseDiv = outputText.querySelector('.ai-response');
             aiResponseDiv.innerHTML = "";
