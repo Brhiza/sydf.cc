@@ -92,6 +92,7 @@ async function handleAIQuery(prompt) {
     if (!aiResponseDiv) {
         aiResponseDiv = document.createElement('div');
         aiResponseDiv.id = 'aiResponse';
+        aiResponseDiv.className = 'ai-response'; // 添加 ai-response 类
         aiResponseDiv.style.marginTop = '20px';
         aiResponseDiv.style.padding = '15px';
         aiResponseDiv.style.borderRadius = '8px';
@@ -109,7 +110,7 @@ async function handleAIQuery(prompt) {
         const aiResponse = await queryAI(prompt);
         for await (const content of aiResponse.streamResponse()) {
             aiResponseDiv.innerHTML += content;
-            aiResponseDiv.scrollTop = aiResponseDiv.scrollHeight;
+            // 移除此处的滚动逻辑，交由 js/ai.js 中的 MutationObserver 处理
         }
     } catch (error) {
         console.error('请求失败:', error);

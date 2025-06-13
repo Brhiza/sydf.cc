@@ -64,7 +64,10 @@ async function queryAI(prompt) {
 if (typeof window !== 'undefined') {
     const scrollContent = () => {
         // In iframes, scrolling documentElement is often more reliable.
-        document.documentElement.scrollTop = document.documentElement.scrollHeight;
+        // Only scroll if the content is taller than the viewport.
+        if (document.documentElement.scrollHeight > window.innerHeight) {
+            document.documentElement.scrollTop = document.documentElement.scrollHeight;
+        }
     };
 
     const observer = new MutationObserver((mutations) => {
