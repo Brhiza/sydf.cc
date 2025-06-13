@@ -19,22 +19,8 @@
             background: linear-gradient(to bottom right, #9370DB 0, #483D8B 100%);
             overflow: auto;
             position: relative;
-            padding-top: 100px
+            padding-top: 50px
         }
-
-/* 电脑设备（屏幕宽度大于 768px） */
-@media (min-width: 769px) {
-    body {
-        padding-top: 50px; /* 电脑设备留白 */
-    }
-}
-
-/* 手机设备（屏幕宽度小于等于 768px） */
-@media (max-width: 768px) {
-    body {
-        padding-top: 50px; /* 手机设备留白 */
-    }
-}
 
         
         /* 背景气泡动画 */
@@ -442,7 +428,6 @@ h1 {
       2.头脑中想着您的问题，并抽取 3 张塔罗牌
       <br>
     </div>
-  </header>
   <main class="centered">
     <div class="card-container" id="cardContainer"></div>
     <div class="result-container" id="resultContainer"></div>
@@ -547,7 +532,7 @@ const majorArcanaCardNames = ["愚人", "魔术师", "女祭司", "皇后", "皇
         reversed: "缺乏封闭感、缺乏成就感、感觉不完整、空虚"
       }
     ];
-        const cdnBaseUrl = "./img/mx/";
+        const cdnBaseUrl = "static/mx/";
         const defaultCardImage = `${cdnBaseUrl}00.jpg`;
         let cards = [];
         let drawnCards = [];
@@ -717,16 +702,18 @@ async function aiInterpretation() {
 
     const outputText = document.getElementById('outputText');
     const aiButton = document.getElementById('aiButton');
+    const loadingAnimation = document.getElementById('loadingAnimation'); // 获取loading元素
     outputText.style.display = 'none';
+    loadingAnimation.style.display = 'block'; // 显示加载动画
     aiButton.classList.add('loading');
-    aiButton.textContent = '';
+    aiButton.textContent = ''; // 按钮文本清空，可以考虑保留或者改为“加载中”
 
     try {
         // 创建 AbortController 实例
         const controller = new AbortController();
         window.currentAIRequest = controller;
 
-        const response = await fetch('https://flow.onlyikun.com/ai', {
+        const response = await fetch('https://flow.ovo.gs/ai', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -811,38 +798,13 @@ async function aiInterpretation() {
         if (window.currentAIRequest) {
             window.currentAIRequest = null;
         }
+        const loadingAnimation = document.getElementById('loadingAnimation'); // 再次获取loading元素
+        loadingAnimation.style.display = 'none'; // 隐藏加载动画
         aiButton.classList.remove('loading');
         aiButton.textContent = 'AI解读';
     }
 }
 
-
-    function typeWriter(text, element, minSpeed = 10, maxSpeed = 40) {
-      let i = 0;
-      element.innerHTML = '';
-      
-      function type() {
-        if (i < text.length) {
-          const currentText = text.substring(0, i + 1);
-          element.innerHTML = marked.parse(currentText);
-          
-          // 修改滚动逻辑，确保每次打字都滚动到底部
-          const scrollTarget = document.documentElement.scrollHeight;
-          if (window.innerHeight + window.scrollY < scrollTarget) {
-            window.scrollTo({
-              top: scrollTarget,
-              behavior: 'smooth'
-            });
-          }
-          
-          i++;
-          const randomSpeed = Math.floor(Math.random() * (maxSpeed - minSpeed + 1)) + minSpeed;
-          setTimeout(type, randomSpeed);
-        }
-      }
-      
-      type();
-    }
 
         document.addEventListener('DOMContentLoaded', () => {
             initCards();

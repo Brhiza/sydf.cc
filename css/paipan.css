@@ -1,0 +1,213 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f0f2f5;
+    color: #333;
+    line-height: 1.6;
+}
+.container {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    max-width: 600px;
+    margin: 20px auto;
+}
+h1 {
+    color: #1a237e; /* 深蓝色标题 */
+    text-align: center;
+    margin-bottom: 30px;
+}
+h2 {
+    color: #283593; /* 稍浅的蓝色副标题 */
+    margin-top: 30px;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #e8eaf6; /* 淡蓝色下划线 */
+    padding-bottom: 8px;
+}
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600; /* 稍粗的字体 */
+    color: #3949ab; /* 标签颜色 */
+}
+input[type="number"],
+select {
+    width: 100%; /* 改为100%配合box-sizing */
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 1px solid #c5cae9; /* 边框颜色 */
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+input[type="number"]:focus,
+select:focus {
+    border-color: #3f51b5; /* 焦点时边框颜色 */
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(63, 81, 181, 0.2);
+}
+.ai-question-button {
+    background-color: #3f51b5; /* 主题蓝色 */
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+    display: block; /* 让按钮独占一行并居中 */
+    width: 100%;
+    max-width: 200px; /* 按钮最大宽度 */
+    margin: 20px auto 0; /* 上边距，并水平居中 */
+}
+.ai-question-button:hover {
+    background-color: #303f9f; /* 悬停时深一点的蓝色 */
+}
+
+.unified-button {
+    background-color: white;
+    color: #3f51b5;
+    border: 1px solid #3f51b5;
+    padding: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: center;
+    font-size: 16px;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    display: block;
+    width: 100%;
+    max-width: 200px;
+    margin: 20px auto 0;
+}
+.unified-button.selected {
+    background-color: #3f51b5;
+    color: white;
+    border: none;
+}
+.unified-button:hover {
+    background-color: #303f9f;
+}
+
+.hidden {
+    display: none;
+}
+
+.ai-question-button.selected {
+    background-color: #3f51b5;
+    color: white;
+    border: 1px solid #3f51b5;
+}
+.ai-question-button:not(.selected):hover {
+    background-color: #e8eaf6;
+}
+
+#result,
+#result2 {
+    margin-top: 30px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    white-space: normal;
+    word-wrap: break-word;
+}
+
+#result h3,
+#result2 h3 {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+    color: #333;
+}
+
+#result p,
+#result2 p {
+    margin-bottom: 5px;
+    color: #333;
+}
+
+#result strong,
+#result2 strong {
+    color: inherit;
+    font-weight: bold;
+}
+
+#result ul,
+#result2 ul {
+    list-style-type: disc;
+    padding-left: 30px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+
+#result li,
+#result2 li {
+    margin-bottom: 5px;
+    padding: 2px 0;
+}
+
+.gender-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.gender-button {
+    flex-grow: 1;
+    padding: 12px;
+    border: 1px solid #c5cae9;
+    border-radius: 6px;
+    background-color: #fff;
+    color: #3f51b5;
+    cursor: pointer;
+    text-align: center;
+    font-size: 16px;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.gender-button.selected {
+    background-color: #3f51b5;
+    color: #fff;
+    border-color: #3f51b5;
+}
+
+.gender-button:not(.selected):hover {
+    background-color: #e8eaf6;
+}
+.date-inputs-row {
+    display: flex;
+    gap: 15px;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.date-input-group {
+    flex: 1;
+    min-width: 0;
+}
+
+.date-input-group label {
+    margin-bottom: 8px;
+}
+
+.date-input-group input[type="number"], .date-input-group select {
+    width: 100%;
+    margin-bottom: 0;
+}
+#aiQuestionOptions, #combinedQuestionOptions {
+        display: none;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        gap: 10px;
+        padding: 20px 0;
+        margin-top: 20px;
+        border-top: 1px solid #eee;
+    }
+    
+#aiQuestionOptions .unified-button, #combinedQuestionOptions .unified-button {
+    display: inline-block;
+    min-width: fit-content;
+    margin: 0;
+}

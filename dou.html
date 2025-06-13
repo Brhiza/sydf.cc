@@ -56,31 +56,63 @@
             linkInput.value = "";
             textOutput.value = "";
 
-            // 提取网页链接
-            var linkMatch = textInput.match(/https?:\/\/[^\s]+/);
-            var linkResult = linkMatch ? linkMatch[0] : "未找到网页链接";
+            // 1. 提取网页链接
+            var extractedLink = "";
+            // 优先匹配特定已知格式，确保链接完整性
+            // 小红书链接到中文逗号或空格前
+            // 抖音和快手链接到空格前
+            var specificLinkMatch = textInput.match(/https?:\/\/(v\.douyin\.com\/[^\s]+|v\.kuaishou\.com\/[^\s]+|xhslink\.com\/[^\s，]+)/);
 
-            linkInput.value = linkResult; // 将提取的链接显示在输入框中
+            if (specificLinkMatch) {
+                extractedLink = specificLinkMatch[0];
+            } else {
+                // Fallback for other generic links, stopping at space or Chinese comma
+                var genericLinkMatch = textInput.match(/https?:\/\/[^\s，]+/);
+                if (genericLinkMatch) {
+                    extractedLink = genericLinkMatch[0];
+                }
+            }
+            linkInput.value = extractedLink || "未找到网页链接";
 
-            // 提取特定文字
-            var textResult = "未找到特定文字";
+            // 2. 提取特定文字 (标题)
+            var extractedText = "未找到特定文字";
 
-            // 样式1提取
-            var style1Match = textInput.match(/【[^】]+】([^#]+)#/);
-            if (style1Match) {
-                textResult = style1Match[1].trim();
+            // 尝试格式1 (抖音)
+            var douyinMatch = textInput.match(/【[^】]+】([^#]+)#/);
+            if (douyinMatch && douyinMatch[1]) {
+                extractedText = douyinMatch[1].trim();
+            } else {
+                // 尝试格式2 (快手) - 标题在链接之后
+                if (extractedLink && textInput.indexOf(extractedLink) !== -1) {
+                    const linkEndIndex = textInput.indexOf(extractedLink) + extractedLink.length;
+                    const textAfterLink = textInput.substring(linkEndIndex);
+                    var kuaishouMatch = textAfterLink.match(/^\s*([^“]+)“/);
+                    if (kuaishouMatch && kuaishouMatch[1]) {
+                        extractedText = kuaishouMatch[1].trim();
+                    } else {
+                        // 尝试格式3 (小红书) - 标题在链接之前
+                        // Regex for Xiaohongshu title:
+                        // ^(.*?)                                - Capture group 1: title part (non-greedy)
+                        // (?:😆\s*[A-Za-z0-9]+\s*😆)?          - Optional non-capturing group for emoji/code
+                        // \s*https?:\/\/xhslink\.com\/[^\s，]+  - Matches the Xiaohongshu link (until space or Chinese comma)
+                        var xiaohongshuTitleMatch = textInput.match(/^(.*?)(?:😆\s*[A-Za-z0-9]+\s*😆)?\s*https?:\/\/xhslink\.com\/[^\s，]+/);
+                        if (xiaohongshuTitleMatch && xiaohongshuTitleMatch[1]) {
+                            let title = xiaohongshuTitleMatch[1].trim();
+                            title = title.replace(/^\d+\s*/, ''); // 去除开头的数字和空格
+                            if (title) { // 如果标题在去除数字后不为空，则设置
+                                extractedText = title;
+                            }
+                        }
+                    }
+                }
             }
 
-            // 样式2提取
-            var style2Match = textInput.match(/https?:\/\/[^\s]+ ([^“]+)“/);
-            if (style2Match) {
-                textResult = style2Match[1].trim();
+            textOutput.value = extractedText;
+
+            // 自动复制网页链接的提取结果 (如果提取到)
+            if (extractedLink) {
+                copyText('linkInput');
             }
-
-            textOutput.value = textResult; // 将提取的文字显示在输入框中
-
-            // 自动复制网页链接的提取结果
-            copyText('linkInput');
 
             // 将焦点设置回输入文本框
             document.getElementById("textInput").focus();
