@@ -98,8 +98,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    function navigateTo(url, linkElement) {
-        loadPage(url);
+    async function navigateTo(url, linkElement) { // Make navigateTo async
+        await loadPage(url); // Await for page content and scripts to load
 
         navLinks.forEach(l => l.classList.remove('active'));
         if (linkElement) {
@@ -119,10 +119,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     navLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
+        link.addEventListener('click', async function(e) { // Make event listener async
             e.preventDefault();
             const url = this.getAttribute('href');
-            navigateTo(url, this);
+            await navigateTo(url, this); // Await navigateTo
         });
     });
 
@@ -133,9 +133,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const btn = document.createElement('button');
             btn.textContent = link.textContent;
             btn.className = 'quick-nav-btn';
-            btn.addEventListener('click', () => {
+            btn.addEventListener('click', async () => { // Make event listener async
                 const url = link.getAttribute('href');
-                navigateTo(url, link);
+                await navigateTo(url, link); // Await navigateTo
             });
             quickNavContainer.appendChild(btn);
         });
