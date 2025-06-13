@@ -163,6 +163,8 @@ iframe {
         width: 100%;
         height: calc(100vh - 60px); /* Full viewport height minus header */
         display: none; /* Initially hide the iframe on mobile */
+        box-sizing: border-box; /* Ensure padding/border don't affect overall dimensions */
+        overflow-y: auto; /* Allow internal scrolling and stabilize layout */
     }
     main.active {
         display: block; /* Show iframe when active */
