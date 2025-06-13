@@ -323,14 +323,15 @@
         
         <div id="aiQuestionContainer" style="display:none;">
             <div id="aiQuestionOptions">
-                <button class="unified-button" data-default-text="请进行全面分析八字格局和五行喜忌，然后分析心性性格、事业、财运、感情、身体健康以及注意事项。" onclick="selectOption(this, 'single')">综合</button>
+                <button class="unified-button" data-default-text="请进行全面分析八字格局和五行喜忌，然后分析此命局中的用神特性，在命主八字中的具体表现及如何影响命主一生；喜神其如何增强命主的运势，以及在何时何地发挥最大效用；忌神其如何制约命主的发展，以及应当如何化解其负面影响；分析其性格特点、思维方式和行为模式，指出其性格中的优势和潜在盲点" onclick="selectOption(this, 'single')">综合</button>
                 <button class="unified-button" data-default-text="请分析我在当前大运的运势，并给出总结和建议以及注意事项。" onclick="selectOption(this, 'single')">大运</button>
                 <button class="unified-button" data-default-text="请分析我在今年的运势，并给出总结和建议以及注意事项。" onclick="selectOption(this, 'single')">流年</button>
                 <button class="unified-button" data-default-text="请分析我在今年每一个月的运势，并给出总结和建议以及注意事项。以 4k max token 输出" onclick="selectOption(this, 'single')">年运</button>
                 <button class="unified-button" data-default-text="请分析我今、明、后三年的运势，并给出总结和建议以及注意事项。" onclick="selectOption(this, 'single')">三年</button>
-                <button class="unified-button" data-default-text="请分析我的事业和财运，并给出总结和建议以及注意事项" onclick="selectOption(this, 'single')">事业财运</button>
-                <button class="unified-button" data-default-text="请分析我的感情和婚姻状况，并给出总结和建议以及注意事项。" onclick="selectOption(this, 'single')">感情婚姻</button>
-                <button class="unified-button" data-default-text="请分析我的健康状况，并给出总结和建议以及注意事项。" onclick="selectOption(this, 'single')">健康</button>
+                <button class="unified-button" data-default-text="请分析我的事业和财运，制定阶段性职业发展计划，指出关键发展期和可能的职业转折点；优化人际关系的具体策略，包括如何处理家庭、职场和社交关系；分析最适合的职业领域和工作环境，指出哪些行业与命主五行相生相助；职业发展的关键时期和可能面临的挑战，结合大运流年，指出事业发展的黄金期和需要谨慎的时段；财运特点，包括财富来源、积累方式和财运波动周期，指出命局中的财星和破财因素；适合的投资策略和理财方向，指出哪些投资领域与命主五行相符。并给出总结和建议以及注意事项" onclick="selectOption(this, 'single')">事业财运</button>
+                <button class="unified-button" data-default-text="请分析我的感情和婚姻状况，婚姻宫位的强弱和特点，预测婚姻生活的整体质量和可能面临的挑战，指出婚姻中的关键时期；潜在配偶的性格特点、外貌特征和职业倾向，分析最佳配偶类型；分析子女宫的特点和强弱，预测生育能力和子女数量，以及与子女关系的发展趋势。" onclick="selectOption(this, 'single')">感情婚姻</button>
+                <button class="unified-button" data-default-text="请分析我与父母、子女、兄弟姐妹的关系特点，指出家庭关系中的优势和需要注意的方面；在人际关系中的表现模式，包括与家人、朋友、同事的互动特点，以及如何根据八字特性优化人际关系。" onclick="selectOption(this, 'single')">家庭/人际</button>
+                <button class="unified-button" data-default-text="请分析我的健康状况，分析体质特点和潜在健康风险，指出命局中的疾厄宫位和对应的身体部位；评估长寿潜力和影响寿命的关键因素，指出需要特别注意的时期；提供延年益寿的具体建议，包括如何调整生活方式、心态和环境以增强命主的寿元。" onclick="selectOption(this, 'single')">健康</button>
                 <button class="unified-button" onclick="showCustomInput('single'); selectOption(this, 'single');">自定义</button>
             </div>
             <div id="customQuestionContainer" style="width: 100%; margin-top: 10px;">
@@ -624,7 +625,16 @@
             const selectedOption = dom.aiQuestionOptions.querySelector('.unified-button.selected');
             const isCustom = selectedOption.textContent.trim() === '自定义';
             const questionText = isCustom ? dom.customQuestion.value : selectedOption.dataset.defaultText;
-            let prompt = `你是一个八字大师，现在是${new Date().toLocaleString()}，以下是排盘结果：\n${dom.result1Div.innerHTML}\n问题: ${questionText}\n请尽量详细的说明`;
+            let prompt = `你是一个八字大师，现在是${new Date().toLocaleString()}，以下是排盘结果：\n${dom.result1Div.innerHTML}\n问题: ${questionText}\n请根据八字排盘尽量详细的说明需要注意1. 结构清晰
+- 先总论命格特点
+- 再分述运势
+- 最后给出具体建议
+
+2. 现代诠释
+- 结合当代社会环境
+- 给出可操作建议
+- 避免宿命论表述
+- 现实可解释性`;
 
             if (selectedOption.dataset.defaultText && selectedOption.dataset.defaultText.includes("今年每一个月的运势")) {
                 const year = new Date().getFullYear();
