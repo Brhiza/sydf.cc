@@ -109,6 +109,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (window.innerWidth <= 768) {
             closeMenu();
             mainContent.classList.add('active');
+            // Force reflow/repaint to ensure correct initial layout
+            void mainContent.offsetHeight;
             if (mobileWelcome) mobileWelcome.classList.add('hidden');
         }
     }
