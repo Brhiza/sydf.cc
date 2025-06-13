@@ -110,8 +110,11 @@ document.addEventListener('DOMContentLoaded', function() {
             closeMenu();
             mainContent.classList.add('active');
             // Force reflow/repaint to ensure correct initial layout
-            void mainContent.offsetHeight;
-            if (mobileWelcome) mobileWelcome.classList.add('hidden');
+            // and add a small timeout for Android Chrome rendering quirks
+            setTimeout(() => {
+                void mainContent.offsetHeight;
+                if (mobileWelcome) mobileWelcome.classList.add('hidden');
+            }, 0);
         }
     }
 
