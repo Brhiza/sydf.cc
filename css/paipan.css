@@ -8,18 +8,18 @@ body {
 }
 .container {
     background-color: #fff;
-    padding: 30px;
+    padding: 40px;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    max-width: 600px;
-    margin: 20px auto; /* Center container with vertical margin */
+    max-width: 800px;
+    margin: 50px auto; /* Center container with vertical margin */
     -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
     box-sizing: border-box; /* Include padding in height calculation */
 }
 h1 {
     color: #1a237e; /* 深蓝色标题 */
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 40px;
 }
 h2 {
     color: #283593; /* 稍浅的蓝色副标题 */
@@ -32,17 +32,18 @@ label {
     display: block;
     margin-bottom: 8px;
     font-weight: 600; /* 稍粗的字体 */
-    color: #3949ab; /* 标签颜色 */
+    color: #34495e; /* 更柔和的标签颜色 */
 }
 input[type="number"],
 select {
     width: 100%; /* 改为100%配合box-sizing */
     padding: 12px;
     margin-bottom: 20px;
-    border: 1px solid #c5cae9; /* 边框颜色 */
+    border: 1px solid #d1d9e6; /* 更柔和的边框颜色 */
     border-radius: 6px;
     box-sizing: border-box;
     font-size: 16px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease; /* 平滑过渡 */
 }
 input[type="number"]:focus,
 select:focus {
@@ -59,14 +60,19 @@ select:focus {
     cursor: pointer;
     font-size: 16px;
     font-weight: 500;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, transform 0.1s ease;
     display: block; /* 让按钮独占一行并居中 */
     width: 100%;
     max-width: 200px; /* 按钮最大宽度 */
     margin: 20px auto 0; /* 上边距，并水平居中 */
 }
+
 .ai-question-button:hover {
     background-color: #303f9f; /* 悬停时深一点的蓝色 */
+}
+
+.ai-question-button:active {
+    transform: scale(0.98); /* 点击时轻微缩小 */
 }
 
 .unified-button {
@@ -90,7 +96,8 @@ select:focus {
     border: none;
 }
 .unified-button:hover {
-    background-color: #303f9f;
+    background-color: #f4f6f8; /* 更柔和的悬停效果 */
+    border-color: #3f51b5;
 }
 
 .hidden {
@@ -270,7 +277,7 @@ select:focus {
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-    font-size: 18px; /* 再次增大桌面端基础字体 */
+    font-size: 20px; /* 再次增大桌面端基础字体 */
 }
 
 .bazi-table th, .bazi-table td {
@@ -281,7 +288,7 @@ select:focus {
 }
 
 .bazi-table thead th {
-    background-color: #3f51b5; /* 主题蓝色 */
+    background-color: #3949ab; /* 稍深一点的主题蓝 */
     color: white;
     font-weight: 600;
     font-size: 16px;
@@ -305,35 +312,35 @@ select:focus {
 
 .bazi-table .gan-zhi {
     font-weight: bold;
-    font-size: 24px; /* 再次增大桌面端干支字体 */
+    font-size: 26px; /* 再次增大桌面端干支字体 */
     color: #1a237e;
 }
 
 .bazi-table .ten-god {
-    font-size: 17px; /* 再次增大桌面端十神字体 */
+    font-size: 18px; /* 再次增大桌面端十神字体 */
     color: #555; /* 十神用突出颜色 */
 }
 
 .bazi-table .hidden-stems {
-    font-size: 15px;
+    font-size: 16px;
     color: #555;
 }
 
 .bazi-table .hidden-gods {
-    font-size: 14px;
+    font-size: 15px;
     color: #555;
 }
 
 .bazi-table .luck-cycle th {
     background-color: #e8eaf6;
     color: #283593;
-    font-size: 15px;
+    font-size: 16px;
     padding: 12px;
 }
 
 .bazi-table .luck-cycle td {
     font-family: monospace;
-    font-size: 16px;
+    font-size: 18px;
     white-space: pre-wrap;
     text-align: center;
     vertical-align: middle;
@@ -354,12 +361,12 @@ select:focus {
 }
 
 .bazi-table .life-stage {
-    font-size: 15px;
+    font-size: 16px;
     color: #555; /* Teal color for distinction */
 }
 
 .bazi-table .shen-sha {
-    font-size: 13px;
+    font-size: 14px;
     color: #555; /* Purple color, similar to hidden gods */
     line-height: 1.4; /* Adjust line height for stacked items */
 }
@@ -389,6 +396,13 @@ select:focus {
     .bazi-table .life-stage {
         font-size: 12px;
     }
+    .container {
+        max-width: 100%;
+        margin: 0 0 20px 0;
+        padding: 15px;
+        border-radius: 0;
+        box-shadow: none;
+    }
     .bazi-table .shen-sha {
         font-size: 11px;
     }
@@ -415,7 +429,7 @@ select:focus {
 
 @media (max-width: 800px) {
     #result, #result2 {
-        padding: 0;
+        padding: 15px;
         border: none;
     }
 }

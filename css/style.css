@@ -270,21 +270,13 @@ input[type="text"] {
     box-sizing: border-box;
 }
 
-.content-wrapper button {
-    width: 100%;
-    padding: 12px;
-    border: none;
-    outline: none;
-    color: #fff;
-    background: #111;
-    cursor: pointer;
+.button-wrapper {
     position: relative;
     z-index: 0;
     border-radius: 10px;
-    font-size: 16px;
 }
 
-.content-wrapper button:before {
+.button-wrapper:before {
     content: '';
     background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
     position: absolute;
@@ -301,19 +293,12 @@ input[type="text"] {
     border-radius: 10px;
 }
 
-.content-wrapper button:active {
-    color: #000
-}
-
-.content-wrapper button:active:after {
-    background: transparent;
-}
-
-.content-wrapper button:hover:before {
+.button-wrapper:hover:before,
+.button-wrapper:active:before {
     opacity: 1;
 }
 
-.content-wrapper button:after {
+.button-wrapper:after {
     z-index: -1;
     content: '';
     position: absolute;
@@ -323,6 +308,33 @@ input[type="text"] {
     left: 0;
     top: 0;
     border-radius: 10px;
+}
+
+.content-wrapper button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    outline: none;
+    color: #fff;
+    background: transparent; /* 设置为透明，由 wrapper 控制背景 */
+    cursor: pointer;
+    border-radius: 10px;
+    font-size: 16px;
+    -webkit-tap-highlight-color: transparent; /* 移除 iOS 点击高亮 */
+    appearance: none; /* 移除默认样式 */
+    -webkit-appearance: none; /* 兼容 WebKit 浏览器 */
+    transition: transform 0.1s ease; /* 添加过渡效果 */
+    position: relative; /* 确保按钮在伪元素之上 */
+    z-index: 1;
+}
+
+.content-wrapper button:active {
+    transform: scale(0.98); /* 按下时轻微缩小 */
+}
+
+/* iOS specific fix */
+.ios-device .button-wrapper:before {
+    filter: none !important;
 }
 
 @keyframes glowing {

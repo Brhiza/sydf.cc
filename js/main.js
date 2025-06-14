@@ -1,4 +1,22 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // --- iOS Device Detection ---
+    function isIOS() {
+        return [
+            'iPad Simulator',
+            'iPhone Simulator',
+            'iPod Simulator',
+            'iPad',
+            'iPhone',
+            'iPod'
+        ].includes(navigator.platform)
+        // iPad on iOS 13 detection
+        || (navigator.userAgent.includes("Mac") && "ontouchend" in document)
+    }
+
+    if (isIOS()) {
+        document.body.classList.add('ios-device');
+    }
+
     const menuToggle = document.querySelector('.menu-toggle');
     const nav = document.querySelector('nav');
     const overlay = document.querySelector('.overlay');
