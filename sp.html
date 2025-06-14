@@ -2,9 +2,9 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>时月东方 - 免费AI算命占卜</title>
-    <meta name="description" content="时月东方是一个免费的AI算命网站，提供六爻、梅花易数、奇门遁甲、塔罗牌等多种在线占卜服务。结合传统智慧与人工智能，为您提供有趣的命理分析和决策参考。">
-    <meta name="keywords" content="AI算命, 免费算命, 在线占卜, 六爻, 梅花易数, 奇门遁甲, 塔罗牌, 周易, 算命, 占卜, 运势, 时月东方">
+    <title>塔罗牌占卜·三牌解读 - 时月东方 | 免费AI算命</title>
+    <meta name="description" content="免费在线塔罗牌三牌占卜（过去、现在、未来）。当您需要处理复杂问题或考虑多方面因素时，AI塔罗大师将为您提供更丰富的细节和更全面的视角。">
+    <meta name="keywords" content="塔罗牌, 塔罗牌占卜, 三牌解读, 过去现在未来, AI算命, 免费算命, 在线占卜, 时月东方">
     <link rel="icon" href="static/favicon.ico" type="image/x-icon">
     <link rel="icon" href="static/favicon.png" type="image/png">
     <link rel="apple-touch-icon" sizes="180x180" href="static/apple-touch-icon.png">
@@ -38,7 +38,7 @@
                 <li><a href="mh.html" class="nav-link">梅花易数</a></li>
                 <li><a href="qm.html" class="nav-link">奇门遁甲</a></li>
                 <li><a href="dp.html" class="nav-link">塔罗牌·单牌</a></li>
-                <li><a href="sp.html" class="nav-link">塔罗牌·三牌</a></li>
+                <li><a href="sp.html" class="nav-link active">塔罗牌·三牌</a></li>
                 <li><a href="about.html" class="nav-link">关于</a></li>
             </ul>
             <div class="desktop-footer">
@@ -46,11 +46,18 @@
             </div>
         </nav>
         <main>
-            <!-- The main content is now primarily in the mobile-welcome div for the index page -->
+            <div class="content-wrapper">
+                <h1 id="divination-title">塔罗牌·三牌</h1>
+                <p class="description" id="divination-description">在处理复杂问题或需要考虑多方面因素时，三牌布局可以提供更丰富的细节和更全面的视角，过去现在和未来</p>
+                <input type="text" id="userInput" placeholder="请输入您的问题">
+                <button id="submitButton">询问塔罗大师</button>
+                <div id="outputText" class="ai-response"></div>
+            </div>
         </main>
     </div>
 
-
+    <script src="js/lunar.js"></script>
+    <script src="js/sp.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>

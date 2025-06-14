@@ -2,9 +2,9 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>时月东方 - 免费AI算命占卜</title>
-    <meta name="description" content="时月东方是一个免费的AI算命网站，提供六爻、梅花易数、奇门遁甲、塔罗牌等多种在线占卜服务。结合传统智慧与人工智能，为您提供有趣的命理分析和决策参考。">
-    <meta name="keywords" content="AI算命, 免费算命, 在线占卜, 六爻, 梅花易数, 奇门遁甲, 塔罗牌, 周易, 算命, 占卜, 运势, 时月东方">
+    <title>六爻占卜 - 时月东方 | 免费AI算命</title>
+    <meta name="description" content="免费在线六爻占卜服务。通过AI技术分析卦象，深入剖析事情的内在联系和发展趋势，为您提供详细的决策参考。">
+    <meta name="keywords" content="六爻, 六爻占卜, AI算命, 免费算命, 在线占卜, 周易预测, 时月东方">
     <link rel="icon" href="static/favicon.ico" type="image/x-icon">
     <link rel="icon" href="static/favicon.png" type="image/png">
     <link rel="apple-touch-icon" sizes="180x180" href="static/apple-touch-icon.png">
@@ -34,7 +34,7 @@
                 <p>一个臭算命的不圈钱，学人来搞AI算命？</p>
             </div>
             <ul>
-                <li><a href="ly.html" class="nav-link">六爻</a></li>
+                <li><a href="ly.html" class="nav-link active">六爻</a></li>
                 <li><a href="mh.html" class="nav-link">梅花易数</a></li>
                 <li><a href="qm.html" class="nav-link">奇门遁甲</a></li>
                 <li><a href="dp.html" class="nav-link">塔罗牌·单牌</a></li>
@@ -46,11 +46,18 @@
             </div>
         </nav>
         <main>
-            <!-- The main content is now primarily in the mobile-welcome div for the index page -->
+            <div class="content-wrapper">
+                <h1 id="divination-title">六爻</h1>
+                <p class="description" id="divination-description">在分析人事方面较为细致准确，能够深入剖析事情的内在联系和发展趋势，对应期的判断也有一定的规律可循，尤其适合详细探究复杂问题</p>
+                <input type="text" id="userInput" placeholder="请输入您的问题">
+                <button id="submitButton">询问赛博大师</button>
+                <div id="outputText" class="ai-response"></div>
+            </div>
         </main>
     </div>
 
-
+    <script src="js/lunar.js"></script>
+    <script src="js/ly.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>
