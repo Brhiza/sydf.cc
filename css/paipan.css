@@ -1,10 +1,12 @@
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     margin: 0;
-    padding: 20px;
+    padding: 0; /* Remove padding */
     background-color: #f0f2f5;
     color: #333;
     line-height: 1.6;
+    height: 100vh; /* Full viewport height */
+    overflow: hidden; /* Prevent body from scrolling */
 }
 .container {
     background-color: #fff;
@@ -12,7 +14,11 @@ body {
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     max-width: 600px;
-    margin: 20px auto;
+    margin: 0 auto; /* Center container */
+    height: 100%; /* Full height of the body */
+    overflow-y: auto; /* Allow vertical scrolling */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    box-sizing: border-box; /* Include padding in height calculation */
 }
 h1 {
     color: #1a237e; /* 深蓝色标题 */
