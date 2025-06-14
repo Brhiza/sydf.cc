@@ -268,7 +268,7 @@ select:focus {
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-    font-size: 14px;
+    font-size: 18px; /* 再次增大桌面端基础字体 */
 }
 
 .bazi-table th, .bazi-table td {
@@ -303,23 +303,23 @@ select:focus {
 
 .bazi-table .gan-zhi {
     font-weight: bold;
-    font-size: 18px;
+    font-size: 24px; /* 再次增大桌面端干支字体 */
     color: #1a237e;
 }
 
 .bazi-table .ten-god {
-    font-size: 13px;
+    font-size: 17px; /* 再次增大桌面端十神字体 */
     color: #555; /* 十神用突出颜色 */
 }
 
 .bazi-table .hidden-stems {
-    font-size: 13px;
+    font-size: 15px;
     color: #555;
 }
 
 .bazi-table .hidden-gods {
-    font-size: 12px;
-    color: #7b1fa2;
+    font-size: 14px;
+    color: #555;
 }
 
 .bazi-table .luck-cycle th {
@@ -331,7 +331,7 @@ select:focus {
 
 .bazi-table .luck-cycle td {
     font-family: monospace;
-    font-size: 13px;
+    font-size: 16px;
     white-space: pre-wrap;
     text-align: left;
     vertical-align: top;
@@ -348,7 +348,18 @@ select:focus {
 }
 
 .bazi-table .luck-life-stage {
-    color: #00796b;
+    color: #555;
+}
+
+.bazi-table .life-stage {
+    font-size: 15px;
+    color: #555; /* Teal color for distinction */
+}
+
+.bazi-table .shen-sha {
+    font-size: 13px;
+    color: #555; /* Purple color, similar to hidden gods */
+    line-height: 1.4; /* Adjust line height for stacked items */
 }
 
 @media (max-width: 600px) {
@@ -365,9 +376,22 @@ select:focus {
     .bazi-table .hidden-gods {
         font-size: 12px; /* 增大藏干十神字体 */
     }
-    .bazi-table .luck-ten-god {
+    .bazi-table .ten-god {
+        font-size: 12px; /* 再次增大桌面端十神字体 */
+        color: #555; /* 十神用突出颜色 */
+    }
+    .bazi-table {
         font-size: 12px; /* 增大大运十神字体 */
         color: #666;
+    }
+    .bazi-table .life-stage {
+        font-size: 12px;
+    }
+    .bazi-table .shen-sha {
+        font-size: 11px;
+    }
+    .bazi-table .luck-cycle td {
+        font-size: 12px;
     }
 }
 /* 五行颜色样式 */

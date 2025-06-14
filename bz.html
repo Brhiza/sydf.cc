@@ -144,8 +144,21 @@
     <script src="js/ai.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/iztro@latest/dist/iztro.min.js"></script>
     <script src="js/paipan.js"></script>
+    <script src="js/shensha.js"></script>
     <script src="js/ui.js"></script>
     <script>
+        const NAYIN_MAP = {
+            '甲子': '海中金', '乙丑': '海中金', '丙寅': '炉中火', '丁卯': '炉中火', '戊辰': '大林木', '己巳': '大林木', '庚午': '路旁土', '辛未': '路旁土', '壬申': '剑锋金', '癸酉': '剑锋金',
+            '甲戌': '山头火', '乙亥': '山头火', '丙子': '涧下水', '丁丑': '涧下水', '戊寅': '城头土', '己卯': '城头土', '庚辰': '白蜡金', '辛巳': '白蜡金', '壬午': '杨柳木', '癸未': '杨柳木',
+            '甲申': '泉中水', '乙酉': '泉中水', '丙戌': '屋上土', '丁亥': '屋上土', '戊子': '霹雳火', '己丑': '霹雳火', '庚寅': '松柏木', '辛卯': '松柏木', '壬辰': '长流水', '癸巳': '长流水',
+            '甲午': '沙中金', '乙未': '沙中金', '丙申': '山下火', '丁酉': '山下火', '戊戌': '平地木', '己亥': '平地木', '庚子': '壁上土', '辛丑': '壁上土', '壬寅': '金箔金', '癸卯': '金箔金',
+            '甲辰': '覆灯火', '乙巳': '覆灯火', '丙午': '天河水', '丁未': '天河水', '戊申': '大驿土', '己酉': '大驿土', '庚戌': '钗钏金', '辛亥': '钗钏金', '壬子': '桑柘木', '癸丑': '桑柘木'
+        };
+
+        function getNayin(ganzhi) {
+            return NAYIN_MAP[ganzhi] || '';
+        }
+
         function getWuxingClass(char) {
             const wuxingMap = ['jin', 'shui', 'mu', 'huo', 'tu'];
             const tgIndex = p.ctg.indexOf(char);
@@ -314,19 +327,45 @@
                 htmlResult += `<tr><th>副星</th>`;
                 for (let i = 0; i < 4; i++) { htmlResult += `<td><span class="hidden-gods">${baziResult.bzcg.slice(i * 3, i * 3 + 3).filter(s => s).join('<br>')}</span></td>`; }
                 htmlResult += `</tr>`;
+
+                // 十二长生
+                const szs = [1, 6, 10, 9, 10, 9, 7, 0, 4, 3];
+                const riGan = baziResult.tg[2];
+                const riGanYinYang = baziResult.yytg[2];
+                htmlResult += `<tr><th>星运</th>`;
+                for (let i = 0; i < 4; i++) {
+                    const zhi = baziResult.dz[i];
+                    const lifeStageIndex = (24 + szs[riGan] + Math.pow(-1, riGanYinYang) * zhi) % 12;
+                    const lifeStageText = p.czs[lifeStageIndex].split('(')[0];
+                    htmlResult += `<td><span class="life-stage">${lifeStageText}</span></td>`;
+                }
+                htmlResult += `</tr>`;
+
+                // 神煞
+                const nianGZ = baziResult.sz[0];
+                const nianNayin = getNayin(nianGZ);
+                const baziArray = [baziResult.tg[0], baziResult.dz[0], baziResult.tg[1], baziResult.dz[1], baziResult.tg[2], baziResult.dz[2], baziResult.tg[3], baziResult.dz[3]];
+                const isMan = baziResult.xb === '男';
+
+                htmlResult += `<tr><th>神煞</th>`;
+                for (let i = 0; i < 4; i++) {
+                    const shenShaList = queryShenSha(baziResult.sz[i], baziArray, isMan, i + 1, nianNayin);
+                    htmlResult += `<td><span class="shen-sha">${shenShaList.join('<br>')}</span></td>`;
+                }
+                htmlResult += `</tr>`;
                 htmlResult += `</tbody></table>`;
 
                 htmlResult += `<h3>大运</h3>`;
                 htmlResult += `<p><strong>起运：</strong>${baziResult.qyy_desc}</p>`;
                 htmlResult += `<table class="bazi-table">`;
-                htmlResult += `<thead><tr><th>大运</th><th>岁数</th><th>起止年份</th><th>十二长生</th></tr></thead>`;
+                htmlResult += `<thead><tr><th>大运</th><th>岁数</th><th>起止年份</th><th>星运</th></tr></thead>`;
                 htmlResult += `<tbody>`;
                 baziResult.dy.forEach((yun) => {
                     const tenGodGan = p.ssq[p.dgs[yun.zfman][baziResult.tg[2]]];
                     const tenGodZhi = p.ssq[p.dzs[yun.zfmbn][baziResult.tg[2]]];
                     htmlResult += `<tr class="luck-cycle">`;
                     htmlResult += `<td><span class="luck-info">${colorizeGanZhi(yun.zfma)} <small class="luck-ten-god">(${tenGodGan})</small><br>${colorizeGanZhi(yun.zfmb)} <small class="luck-ten-god">(${tenGodZhi})</small></span></td>`;
-                    htmlResult += `<td>${yun.zqage}-${yun.zboz}</td>`;
+                    htmlResult += `<td>${yun.zqage}岁</td>`;
                     htmlResult += `<td>${yun.syear}-${yun.eyear}</td>`;
                     htmlResult += `<td><span class="luck-life-stage">${yun.nzsc}</span></td>`;
                     htmlResult += `</tr>`;
