@@ -106,7 +106,7 @@ async function handleAIQuery(prompt) {
     try {
         const aiResponse = await queryAI(prompt);
         for await (const content of aiResponse.streamResponse()) {
-            aiResponseDiv.innerHTML += content;
+            aiResponseDiv.append(document.createTextNode(content));
             // 移除此处的滚动逻辑，交由 js/ai.js 中的 MutationObserver 处理
         }
     } catch (error) {

@@ -18,7 +18,7 @@ document.getElementById('submitButton').addEventListener('click', async () => {
         const aiResponse = await queryAI(prompt);
         for await (const content of aiResponse.streamResponse()) {
             const processedContent = content.replace(/[*#]/g, '');
-            aiResponseDiv.innerHTML += processedContent;
+            aiResponseDiv.append(document.createTextNode(processedContent));
         }
     } catch (error) {
         console.error('请求失败:', error);

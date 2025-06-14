@@ -136,7 +136,7 @@ document.getElementById('submitButton').addEventListener('click', async () => {
     try {
         const aiResponse = await queryAI(prompt);
         for await (const content of aiResponse.streamResponse()) {
-            aiResponseDiv.innerHTML += content;
+            aiResponseDiv.append(document.createTextNode(content));
             aiResponseDiv.scrollTop = aiResponseDiv.scrollHeight;
         }
     } catch (error) {

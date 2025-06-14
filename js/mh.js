@@ -126,7 +126,7 @@ document.getElementById('submitButton').addEventListener('click', async () => {
     try {
         const aiResponse = await queryAI(prompt);
         for await (const content of aiResponse.streamResponse()) {
-            aiResponseDiv.innerHTML += content;
+            aiResponseDiv.append(document.createTextNode(content));
         }
     } catch (error) {
         console.error('请求失败:', error);
