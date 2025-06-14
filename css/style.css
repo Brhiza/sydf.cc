@@ -439,3 +439,143 @@ input[type="text"] {
     width: 100%; /* 宽度由父容器决定 */
     height: auto;
 }
+
+/* Desktop Welcome Navigation */
+.desktop-welcome {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    padding: 40px;
+    box-sizing: border-box;
+    text-align: center;
+    background-color: #f4f7f6;
+}
+
+.desktop-welcome h2 {
+    font-size: 2.5em;
+    color: #2c3e50;
+    margin-bottom: 40px;
+}
+
+.welcome-nav-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+    width: 100%;
+    max-width: 900px;
+}
+
+.nav-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 25px;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid #e0e0e0;
+}
+
+.nav-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.nav-card h3 {
+    font-size: 1.4em;
+    color: #34495e;
+    margin: 0 0 10px;
+}
+
+.nav-card p {
+    font-size: 1em;
+    color: #7f8c8d;
+    margin: 0;
+    line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+    .desktop-welcome {
+        display: none;
+    }
+}
+
+/* About Page Styles */
+.about-page {
+    padding: 40px;
+}
+
+.about-section {
+    margin-bottom: 40px;
+    padding-bottom: 30px;
+    border-bottom: 1px solid #eee;
+}
+
+.about-section:last-child {
+    margin-bottom: 0;
+    border-bottom: none;
+}
+
+.about-section h2 {
+    font-size: 2em;
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.about-section h3 {
+    font-size: 1.5em;
+    color: #34495e;
+    margin-bottom: 15px;
+}
+
+.about-section .subtitle {
+    font-size: 1.1em;
+    color: #95a5a6;
+    margin-top: -10px;
+    margin-bottom: 20px;
+    font-style: italic;
+}
+
+.about-section p {
+    font-size: 1.1em;
+    line-height: 1.8;
+    color: #555;
+}
+
+.disclaimer {
+    background-color: #fdf2f2;
+    border: 1px solid #f8d7da;
+    color: #721c24;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.disclaimer h3 {
+    color: #721c24;
+}
+
+.disclaimer p {
+    color: #721c24;
+    margin: 0;
+}
+
+.contact-info {
+    text-align: center;
+}
+
+.qr-code {
+    width: 200px;
+    margin: 20px auto;
+    display: block;
+    border: 5px solid #fff;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+.qr-caption {
+    font-size: 0.9em;
+    color: #888;
+    margin-top: -10px;
+}
