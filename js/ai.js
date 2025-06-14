@@ -62,10 +62,23 @@ async function queryAI(prompt) {
 } 
 
 if (typeof window !== 'undefined') {
+    let userHasScrolled = false;
+
+    // 当用户滚动时，检查他们是否滚动到了底部
+    window.addEventListener('scroll', () => {
+        // 检查滚动条是否在底部 (留出一些像素的容差)
+        const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 5;
+        if (!atBottom) {
+            userHasScrolled = true;
+        } else {
+            // 如果用户滚动回底部，重新启用自动滚动
+            userHasScrolled = false;
+        }
+    });
+
     const scrollContent = () => {
-        // In iframes, scrolling documentElement is often more reliable.
-        // Only scroll if the content is taller than the viewport.
-        if (document.documentElement.scrollHeight > window.innerHeight) {
+        // 只有在用户没有手动滚动时才自动滚动
+        if (!userHasScrolled && document.documentElement.scrollHeight > window.innerHeight) {
             document.documentElement.scrollTop = document.documentElement.scrollHeight;
         }
     };
