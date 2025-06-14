@@ -98,19 +98,24 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    async function navigateTo(url, linkElement) { // Make navigateTo async
-        await loadPage(url); // Await for page content and scripts to load
+    async function navigateTo(url, linkElement, pushState = true) {
+        await loadPage(url);
 
         navLinks.forEach(l => l.classList.remove('active'));
         if (linkElement) {
             linkElement.classList.add('active');
         }
 
+        const pageId = url.split('.')[0];
+        localStorage.setItem('activePage', url);
+
+        if (pushState) {
+            history.pushState({ page: url }, '', `?${pageId}`);
+        }
+
         if (window.innerWidth <= 768) {
             closeMenu();
             mainContent.classList.add('active');
-            // Force reflow/repaint to ensure correct initial layout
-            // and add a small timeout for Android Chrome rendering quirks
             setTimeout(() => {
                 void mainContent.offsetHeight;
                 if (mobileWelcome) mobileWelcome.classList.add('hidden');
@@ -122,7 +127,7 @@ document.addEventListener('DOMContentLoaded', function() {
         link.addEventListener('click', async function(e) { // Make event listener async
             e.preventDefault();
             const url = this.getAttribute('href');
-            await navigateTo(url, this); // Await navigateTo
+            await navigateTo(url, this);
         });
     });
 
@@ -135,23 +140,53 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.className = 'quick-nav-btn';
             btn.addEventListener('click', async () => { // Make event listener async
                 const url = link.getAttribute('href');
-                await navigateTo(url, link); // Await navigateTo
+                await navigateTo(url, link);
             });
             quickNavContainer.appendChild(btn);
         });
     }
 
-    // Initial page load
-    if (window.innerWidth > 768) {
-        mainContent.classList.add('active');
-        const initialUrl = document.querySelector('.nav-link.active')?.getAttribute('href');
-        if (initialUrl) {
-            loadPage(initialUrl);
+    // Initial page load logic
+    function initialLoad() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const pageIdFromUrl = urlParams.toString().split('=')[0];
+        const storedPage = localStorage.getItem('activePage');
+
+        let initialUrl = 'ly.html'; // Default page
+        if (pageIdFromUrl) {
+            initialUrl = `${pageIdFromUrl}.html`;
+        } else if (storedPage) {
+            initialUrl = storedPage;
         }
-    } else {
-        mainContent.classList.remove('active');
-        if (mobileWelcome) mobileWelcome.classList.remove('hidden');
+
+        const linkElement = document.querySelector(`.nav-link[href="${initialUrl}"]`);
+
+        if (window.innerWidth > 768) {
+            mainContent.classList.add('active');
+            navigateTo(initialUrl, linkElement, false);
+        } else {
+            // On mobile, don't load a page by default, show the welcome screen.
+            // But if there's a direct link, load it.
+            if (pageIdFromUrl) {
+                 navigateTo(initialUrl, linkElement, false);
+            } else {
+                mainContent.classList.remove('active');
+                if (mobileWelcome) mobileWelcome.classList.remove('hidden');
+            }
+        }
     }
+
+    initialLoad();
+
+    window.addEventListener('popstate', function(event) {
+        if (event.state && event.state.page) {
+            const linkElement = document.querySelector(`.nav-link[href="${event.state.page}"]`);
+            navigateTo(event.state.page, linkElement, false);
+        } else {
+            // Handle cases where state is null (e.g., initial page load)
+            initialLoad();
+        }
+    });
 
     // Set year in footer
     const yearDesktop = document.getElementById('year-desktop');
