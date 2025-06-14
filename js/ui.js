@@ -4,6 +4,7 @@ window.astrolabe2 = null;
 
 // 缓存 DOM 元素
 const dom = {
+    nameInput: document.getElementById('name'),
     year1: document.getElementById('year'),
     month1: document.getElementById('month'),
     day1: document.getElementById('day'),
@@ -214,27 +215,46 @@ function generateAstrolabe() {
     }
 }
 
-function askAI() {
+async function askAI() {
     if (!pageConfig.getAIPrompt) return;
+    const button = dom.aiQuestionContainer.querySelector('.ai-glow-button');
     const selectedOption = dom.aiQuestionOptions.querySelector('.unified-button.selected');
     const isCustom = selectedOption.textContent.trim() === '自定义';
     const questionText = isCustom ? dom.customQuestion.value : selectedOption.dataset.defaultText;
     const prompt = pageConfig.getAIPrompt(questionText, selectedOption);
-    handleAIQuery(prompt);
+    
+    button.classList.add('glowing');
+    try {
+        await handleAIQuery(prompt);
+    } finally {
+        button.classList.remove('glowing');
+    }
 }
 
-function askAIForCompatibility() {
+async function askAIForCompatibility() {
     if (!pageConfig.getCompatibilityPrompt) return;
+    const button = dom.combinedAnalysisContainer.querySelector('.ai-glow-button');
     const selectedOption = dom.combinedQuestionOptions.querySelector('.unified-button.selected');
     const isCustom = selectedOption.textContent.trim() === '自定义';
     const questionText = isCustom ? dom.customCombinedQuestion.value : selectedOption.dataset.defaultText;
     const prompt = pageConfig.getCompatibilityPrompt(questionText);
-    handleAIQuery(prompt);
+
+    button.classList.add('glowing');
+    try {
+        await handleAIQuery(prompt);
+    } finally {
+        button.classList.remove('glowing');
+    }
 }
 
 // 从 URL 加载数据并排盘
 function loadDataFromURL() {
     const params = new URLSearchParams(window.location.search);
+    const name = params.get('name');
+    if (name) {
+        dom.nameInput.value = name;
+    }
+
     const year1 = params.get('y1');
     // 如果没有参数，则不执行任何操作
     if (!year1) {
@@ -275,6 +295,10 @@ function loadDataFromURL() {
 // 将当前输入数据更新到 URL
 function updateURLParameters() {
     const params = new URLSearchParams();
+    const name = dom.nameInput.value.trim();
+    if (name) {
+        params.set('name', name);
+    }
     params.set('y1', dom.year1.value);
     params.set('m1', dom.month1.value);
     params.set('d1', dom.day1.value);
@@ -301,3 +325,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // 页面加载时尝试从 URL 加载数据
     loadDataFromURL();
 });
+// Detect iOS devices and add a class to the body
+(function() {
+    const platform = navigator.platform;
+    const userAgent = navigator.userAgent;
+    const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+    const isMac = platform.toUpperCase().indexOf('MAC') >= 0;
+
+    // Check if it's an iOS device (including iPad on iPadOS 13+)
+    if (isIOS || (isMac && 'ontouchend' in document)) {
+        document.body.classList.add('ios-device');
+    }
+})();

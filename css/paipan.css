@@ -1,116 +1,148 @@
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     margin: 0;
-    padding: 0; /* Remove padding */
+    padding: 0;
     background-color: #f0f2f5;
     color: #333;
     line-height: 1.6;
 }
 .container {
     background-color: #fff;
-    padding: 40px;
+    padding: 25px;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     max-width: 800px;
-    margin: 50px auto; /* Center container with vertical margin */
-    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-    box-sizing: border-box; /* Include padding in height calculation */
+    margin: 50px auto;
+    -webkit-overflow-scrolling: touch;
+    box-sizing: border-box;
 }
 h1 {
-    color: #1a237e; /* 深蓝色标题 */
+    color: #000;
     text-align: center;
     margin-bottom: 40px;
 }
 h2 {
-    color: #283593; /* 稍浅的蓝色副标题 */
+    color: #000;
     margin-top: 30px;
     margin-bottom: 15px;
-    border-bottom: 2px solid #e8eaf6; /* 淡蓝色下划线 */
+    border-bottom: 2px solid #e8eaf6;
     padding-bottom: 8px;
 }
 label {
     display: block;
     margin-bottom: 8px;
-    font-weight: 600; /* 稍粗的字体 */
-    color: #34495e; /* 更柔和的标签颜色 */
+    font-weight: 600;
+    color: #34495e;
 }
 input[type="number"],
 select {
-    width: 100%; /* 改为100%配合box-sizing */
+    width: 100%;
     padding: 12px;
     margin-bottom: 20px;
-    border: 1px solid #d1d9e6; /* 更柔和的边框颜色 */
+    border: 1px solid #d1d9e6;
     border-radius: 6px;
     box-sizing: border-box;
     font-size: 16px;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease; /* 平滑过渡 */
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 input[type="number"]:focus,
 select:focus {
-    border-color: #3f51b5; /* 焦点时边框颜色 */
+    border-color: #000;
     outline: none;
-    box-shadow: 0 0 0 2px rgba(63, 81, 181, 0.2);
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2);
 }
-.ai-question-button {
-    background-color: #3f51b5; /* 主题蓝色 */
-    color: white;
-    padding: 12px 20px;
-    border: none;
-    border-radius: 6px;
+
+/* --- Button Styles Final Refactor --- */
+
+/* Default button style for unified buttons */
+.unified-button {
+    width: auto;
+    padding: 10px 20px;
+    border: 1px solid #000;
+    outline: none;
+    color: #000;
+    background-color: #fff;
     cursor: pointer;
+    border-radius: 6px;
     font-size: 16px;
-    font-weight: 500;
-    transition: background-color 0.3s ease, transform 0.1s ease;
-    display: block; /* 让按钮独占一行并居中 */
+    -webkit-tap-highlight-color: transparent;
+    appearance: none;
+    -webkit-appearance: none;
+    transition: background-color 0.3s ease, color 0.3s ease, transform 0.1s ease;
+    margin: 0 5px; /* Add some space between buttons */
+}
+
+.unified-button:hover:not(.selected) {
+    background-color: #e8eaf6;
+}
+
+.unified-button.selected {
+    background-color: #000;
+    color: white;
+    border-color: #000;
+}
+
+/* Default style for the main action button (e.g., "开始排盘") */
+.ai-question-button {
+    display: block; /* Make it a block to fill width */
     width: 100%;
-    max-width: 200px; /* 按钮最大宽度 */
-    margin: 20px auto 0; /* 上边距，并水平居中 */
+    max-width: 200px; /* Limit max width */
+    margin: 20px auto; /* Center it */
+    padding: 12px;
+    border: 1px solid #000;
+    outline: none;
+    color: #fff;
+    background-color: #000;
+    cursor: pointer;
+    border-radius: 6px;
+    font-size: 16px;
+    -webkit-tap-highlight-color: transparent;
+    appearance: none;
+    -webkit-appearance: none;
+    transition: background-color 0.3s ease, transform 0.1s ease;
 }
 
 .ai-question-button:hover {
-    background-color: #303f9f; /* 悬停时深一点的蓝色 */
+    background-color: #333; /* Darken on hover */
 }
 
-.ai-question-button:active {
-    transform: scale(0.98); /* 点击时轻微缩小 */
-}
-
-.unified-button {
-    background-color: white;
-    color: #3f51b5;
-    border: 1px solid #3f51b5;
-    padding: 12px;
-    border-radius: 6px;
-    cursor: pointer;
-    text-align: center;
-    font-size: 16px;
-    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-    display: block;
-    width: 100%;
-    max-width: 200px;
-    margin: 20px auto 0;
-}
-.unified-button.selected {
-    background-color: #3f51b5;
-    color: white;
+/* Special glowing style for designated AI buttons */
+.ai-glow-button {
+    display: inline-block; /* Override block display */
+    width: auto; /* Override width */
+    max-width: none; /* Override max-width */
+    margin: 10px 0; /* Adjust margin */
+    padding: 14px 100px; /* Increase padding to make the button larger */
+    border-radius: 12px; /* Slightly larger radius to match */
     border: none;
+    color: #fff;
+    background: #000;
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
 }
-.unified-button:hover {
-    background-color: #f4f6f8; /* 更柔和的悬停效果 */
-    border-color: #3f51b5;
+
+/* Glowing state controlled by JavaScript */
+.ai-glow-button.glowing {
+    transform: scale(1.05);
+    box-shadow: 0 0 8px 2px rgba(255, 0, 255, 0.6), /* Magenta */
+                0 0 12px 4px rgba(0, 255, 255, 0.6); /* Cyan */
 }
+
+.ai-glow-button:hover {
+    transform: scale(1.05);
+    background: #000; /* Ensure background doesn't change on hover */
+    box-shadow: 0 0 12px 3px rgba(255, 0, 255, 0.8),
+                0 0 20px 6px rgba(0, 255, 255, 0.8);
+}
+
+
+.ai-question-button:active, .unified-button:active {
+    transform: scale(0.98);
+}
+
+/* --- End Button Styles Refactor --- */
 
 .hidden {
     display: none;
-}
-
-.ai-question-button.selected {
-    background-color: #3f51b5;
-    color: white;
-    border: 1px solid #3f51b5;
-}
-.ai-question-button:not(.selected):hover {
-    background-color: #e8eaf6;
 }
 
 #result,
@@ -169,7 +201,7 @@ select:focus {
     border: 1px solid #c5cae9;
     border-radius: 6px;
     background-color: #fff;
-    color: #3f51b5;
+    color: #000;
     cursor: pointer;
     text-align: center;
     font-size: 16px;
@@ -177,9 +209,9 @@ select:focus {
 }
 
 .gender-button.selected {
-    background-color: #3f51b5;
+    background-color: #000;
     color: #fff;
-    border-color: #3f51b5;
+    border-color: #000;
 }
 
 .gender-button:not(.selected):hover {
@@ -205,15 +237,46 @@ select:focus {
     width: 100%;
     margin-bottom: 0;
 }
+
+#aiQuestionContainer, #combinedAnalysisContainer {
+    text-align: center; /* Center the AI button */
+    padding: 20px 0;
+}
+
 #aiQuestionOptions, #combinedQuestionOptions {
-        display: none;
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        gap: 10px;
-        padding: 20px 0;
-        margin-top: 20px;
-        border-top: 1px solid #eee;
-    }
+    display: none;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 10px;
+    margin-top: 20px;
+    border-top: 1px solid #eee;
+    justify-content: flex-start; /* Align to start for better scrolling */
+    
+    padding: 20px 0;
+    box-sizing: border-box;
+
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: #ccc #f0f0f0; /* Firefox */
+}
+
+#aiQuestionOptions::-webkit-scrollbar, #combinedQuestionOptions::-webkit-scrollbar {
+    height: 8px;
+}
+
+#aiQuestionOptions::-webkit-scrollbar-track, #combinedQuestionOptions::-webkit-scrollbar-track {
+    background: #f0f0f0;
+    border-radius: 4px;
+}
+
+#aiQuestionOptions::-webkit-scrollbar-thumb, #combinedQuestionOptions::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 4px;
+}
+
+#aiQuestionOptions::-webkit-scrollbar-thumb:hover, #combinedQuestionOptions::-webkit-scrollbar-thumb:hover {
+    background: #aaa;
+}
     
 #aiQuestionOptions .unified-button, #combinedQuestionOptions .unified-button {
     display: inline-block;
@@ -262,7 +325,7 @@ select:focus {
 }
 
 .star-minor {
-    color: #303f9f;
+    color: #333;
 }
 
 .star-adjective {
@@ -277,7 +340,7 @@ select:focus {
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-    font-size: 20px; /* 再次增大桌面端基础字体 */
+    font-size: 20px;
 }
 
 .bazi-table th, .bazi-table td {
@@ -288,7 +351,7 @@ select:focus {
 }
 
 .bazi-table thead th {
-    background-color: #3949ab; /* 稍深一点的主题蓝 */
+    background-color: #000;
     color: white;
     font-weight: 600;
     font-size: 16px;
@@ -312,13 +375,13 @@ select:focus {
 
 .bazi-table .gan-zhi {
     font-weight: bold;
-    font-size: 26px; /* 再次增大桌面端干支字体 */
-    color: #1a237e;
+    font-size: 26px;
+    color: #000;
 }
 
 .bazi-table .ten-god {
-    font-size: 18px; /* 再次增大桌面端十神字体 */
-    color: #555; /* 十神用突出颜色 */
+    font-size: 18px;
+    color: #555;
 }
 
 .bazi-table .hidden-stems {
@@ -333,7 +396,7 @@ select:focus {
 
 .bazi-table .luck-cycle th {
     background-color: #e8eaf6;
-    color: #283593;
+    color: #000;
     font-size: 16px;
     padding: 12px;
 }
@@ -348,8 +411,7 @@ select:focus {
 }
 
 .bazi-table .luck-info {
-    font-weight: bold;
-    color: #303f9f;
+    color: #333;
 }
 
 .bazi-table .luck-ten-god {
@@ -362,46 +424,60 @@ select:focus {
 
 .bazi-table .life-stage {
     font-size: 16px;
-    color: #555; /* Teal color for distinction */
+    color: #555;
 }
 
 .bazi-table .shen-sha {
     font-size: 14px;
-    color: #555; /* Purple color, similar to hidden gods */
-    line-height: 1.4; /* Adjust line height for stacked items */
+    color: #555;
+    line-height: 1.4;
 }
 
 @media (max-width: 600px) {
     .bazi-table {
-        font-size: 13px; /* 适当增大基础字体 */
-        word-break: break-all; /* 允许在单词内换行 */
+        font-size: 13px;
+        word-break: break-all;
     }
     .bazi-table th, .bazi-table td {
-        padding: 6px 4px; /* 略微增加垂直内边距 */
+        padding: 6px 4px;
     }
     .bazi-table .gan-zhi {
-        font-size: 16px; /* 增大干支字体 */
+        font-size: 16px;
     }
     .bazi-table .hidden-gods {
-        font-size: 12px; /* 增大藏干十神字体 */
+        font-size: 12px;
     }
     .bazi-table .ten-god {
-        font-size: 12px; /* 再次增大桌面端十神字体 */
-        color: #555; /* 十神用突出颜色 */
+        font-size: 12px;
+        color: #555;
     }
     .bazi-table {
-        font-size: 12px; /* 增大大运十神字体 */
+        font-size: 12px;
         color: #666;
     }
     .bazi-table .life-stage {
         font-size: 12px;
     }
     .container {
-        max-width: 100%;
-        margin: 0 0 20px 0;
-        padding: 15px;
+        margin: 0;
+        padding: 20px 20px;
         border-radius: 0;
         box-shadow: none;
+    }
+
+    #aiQuestionContainer, #combinedAnalysisContainer {
+        padding: 0;
+    }
+
+    #aiQuestionOptions, #combinedQuestionOptions {
+        position: relative;
+        width: 100vw;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 15px;
+        margin-top: 15px;
+        margin-bottom: 0;
+        box-sizing: border-box;
     }
     .bazi-table .shen-sha {
         font-size: 11px;
@@ -426,10 +502,10 @@ select:focus {
         .wuxing-tu {
             color: #8D6E63 !important;
         }
-
+        
 @media (max-width: 800px) {
     #result, #result2 {
-        padding: 15px;
+        padding: 10px;
         border: none;
     }
 }
