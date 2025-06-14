@@ -2671,7 +2671,7 @@ function paipan() {
                 var nzcg = this.zcg[dz[i]][j]; //取得藏干表中的藏干代碼,zcg為一 4X3 之array the number of 支藏干
                 if (nzcg >= 0) { //若存在則取出(若為-1,則代表空白)
                     bctg[3 * i + j] = this.ctg[nzcg]; //暫存其干支文字
-                    bzcg[3 * i + j] = this.sss[this.dgs[nzcg][tg[2]]]; //暫存其所對應之十神文字
+                    bzcg[3 * i + j] = this.ssq[this.dgs[nzcg][tg[2]]]; //暫存其所對應之十神文字
 
                     wxcg[i][j] = this.wxtg[nzcg]; //其五行屬性
                     yycg[i][j] = nzcg % 2; //其陰陽屬性

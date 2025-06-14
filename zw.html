@@ -106,11 +106,15 @@
         <button class="ai-question-button" onclick="generateAstrolabe()">开始排盘</button>
         <h2>排盘结果:</h2>
         <div id="result" style="display:none;">
-            <div class="iztro-container"></div>
+            <div class="chart-wrapper">
+                <div class="iztro-container"></div>
+            </div>
             <div class="original-result" style="display: none;"></div>
         </div>
         <div id="result2" style="margin-top: 20px; display:none;">
-            <div class="iztro-container"></div>
+            <div class="chart-wrapper">
+                <div class="iztro-container"></div>
+            </div>
             <div class="original-result" style="display: none;"></div>
         </div>
         
@@ -174,9 +178,7 @@
             result += `* **命主**: ${astrolabe.soul}\n`;
             result += `* **身主**: ${astrolabe.body}\n`;
             result += `* **五行局**: ${astrolabe.fiveElementsClass}\n`;
-            result += `* **星座**: ${astrolabe.sign}\n`;
-            result += `* **生肖**: ${astrolabe.zodiac}\n\n`;
-
+            result += `\n`;
             result += `### 四化星\n`;
             result += `* **生年四化**: 天干【${yearStem}】\n`;
             result += `  - **化禄**: ${yearMutagens['禄']}\n`;
@@ -187,20 +189,14 @@
             result += `### 宫位信息\n`;
             astrolabe.palaces.forEach(palace => {
                 const majorStars = palace.majorStars.map(s => `${s.name}(${s.brightness})`).join(' ') || '无';
-                const minorStars = palace.minorStars.map(s => `${s.name}(${s.brightness})`).join(' ') || '无';
-                const adjectiveStars = palace.adjectiveStars.map(s => s.name).join(' ') || '无';
-                const selfPalace = palace.isBodyPalace ? ' (身宫)' : ''; // Corrected from isSelfPalace
+                const minorStars = palace.minorStars.map(s => s.name).join(' ') || '无'; // 移除辅星亮度
+                const selfPalace = palace.isBodyPalace ? ' (身宫)' : '';
                 const palaceMutagens = MUTAGEN_MAP[palace.heavenlyStem];
 
                 result += `* **${palace.name}宫 (${palace.heavenlyStem}${palace.earthlyBranch})${selfPalace}**: \n`;
                 result += `  - **主星**: ${majorStars}\n`;
                 result += `  - **辅星**: ${minorStars}\n`;
-                result += `  - **杂曜**: ${adjectiveStars}\n`;
                 result += `  - **大限**: ${palace.decadal.range.join('-')}岁\n`;
-                result += `  - **博士十二神**: ${palace.boshi12}\n`;
-                result += `  - **十二长生**: ${palace.changsheng12}\n`;
-                result += `  - **岁前十二神**: ${palace.suiqian12}\n`;
-                result += `  - **将前十二神**: ${palace.jiangqian12}\n`;
                 result += `  - **宫干四化**: 天干【${palace.heavenlyStem}】禄入${palaceMutagens['禄']}, 权入${palaceMutagens['权']}, 科入${palaceMutagens['科']}, 忌入${palaceMutagens['忌']}\n`;
             });
 

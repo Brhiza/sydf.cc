@@ -157,17 +157,17 @@
 /* Center Palace */
 .iztro-palace-center {
   grid-area: ct;
-  padding: 15px;
+  padding: 10px;
   display: flex; /* Change to flexbox */
   flex-direction: column;
   justify-content: center;
-  gap: 8px;
+  gap: 4px;
 }
 
 .center-section {
     display: grid;
     grid-template-columns: max-content 1fr;
-    gap: 4px 15px;
+    gap: 2px 8px;
 }
 
 .iztro-palace-center-item {
@@ -183,6 +183,7 @@
 .iztro-palace-center-item span {
     text-align: left;
     font-weight: bold;
+    font-size: clamp(12px, 1.4vw, 14px);
 }
 
 .gender.gender-male { color: var(--iztro-color-quan); }

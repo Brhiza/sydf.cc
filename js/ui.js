@@ -208,6 +208,10 @@ function generateAstrolabe() {
             targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 100);
     }
+    // 排盘成功后更新URL
+    if (allSuccess) {
+        updateURLParameters();
+    }
 }
 
 function askAI() {
@@ -228,6 +232,72 @@ function askAIForCompatibility() {
     handleAIQuery(prompt);
 }
 
+// 从 URL 加载数据并排盘
+function loadDataFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    const year1 = params.get('y1');
+    // 如果没有参数，则不执行任何操作
+    if (!year1) {
+        return;
+    }
+
+    dom.year1.value = year1;
+    dom.month1.value = params.get('m1');
+    dom.day1.value = params.get('d1');
+    dom.hour1.value = params.get('h1');
+    const gender1 = params.get('g1');
+    if (gender1 === 'male') {
+        dom.genderMale1.click();
+    } else if (gender1 === 'female') {
+        dom.genderFemale1.click();
+    }
+
+    const isCombined = params.get('hp') === 'true';
+    if (isCombined) {
+        dom.enableSecondPerson.checked = true;
+        toggleSecondPersonInputs();
+        dom.year2.value = params.get('y2');
+        dom.month2.value = params.get('m2');
+        dom.day2.value = params.get('d2');
+        dom.hour2.value = params.get('h2');
+        const gender2 = params.get('g2');
+        if (gender2 === 'male') {
+            dom.genderMale2.click();
+        } else if (gender2 === 'female') {
+            dom.genderFemale2.click();
+        }
+    }
+
+    // 确保所有数据都已填充，然后触发排盘
+    setTimeout(generateAstrolabe, 100);
+}
+
+// 将当前输入数据更新到 URL
+function updateURLParameters() {
+    const params = new URLSearchParams();
+    params.set('y1', dom.year1.value);
+    params.set('m1', dom.month1.value);
+    params.set('d1', dom.day1.value);
+    params.set('h1', dom.hour1.value);
+    const gender1 = dom.genderMale1.classList.contains('selected') ? 'male' : 'female';
+    params.set('g1', gender1);
+
+    if (dom.enableSecondPerson.checked) {
+        params.set('hp', 'true');
+        params.set('y2', dom.year2.value);
+        params.set('m2', dom.month2.value);
+        params.set('d2', dom.day2.value);
+        params.set('h2', dom.hour2.value);
+        const gender2 = dom.genderMale2.classList.contains('selected') ? 'male' : 'female';
+        params.set('g2', gender2);
+    }
+
+    const newUrl = `${window.location.pathname}?${params.toString()}`;
+    history.pushState({}, '', newUrl);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     setDefaultOption('single');
+    // 页面加载时尝试从 URL 加载数据
+    loadDataFromURL();
 });

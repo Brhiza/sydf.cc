@@ -309,7 +309,7 @@ select:focus {
 
 .bazi-table .ten-god {
     font-size: 13px;
-    color: #c2185b; /* 十神用突出颜色 */
+    color: #555; /* 十神用突出颜色 */
 }
 
 .bazi-table .hidden-stems {
@@ -344,7 +344,7 @@ select:focus {
 }
 
 .bazi-table .luck-ten-god {
-    color: #c2185b;
+    color: #555;
 }
 
 .bazi-table .luck-life-stage {
@@ -353,13 +353,21 @@ select:focus {
 
 @media (max-width: 600px) {
     .bazi-table {
-        font-size: 12px;
+        font-size: 13px; /* 适当增大基础字体 */
+        word-break: break-all; /* 允许在单词内换行 */
     }
     .bazi-table th, .bazi-table td {
-        padding: 6px 8px;
+        padding: 6px 4px; /* 略微增加垂直内边距 */
     }
     .bazi-table .gan-zhi {
-        font-size: 15px;
+        font-size: 16px; /* 增大干支字体 */
+    }
+    .bazi-table .hidden-gods {
+        font-size: 12px; /* 增大藏干十神字体 */
+    }
+    .bazi-table .luck-ten-god {
+        font-size: 12px; /* 增大大运十神字体 */
+        color: #666;
     }
 }
 /* 五行颜色样式 */
@@ -378,3 +386,10 @@ select:focus {
         .wuxing-tu {
             color: #8D6E63 !important;
         }
+
+@media (max-width: 800px) {
+    #result, #result2 {
+        padding: 0;
+        border: none;
+    }
+}

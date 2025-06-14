@@ -164,19 +164,17 @@
             return ganzhi.split('').map(char => `<span class="${getWuxingClass(char)}">${char}</span>`).join('');
         }
 
-        function formatBaziForAI(baziResult) {
+        function formatBaziForAI(baziResult, selectedOption = null) {
             if (!baziResult) {
                 return "无法获取八字数据。";
             }
-
+        
             let result = `### 基本信息\n`;
             result += `* **性别**: ${baziResult.xb}\n`;
             result += `* **公历**: ${baziResult.gl.join('-')}\n`;
             result += `* **农历**: ${baziResult.nl[0]}年 ${baziResult.nl[4].ym}${baziResult.nl[2]}日\n`;
-            result += `* **生肖**: ${baziResult.sx}\n`;
-            result += `* **星座**: ${baziResult.xz}\n`;
             result += `* **日主**: ${baziResult.ctg[2]} (${p.cyy[baziResult.yytg[2]]} ${p.cwx[baziResult.ewxtg[2]]})\n\n`;
-
+        
             result += `### 八字四柱\n`;
             const pillars = ['年柱', '月柱', '日柱', '时柱'];
             for (let i = 0; i < 4; i++) {
@@ -186,28 +184,69 @@
                 result += `* **${pillars[i]}**: ${baziResult.sz[i]} (${tenGodGan}) | 藏干: ${hiddenStems} (${hiddenGods})\n`;
             }
             result += `\n`;
-
+        
             result += `### 五行旺衰\n`;
             result += `* **五行个数**: 金(${baziResult.nwx[0]}), 水(${baziResult.nwx[1]}), 木(${baziResult.nwx[2]}), 火(${baziResult.nwx[3]}), 土(${baziResult.nwx[4]})\n\n`;
-
+        
             result += `### 大运\n`;
             result += `* **起运**: ${baziResult.qyy_desc}\n`;
             baziResult.dy.forEach(yun => {
                 const tenGodGan = p.ssq[p.dgs[yun.zfman][baziResult.tg[2]]];
                 const tenGodZhi = p.ssq[p.dzs[yun.zfmbn][baziResult.tg[2]]];
-                result += `* **${yun.syear} - ${yun.eyear} (${yun.zqage}-${yun.zboz}岁)**: ${yun.zfma}${yun.zfmb} (${tenGodGan}, ${tenGodZhi}) | ${yun.nzsc}\n`;
+                result += `* **${yun.syear} - ${yun.eyear} (${yun.zqage}-${yun.zboz}岁)**: ${yun.zfma}${yun.zfmb} (${tenGodGan}, ${tenGodZhi})\n`;
             });
             result += `\n`;
-            
-            result += `### 流年\n`;
-            baziResult.dy.forEach(yun => {
-                result += `* **${yun.zfma}${yun.zfmb}大运 (${yun.zqage}-${yun.zboz}岁)**:\n`;
-                yun.ly.forEach(liunian => {
-                     result += `  - ${liunian.year}年 (${liunian.age}岁): ${liunian.lye}\n`;
-                });
-            });
-
-
+        
+            // Conditionally add Liunian (Flowing Years) info
+            if (selectedOption) {
+                const questionText = selectedOption.dataset.defaultText || '';
+                const currentYear = new Date().getFullYear();
+                let relevantYears = [];
+                let title = '';
+        
+                if (questionText.includes('流年') && !questionText.includes('年运')) { //流年
+                    relevantYears.push(currentYear);
+                    title = '### 流年信息\n';
+                } else if (questionText.includes('年运')) { // 年运
+                    relevantYears.push(currentYear);
+                    title = '### 流年信息\n';
+                } else if (questionText.includes('三年')) { // 三年
+                    relevantYears.push(currentYear, currentYear + 1, currentYear + 2);
+                    title = '### 流年信息\n';
+                } else if (
+                    questionText.includes('事业财运') ||
+                    questionText.includes('感情婚姻') ||
+                    questionText.includes('家庭/人际') ||
+                    questionText.includes('健康')
+                ) {
+                    // No liunian for these topics
+                } else {
+                    // Default for '综合', '大运', '自定义'
+                    const currentLuckCycle = baziResult.dy.find(yun => currentYear >= yun.syear && currentYear <= yun.eyear);
+                    if (currentLuckCycle) {
+                        result += `### 当前大运流年\n`;
+                        currentLuckCycle.ly.forEach(liunian => {
+                            result += `  - ${liunian.year}年 (${liunian.age}岁): ${liunian.lye}\n`;
+                        });
+                        result += `\n`;
+                    }
+                }
+        
+                if (relevantYears.length > 0) {
+                    let liunianResult = '';
+                    baziResult.dy.forEach(yun => {
+                        yun.ly.forEach(liunian => {
+                            if (relevantYears.includes(liunian.year)) {
+                                liunianResult += `  - ${liunian.year}年 (${liunian.age}岁): ${liunian.lye}\n`;
+                            }
+                        });
+                    });
+                    if (liunianResult) {
+                        result += title + liunianResult + '\n';
+                    }
+                }
+            }
+        
             return result;
         }
 
@@ -236,12 +275,11 @@
                     throw new Error('排盘库返回了空结果。');
                 }
 
-                // Store formatted data for AI
-                const formattedData = formatBaziForAI(baziResult);
+                // Store raw bazi data
                 if (personNumber === 1) {
-                    window.baziData1 = formattedData;
+                    window.baziResult1 = baziResult;
                 } else {
-                    window.baziData2 = formattedData;
+                    window.baziResult2 = baziResult;
                 }
                 
                 // Generate HTML for display
@@ -251,26 +289,30 @@
                 
                 htmlResult += `<h3>八字排盘</h3>`;
                 htmlResult += `<table class="bazi-table">`;
-                htmlResult += `<thead><tr><th>项目</th><th>年柱</th><th>月柱</th><th>日柱</th><th>时柱</th></tr></thead>`;
+                htmlResult += `<thead><tr><th></th><th>年柱</th><th>月柱</th><th>日柱</th><th>时柱</th></tr></thead>`;
                 htmlResult += `<tbody>`;
                 // 十神
-                htmlResult += `<tr><th>十神</th>`;
+                htmlResult += `<tr><th>主星</th>`;
                 for (let i = 0; i < 4; i++) { htmlResult += `<td><span class="ten-god">${p.ssq[p.dgs[baziResult.tg[i]][baziResult.tg[2]]]}</span></td>`; }
                 htmlResult += `</tr>`;
                 // 四柱
                 htmlResult += `<tr><th>四柱</th>`;
-                for (let i = 0; i < 4; i++) { htmlResult += `<td><span class="gan-zhi">${colorizeGanZhi(baziResult.sz[i])}</span></td>`; }
+                for (let i = 0; i < 4; i++) {
+                    const gan = baziResult.sz[i][0];
+                    const zhi = baziResult.sz[i][1];
+                    htmlResult += `<td><span class="gan-zhi">${colorizeGanZhi(gan)}<br>${colorizeGanZhi(zhi)}</span></td>`;
+                }
                 htmlResult += `</tr>`;
                 // 藏干
                 htmlResult += `<tr><th>藏干</th>`;
                 for (let i = 0; i < 4; i++) {
                     const hiddenStems = baziResult.bctg.slice(i * 3, i * 3 + 3).filter(s => s);
-                    htmlResult += `<td><span class="hidden-stems">${hiddenStems.map(s => colorizeGanZhi(s)).join(',')}</span></td>`;
+                    htmlResult += `<td><span class="hidden-stems">${hiddenStems.map(s => colorizeGanZhi(s)).join('<br>')}</span></td>`;
                 }
                 htmlResult += `</tr>`;
                 // 藏干十神
-                htmlResult += `<tr><th>藏干十神</th>`;
-                for (let i = 0; i < 4; i++) { htmlResult += `<td><span class="hidden-gods">${baziResult.bzcg.slice(i * 3, i * 3 + 3).filter(s => s).join(',')}</span></td>`; }
+                htmlResult += `<tr><th>副星</th>`;
+                for (let i = 0; i < 4; i++) { htmlResult += `<td><span class="hidden-gods">${baziResult.bzcg.slice(i * 3, i * 3 + 3).filter(s => s).join('<br>')}</span></td>`; }
                 htmlResult += `</tr>`;
                 htmlResult += `</tbody></table>`;
 
@@ -283,7 +325,7 @@
                     const tenGodGan = p.ssq[p.dgs[yun.zfman][baziResult.tg[2]]];
                     const tenGodZhi = p.ssq[p.dzs[yun.zfmbn][baziResult.tg[2]]];
                     htmlResult += `<tr class="luck-cycle">`;
-                    htmlResult += `<td><span class="luck-info">${colorizeGanZhi(yun.zfma)}${colorizeGanZhi(yun.zfmb)}</span> (<span class="luck-ten-god">${tenGodGan}</span>, <span class="luck-ten-god">${tenGodZhi}</span>)</td>`;
+                    htmlResult += `<td><span class="luck-info">${colorizeGanZhi(yun.zfma)} <small class="luck-ten-god">(${tenGodGan})</small><br>${colorizeGanZhi(yun.zfmb)} <small class="luck-ten-god">(${tenGodZhi})</small></span></td>`;
                     htmlResult += `<td>${yun.zqage}-${yun.zboz}</td>`;
                     htmlResult += `<td>${yun.syear}-${yun.eyear}</td>`;
                     htmlResult += `<td><span class="luck-life-stage">${yun.nzsc}</span></td>`;
@@ -328,7 +370,7 @@
             initializePage({
                 chartingFunction: generateAstrolabeForPerson,
                 getAIPrompt: (questionText, selectedOption) => {
-                    const baziData = window.baziData1 || "无法获取命盘数据。";
+                    const baziData = window.baziResult1 ? formatBaziForAI(window.baziResult1, selectedOption) : "无法获取命盘数据。";
                     let prompt = `你是一个精通八字命理的AI大师，现在是${new Date().toLocaleString()}，请基于以下命盘数据回答问题。\n\n---\n\n${baziData}\n\n---\n\n**问题**: ${questionText}\n\n---\n\n**分析要求**:\n1. **结构清晰**: 先总论命格特点、格局、旺衰和喜用神，再分述各阶段运势，最后给出具体建议。\n2. **现代诠释**: 结合当代社会环境，给出可操作的、积极的建议，避免宿命论的消极表述。\n3. **重点突出**: 根据问题，重点分析相关的十神、宫位、大运和流年。`;
                     
                     if (selectedOption.dataset.defaultText && selectedOption.dataset.defaultText.includes("今年每一个月的运势")) {
@@ -338,8 +380,8 @@
                     return prompt;
                 },
                 getCompatibilityPrompt: (questionText) => {
-                    const baziData1 = window.baziData1 || "无法获取第一人命盘数据。";
-                    const baziData2 = window.baziData2 || "无法获取第二人命盘数据。";
+                    const baziData1 = window.baziResult1 ? formatBaziForAI(window.baziResult1) : "无法获取第一人命盘数据。";
+                    const baziData2 = window.baziResult2 ? formatBaziForAI(window.baziResult2) : "无法获取第二人命盘数据。";
                     return `你是一个精通八字合婚的AI大师，现在是${new Date().toLocaleString()}，请基于以下两个命盘数据进行合盘分析。\n\n# 第一人命盘\n${baziData1}\n\n# 第二人命盘\n${baziData2}\n\n---\n\n**问题**: ${questionText}\n\n---\n\n**分析要求**:\n1. **五行互补**: 分析双方五行是否互补，有何助益或损耗。\n2. **十神关系**: 从双方的十神生克关系，分析性格互动和吸引力。\n3. **婚姻宫**: 重点分析双方日柱（夫妻宫）的干支关系，判断婚姻稳定性。\n4. **大运同步性**: 比较双方大运走势，看是否存在同步的吉运或凶运。\n5. **综合建议**: 总结双方匹配度，提出促进关系和谐发展的具体建议。`;
                 }
             });
