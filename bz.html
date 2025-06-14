@@ -146,6 +146,71 @@
     <script src="js/paipan.js"></script>
     <script src="js/ui.js"></script>
     <script>
+        function getWuxingClass(char) {
+            const wuxingMap = ['jin', 'shui', 'mu', 'huo', 'tu'];
+            const tgIndex = p.ctg.indexOf(char);
+            if (tgIndex !== -1) {
+                return `wuxing-${wuxingMap[p.wxtg[tgIndex]]}`;
+            }
+            const dzIndex = p.cdz.indexOf(char);
+            if (dzIndex !== -1) {
+                return `wuxing-${wuxingMap[p.wxdz[dzIndex]]}`;
+            }
+            return '';
+        }
+
+        function colorizeGanZhi(ganzhi) {
+            if (!ganzhi || ganzhi.length === 0) return '';
+            return ganzhi.split('').map(char => `<span class="${getWuxingClass(char)}">${char}</span>`).join('');
+        }
+
+        function formatBaziForAI(baziResult) {
+            if (!baziResult) {
+                return "无法获取八字数据。";
+            }
+
+            let result = `### 基本信息\n`;
+            result += `* **性别**: ${baziResult.xb}\n`;
+            result += `* **公历**: ${baziResult.gl.join('-')}\n`;
+            result += `* **农历**: ${baziResult.nl[0]}年 ${baziResult.nl[4].ym}${baziResult.nl[2]}日\n`;
+            result += `* **生肖**: ${baziResult.sx}\n`;
+            result += `* **星座**: ${baziResult.xz}\n`;
+            result += `* **日主**: ${baziResult.ctg[2]} (${p.cyy[baziResult.yytg[2]]} ${p.cwx[baziResult.ewxtg[2]]})\n\n`;
+
+            result += `### 八字四柱\n`;
+            const pillars = ['年柱', '月柱', '日柱', '时柱'];
+            for (let i = 0; i < 4; i++) {
+                const tenGodGan = p.ssq[p.dgs[baziResult.tg[i]][baziResult.tg[2]]];
+                const hiddenStems = baziResult.bctg.slice(i * 3, i * 3 + 3).filter(s => s).join(',');
+                const hiddenGods = baziResult.bzcg.slice(i * 3, i * 3 + 3).filter(s => s).join(',');
+                result += `* **${pillars[i]}**: ${baziResult.sz[i]} (${tenGodGan}) | 藏干: ${hiddenStems} (${hiddenGods})\n`;
+            }
+            result += `\n`;
+
+            result += `### 五行旺衰\n`;
+            result += `* **五行个数**: 金(${baziResult.nwx[0]}), 水(${baziResult.nwx[1]}), 木(${baziResult.nwx[2]}), 火(${baziResult.nwx[3]}), 土(${baziResult.nwx[4]})\n\n`;
+
+            result += `### 大运\n`;
+            result += `* **起运**: ${baziResult.qyy_desc}\n`;
+            baziResult.dy.forEach(yun => {
+                const tenGodGan = p.ssq[p.dgs[yun.zfman][baziResult.tg[2]]];
+                const tenGodZhi = p.ssq[p.dzs[yun.zfmbn][baziResult.tg[2]]];
+                result += `* **${yun.syear} - ${yun.eyear} (${yun.zqage}-${yun.zboz}岁)**: ${yun.zfma}${yun.zfmb} (${tenGodGan}, ${tenGodZhi}) | ${yun.nzsc}\n`;
+            });
+            result += `\n`;
+            
+            result += `### 流年\n`;
+            baziResult.dy.forEach(yun => {
+                result += `* **${yun.zfma}${yun.zfmb}大运 (${yun.zqage}-${yun.zboz}岁)**:\n`;
+                yun.ly.forEach(liunian => {
+                     result += `  - ${liunian.year}年 (${liunian.age}岁): ${liunian.lye}\n`;
+                });
+            });
+
+
+            return result;
+        }
+
         function generateAstrolabeForPerson(personNumber, year, month, day, timeIndex, gender, resultDiv) {
             resultDiv.innerHTML = '';
             resultDiv.style.display = 'none';
@@ -162,41 +227,73 @@
                 return null;
             }
 
-            const solarDate = `${year}-${month}-${day}`;
-
             try {
-                const astrolabe = iztro.astro.bySolar(solarDate, timeIndex, gender, true, 'zh-CN');
-                let htmlResult = `<h3>${personNumber === 1 ? '基本信息：' : `第${personNumber}人 - 基本信息：`}</h3>`;
-                htmlResult += `<p><strong>阳历：</strong>${astrolabe.solarDate}</p>`;
-                htmlResult += `<p><strong>农历：</strong>${astrolabe.lunarDate}</p>`;
-                htmlResult += `<p><strong>干支：</strong>${astrolabe.chineseDate}</p>`;
-                htmlResult += `<p><strong>性别：</strong>${astrolabe.gender}</p>`;
-                htmlResult += `<p><strong>时辰：</strong>${astrolabe.time}</p>`;
+                const hourMap = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 23];
+                const hourForPaipan = hourMap[timeIndex];
+                const baziResult = p.fatemaps(gender === 'male' ? 0 : 1, year, month, day, hourForPaipan, 0, 0);
 
-                // 推算大运
-                try {
-                    const hourMap = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 23];
-                    const hourForPaipan = hourMap[timeIndex];
-                    const baziResult = p.fatemaps(gender === '男' ? 0 : 1, year, month, day, hourForPaipan, 0, 0);
-
-                    if (baziResult && baziResult.dy) {
-                        htmlResult += `<h3>大运：</h3>`;
-                        htmlResult += `<p><strong>起运：</strong>${baziResult.qyy_desc}</p>`;
-                        htmlResult += `<p>${baziResult.qyy_desc2}</p>`;
-                        htmlResult += `<ul>`;
-                        baziResult.dy.forEach((yun, index) => {
-                            htmlResult += `<li><strong>${yun.syear}年 (${yun.zqage}岁):</strong> ${yun.zfma}${yun.zfmb} (${yun.nzsc})</li>`;
-                        });
-                        htmlResult += `</ul>`;
-                    }
-                } catch (e) {
-                    console.error('大运推算错误:', e);
-                    htmlResult += `<p style="color: red;">大运推算失败。</p>`;
+                if (!baziResult) {
+                    throw new Error('排盘库返回了空结果。');
                 }
+
+                // Store formatted data for AI
+                const formattedData = formatBaziForAI(baziResult);
+                if (personNumber === 1) {
+                    window.baziData1 = formattedData;
+                } else {
+                    window.baziData2 = formattedData;
+                }
+                
+                // Generate HTML for display
+                let htmlResult = `<h3>${personNumber === 1 ? '基本信息' : `第${personNumber}人 - 基本信息`}</h3>`;
+                htmlResult += `<p><strong>性别:</strong> ${baziResult.xb} | <strong>公历:</strong> ${baziResult.gl.join('-')} | <strong>农历:</strong> ${baziResult.nl[0]}年 ${baziResult.nl[4].ym}${baziResult.nl[2]}日</p>`;
+                htmlResult += `<p><strong>生肖:</strong> ${baziResult.sx} | <strong>星座:</strong> ${baziResult.xz} | <strong>日主:</strong> ${baziResult.ctg[2]} (${p.cyy[baziResult.yytg[2]]} ${p.cwx[baziResult.ewxtg[2]]})</p>`;
+                
+                htmlResult += `<h3>八字排盘</h3>`;
+                htmlResult += `<table class="bazi-table">`;
+                htmlResult += `<thead><tr><th>项目</th><th>年柱</th><th>月柱</th><th>日柱</th><th>时柱</th></tr></thead>`;
+                htmlResult += `<tbody>`;
+                // 十神
+                htmlResult += `<tr><th>十神</th>`;
+                for (let i = 0; i < 4; i++) { htmlResult += `<td><span class="ten-god">${p.ssq[p.dgs[baziResult.tg[i]][baziResult.tg[2]]]}</span></td>`; }
+                htmlResult += `</tr>`;
+                // 四柱
+                htmlResult += `<tr><th>四柱</th>`;
+                for (let i = 0; i < 4; i++) { htmlResult += `<td><span class="gan-zhi">${colorizeGanZhi(baziResult.sz[i])}</span></td>`; }
+                htmlResult += `</tr>`;
+                // 藏干
+                htmlResult += `<tr><th>藏干</th>`;
+                for (let i = 0; i < 4; i++) {
+                    const hiddenStems = baziResult.bctg.slice(i * 3, i * 3 + 3).filter(s => s);
+                    htmlResult += `<td><span class="hidden-stems">${hiddenStems.map(s => colorizeGanZhi(s)).join(',')}</span></td>`;
+                }
+                htmlResult += `</tr>`;
+                // 藏干十神
+                htmlResult += `<tr><th>藏干十神</th>`;
+                for (let i = 0; i < 4; i++) { htmlResult += `<td><span class="hidden-gods">${baziResult.bzcg.slice(i * 3, i * 3 + 3).filter(s => s).join(',')}</span></td>`; }
+                htmlResult += `</tr>`;
+                htmlResult += `</tbody></table>`;
+
+                htmlResult += `<h3>大运</h3>`;
+                htmlResult += `<p><strong>起运：</strong>${baziResult.qyy_desc}</p>`;
+                htmlResult += `<table class="bazi-table">`;
+                htmlResult += `<thead><tr><th>大运</th><th>岁数</th><th>起止年份</th><th>十二长生</th></tr></thead>`;
+                htmlResult += `<tbody>`;
+                baziResult.dy.forEach((yun) => {
+                    const tenGodGan = p.ssq[p.dgs[yun.zfman][baziResult.tg[2]]];
+                    const tenGodZhi = p.ssq[p.dzs[yun.zfmbn][baziResult.tg[2]]];
+                    htmlResult += `<tr class="luck-cycle">`;
+                    htmlResult += `<td><span class="luck-info">${colorizeGanZhi(yun.zfma)}${colorizeGanZhi(yun.zfmb)}</span> (<span class="luck-ten-god">${tenGodGan}</span>, <span class="luck-ten-god">${tenGodZhi}</span>)</td>`;
+                    htmlResult += `<td>${yun.zqage}-${yun.zboz}</td>`;
+                    htmlResult += `<td>${yun.syear}-${yun.eyear}</td>`;
+                    htmlResult += `<td><span class="luck-life-stage">${yun.nzsc}</span></td>`;
+                    htmlResult += `</tr>`;
+                });
+                htmlResult += `</tbody></table>`;
 
                 resultDiv.innerHTML = htmlResult;
                 resultDiv.style.display = 'block';
-                return astrolabe;
+                return baziResult; // Return the full object
             } catch (error) {
                 console.error(`第${personNumber}人排盘错误:`, error);
                 resultDiv.innerHTML = `<p style="color: red;">第${personNumber}人排盘失败，请检查输入或查看控制台错误信息。</p><p>${error.message}</p>`;
@@ -231,16 +328,9 @@
             initializePage({
                 chartingFunction: generateAstrolabeForPerson,
                 getAIPrompt: (questionText, selectedOption) => {
-                    let prompt = `你是一个八字大师，现在是${new Date().toLocaleString()}，以下是排盘结果：\n${dom.result1Div.innerHTML}\n问题: ${questionText}\n请根据八字排盘尽量详细的说明需要注意1. 结构清晰
-- 先总论命格特点
-- 再分述运势
-- 最后给出具体建议
-
-2. 现代诠释
-- 结合当代社会环境
-- 给出可操作建议
-- 避免宿命论表述
-- 现实可解释性`;
+                    const baziData = window.baziData1 || "无法获取命盘数据。";
+                    let prompt = `你是一个精通八字命理的AI大师，现在是${new Date().toLocaleString()}，请基于以下命盘数据回答问题。\n\n---\n\n${baziData}\n\n---\n\n**问题**: ${questionText}\n\n---\n\n**分析要求**:\n1. **结构清晰**: 先总论命格特点、格局、旺衰和喜用神，再分述各阶段运势，最后给出具体建议。\n2. **现代诠释**: 结合当代社会环境，给出可操作的、积极的建议，避免宿命论的消极表述。\n3. **重点突出**: 根据问题，重点分析相关的十神、宫位、大运和流年。`;
+                    
                     if (selectedOption.dataset.defaultText && selectedOption.dataset.defaultText.includes("今年每一个月的运势")) {
                         const year = new Date().getFullYear();
                         prompt += getLunarCalendarInfoForYear(year);
@@ -248,7 +338,9 @@
                     return prompt;
                 },
                 getCompatibilityPrompt: (questionText) => {
-                    return `你是一个八字大师，现在是${new Date().toLocaleString()}，以下是排盘结果：\n第一人排盘结果:\n${dom.result1Div.innerHTML}\n\n第二人排盘结果:\n${dom.result2Div.innerHTML}\n问题：${questionText}\n请尽量详细的说明`;
+                    const baziData1 = window.baziData1 || "无法获取第一人命盘数据。";
+                    const baziData2 = window.baziData2 || "无法获取第二人命盘数据。";
+                    return `你是一个精通八字合婚的AI大师，现在是${new Date().toLocaleString()}，请基于以下两个命盘数据进行合盘分析。\n\n# 第一人命盘\n${baziData1}\n\n# 第二人命盘\n${baziData2}\n\n---\n\n**问题**: ${questionText}\n\n---\n\n**分析要求**:\n1. **五行互补**: 分析双方五行是否互补，有何助益或损耗。\n2. **十神关系**: 从双方的十神生克关系，分析性格互动和吸引力。\n3. **婚姻宫**: 重点分析双方日柱（夫妻宫）的干支关系，判断婚姻稳定性。\n4. **大运同步性**: 比较双方大运走势，看是否存在同步的吉运或凶运。\n5. **综合建议**: 总结双方匹配度，提出促进关系和谐发展的具体建议。`;
                 }
             });
         });

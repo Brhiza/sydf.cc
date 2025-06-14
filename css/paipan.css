@@ -211,3 +211,170 @@ select:focus {
     min-width: fit-content;
     margin: 0;
 }
+.palace-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    border: 1px solid #000;
+    max-width: 800px;
+    margin: 20px auto;
+}
+
+.palace-cell {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+    position: relative;
+    height: 150px;
+    overflow: hidden;
+}
+
+.palace-name {
+    font-weight: bold;
+    font-size: 1.2em;
+    margin-bottom: 5px;
+}
+
+.palace-heavenly-stem {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    color: #999;
+}
+
+.palace-stars {
+    font-size: 0.9em;
+    line-height: 1.4;
+}
+
+.star-major {
+    color: #d32f2f;
+    font-weight: bold;
+}
+
+.star-minor {
+    color: #303f9f;
+}
+
+.star-adjective {
+    color: #388e3c;
+}
+
+/* Bazi Table Styles */
+.bazi-table {
+    width: 100%;
+    margin: 20px 0;
+    border-collapse: collapse;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    font-size: 14px;
+}
+
+.bazi-table th, .bazi-table td {
+    border: 1px solid #e0e0e0;
+    padding: 10px 12px;
+    text-align: center;
+    transition: background-color 0.3s;
+}
+
+.bazi-table thead th {
+    background-color: #3f51b5; /* 主题蓝色 */
+    color: white;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.bazi-table tbody th {
+    background-color: #f5f5f5;
+    font-weight: 600;
+    color: #333;
+    text-align: left;
+}
+
+.bazi-table td {
+    background-color: #fff;
+    color: #555;
+}
+
+.bazi-table tbody tr:hover td {
+    background-color: #f0f2f5;
+}
+
+.bazi-table .gan-zhi {
+    font-weight: bold;
+    font-size: 18px;
+    color: #1a237e;
+}
+
+.bazi-table .ten-god {
+    font-size: 13px;
+    color: #c2185b; /* 十神用突出颜色 */
+}
+
+.bazi-table .hidden-stems {
+    font-size: 13px;
+    color: #555;
+}
+
+.bazi-table .hidden-gods {
+    font-size: 12px;
+    color: #7b1fa2;
+}
+
+.bazi-table .luck-cycle th {
+    background-color: #e8eaf6;
+    color: #283593;
+    font-size: 15px;
+    padding: 12px;
+}
+
+.bazi-table .luck-cycle td {
+    font-family: monospace;
+    font-size: 13px;
+    white-space: pre-wrap;
+    text-align: left;
+    vertical-align: top;
+    line-height: 1.7;
+}
+
+.bazi-table .luck-info {
+    font-weight: bold;
+    color: #303f9f;
+}
+
+.bazi-table .luck-ten-god {
+    color: #c2185b;
+}
+
+.bazi-table .luck-life-stage {
+    color: #00796b;
+}
+
+@media (max-width: 600px) {
+    .bazi-table {
+        font-size: 12px;
+    }
+    .bazi-table th, .bazi-table td {
+        padding: 6px 8px;
+    }
+    .bazi-table .gan-zhi {
+        font-size: 15px;
+    }
+}
+/* 五行颜色样式 */
+        .wuxing-jin {
+            color: #FFB74D !important;
+        }
+        .wuxing-mu {
+            color: #66BB6A !important;
+        }
+        .wuxing-shui {
+            color: #42A5F5 !important;
+        }
+        .wuxing-huo {
+            color: #EF5350 !important;
+        }
+        .wuxing-tu {
+            color: #8D6E63 !important;
+        }

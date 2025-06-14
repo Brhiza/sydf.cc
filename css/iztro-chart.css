@@ -1,0 +1,273 @@
+/* Base Theme Variables */
+.iztro-astrolabe-theme-default {
+  --iztro-star-font-size-big: clamp(13px, 1.5vw, 15px);
+  --iztro-star-font-size-small: clamp(11px, 1.2vw, 12px);
+  --iztro-color-major: #d32f2f;
+  --iztro-color-focus: #000;
+  --iztro-color-quan: #2f54eb;
+  --iztro-color-tough: #612500;
+  --iztro-color-awesome: #d4380d;
+  --iztro-color-active: #1890ff;
+  --iztro-color-happy: #c41d7f;
+  --iztro-color-nice: #2e7d32;
+  --iztro-color-decorator-1: #90983c;
+  --iztro-color-decorator-2: #813359;
+  --iztro-color-text: #666;
+  --iztro-color-border: #e0e0e0;
+}
+
+/* Main Astrolabe Container */
+.iztro-astrolabe {
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif;
+  display: grid;
+  position: relative;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  grid-gap: 1px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-rows: 1fr;
+  grid-template-areas:
+    "g3 g4 g5 g6"
+    "g2 ct ct g7"
+    "g1 ct ct g8"
+    "g0 g11 g10 g9";
+  border: 1px solid var(--iztro-color-border);
+  background-color: var(--iztro-color-border);
+}
+
+/* Palace General Style */
+.iztro-palace, .iztro-palace-center {
+  background-color: #fff;
+}
+
+.iztro-palace {
+  display: flex;
+  flex-direction: column;
+  min-height: 170px;
+  cursor: pointer; /* Indicate palaces are clickable */
+  transition: background-color 0.2s;
+}
+
+.iztro-palace:hover {
+    background-color: #fafafa;
+}
+
+.taiji-active {
+    background-color: #fffbe6;
+    /* Use outline for highlighting as it doesn't affect layout */
+    outline: 2px solid var(--iztro-color-major);
+    outline-offset: -2px; /* Negative offset to draw it inside the border */
+}
+
+/* Palace Content (Stars Area) */
+.iztro-palace-content {
+  flex: 1;
+  padding: 5px;
+}
+
+.iztro-stars-container {
+  display: flex;
+  flex-wrap: wrap; /* Allow stars to wrap to the next line */
+  align-content: flex-start;
+  gap: 3px 8px; /* Row and column gap */
+  height: 100%;
+}
+
+/* Star Element Style */
+.iztro-star {
+  white-space: nowrap;
+  font-size: var(--iztro-star-font-size-small);
+}
+
+.iztro-star-major .iztro-star-name,
+.iztro-star-tianma .iztro-star-name,
+.iztro-star-lucun .iztro-star-name {
+    font-size: var(--iztro-star-font-size-big);
+    font-weight: bold;
+}
+
+.iztro-star-major { color: var(--iztro-color-major); }
+.iztro-star-tough { color: var(--iztro-color-tough); }
+.iztro-star-soft { color: var(--iztro-color-major); }
+.iztro-star-flower { color: var(--iztro-color-happy); }
+.iztro-star-helper { color: var(--iztro-color-nice); }
+.iztro-star-tianma { color: var(--iztro-color-active); }
+.iztro-star-lucun { color: var(--iztro-color-awesome); }
+
+.iztro-star-brightness {
+  font-size: var(--iztro-star-font-size-small);
+  opacity: 0.7;
+  margin-left: 2px;
+}
+
+/* Palace Footer */
+.iztro-palace-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 6px;
+  border-top: 1px solid var(--iztro-color-border);
+  background-color: #fafafa;
+  font-size: var(--iztro-star-font-size-small);
+}
+
+.iztro-palace-lft24, .iztro-palace-rgt24 {
+    color: var(--iztro-color-text);
+}
+
+.iztro-palace-name {
+    font-weight: bold;
+    font-size: var(--iztro-star-font-size-big);
+}
+
+.taiji-palace-name {
+    color: var(--iztro-color-major);
+}
+
+.original-palace-name {
+    font-size: var(--iztro-star-font-size-small);
+    color: var(--iztro-color-text);
+    margin-left: 4px;
+}
+
+.iztro-palace-scope-decadal {
+    color: var(--iztro-color-text);
+}
+
+.iztro-palace-gz {
+    color: var(--iztro-color-nice);
+    font-weight: bold;
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.footer-right-container {
+    text-align: right;
+}
+
+.iztro-palace-gz.active, .iztro-palace-gz:hover {
+    background-color: var(--iztro-color-nice);
+    color: #fff;
+}
+
+/* Center Palace */
+.iztro-palace-center {
+  grid-area: ct;
+  padding: 15px;
+  display: flex; /* Change to flexbox */
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+}
+
+.center-section {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 4px 15px;
+}
+
+.iztro-palace-center-item {
+    display: contents; /* Use grid from parent */
+}
+
+.iztro-palace-center-item label {
+    text-align: right;
+    color: var(--iztro-color-text);
+    white-space: nowrap;
+}
+
+.iztro-palace-center-item span {
+    text-align: left;
+    font-weight: bold;
+}
+
+.gender.gender-male { color: var(--iztro-color-quan); }
+.gender.gender-female { color: var(--iztro-color-happy); }
+
+/* Mutagen Highlight Styles */
+.star-highlight .iztro-star-name {
+    background-color: #fffbe6;
+    border: 1px solid #ffe58f;
+    border-radius: 4px;
+    padding: 0px 3px;
+    margin: -1px -3px;
+}
+
+.iztro-mutagen-tag {
+    display: inline-block;
+    font-size: 10px;
+    line-height: 1;
+    color: #fff;
+    padding: 2px 3px;
+    border-radius: 100px; /* Circle */
+    margin-left: 2px;
+    vertical-align: middle;
+    font-weight: normal;
+}
+
+.mutagen-lu { background-color: var(--iztro-color-awesome); }
+.mutagen-quan { background-color: var(--iztro-color-quan); }
+.mutagen-ke { background-color: var(--iztro-color-nice); }
+.mutagen-ji { background-color: var(--iztro-color-focus); }
+
+/* Horoscope (Dynamic) Info Styles */
+.iztro-palace-dynamic-info {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--iztro-color-border);
+}
+
+.dynamic-palace-name {
+    font-weight: bold;
+}
+
+.dynamic-palace-name.yearly {
+    color: var(--iztro-color-active);
+}
+
+.horoscope-stars {
+    color: var(--iztro-color-text);
+    opacity: 0.9;
+}
+
+.horoscope-stars .iztro-star-name {
+    font-size: var(--iztro-star-font-size-small);
+    font-weight: normal;
+}
+
+.horoscope-stars.yearly {
+    color: var(--iztro-color-active);
+}
+
+/* Center Horoscope Controls */
+.center-section {
+    padding: 10px 0;
+}
+
+.center-section:not(:last-child) {
+    border-bottom: 1px solid var(--iztro-color-border);
+}
+
+.horoscope-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    grid-column: 1 / -1; /* Span both columns */
+    align-items: center;
+}
+
+.horoscope-controls label {
+    font-weight: bold;
+    color: var(--iztro-color-major);
+}
+
+.horoscope-controls input[type="date"] {
+    padding: 5px;
+    border: 1px solid var(--iztro-color-border);
+    border-radius: 4px;
+    font-family: inherit;
+}

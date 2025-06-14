@@ -1,3 +1,7 @@
+// 定义全局变量来存储星盘数据
+window.astrolabe1 = null;
+window.astrolabe2 = null;
+
 // 缓存 DOM 元素
 const dom = {
     year1: document.getElementById('year'),
@@ -25,32 +29,25 @@ const dom = {
     mainContainer: document.querySelector('.container')
 };
 
-let selectedGender = null;
-let selectedGender2 = null;
-
-// 性别选择事件监听
+// 性别选择事件监听 - 只处理视觉状态
 dom.genderMale1.addEventListener('click', () => {
     dom.genderMale1.classList.add('selected');
     dom.genderFemale1.classList.remove('selected');
-    selectedGender = '男';
 });
 
 dom.genderFemale1.addEventListener('click', () => {
     dom.genderFemale1.classList.add('selected');
     dom.genderMale1.classList.remove('selected');
-    selectedGender = '女';
 });
 
 dom.genderMale2.addEventListener('click', () => {
     dom.genderMale2.classList.add('selected');
     dom.genderFemale2.classList.remove('selected');
-    selectedGender2 = '男';
 });
 
 dom.genderFemale2.addEventListener('click', () => {
     dom.genderFemale2.classList.add('selected');
     dom.genderMale2.classList.remove('selected');
-    selectedGender2 = '女';
 });
 
 function setDefaultOption(type = 'single') {
@@ -141,17 +138,26 @@ function generateAstrolabe() {
     const day1Val = dom.day1.value;
     const hour1Val = dom.hour1.value;
     
-    let astrolabe1 = null;
-    let astrolabe2 = null;
+    window.astrolabe1 = null;
+    window.astrolabe2 = null;
     let allSuccess = true;
+
+    // Determine gender at the time of charting
+    const getSelectedGender = (maleBtn, femaleBtn) => {
+        if (maleBtn.classList.contains('selected')) return 'male';
+        if (femaleBtn.classList.contains('selected')) return 'female';
+        return null;
+    };
+
+    const gender1 = getSelectedGender(dom.genderMale1, dom.genderFemale1);
     
-    if (year1Val !== '' && month1Val !== '' && day1Val !== '' && hour1Val !== '' && selectedGender) {
+    if (year1Val && month1Val && day1Val && hour1Val && gender1) {
         const year1 = parseInt(year1Val);
         const month1 = parseInt(month1Val);
         const day1 = parseInt(day1Val);
         const timeIndex1 = parseInt(hour1Val);
-        astrolabe1 = pageConfig.chartingFunction(1, year1, month1, day1, timeIndex1, selectedGender, dom.result1Div);
-        if (!astrolabe1) allSuccess = false;
+        window.astrolabe1 = pageConfig.chartingFunction(1, year1, month1, day1, timeIndex1, gender1, dom.result1Div);
+        if (!window.astrolabe1) allSuccess = false;
     } else {
         dom.result1Div.innerHTML = '<p style="color: red;">请输入第一个人的完整出生信息！</p>';
         dom.result1Div.style.display = 'block';
@@ -163,14 +169,15 @@ function generateAstrolabe() {
         const month2Val = dom.month2.value;
         const day2Val = dom.day2.value;
         const hour2Val = dom.hour2.value;
+        const gender2 = getSelectedGender(dom.genderMale2, dom.genderFemale2);
 
-        if (year2Val !== '' && month2Val !== '' && day2Val !== '' && hour2Val !== '' && selectedGender2) {
+        if (year2Val && month2Val && day2Val && hour2Val && gender2) {
             const year2 = parseInt(year2Val);
             const month2 = parseInt(month2Val);
             const day2 = parseInt(day2Val);
             const timeIndex2 = parseInt(hour2Val);
-            astrolabe2 = pageConfig.chartingFunction(2, year2, month2, day2, timeIndex2, selectedGender2, dom.result2Div);
-            if (!astrolabe2) allSuccess = false;
+            window.astrolabe2 = pageConfig.chartingFunction(2, year2, month2, day2, timeIndex2, gender2, dom.result2Div);
+            if (!window.astrolabe2) allSuccess = false;
         } else {
             dom.result2Div.innerHTML = '<p style="color: red;">请输入第二个人的完整出生信息！</p>';
             dom.result2Div.style.display = 'block';

@@ -8,6 +8,7 @@
     <link rel="icon" href="static/favicon.png" type="image/png">
     <link rel="apple-touch-icon" sizes="180x180" href="static/apple-touch-icon.png">
     <link rel="stylesheet" href="css/paipan.css">
+    <link rel="stylesheet" href="css/iztro-chart.css">
 </head>
 <body>
     <div class="container">
@@ -104,8 +105,14 @@
 
         <button class="ai-question-button" onclick="generateAstrolabe()">开始排盘</button>
         <h2>排盘结果:</h2>
-        <div id="result" style="display:none;"></div>
-        <div id="result2" style="margin-top: 20px; display:none;"></div>
+        <div id="result" style="display:none;">
+            <div class="iztro-container"></div>
+            <div class="original-result" style="display: none;"></div>
+        </div>
+        <div id="result2" style="margin-top: 20px; display:none;">
+            <div class="iztro-container"></div>
+            <div class="original-result" style="display: none;"></div>
+        </div>
         
         <!-- AI提问容器 -->
         <div id="aiQuestionContainer" style="display:none;">
@@ -144,14 +151,66 @@
 
     </div>
 
-    <script src="js/ai.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/iztro@latest/dist/iztro.min.js"></script>
+    <script src="js/ai.js"></script>
+    <script src="js/iztro-chart-renderer.js"></script>
     <script src="js/paipan.js"></script>
     <script src="js/ui.js"></script>
     <script>
+        function formatAstrolabeForAI(astrolabe) {
+            if (!astrolabe) {
+                return "无法获取命盘数据。";
+            }
+
+            const yearStem = astrolabe.chineseDate.substring(0, 1);
+            const yearMutagens = MUTAGEN_MAP[yearStem];
+
+            let result = `### 基本信息\n`;
+            result += `* **阳历**: ${astrolabe.solarDate}\n`;
+            result += `* **农历**: ${astrolabe.lunarDate}\n`;
+            result += `* **干支**: ${astrolabe.chineseDate}\n`;
+            result += `* **性别**: ${astrolabe.gender}\n`;
+            result += `* **时辰**: ${astrolabe.time}\n`;
+            result += `* **命主**: ${astrolabe.soul}\n`;
+            result += `* **身主**: ${astrolabe.body}\n`;
+            result += `* **五行局**: ${astrolabe.fiveElementsClass}\n`;
+            result += `* **星座**: ${astrolabe.sign}\n`;
+            result += `* **生肖**: ${astrolabe.zodiac}\n\n`;
+
+            result += `### 四化星\n`;
+            result += `* **生年四化**: 天干【${yearStem}】\n`;
+            result += `  - **化禄**: ${yearMutagens['禄']}\n`;
+            result += `  - **化权**: ${yearMutagens['权']}\n`;
+            result += `  - **化科**: ${yearMutagens['科']}\n`;
+            result += `  - **化忌**: ${yearMutagens['忌']}\n\n`;
+
+            result += `### 宫位信息\n`;
+            astrolabe.palaces.forEach(palace => {
+                const majorStars = palace.majorStars.map(s => `${s.name}(${s.brightness})`).join(' ') || '无';
+                const minorStars = palace.minorStars.map(s => `${s.name}(${s.brightness})`).join(' ') || '无';
+                const adjectiveStars = palace.adjectiveStars.map(s => s.name).join(' ') || '无';
+                const selfPalace = palace.isBodyPalace ? ' (身宫)' : ''; // Corrected from isSelfPalace
+                const palaceMutagens = MUTAGEN_MAP[palace.heavenlyStem];
+
+                result += `* **${palace.name}宫 (${palace.heavenlyStem}${palace.earthlyBranch})${selfPalace}**: \n`;
+                result += `  - **主星**: ${majorStars}\n`;
+                result += `  - **辅星**: ${minorStars}\n`;
+                result += `  - **杂曜**: ${adjectiveStars}\n`;
+                result += `  - **大限**: ${palace.decadal.range.join('-')}岁\n`;
+                result += `  - **博士十二神**: ${palace.boshi12}\n`;
+                result += `  - **十二长生**: ${palace.changsheng12}\n`;
+                result += `  - **岁前十二神**: ${palace.suiqian12}\n`;
+                result += `  - **将前十二神**: ${palace.jiangqian12}\n`;
+                result += `  - **宫干四化**: 天干【${palace.heavenlyStem}】禄入${palaceMutagens['禄']}, 权入${palaceMutagens['权']}, 科入${palaceMutagens['科']}, 忌入${palaceMutagens['忌']}\n`;
+            });
+
+            return result;
+        }
+
         function generateAstrolabeForPerson(personNumber, year, month, day, timeIndex, gender, resultDiv) {
-            resultDiv.innerHTML = '';
             resultDiv.style.display = 'none';
+            // Pre-create the necessary containers to prevent null errors
+            resultDiv.innerHTML = '<div class="iztro-container"></div><div class="original-result" style="display: none;"></div>';
 
             if (isNaN(year) || isNaN(month) || isNaN(day) || timeIndex === null) {
                 resultDiv.innerHTML = `<p style="color: red;">第${personNumber}人：请输入所有必填的出生信息！</p>`;
@@ -169,6 +228,60 @@
 
             try {
                 const astrolabe = iztro.astro.bySolar(solarDate, timeIndex, gender, true, 'zh-CN');
+                console.log(formatAstrolabeForAI(astrolabe)); // 使用新的格式化函数
+                let activeHeavenlyStem = null;
+                let horoscopeDate = new Date();
+                // 1. 初始化太极点状态，默认为命宫
+                let activePalaceIndex = astrolabe.palaces.findIndex(p => p.name === '命宫');
+
+                const redrawAstrolabe = () => {
+                    const container = resultDiv.querySelector('.iztro-container');
+                    const horoscope = iztro.astro.getHoroscope(astrolabe, horoscopeDate);
+                    // Manually generate shifted palace names as a robust workaround for the unreliable API
+                    const getShiftedPalaceNames = (targetPalaceIndex) => {
+                        const PALACE_NAMES_ORDER = ['命宫', '兄弟宫', '夫妻宫', '子女宫', '财帛宫', '疾厄宫', '迁移宫', '仆役宫', '官禄宫', '田宅宫', '福德宫', '父母宫'];
+                        const originalLifePalaceIndex = astrolabe.palaces.findIndex(p => p.name === '命宫');
+
+                        // If the target is the original life palace, no shift is needed.
+                        if (targetPalaceIndex === originalLifePalaceIndex) {
+                            return astrolabe.palaces.map(p => p.name);
+                        }
+
+                        const newNames = [];
+                        for (let i = 0; i < 12; i++) {
+                            // Calculate the new name for the palace at original index `i`
+                            newNames[i] = PALACE_NAMES_ORDER[(i - targetPalaceIndex + 12) % 12];
+                        }
+                        return newNames;
+                    };
+
+                    const taijiPalaces = getShiftedPalaceNames(activePalaceIndex);
+
+                    const handleStemClick = (stem) => {
+                        activeHeavenlyStem = activeHeavenlyStem === stem ? null : stem;
+                        redrawAstrolabe();
+                    };
+
+                    const handleHoroscopeDateChange = (date) => {
+                        horoscopeDate = date;
+                        redrawAstrolabe();
+                    };
+
+                    // 2. 定义太极点点击事件处理函数
+                    const handlePalaceClick = (palaceIndex) => {
+                        // 如果点击的已经是激活的太极点，则重置回命宫
+                        const lifePalaceIndex = astrolabe.palaces.findIndex(p => p.name === '命宫');
+                        activePalaceIndex = activePalaceIndex === palaceIndex ? lifePalaceIndex : palaceIndex;
+                        redrawAstrolabe();
+                    };
+
+                    renderAstrolabe(astrolabe, horoscope, horoscopeDate, taijiPalaces, container, activeHeavenlyStem, activePalaceIndex, handleStemClick, handlePalaceClick, handleHoroscopeDateChange);
+                };
+                
+                redrawAstrolabe();
+
+                // 生成并存储原始文本结果
+                const originalResultContainer = resultDiv.querySelector('.original-result');
                 let htmlResult = `<h3>${personNumber === 1 ? '基本信息：' : `第${personNumber}人 - 基本信息：`}</h3>`;
                 htmlResult += `<p><strong>阳历：</strong>${astrolabe.solarDate}</p>`;
                 htmlResult += `<p><strong>农历：</strong>${astrolabe.lunarDate}</p>`;
@@ -190,8 +303,8 @@
                     htmlResult += `</li>`;
                 });
                 htmlResult += '</ul>';
+                originalResultContainer.innerHTML = htmlResult;
 
-                resultDiv.innerHTML = htmlResult;
                 resultDiv.style.display = 'block';
                 return astrolabe;
             } catch (error) {
@@ -206,23 +319,13 @@
             initializePage({
                 chartingFunction: generateAstrolabeForPerson,
                 getAIPrompt: (questionText, selectedOption) => {
-                    return `你是一个紫微斗数大师，现在是${new Date().toLocaleString()}，以下是排盘结果：\n${dom.result1Div.innerHTML}\n问题: ${questionText}\n请尽量详细的说明，需要注意1. 结构清晰
-- 先总论命格特点
-- 再分述各宫位运势
-- 最后给出具体建议
-
-2. 现代诠释
-- 结合当代社会环境
-- 给出可操作建议
-- 避免宿命论表述
-
-3. 验证体系
-- 星曜印证度
-- 宫位契合度
-- 现实可解释性`;
+                    const formattedAstrolabe = window.astrolabe1 ? formatAstrolabeForAI(window.astrolabe1) : "无法获取命盘数据。";
+                    return `你是一个紫微斗数大师，现在是${new Date().toLocaleString()}，请基于以下命盘数据回答问题。\n\n${formattedAstrolabe}\n\n---\n\n**问题**: ${questionText}\n\n---\n\n**分析要求**:\n1. **结构清晰**: 先总论命格特点，再分述各宫位运势，最后给出具体建议。\n2. **现代诠释**: 结合当代社会环境，给出可操作的、积极的建议，避免宿命论的消极表述。\n3. **重点突出**: 根据问题，重点分析相关的星曜和宫位。`;
                 },
                 getCompatibilityPrompt: (questionText) => {
-                    return `你是一个紫微斗数大师，现在是${new Date().toLocaleString()}，以下是排盘结果：\n第一人排盘结果:\n${dom.result1Div.innerHTML}\n\n第二人排盘结果:\n${dom.result2Div.innerHTML}\n问题：${questionText}\n请尽量详细的说明`;
+                    const formattedAstrolabe1 = window.astrolabe1 ? formatAstrolabeForAI(window.astrolabe1) : "无法获取第一人命盘数据。";
+                    const formattedAstrolabe2 = window.astrolabe2 ? formatAstrolabeForAI(window.astrolabe2) : "无法获取第二人命盘数据。";
+                    return `你是一个紫微斗数大师，现在是${new Date().toLocaleString()}，请基于以下两个命盘数据进行合盘分析。\n\n# 第一人命盘\n${formattedAstrolabe1}\n\n# 第二人命盘\n${formattedAstrolabe2}\n\n---\n\n**问题**: ${questionText}\n\n---\n\n**分析要求**:\n1. **关系概览**: 综合评价双方的匹配度和互补性。\n2. **性格互动**: 分析双方的性格特点以及可能的互动模式。\n3. **关键领域**: 重点分析影响两人关系的核心宫位（如夫妻、命宫、福德等）。\n4. **未来建议**: 提出促进关系和谐发展的具体建议，并点出需要注意的关键年份或问题。`;
                 }
             });
         });
