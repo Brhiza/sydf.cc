@@ -129,6 +129,13 @@ function initializePage(config) {
 }
 
 function generateAstrolabe() {
+    // Clear previous AI response when re-charting
+    const aiResponseDiv = document.getElementById('aiResponse');
+    if (aiResponseDiv) {
+        aiResponseDiv.innerHTML = '';
+        aiResponseDiv.style.display = 'none'; // Hide the container as well
+    }
+
     const year1Val = dom.year1.value;
     const month1Val = dom.month1.value;
     const day1Val = dom.day1.value;
