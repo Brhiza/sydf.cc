@@ -207,30 +207,15 @@ document.addEventListener('DOMContentLoaded', function() {
         // Step 2: Setup general page logic AFTER injection
         setupCommonLogic();
 
-        // Step 3: Inject and initialize the inspiration card on specific pages
-        const pagesWithInspiration = ['ly.html', 'mh.html', 'qm.html', 'dp.html', 'sp.html'];
-        const currentPageForInspiration = window.location.pathname.split('/').pop() || 'index.html';
-        
-        if (pagesWithInspiration.includes(currentPageForInspiration)) {
-            const observer = new MutationObserver((mutations, obs) => {
-                const inputCard = document.querySelector('.input-card');
-                if (inputCard) {
-                    injectAndInitializeInspirationCard(inputCard);
-                    obs.disconnect(); // Stop observing once the element is found and injected
-                }
-            });
-
-            observer.observe(document.body, {
-                childList: true,
-                subtree: true
-            });
-
-            // Optional: Add a timeout to prevent the observer from running indefinitely
-            setTimeout(() => {
-                observer.disconnect();
-                // console.log('Inspiration card observer timed out.');
-            }, 5000); // 5-second timeout
-        }
+        // Step 3: Expose the injection function to the global scope
+        window.injectInspirationCard = () => {
+            const inputCard = document.querySelector('.input-card');
+            if (inputCard) {
+                injectAndInitializeInspirationCard(inputCard);
+            } else {
+                console.error('Could not find .input-card to inject inspiration.');
+            }
+        };
     }
 
     function setupCommonLogic() {

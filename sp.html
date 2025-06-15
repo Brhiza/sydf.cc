@@ -28,5 +28,12 @@
     <script src="js/ai.js"></script>
     <script src="js/qigua/main.js"></script>
     <script src="js/qigua/sp.bundle.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.injectInspirationCard) {
+                window.injectInspirationCard();
+            }
+        });
+    </script>
 </body>
 </html>
