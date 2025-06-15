@@ -212,20 +212,24 @@ document.addEventListener('DOMContentLoaded', function() {
         const currentPageForInspiration = window.location.pathname.split('/').pop() || 'index.html';
         
         if (pagesWithInspiration.includes(currentPageForInspiration)) {
-            const maxTries = 20; // Try for 2 seconds (20 * 100ms)
-            let currentTry = 0;
-
-            const injectionInterval = setInterval(() => {
+            const observer = new MutationObserver((mutations, obs) => {
                 const inputCard = document.querySelector('.input-card');
                 if (inputCard) {
                     injectAndInitializeInspirationCard(inputCard);
-                    clearInterval(injectionInterval); // Stop polling once injected
-                } else if (currentTry >= maxTries) {
-                    clearInterval(injectionInterval); // Stop after timeout
-                    console.error('Could not find .input-card to inject inspiration.');
+                    obs.disconnect(); // Stop observing once the element is found and injected
                 }
-                currentTry++;
-            }, 100);
+            });
+
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+
+            // Optional: Add a timeout to prevent the observer from running indefinitely
+            setTimeout(() => {
+                observer.disconnect();
+                // console.log('Inspiration card observer timed out.');
+            }, 5000); // 5-second timeout
         }
     }
 
