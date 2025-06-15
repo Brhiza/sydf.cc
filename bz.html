@@ -146,11 +146,11 @@
 
     </div>
 
+    <script src="https://cdn.jsdelivr.net/gh/6tail/lunar-javascript@master/lunar.js"></script>
     <script src="js/ai.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/iztro@latest/dist/iztro.min.js"></script>
-    <script src="js/paipan.js"></script>
-    <script src="js/shensha.js"></script>
-    <script src="js/ui.js"></script>
+    <script src="js/paipan/paipan.js"></script>
+    <script src="js/paipan/common.js"></script>
     <script>
         const NAYIN_MAP = {
             '甲子': '海中金', '乙丑': '海中金', '丙寅': '炉中火', '丁卯': '炉中火', '戊辰': '大林木', '己巳': '大林木', '庚午': '路旁土', '辛未': '路旁土', '壬申': '剑锋金', '癸酉': '剑锋金',
@@ -359,7 +359,7 @@
 
                 htmlResult += `<tr><th>神煞</th>`;
                 for (let i = 0; i < 4; i++) {
-                    const shenShaList = queryShenSha(baziResult.sz[i], baziArray, isMan, i + 1, nianNayin);
+                    const shenShaList = p.queryShenSha(baziResult.sz[i], baziArray, isMan, i + 1, nianNayin);
                     htmlResult += `<td><span class="shen-sha">${shenShaList.join('<br>')}</span></td>`;
                 }
                 htmlResult += `</tr>`;
