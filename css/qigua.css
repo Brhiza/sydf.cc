@@ -566,6 +566,8 @@ html, body {
         padding: 10px 15px;
         font-size: 1em;
         cursor: pointer;
+        text-decoration: none;
+        color: #2c3e50;
     }
 }
 

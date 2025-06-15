@@ -207,10 +207,15 @@ document.addEventListener('DOMContentLoaded', function() {
         // Step 2: Setup general page logic AFTER injection
         setupCommonLogic();
 
-        // Step 3: Inject and initialize the inspiration card if applicable
-        const inputCard = document.querySelector('.input-card');
-        if (inputCard) {
-            injectAndInitializeInspirationCard(inputCard);
+        // Step 3: Inject and initialize the inspiration card on specific pages
+        const pagesWithInspiration = ['ly.html', 'mh.html', 'qm.html', 'dp.html', 'sp.html'];
+        const currentPageForInspiration = window.location.pathname.split('/').pop() || 'index.html';
+        
+        if (pagesWithInspiration.includes(currentPageForInspiration)) {
+            const inputCard = document.querySelector('.input-card');
+            if (inputCard) {
+                injectAndInitializeInspirationCard(inputCard);
+            }
         }
     }
 
@@ -266,6 +271,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // --- Page State Logic for index.html ---
         if (document.querySelector('.welcome-card') || document.querySelector('.mobile-welcome')) {
+            const quickNavContainer = document.querySelector('.quick-nav');
+
+            // --- Populate Quick Nav for Mobile ---
+            if (quickNavContainer && navLinks.length > 0) {
+                navLinks.forEach(link => {
+                    // Create a new element to avoid issues with cloning event listeners etc.
+                    const quickLink = document.createElement('a');
+                    quickLink.href = link.href;
+                    quickLink.textContent = link.textContent;
+                    quickLink.className = 'quick-nav-btn';
+                    quickNavContainer.appendChild(quickLink);
+                });
+            }
+
              function setIndexPageState() {
                 if (window.innerWidth <= 768) {
                     if(mainContent) mainContent.style.display = 'none';
