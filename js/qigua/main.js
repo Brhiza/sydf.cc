@@ -230,6 +230,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const overlay = document.querySelector('.overlay');
         const navLinks = document.querySelectorAll('.nav-link');
         const mainContent = document.querySelector('.main-content');
+// --- Viewport Height Fix for Mobile ---
+        function setViewportHeight() {
+            let vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+        }
+        setViewportHeight();
+        window.addEventListener('resize', setViewportHeight);
         const mobileWelcome = document.querySelector('.mobile-welcome');
         const desktopWelcome = document.querySelector('.desktop-welcome');
 
