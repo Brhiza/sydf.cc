@@ -212,10 +212,20 @@ document.addEventListener('DOMContentLoaded', function() {
         const currentPageForInspiration = window.location.pathname.split('/').pop() || 'index.html';
         
         if (pagesWithInspiration.includes(currentPageForInspiration)) {
-            const inputCard = document.querySelector('.input-card');
-            if (inputCard) {
-                injectAndInitializeInspirationCard(inputCard);
-            }
+            const maxTries = 20; // Try for 2 seconds (20 * 100ms)
+            let currentTry = 0;
+
+            const injectionInterval = setInterval(() => {
+                const inputCard = document.querySelector('.input-card');
+                if (inputCard) {
+                    injectAndInitializeInspirationCard(inputCard);
+                    clearInterval(injectionInterval); // Stop polling once injected
+                } else if (currentTry >= maxTries) {
+                    clearInterval(injectionInterval); // Stop after timeout
+                    console.error('Could not find .input-card to inject inspiration.');
+                }
+                currentTry++;
+            }, 100);
         }
     }
 
