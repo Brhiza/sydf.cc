@@ -344,6 +344,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         });
+
+        if (submitButton && inspirationCard) {
+            submitButton.addEventListener('click', () => {
+                // Hide the card if the input has some value, which it will if a question was clicked
+                if (userInput.value) {
+                    inspirationCard.style.display = 'none';
+                }
+            });
+        }
     }
 
     initializePage();
