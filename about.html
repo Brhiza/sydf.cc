@@ -12,52 +12,55 @@
     <link rel="stylesheet" href="css/qigua.css">
 </head>
 <body>
-    <div class="mobile-header">
-        <h1>时月东方</h1>
-        <button class="menu-toggle">&#9776;</button>
-    </div>
+    <header class="header">
+        <div class="header-content">
+            <h1 class="title">关于</h1>
+            <button class="menu-toggle">&#9776;</button>
+        </div>
+    </header>
     <div class="overlay"></div>
-    <div class="container">
-        <nav>
-            <div class="logo">
-                <img src="static/avatar.png" alt="癸水少女">
-                <h1>时月东方</h1>
-                <p>一个臭算命的不圈钱，学人来搞AI算命？</p>
-            </div>
-            <ul>
-                <li><a href="ly.html" class="nav-link">六爻</a></li>
-                <li><a href="mh.html" class="nav-link">梅花易数</a></li>
-                <li><a href="qm.html" class="nav-link">奇门遁甲</a></li>
-                <li><a href="dp.html" class="nav-link">塔罗牌·单牌</a></li>
-                <li><a href="sp.html" class="nav-link">塔罗牌·三牌</a></li>
-                <li><a href="about.html" class="nav-link active">关于</a></li>
-            </ul>
-            <div class="desktop-footer">
-                <p>© <span id="year-desktop"></span> By <a href="about.html" target="_blank">少女的美丽忧伤丨AI算命仅供娱乐</a></p>
-            </div>
-        </nav>
-        <main>
-            <div class="content-wrapper about-page">
+    <nav class="sidebar">
+        <div class="logo">
+            <img src="static/avatar.png" alt="癸水少女">
+            <h1>时月东方</h1>
+            <p>一个臭算命的不圈钱，学人来搞AI算命？</p>
+        </div>
+        <ul>
+            <li><a href="ly.html" class="nav-link">六爻</a></li>
+            <li><a href="mh.html" class="nav-link">梅花易数</a></li>
+            <li><a href="qm.html" class="nav-link">奇门遁甲</a></li>
+            <li><a href="dp.html" class="nav-link">塔罗牌·单牌</a></li>
+            <li><a href="sp.html" class="nav-link">塔罗牌·三牌</a></li>
+            <li><a href="rengong.html" class="nav-link">转人工</a></li>
+            <li><a href="about.html" class="nav-link active">关于</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <p>© <span id="year-desktop"></span> By <a href="about.html" target="_blank">少女的美丽忧伤</a></p>
+        </div>
+    </nav>
+    <main class="main-content">
+        <div class="content-wrapper about-page">
+            <div class="input-card" style="padding: 40px;">
                 <section class="about-section">
-                    <h2>关于 “少女的美丽忧伤”</h2>
-                    <p class="subtitle">一个很长又感觉有点怪的名字</p>
-                    <p>有点家传、师传，会八字、紫薇、风水、六壬、六爻等，毕竟大家都在用AI算命，那为什么不做一个更好的AI呢？于是引用了传统的计算方法和排盘逻辑，做出了本站。</p>
+                    <h2 class="card-title" style="margin-bottom: 20px;">关于</h2>
+                    <p class="card-description" style="text-align: justify; line-height: 1.8; color: #555;">有点家传、师传，会八字、紫薇、风水、六壬、六爻等，毕竟大家都在用AI算命，那为什么不做一个更好的AI呢？于是引用了传统的计算方法和排盘逻辑，做出了本站。</p>
                 </section>
-                <section class="about-section disclaimer">
-                    <h3>免责声明</h3>
-                    <p>切记，AI算命仅供娱乐。生成的内容完全基于 AI 模型的胡言乱语，不构成任何形式的建议。作者对您基于本工具做出的任何决定不负任何责任。如果您真的相信了这个工具的分析结果，那么......祝您好运！</p>
+                <section class="about-section disclaimer" style="border-top: 1px solid #eee; padding-top: 25px; margin-top: 25px;">
+                    <h3 style="text-align: center; font-size: 1.4em; color: #333; margin-bottom: 15px;">免责声明</h3>
+                    <p style="line-height: 1.8; color: #555; text-align: justify;">切记，AI算命仅供娱乐。生成的内容完全基于 AI 模型的胡言乱语，不构成任何形式的建议。作者对您基于本工具做出的任何决定不负任何责任。如果您真的相信了这个工具的分析结果，那么......祝您好运！</p>
                 </section>
-                <section class="about-section contact-info">
-                    <h3>联系我</h3>
-                    <p>如果您有任何建议、反馈或合作意向，欢迎通过以下方式联系我：</p>
-                    <img src="static/weixin.jpg" alt="微信二维码" class="qr-code">
-                    <p class="qr-caption">扫一扫上面的二维码，加我微信</p>
+                <section class="about-section contact-info" style="border-top: 1px solid #eee; padding-top: 25px; margin-top: 25px; text-align: center;">
+                    <h3 style="font-size: 1.4em; color: #333; margin-bottom: 15px;">联系我</h3>
+                    <p style="line-height: 1.8; color: #555;">如果您有任何建议、反馈或合作意向，或者有闲聊、交朋友的需求欢迎通过以下方式联系我：</p>
+                    <img src="static/weixin.jpg" alt="微信二维码" class="qr-code" style="max-width: 160px; margin-top: 15px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                    <p class="qr-caption" style="margin-top: 10px; color: #777; font-size: 0.9em;">扫一扫上面的二维码，加我微信</p>
                 </section>
             </div>
-        </main>
-    </div>
-    <script src="https://cdn.jsdelivr.net/gh/6tail/lunar-javascript@master/lunar.js"></script>
-    <script src="js/ai.js"></script>
+        </div>
+    </main>
+    <script>
+        document.getElementById('year-desktop').textContent = new Date().getFullYear();
+    </script>
     <script src="js/qigua/main.js"></script>
 </body>
 </html>

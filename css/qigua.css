@@ -109,7 +109,7 @@ html, body {
     font-size: 1.1em;
 }
 
-.sidebar .logo p {
+.sidebar .logo p, .container nav .logo p {
     color: rgba(255, 255, 255, 0.7);
     font-size: 12px;
     margin: 0;
