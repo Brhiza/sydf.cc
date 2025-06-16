@@ -9,10 +9,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let historyId = null; // To store the ID of the current history entry
 
     submitButton.addEventListener('click', () => {
-        const question = userInput.value.trim();
+        let question = userInput.value.trim();
         if (!question) {
-            alert('请输入您的问题。');
-            return;
+            question = "心中所想之事";
         }
         inputCard.style.display = 'none';
         if (window.injectInspirationCard && event.isTrusted) {
@@ -28,7 +27,11 @@ document.addEventListener('DOMContentLoaded', () => {
         tossCount = 0;
         currentQian = null;
         historyId = null; // Reset history ID
-        outputText.innerHTML = `<div class="result-section"><p>您的问题是：<strong>${question}</strong></p><p>请静心默念，准备摇签...</p></div>`;
+        if (question === "心中所想之事") {
+            outputText.innerHTML = `<div class="result-section"><p>请静心默念，准备摇签...</p></div>`;
+        } else {
+            outputText.innerHTML = `<div class="result-section"><p>您的问题是：<strong>${question}</strong></p><p>请静心默念，准备摇签...</p></div>`;
+        }
         setTimeout(shakeLottle, 2000);
     }
 
