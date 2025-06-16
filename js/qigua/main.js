@@ -322,6 +322,12 @@ document.addEventListener('DOMContentLoaded', function() {
         if (yearDesktop) {
             yearDesktop.textContent = new Date().getFullYear();
         }
+
+        // Clear userInput on page load to prevent browser caching
+        const userInput = document.getElementById('userInput');
+        if (userInput) {
+            userInput.value = '';
+        }
     }
 
     function injectAndInitializeInspirationCard(inputCard) {
