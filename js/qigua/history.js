@@ -1,15 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
     const historyContainer = document.getElementById('historyContainer');
-    let history = [];
-    try {
-        history = JSON.parse(localStorage.getItem('qigua_history')) || [];
-    } catch (e) {
-        console.error("Could not parse history from localStorage", e);
-        history = [];
-    }
+    const history = JSON.parse(localStorage.getItem('qigua_history')) || [];
 
     if (history.length === 0) {
-        historyContainer.innerHTML = '<p class="card-description">暂无历史记录。</p>';
+        historyContainer.innerHTML = '<p>暂无历史记录。</p>';
         return;
     }
 
@@ -19,17 +13,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const button = document.createElement('button');
         button.className = 'history-item-button';
-        button.innerHTML = `<span>${new Date(item.date).toLocaleDateString()} - ${item.userInput}</span><span class="toggle-icon">▶</span>`;
+        button.textContent = `${new Date(item.date).toLocaleDateString()} - ${item.userInput}`;
         
         const content = document.createElement('div');
         content.className = 'history-item-content';
         content.style.display = 'none'; // Initially hidden
-        content.innerHTML = item.resultHTML;
+        
+        const card = document.createElement('div');
+        card.className = 'history-item-card';
+        
+        const title = document.createElement('h3');
+        title.textContent = `${item.type} - ${new Date(item.date).toLocaleString()}`;
+        card.appendChild(title);
+
+        const question = document.createElement('p');
+        question.innerHTML = `<strong>问题：</strong> ${item.userInput}`;
+        card.appendChild(question);
+
+        const resultContainer = document.createElement('div');
+        resultContainer.innerHTML = item.resultHTML;
+        card.appendChild(resultContainer);
+        
+        content.appendChild(card);
         
         button.addEventListener('click', () => {
             const isVisible = content.style.display === 'block';
             content.style.display = isVisible ? 'none' : 'block';
-            button.classList.toggle('open');
         });
 
         historyItem.appendChild(button);
