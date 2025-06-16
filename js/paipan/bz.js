@@ -38,6 +38,32 @@ function formatBaziForAI(baziResult, selectedOption = null) {
     }
     result += `\n`;
 
+    result += `### 命盘结构\n`;
+    result += `* **四柱纳音**: ${baziResult.naYin.join(', ')}\n`;
+    result += `* **四柱星运**: ${baziResult.pillarLifeStages.join(', ')}\n`;
+    result += `* **空亡**: 年柱(${baziResult.kongWang.year.join('')}), 日柱(${baziResult.kongWang.day.join('')})\n`;
+
+    const relationships = p.getRelationships(baziResult.sz);
+    if (Object.keys(relationships).length > 0) {
+        const relMap = {
+            tianGanHe: '天干五合', diZhiSanHui: '三会局', diZhiSanHe: '三合局',
+            diZhiLiuHe: '六合', diZhiChong: '相冲', diZhiXing: '相刑',
+            diZhiHai: '相害', diZhiPo: '相破'
+        };
+        const relEntries = Object.entries(relationships).map(([key, value]) => {
+            const title = relMap[key];
+            const details = value.map(item => {
+                if (item.gans) return `${item.gans.join('')}合化${item.he}`;
+                if (item.zhis) return item.zhis.join('');
+                if (item.type && item.members) return `${item.members.join('')}${item.type}`;
+                return '';
+            }).join(' ');
+            return `${title}(${details})`;
+        });
+        result += `* **干支关系**: ${relEntries.join('; ')}\n`;
+    }
+    result += `\n`;
+
     result += `### 五行旺衰\n`;
     result += `* **五行个数**: 水(${baziResult.nwx[0]}), 木(${baziResult.nwx[1]}), 火(${baziResult.nwx[2]}), 土(${baziResult.nwx[3]}), 金(${baziResult.nwx[4]})\n\n`;
 

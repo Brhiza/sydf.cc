@@ -823,5 +823,122 @@ rt['pillarLifeStages'] = getPillarLifeStages(rt['ctg'][2], rt['cdz']);
  
      return [...new Set(results)];
  };
+this.getRelationships = function(baziSz) {
+    const ctg = baziSz.map(p => p[0]);
+    const cdz = baziSz.map(p => p[1]);
+    const relationships = {
+        tianGanHe: [],
+        diZhiSanHui: [],
+        diZhiSanHe: [],
+        diZhiLiuHe: [],
+        diZhiChong: [],
+        diZhiXing: [],
+        diZhiHai: [],
+        diZhiPo: []
+    };
+
+    // --- 天干五合 ---
+    const tgHeMap = { '甲': '己', '乙': '庚', '丙': '辛', '丁': '壬', '戊': '癸' };
+    const heHuaMap = { '甲己': '土', '乙庚': '金', '丙辛': '水', '丁壬': '木', '戊癸': '火' };
+    const checkedTgPairs = new Set();
+    for (let i = 0; i < 4; i++) {
+        for (let j = i + 1; j < 4; j++) {
+            const pairKey = [ctg[i], ctg[j]].sort().join('');
+            if (checkedTgPairs.has(pairKey)) continue;
+            if (tgHeMap[ctg[i]] === ctg[j] || tgHeMap[ctg[j]] === ctg[i]) {
+                relationships.tianGanHe.push({ gans: [ctg[i], ctg[j]], he: heHuaMap[pairKey] });
+            }
+            checkedTgPairs.add(pairKey);
+        }
+    }
+
+    // --- 地支关系 ---
+    const uniqueZhi = [...new Set(cdz)];
+
+    // 三会
+    const sanHuiMap = {
+        '木': ['寅', '卯', '辰'], '火': ['巳', '午', '未'],
+        '金': ['申', '酉', '戌'], '水': ['亥', '子', '丑']
+    };
+    for (const [type, members] of Object.entries(sanHuiMap)) {
+        if (members.every(m => uniqueZhi.includes(m))) {
+            relationships.diZhiSanHui.push({ type: `${type}方`, members });
+        }
+    }
+
+    // 三合
+    const sanHeMap = {
+        '水': ['申', '子', '辰'], '木': ['亥', '卯', '未'],
+        '火': ['寅', '午', '戌'], '金': ['巳', '酉', '丑']
+    };
+    for (const [type, members] of Object.entries(sanHeMap)) {
+        const foundMembers = members.filter(m => uniqueZhi.includes(m));
+        if (foundMembers.length === 3) {
+            relationships.diZhiSanHe.push({ type: `${type}局`, members: foundMembers });
+        } else if (foundMembers.length === 2) {
+            const zhongShen = members[1];
+            if (foundMembers.includes(zhongShen)) {
+                 relationships.diZhiSanHe.push({ type: `${type}半合`, members: foundMembers });
+            }
+        }
+    }
+    
+    const checkedDzPairs = new Set();
+    for (let i = 0; i < 4; i++) {
+        for (let j = i + 1; j < 4; j++) {
+            const zhi1 = cdz[i];
+            const zhi2 = cdz[j];
+            const pairKey = [zhi1, zhi2].sort().join('');
+            if (checkedDzPairs.has(pairKey)) continue;
+
+            const liuHeMap = {'子':'丑','寅':'亥','卯':'戌','辰':'酉','巳':'申','午':'未'};
+            if (liuHeMap[zhi1] === zhi2 || liuHeMap[zhi2] === zhi1) {
+                relationships.diZhiLiuHe.push({ zhis: [zhi1, zhi2] });
+            }
+            const chongMap = {'子':'午','丑':'未','寅':'申','卯':'酉','辰':'戌','巳':'亥'};
+            if (chongMap[zhi1] === zhi2 || chongMap[zhi2] === zhi1) {
+                relationships.diZhiChong.push({ zhis: [zhi1, zhi2] });
+            }
+            const haiMap = {'子':'未','丑':'午','寅':'巳','卯':'辰','申':'亥','酉':'戌'};
+            if (haiMap[zhi1] === zhi2 || haiMap[zhi2] === zhi1) {
+                relationships.diZhiHai.push({ zhis: [zhi1, zhi2] });
+            }
+            const poMap = {'子':'酉','卯':'午','辰':'丑','未':'戌','寅':'亥','巳':'申'};
+             if (poMap[zhi1] === zhi2 || poMap[zhi2] === zhi1) {
+                relationships.diZhiPo.push({ zhis: [zhi1, zhi2] });
+            }
+            checkedDzPairs.add(pairKey);
+        }
+    }
+
+    // 相刑
+    const xingMap = {
+        '无恩之刑': ['寅', '巳', '申'],
+        '恃势之刑': ['丑', '戌', '未'],
+    };
+    for (const [type, members] of Object.entries(xingMap)) {
+        const found = members.filter(m => uniqueZhi.includes(m));
+        if (found.length >= 2) {
+            relationships.diZhiXing.push({ type, members: found });
+        }
+    }
+    if (uniqueZhi.includes('子') && uniqueZhi.includes('卯')) {
+        relationships.diZhiXing.push({ type: '无礼之刑', members: ['子', '卯'] });
+    }
+    ['辰', '午', '酉', '亥'].forEach(z => {
+        if (cdz.filter(item => item === z).length >= 2) {
+            relationships.diZhiXing.push({ type: '自刑', members: [z, z] });
+        }
+    });
+
+    // Filter out empty relationship arrays
+    for (const key in relationships) {
+        if (relationships[key].length === 0) {
+            delete relationships[key];
+        }
+    }
+
+    return relationships;
+};
  }
  window.p = new paipan();
