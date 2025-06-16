@@ -342,6 +342,15 @@ function renderHexagrams(data, lunar) {
     return outputText.querySelector('.ai-response');
 }
 
+document.addEventListener('DOMContentLoaded', () => {
+    const latest = window.loadLatestHistory('六爻');
+    if (latest) {
+        document.getElementById('userInput').value = latest.userInput;
+        document.getElementById('outputText').innerHTML = latest.resultHTML;
+        document.getElementById('outputText').style.display = 'block';
+    }
+});
+
 document.getElementById('submitButton').addEventListener('click', async () => {
     const userInput = document.getElementById('userInput').value;
     if (!userInput.trim()) {
@@ -374,9 +383,12 @@ document.getElementById('submitButton').addEventListener('click', async () => {
     aiResponseDiv.innerHTML = "";
     try {
         const aiResponse = await queryAI(prompt);
+        let fullResponse = "";
         for await (const content of aiResponse.streamResponse()) {
+            fullResponse += content;
             aiResponseDiv.append(document.createTextNode(content));
         }
+        window.saveHistory('六爻', userInput, document.getElementById('outputText').innerHTML);
     } catch (error) {
         console.error('请求失败:', error);
         aiResponseDiv.innerHTML = "哈哈，AI开小差了";
