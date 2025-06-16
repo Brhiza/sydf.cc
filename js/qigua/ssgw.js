@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let tossCount = 0;
     let currentQian = null;
     let historyId = null; // To store the ID of the current history entry
+    let isFirstToss = true;
 
     submitButton.addEventListener('click', () => {
         let question = userInput.value.trim();
@@ -27,6 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tossCount = 0;
         currentQian = null;
         historyId = null; // Reset history ID
+        isFirstToss = true;
         if (question === "心中所想之事") {
             outputText.innerHTML = `<div class="result-section"><p>请静心默念，准备摇签...</p></div>`;
         } else {
@@ -36,12 +38,37 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function shakeLottle() {
-        outputText.innerHTML += `<div class="result-section"><p>正在摇签中...</p></div>`;
+        // Clear previous bei images if any
+        const beiContainer = outputText.querySelector('.bei-container');
+        if (beiContainer) {
+            beiContainer.remove();
+        }
+
+        // Clean up previous results, but keep the initial question
+        const resultSections = outputText.querySelectorAll('.result-section');
+        resultSections.forEach((section, index) => {
+            if (index > 0) { // Keep the first section (the question)
+                section.remove();
+            }
+        });
+
+
+        const shakingSection = document.createElement('div');
+        shakingSection.className = 'result-section';
+        shakingSection.innerHTML = `<p>正在摇签中...</p>`;
+        outputText.appendChild(shakingSection);
+
         // Simulate shaking animation
         setTimeout(() => {
+            shakingSection.remove(); // Clean up the "shaking" message
             // Exclude the last "penalty" sign
             currentQian = Math.floor(Math.random() * (QIANWEN_DATA.length - 1)) + 1;
-            outputText.innerHTML += `<div class="result-section"><p>求得第 <strong>${currentQian}</strong> 签。</p><p>请投掷圣杯，询问三山国王是否同意此签...</p></div>`;
+            
+            const newQianSection = document.createElement('div');
+            newQianSection.className = 'result-section';
+            newQianSection.innerHTML = `<p>求得第 <strong>${currentQian}</strong> 签。</p><p>请投掷圣杯，询问三山国王是否同意此签...</p>`;
+            outputText.appendChild(newQianSection);
+
             addTossButton();
         }, 2000);
     }
@@ -66,33 +93,72 @@ document.addEventListener('DOMContentLoaded', () => {
         button.disabled = true;
         button.textContent = '投掷中...';
 
+        // Create a container for the bei images
+        const beiContainer = document.createElement('div');
+        beiContainer.className = 'bei-container';
+        
+        // Find the last result section to append the container after it
+        const resultSections = outputText.querySelectorAll('.result-section');
+        const lastResultSection = resultSections[resultSections.length - 1];
+        if (lastResultSection) {
+            lastResultSection.insertAdjacentElement('afterend', beiContainer);
+        } else {
+            outputText.appendChild(beiContainer);
+        }
+
+
         setTimeout(() => {
-            // Remove the button's wrapper after the toss animation
             const buttonWrapper = button.parentElement;
             if (buttonWrapper) {
                 buttonWrapper.remove();
             }
 
-            const results = ['圣杯', '笑杯', '阴杯'];
-            const result = results[Math.floor(Math.random() * results.length)];
+            // Simulate tossing two "bei"
+            const bei1 = Math.random() > 0.5 ? 'ping' : 'tu'; // ping: 正, tu: 反
+            const bei2 = Math.random() > 0.5 ? 'ping' : 'tu';
+
+            const animationClass = isFirstToss ? ' animated' : '';
+            isFirstToss = false; // Animation only happens on the very first toss
+
+            beiContainer.innerHTML = `
+                <img src="static/${bei1}.png" alt="${bei1}" class="bei-image${animationClass}">
+                <img src="static/${bei2}.png" alt="${bei2}" class="bei-image${animationClass}">
+            `;
             
+            let result = '';
+            if (bei1 !== bei2) {
+                result = '圣杯';
+            } else if (bei1 === 'ping') {
+                result = '笑杯';
+            } else {
+                result = '阴杯';
+            }
+
             let resultText = '';
+            const resultSection = document.createElement('div');
+            resultSection.className = 'result-section';
+
             if (result === '圣杯') {
-                resultText = '<strong>圣杯</strong> - 神明同意此签。';
-                outputText.innerHTML += `<div class="result-section"><p>${resultText}</p><p>正在为您解读签文...</p></div>`;
+                resultText = '<strong>圣杯</strong> (一平一凸) - 神明同意此签。';
+                resultSection.innerHTML = `<p>${resultText}</p><p>正在为您解读签文...</p>`;
+                outputText.appendChild(resultSection);
                 setTimeout(displayResult, 2000);
+                isFirstToss = true; // Reset for the next full cycle
             } else {
                 tossCount++;
                 if (result === '笑杯') {
-                    resultText = '<strong>笑杯</strong> - 神明笑而不语，可能问题不明或时机未到。';
+                    resultText = '<strong>笑杯</strong> (两平) - 神明笑而不语，可能问题不明或时机未到。';
                 } else {
-                    resultText = '<strong>阴杯</strong> - 神明不同意此签。';
+                    resultText = '<strong>阴杯</strong> (两凸) - 神明不同意此签。';
                 }
 
                 if (tossCount >= 3) {
-                    outputText.innerHTML += `<div class="result-section"><p>${resultText}</p><p>您已连续三次未能获得圣杯，看来今日不宜再问此事，请改日再来。</p></div>`;
+                    resultSection.innerHTML = `<p>${resultText}</p><p>您已连续三次未能获得圣杯，看来今日不宜再问此事，请改日再来。</p>`;
+                    outputText.appendChild(resultSection);
+                    isFirstToss = true; // Reset for the next full cycle
                 } else {
-                    outputText.innerHTML += `<div class="result-section"><p>${resultText}</p><p>请重新为您摇签...</p></div>`;
+                    resultSection.innerHTML = `<p>${resultText}</p><p>请重新为您摇签...</p>`;
+                    outputText.appendChild(resultSection);
                     setTimeout(shakeLottle, 2000);
                 }
             }
@@ -100,6 +166,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function displayResult() {
+        // Clear everything before showing the final result
+        const beiContainer = outputText.querySelector('.bei-container');
+        if (beiContainer) {
+            beiContainer.remove();
+        }
+        outputText.innerHTML = ''; // Clear all previous messages
+
         const qianData = QIANWEN_DATA.find(q => q.id === currentQian);
         if (!qianData) {
             outputText.innerHTML = '<p>签文数据错误，请稍后再试。</p>';

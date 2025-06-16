@@ -937,3 +937,30 @@ html, body {
         padding: 0 15px 15px 15px; /* Add padding back, remove top padding */
     }
 }
+
+.bei-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.bei-image {
+    width: 80px;
+    height: 80px;
+}
+
+.bei-image.animated {
+    animation: toss-animation 1s ease-out;
+}
+
+@keyframes toss-animation {
+    0% {
+        transform: translateY(-100px) rotate(0deg);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0) rotate(720deg);
+        opacity: 1;
+    }
+}
