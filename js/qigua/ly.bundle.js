@@ -369,7 +369,7 @@ document.getElementById('submitButton').addEventListener('click', async () => {
     const hexagramData = getHexagrams(ganzhi);
     const prompt = `你是一个六爻大师，根据用户提供的卦象和问题，提供准确的卦象解读和实用建议
 任务要求：逻辑清晰，语气得当
-1. 解读卦象：分析主卦、变爻及变卦，解读整体趋势和吉凶
+1. 解读卦象：分析卦象信息，解读整体趋势和吉凶
 2. 关联问题：针对用户问题，结合卦象信息，提供具体分析
 3. 提供建议：根据卦象启示，给出切实可行的建议，帮助用户解决实际问题
 当前时间：${ganzhiInfo}

@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     '<li><a href="qm.html" class="nav-link">奇门遁甲</a></li>',
                     '<li><a href="dp.html" class="nav-link">塔罗牌·单牌</a></li>',
                     '<li><a href="sp.html" class="nav-link">塔罗牌·三牌</a></li>',
+                    '<li><a href="ssgw.html" class="nav-link">三山国王灵签</a></li>',
                     '<li><a href="history.html" class="nav-link">历史记录</a></li>',
                     '<li><a href="rengong.html" class="nav-link">转人工</a></li>',
                     '<li><a href="about.html" class="nav-link">关于</a></li>',
@@ -218,7 +219,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         };
 
-        window.saveHistory = (type, userInput, resultHTML) => {
+        window.saveHistory = (type, userInput, resultHTML, aiResponse = '') => {
             let history = [];
             try {
                 history = JSON.parse(localStorage.getItem('qigua_history')) || [];
@@ -226,14 +227,33 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error("Could not parse history from localStorage", e);
                 history = [];
             }
+            const entryDate = new Date().toISOString();
             const newEntry = {
+                id: entryDate, // Use timestamp as unique ID
+                date: entryDate,
                 type,
                 userInput,
                 resultHTML,
-                date: new Date().toISOString()
+                aiResponse
             };
             history.push(newEntry);
             localStorage.setItem('qigua_history', JSON.stringify(history));
+            return newEntry.id; // Return the ID for later updates
+        };
+
+        window.updateHistory = (id, fieldsToUpdate) => {
+            let history = [];
+            try {
+                history = JSON.parse(localStorage.getItem('qigua_history')) || [];
+            } catch (e) {
+                console.error("Could not parse history from localStorage", e);
+                return;
+            }
+            const entryIndex = history.findIndex(entry => entry.id === id);
+            if (entryIndex > -1) {
+                history[entryIndex] = { ...history[entryIndex], ...fieldsToUpdate };
+                localStorage.setItem('qigua_history', JSON.stringify(history));
+            }
         };
 
         window.loadLatestHistory = (type) => {
@@ -301,6 +321,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const yearDesktop = document.getElementById('year-desktop');
         if (yearDesktop) {
             yearDesktop.textContent = new Date().getFullYear();
+        }
+
+        // Clear userInput on page load to prevent browser caching
+        const userInput = document.getElementById('userInput');
+        if (userInput) {
+            userInput.value = '';
         }
     }
 

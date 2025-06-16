@@ -245,7 +245,9 @@ document.addEventListener('DOMContentLoaded', function() {
         aiResponseDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
     
         try {
-            const aiResponse = await queryAI(prompt);
+            const currentTime = new Date().toLocaleString('zh-CN');
+            const promptWithTime = `当前公历时间：${currentTime}\n\n${prompt}`;
+            const aiResponse = await queryAI(promptWithTime);
             for await (const content of aiResponse.streamResponse()) {
                 aiResponseDiv.append(document.createTextNode(content));
             }

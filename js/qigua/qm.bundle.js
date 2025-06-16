@@ -399,7 +399,9 @@ document.getElementById('submitButton').addEventListener('click', async () => {
 **你可以：**
 [在此处给出具体的建议和行动方向]`;
     try {
-        const aiResponse = await queryAI(prompt);
+        const currentTime = new Date().toLocaleString('zh-CN');
+        const promptWithTime = `当前公历时间：${currentTime}\n\n${prompt}`;
+        const aiResponse = await queryAI(promptWithTime);
         let fullResponse = "";
         for await (const content of aiResponse.streamResponse()) {
             const processedContent = content.replace(/[*#]/g, '');

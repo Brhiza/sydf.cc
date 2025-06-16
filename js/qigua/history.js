@@ -31,6 +31,16 @@ document.addEventListener('DOMContentLoaded', () => {
         resultContainer.innerHTML = item.resultHTML;
         content.appendChild(resultContainer);
 
+        if (item.aiResponse) {
+            const aiResponseContainer = document.createElement('div');
+            aiResponseContainer.className = 'result-section';
+            aiResponseContainer.innerHTML = `
+                <h3 class="result-title">AI 深度解读</h3>
+                <div class="ai-response">${item.aiResponse}</div>
+            `;
+            content.appendChild(aiResponseContainer);
+        }
+
         button.addEventListener('click', () => {
             const isVisible = content.style.display === 'block';
             content.style.display = isVisible ? 'none' : 'block';
