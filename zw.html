@@ -125,18 +125,34 @@
         <!-- AI提问容器 -->
         <div id="aiQuestionContainer" style="display:none;">
             <div id="aiQuestionOptions">
-                <button class="unified-button" data-default-text="请综合全面的分析我的排盘结果，1.星曜解读 - 主星：紫微、天机等14主星特性及庙旺落陷 - 辅星：文昌、文曲等吉星影响 - 煞星：擎羊、陀罗等煞星制化 - 四化：禄权科忌在各宫位的影响
-2.宫位分析 - 命宫：先天命格与性格特质 - 财帛宫：财富格局与赚钱方式 - 官禄宫：事业发展与职业倾向 - 夫妻宫：感情模式与婚姻状况 - 迁移宫：外出运与贵人运
-3.大限流年推演 - 当前大限（10年运势）分析 - 今年流年运势详解 - 未来5年关键时间节点
-4.补救建议 - 有利方位 - 适合职业 - 流年注意事项 - 风水调理建议
-                    5.总结和建议以及注意事项。" onclick="selectOption(this, 'single')">综合</button>
-                <button class="unified-button" data-default-text="请分析我在当前大运的运势，并给出总结和建议以及注意事项。" onclick="selectOption(this, 'single')">大运</button>
-                <button class="unified-button" data-default-text="请分析我在今年的运势，并给出总结和建议以及注意事项。" onclick="selectOption(this, 'single')">流年</button>
-                <button class="unified-button" data-default-text="请分析我今、明、后三年的运势，并给出总结和建议以及注意事项。" onclick="selectOption(this, 'single')">三年</button>
-                <button class="unified-button" data-default-text="请分析我的事业和财运，并给出总结和建议以及注意事项。" onclick="selectOption(this, 'single')">事业财运</button>
-                <button class="unified-button" data-default-text="请分析我的感情和婚姻状况，并给出总结和建议以及注意事项。" onclick="selectOption(this, 'single')">感情婚姻</button>
-                <button class="unified-button" data-default-text="请分析我的健康状况，并给出总结和建议以及注意事项。" onclick="selectOption(this, 'single')">健康</button>
-                <button class="unified-button" onclick="showCustomInput('single'); selectOption(this, 'single');">自定义</button>
+                <button class="unified-button" data-default-text="请对该紫微斗数命盘进行一次全面、深入、详尽的命格总论分析，内容需丰富详实，至少1500字。分析需严格按照以下结构展开：
+
+1.  **命格核心提要**：
+    *   **命宫与身宫**：深度解读命宫和身宫的主星组合，精准判断命格的基本类型和格局层次（例如，“杀破狼”格的开创型，“机月同梁”格的稳定型等）。
+    *   **三方四正**：综合分析命宫、财帛宫、官禄宫、迁移宫的星曜组合，提炼出命主最核心的、贯穿一生的追求与价值观。
+    *   **生年四化**：点明生年四化（禄、权、科、忌）分别落入的宫位和代表的核心含义，揭示命主与生俱来的优势领域和需要特别关注的人生课题。
+
+2.  **性格、能力与天赋**：
+    *   **核心性格**：根据命宫、福德宫的星曜组合，深入剖析命主最核心的性格特质，包括其外在表现和内在真实的思维模式、情感需求。
+    *   **先天优势**：详细描述命主与生俱来的天赋和才能，例如学习能力（文昌、文曲）、沟通表达（巨门）、领导管理（紫微、天府）、抗压能力（七杀、破军）等，并说明这些优势在哪些领域最能得到发挥。
+    *   **潜在挑战**：客观指出命主性格或命格中可能存在的弱点、盲点或潜在的内在冲突（如空劫、煞忌交侵），并解释这些挑战可能在生活中如何体现。
+
+3.  **人生主要领域剖析**：
+    *   **事业格局**：分析官禄宫，判断其事业心的强弱、适合的职业方向、工作环境以及事业上的贵人与阻力。
+    *   **财富机遇**：分析财帛宫和田宅宫，解读其理财观念、财富能量、获取财富的主要方式以及资产积累的潜力。
+    *   **感情婚姻**：分析夫妻宫，解读其感情观、择偶偏好、理想伴侣的类型以及婚姻生活的真实写照。
+    *   **人际互动**：分析仆役宫和兄弟宫，揭示其与朋友、同事、合作伙伴的相处模式和贵人运。
+
+4.  **人生大运总览与核心建议**：
+    *   **大限趋势**：简要概括未来几步大限（每步大限为十年）的整体走势起伏，点明人生的几个关键转折期和黄金发展阶段。
+    *   **核心指导与人生课题**：综合以上所有分析，为命主提炼出最核心、最重要的人生发展建议。明确指出TA此生的主要人生课题是什么，并提供具体的、可操作的策略来帮助TA扬长避短、趋吉避凶，更好地实现人生价值。" onclick="selectOption(this, 'single')">命格总论</button>
+                <button class="unified-button" data-default-text="请详细分析命主当前所处的这步大限（十年运势）。重点解读大限命宫、财帛宫、官禄宫、夫妻宫的星曜组合及四化影响。说明在此期间，命主在事业、财运、感情和人际关系方面的主要机遇和挑战，并提供针对性的发展建议。" onclick="selectOption(this, 'single')">当前大限</button>
+                <button class="unified-button" data-default-text="请详细分析命主在今年的流年运势。重点解读流年命宫、流年四化（禄权科忌）对原局各宫位的影响。具体分析事业、财运、感情、健康四个方面的运势走向，并指出需要特别注意的关键月份。" onclick="selectOption(this, 'single')">今年运势</button>
+                <button class="unified-button" data-default-text="请深入分析该命盘的事业发展潜力。重点解读官禄宫和三方四正的星曜组合，判断其事业心、领导力、适合的职业方向（如创业、职场、技术、艺术等）。结合大限走势，分析其职业生涯的关键上升期和可能遇到的瓶颈。" onclick="selectOption(this, 'single')">事业格局</button>
+                <button class="unified-button" data-default-text="请深入分析该命盘的财富格局。重点解读财帛宫和田宅宫，判断其理财观念、财富能量、主要收入来源和资产积累能力。分析其一生的财运起伏，并提供符合其命盘特性的求财和守财建议。" onclick="selectOption(this, 'single')">财富机遇</button>
+                <button class="unified-button" data-default-text="请深入分析该命盘的感情与婚姻状况。重点解读夫妻宫，分析其对待感情的态度、理想伴侣的类型以及婚姻生活的真实写照。结合大限和流年，判断感情运势的起伏和正缘出现的可能时机，并为经营长期稳定的亲密关系提供建议。" onclick="selectOption(this, 'single')">感情婚姻</button>
+                <button class="unified-button" data-default-text="请分析该命盘的人际关系模式。重点解读兄弟宫（与同辈、朋友）和仆役宫（与下属、合作者），评估其社交能力、贵人运和需要注意的人际交往问题。提供改善人际互动、化解潜在矛盾的具体方法。" onclick="selectOption(this, 'single')">人际关系</button>
+                <button class="unified-button" onclick="showCustomInput('single'); selectOption(this, 'single');">自定义...</button>
             </div>
             <div id="customQuestionContainer" style="width: 100%; margin-top: 10px;">
                 <input type="text" id="customQuestion" placeholder="请输入您的问题" style="display: none; width: 100%; padding: 12px; border: 1px solid #c5cae9; border-radius: 6px; box-sizing: border-box; font-size: 16px;">
@@ -147,9 +163,9 @@
         <!-- 合盘分析容器 -->
         <div id="combinedAnalysisContainer" style="display:none;">
             <div id="combinedQuestionOptions">
-                <button class="unified-button" data-default-text="请分析两个人命盘合不合，双方是否互补，双方性格怎么样，在一起几率高不高，有利和不利的婚姻因素，需要注意的年份，并给出总结和建议以及注意事项。" onclick="selectOption(this, 'combined');">合婚</button>
-                <button class="unified-button" data-default-text="请分析我们在事业合作方面的匹配度，并给出总结和建议以及注意事项。" onclick="selectOption(this, 'combined');">合作</button>
-                <button class="unified-button" onclick="showCustomInput('combined'); selectOption(this, 'combined');">自定义</button>
+                <button class="unified-button" data-default-text="请对这两个紫微斗数命盘进行婚恋匹配分析。从命宫的性格互补性、夫妻宫的星曜呼应、四化星的相互影响等角度，系统评估双方的缘分深浅和相处模式。总结双方的匹配优势和潜在矛盾，并为促进关系和谐提供具体建议。" onclick="selectOption(this, 'combined');">婚恋匹配</button>
+                <button class="unified-button" data-default-text="请对这两个紫微斗数命盘进行事业合作匹配分析。评估双方在性格、能力、资源上的互补性，以及合作的默契程度。分析合作过程中可能出现的机遇和矛盾点，并对如何建立长期、共赢的合作关系提供策略建议。" onclick="selectOption(this, 'combined');">事业合作</button>
+                <button class="unified-button" onclick="showCustomInput('combined'); selectOption(this, 'combined');">自定义...</button>
             </div>
             <div id="customCombinedQuestionContainer" style="width: 100%; margin-top: 10px;">
                 <input type="text" id="customCombinedQuestion" placeholder="请输入您的问题" style="display: none; width: 100%; padding: 12px; border: 1px solid #c5cae9; border-radius: 6px; box-sizing: border-box; font-size: 16px;">
@@ -556,12 +572,12 @@ function createCenterElement(astrolabe, horoscope, horoscopeDate, handleHoroscop
                 chartingFunction: generateAstrolabeForPerson,
                 getAIPrompt: (questionText, selectedOption) => {
                     const formattedAstrolabe = window.astrolabe1 ? formatAstrolabeForAI(window.astrolabe1) : "无法获取命盘数据。";
-                    return `你是一个紫微斗数大师，现在是${new Date().toLocaleString()}，请基于以下命盘数据回答问题。\n\n${formattedAstrolabe}\n\n---\n\n**问题**: ${questionText}\n\n---\n\n**分析要求**:\n1. **结构清晰**: 先总论命格特点，再分述各宫位运势，最后给出具体建议。\n2. **现代诠释**: 结合当代社会环境，给出可操作的、积极的建议，避免宿命论的消极表述。\n3. **重点突出**: 根据问题，重点分析相关的星曜和宫位。`;
+                    return `你是一个紫微斗数大师，现在是${new Date().toLocaleString()}，请基于以下命盘数据回答问题。\n\n${formattedAstrolabe}\n\n---\n\n**问题**: ${questionText}\n\n---\n\n**分析要求**:\n1. **深入浅出**: 请使用通俗易懂的语言和生活化的比喻来解释专业的命理概念（如星曜、宫位、四化）。分析的最终目的是为了给用户提供清晰的指引，而不是展示术语。\n2. **先定性，后定量**: 先对命格的核心特点（如性格、优势、挑战）进行定性描述，再结合大限、流年进行定量的运势分析。\n3. **积极正向**: 所有的分析都应以积极、善意的视角出发。在指出潜在的挑战或风险时，必须同步提供具体的、可操作的规避方法或转化策略，避免宿命论和不必要的焦虑。\n4. **聚焦建议**: 最终的落脚点是提供清晰、可行的建议。无论是事业、感情还是健康，都要给出用户在现实生活中可以参考和实践的指引。`;
                 },
                 getCompatibilityPrompt: (questionText) => {
                     const formattedAstrolabe1 = window.astrolabe1 ? formatAstrolabeForAI(window.astrolabe1) : "无法获取第一人命盘数据。";
                     const formattedAstrolabe2 = window.astrolabe2 ? formatAstrolabeForAI(window.astrolabe2) : "无法获取第二人命盘数据。";
-                    return `你是一个紫微斗数大师，现在是${new Date().toLocaleString()}，请基于以下两个命盘数据进行合盘分析。\n\n# 第一人命盘\n${formattedAstrolabe1}\n\n# 第二人命盘\n${formattedAstrolabe2}\n\n---\n\n**问题**: ${questionText}\n\n---\n\n**分析要求**:\n1. **关系概览**: 综合评价双方的匹配度和互补性。\n2. **性格互动**: 分析双方的性格特点以及可能的互动模式。\n3. **关键领域**: 重点分析影响两人关系的核心宫位（如夫妻、命宫、福德等）。\n4. **未来建议**: 提出促进关系和谐发展的具体建议，并点出需要注意的关键年份或问题。`;
+                    return `你是一个紫微斗数大师，现在是${new Date().toLocaleString()}，请基于以下两个命盘数据进行合盘分析。\n\n# 第一人命盘\n${formattedAstrolabe1}\n\n# 第二人命盘\n${formattedAstrolabe2}\n\n---\n\n**问题**: ${questionText}\n\n---\n\n**分析要求**:\n1. **通俗易懂**: 用生活化的语言解释双方的互动模式，避免生涩的专业术语。\n2. **突出重点**: 聚焦于双方性格的吸引点、潜在的矛盾点，以及星曜能量的互补性。\n3. **关系导向**: 分析的目的不是给出“合”或“不合”的简单结论，而是深入剖析双方的相处之道。\n4. **提供策略**: 必须提供具体的、可操作的建议，用于促进双方关系的和谐发展，以及如何化解潜在的矛盾。`;
                 }
             });
         });

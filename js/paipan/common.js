@@ -111,43 +111,43 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="inspiration-content">
                     <div class="tab-pane active" id="ganqing">
                         <div class="question-group">
-                            <h4>情感发展状态</h4>
+                            <h4>情感发展</h4>
                             <div class="questions-grid">
-                                <p>他/她对我的真实情感是什么</p><p>我们之间是否有未来或者复合的可能</p><p>我近期的桃花运怎么样？会遇到新的人吗</p><p>我们目前的感情走向如何</p>
+                                <p>我近期的桃花运怎么样？</p><p>我们目前的感情走向如何？</p><p>他/她对我的真实情感是什么？</p><p>我们之间有未来吗？</p><p>如何改善我们目前的关系？</p><p>这段感情对我的影响？</p>
                             </div>
                         </div>
                         <div class="question-group">
-                            <h4>感情婚姻</h4>
+                            <h4>正缘婚姻</h4>
                             <div class="questions-grid">
-                                <p>如何吸引我的正缘/桃花</p><p>我什么时候能脱单</p><p>我何时会结婚</p><p>我适合和对方结婚吗</p>
+                                <p>我的正缘什么时候出现？</p><p>我的另一半是什么样的人？</p><p>我何时会结婚？</p><p>我适合和现在的对象结婚吗？</p><p>我的婚姻生活会幸福吗？</p><p>如何吸引我的正缘桃花？</p>
                             </div>
                         </div>
                         <div class="question-group">
-                            <h4>关系状态</h4>
+                            <h4>关系难题</h4>
                             <div class="questions-grid">
-                                <p>我们会复合吗</p><p>他/她想跟我复合吗</p><p>我的正缘是谁</p><p>我的灵魂伴侣有什么特征</p><p>我们之间出了什么问题</p><p>如何解决现在的感情危机</p>
+                                <p>我们之间出了什么问题？</p><p>如何解决现在的感情危机？</p><p>我们有机会复合吗？</p><p>我应该放弃这段感情吗？</p><p>我和Ta的缘分有多深？</p><p>我的灵魂伴侣有什么特征？</p>
                             </div>
                         </div>
                     </div>
                     <div class="tab-pane" id="shiye">
-                        <div class="question-group"><h4>工作发展</h4><div class="questions-grid"><p>我的工作走向怎么样</p><p>我适合辞职/跳槽吗</p><p>我什么时候能找到工作</p><p>我的事业什么时候才能成功</p></div></div>
-                        <div class="question-group"><h4>职场状态</h4><div class="questions-grid"><p>我最近的职场人际关系如何</p><p>如何改善我的职场人际关系</p><p>如何改善我的工作状态</p><p>我在公司的发展前景如何</p></div></div>
-                        <div class="question-group"><h4>创业发展</h4><div class="questions-grid"><p>我适合创业吗</p><p>我的创业项目前景如何</p><p>我该和什么样的人合伙</p><p>我的创业会成功吗</p></div></div>
+                        <div class="question-group"><h4>事业发展</h4><div class="questions-grid"><p>我适合现在的工作/行业吗？</p><p>我的事业什么时候能成功？</p><p>我适合跳槽还是继续坚守？</p><p>我事业上的贵人会是谁？</p><p>我未来的事业走向怎么样？</p><p>我什么时候能找到满意的工作？</p></div></div>
+                        <div class="question-group"><h4>职场机遇</h4><div class="questions-grid"><p>我今年有机会升职加薪吗？</p><p>如何得到领导的赏识和重用？</p><p>我在公司的发展前景如何？</p><p>如何改善我的职场人际关系？</p><p>如何改善当前的工作状态？</p><p>我最近的职场人际运如何？</p></div></div>
+                        <div class="question-group"><h4>创业之路</h4><div class="questions-grid"><p>我适合创业吗？</p><p>我的创业最佳时机是什么时候？</p><p>我该和什么样的人合伙？</p><p>我的创业项目前景如何？</p><p>创业过程中需要注意哪些风险？</p><p>我的创业会成功吗？</p></div></div>
                     </div>
                     <div class="tab-pane" id="caifu">
-                        <div class="question-group"><h4>财运预测</h4><div class="questions-grid"><p>我近期的财运怎么样</p><p>我会有意外之财吗</p><p>如何提升我的财运</p><p>我什么时候能发财</p></div></div>
-                        <div class="question-group"><h4>投资理财</h4><div class="questions-grid"><p>我适合投资吗</p><p>这个投资项目能赚钱吗</p><p>如何管理我的财富</p><p>我的投资风险大吗</p></div></div>
-                        <div class="question-group"><h4>破财风险</h4><div class="questions-grid"><p>我最近会破财吗</p><p>如何避免破财</p><p>我为什么总是存不住钱</p><p>我该如何处理我的债务</p></div></div>
+                        <div class="question-group"><h4>财运趋势</h4><div class="questions-grid"><p>我近期的财运怎么样？</p><p>我这辈子财运的整体趋势？</p><p>我什么时候能发财？</p><p>我适合靠什么方式赚钱？</p><p>如何有效提升我的财运？</p><p>我近期会有意外之财吗？</p></div></div>
+                        <div class="question-group"><h4>投资理财</h4><div class="questions-grid"><p>我适合做投资吗？</p><p>我应该选择什么样的投资方向？</p><p>这个投资项目能赚钱吗？</p><p>如何才能守住我的财富？</p><p>我的投资风险大吗？</p><p>如何更好地管理我的财富？</p></div></div>
+                        <div class="question-group"><h4>财务状况</h4><div class="questions-grid"><p>我为什么总是存不住钱？</p><p>是什么原因导致我财务紧张？</p><p>我最近会有破财风险吗？</p><p>如何避免不必要的财务损失？</p><p>我需要注意哪些年份的破财？</p><p>我该如何处理我的债务问题？</p></div></div>
                     </div>
                     <div class="tab-pane" id="renji">
-                        <div class="question-group"><h4>社交关系</h4><div class="questions-grid"><p>我目前的人际关系/社交运如何</p><p>我会吸引哪些人进入我的生活</p><p>如何获得领导的赏识</p><p>我该如何处理与朋友的矛盾</p></div></div>
-                        <div class="question-group"><h4>朋友交往</h4><div class="questions-grid"><p>如何结交更多的朋友</p><p>我该如何维系我的友谊</p><p>我该信任我的朋友吗</p><p>我与朋友的矛盾如何解决</p></div></div>
-                        <div class="question-group"><h4>家庭关系</h4><div class="questions-grid"><p>如何改善我与家人的关系</p><p>我该如何处理家庭矛盾</p><p>我与家人的缘分如何</p><p>我该如何更好地与家人沟通</p></div></div>
+                        <div class="question-group"><h4>社交模式</h4><div class="questions-grid"><p>我的人际交往模式有何优缺点？</p><p>如何拓展我的高质量社交圈？</p><p>我目前的人际关系状态如何？</p><p>我会吸引哪些人进入我的生活？</p><p>如何获得他人的信任与支持？</p><p>如何处理与朋友的矛盾？</p></div></div>
+                        <div class="question-group"><h4>贵人善缘</h4><div class="questions-grid"><p>什么样的朋友是我的贵人？</p><p>我应该远离什么样的朋友？</p><p>如何结交更多志同道合的朋友？</p><p>我该如何维系重要的友谊？</p><p>我该信任我身边的朋友吗？</p><p>如何获得领导或长辈的赏识？</p></div></div>
+                        <div class="question-group"><h4>家庭关系</h4><div class="questions-grid"><p>我和家人的关系怎么样？</p><p>我的家庭对我有什么样的影响？</p><p>如何改善我与家人的关系？</p><p>我该如何处理家庭矛盾？</p><p>我与家人的缘分有多深？</p><p>如何更好地与家人沟通？</p></div></div>
                     </div>
                     <div class="tab-pane" id="rensheng">
-                        <div class="question-group"><h4>学业考试</h4><div class="questions-grid"><p>我这次考试能通过吗</p><p>我适合考研/考公吗</p><p>如何提升我的学习效率</p><p>我该选择哪个专业/学校</p></div></div>
-                        <div class="question-group"><h4>个人成长</h4><div class="questions-grid"><p>我的人生课题是什么</p><p>如何找到我的人生方向</p><p>如何提升我自己的能量</p><p>我该如何克服我的人性弱点</p></div></div>
-                        <div class="question-group"><h4>未来规划</h4><div class="questions-grid"><p>我未来的人生走向如何</p><p>我该如何实现我的人生目标</p><p>我的人生会有什么重大的转折吗</p><p>如何活出更精彩的人生</p></div></div>
+                        <div class="question-group"><h4>学业规划</h4><div class="questions-grid"><p>我的学业运势如何？</p><p>我适合考研/考公吗？</p><p>我适合继续深造还是工作？</p><p>如何提升我的学习效率？</p><p>我该选择哪个专业/学校？</p><p>我这次考试能通过吗？</p></div></div>
+                        <div class="question-group"><h4>个人成长</h4><div class="questions-grid"><p>我的性格优势和劣势是什么？</p><p>我的人生主要课题是什么？</p><p>如何找到我的人生方向？</p><p>如何克服我性格中的弱点？</p><p>如何有效提升自己的能量状态？</p><p>我的人生转折点在何时？</p></div></div>
+                        <div class="question-group"><h4>人生机遇</h4><div class="questions-grid"><p>我未来十年的人生大运怎么样？</p><p>我该如何实现我的人生目标？</p><p>我的人生会有什么重大机遇？</p><p>我应该注意哪些健康问题？</p><p>如何才能活出更精彩的人生？</p><p>未来的人生之路走向如何？</p></div></div>
                     </div>
                 </div>`;
         
