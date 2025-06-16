@@ -18,27 +18,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const content = document.createElement('div');
         content.className = 'history-item-content';
         content.style.display = 'none'; // Initially hidden
-        
-        const card = document.createElement('div');
-        card.className = 'history-item-card';
-        
+
         const title = document.createElement('h3');
         title.textContent = `${item.type} - ${new Date(item.date).toLocaleString()}`;
-        card.appendChild(title);
+        content.appendChild(title);
 
         const question = document.createElement('p');
         question.innerHTML = `<strong>问题：</strong> ${item.userInput}`;
-        card.appendChild(question);
+        content.appendChild(question);
 
         const resultContainer = document.createElement('div');
         resultContainer.innerHTML = item.resultHTML;
-        card.appendChild(resultContainer);
-        
-        content.appendChild(card);
-        
+        content.appendChild(resultContainer);
+
         button.addEventListener('click', () => {
             const isVisible = content.style.display === 'block';
             content.style.display = isVisible ? 'none' : 'block';
+            historyItem.classList.toggle('expanded', !isVisible);
         });
 
         historyItem.appendChild(button);
