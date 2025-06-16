@@ -237,9 +237,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         setViewportHeight();
         window.addEventListener('resize', setViewportHeight);
-        const mobileWelcome = document.querySelector('.mobile-welcome');
-        const desktopWelcome = document.querySelector('.desktop-welcome');
-
         // --- Mobile Menu Logic ---
         function closeMenu() {
             if (sidebar) sidebar.classList.remove('open');
@@ -273,35 +270,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const yearDesktop = document.getElementById('year-desktop');
         if (yearDesktop) {
             yearDesktop.textContent = new Date().getFullYear();
-        }
-
-        // --- Page State Logic for index.html ---
-        if (document.querySelector('.welcome-card') || document.querySelector('.mobile-welcome')) {
-            const quickNavContainer = document.querySelector('.quick-nav');
-
-            // --- Populate Quick Nav for Mobile ---
-            if (quickNavContainer && navLinks.length > 0) {
-                navLinks.forEach(link => {
-                    // Create a new element to avoid issues with cloning event listeners etc.
-                    const quickLink = document.createElement('a');
-                    quickLink.href = link.href;
-                    quickLink.textContent = link.textContent;
-                    quickLink.className = 'quick-nav-btn';
-                    quickNavContainer.appendChild(quickLink);
-                });
-            }
-
-             function setIndexPageState() {
-                if (window.innerWidth <= 768) {
-                    if(mainContent) mainContent.style.display = 'none';
-                    if(mobileWelcome) mobileWelcome.style.display = 'flex';
-                } else {
-                    if(mobileWelcome) mobileWelcome.style.display = 'none';
-                    if(mainContent) mainContent.style.display = 'block';
-                }
-            }
-            setIndexPageState();
-            window.addEventListener('resize', setIndexPageState);
         }
     }
 
@@ -340,16 +308,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (userInput && submitButton) {
                     userInput.value = question.textContent;
                     submitButton.click();
-                    inspirationCard.style.display = 'none';
                 }
             });
         });
 
         if (submitButton && inspirationCard) {
-            submitButton.addEventListener('click', () => {
-                // Hide the card if the input has some value, which it will if a question was clicked
+            submitButton.addEventListener('click', (event) => {
                 if (userInput.value) {
-                    inspirationCard.style.display = 'none';
+                    // Hide the card only on trusted (user-initiated) clicks.
+                    if (event.isTrusted) {
+                        inspirationCard.style.display = 'none';
+                    }
+                    
+                    // Scroll to results after a short delay to allow the UI to update.
+                    setTimeout(() => {
+                        const resultElement = document.getElementById('paipan-result') || document.getElementById('ai-response');
+                        if (resultElement) {
+                            resultElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    }, 100);
                 }
             });
         }
