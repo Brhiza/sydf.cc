@@ -86,18 +86,141 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     window.selectOption = function(button, type = 'single') {
-        const optionsContainer = type === 'combined' ? dom.combinedQuestionOptions : dom.aiQuestionOptions;
-        const customInput = type === 'combined' ? dom.customCombinedQuestion : dom.customQuestion;
-        
-        optionsContainer.querySelectorAll('.unified-button').forEach(btn => btn.classList.remove('selected'));
-        button.classList.add('selected');
-
-        if (button.textContent.trim() !== '自定义') {
-            customInput.style.display = 'none';
+            const optionsContainer = type === 'combined' ? dom.combinedQuestionOptions : dom.aiQuestionOptions;
+            const customInput = type === 'combined' ? dom.customCombinedQuestion : dom.customQuestion;
+            
+            optionsContainer.querySelectorAll('.unified-button').forEach(btn => btn.classList.remove('selected'));
+            button.classList.add('selected');
+    
+            if (button.textContent.trim() !== '自定义') {
+                customInput.style.display = 'none';
+            }
         }
-    }
-
-    async function handleAIQuery(prompt) {
+    
+        function createInspirationCardHTML(isCombined = false) {
+            const tabsHTML = `
+                <div class="inspiration-tabs">
+                    <button class="tab-btn active" data-tab="ganqing">感情类</button>
+                    <button class="tab-btn" data-tab="shiye">事业类</button>
+                    <button class="tab-btn" data-tab="caifu">财富类</button>
+                    <button class="tab-btn" data-tab="renji">人际关系类</button>
+                    <button class="tab-btn" data-tab="rensheng">人生长成类</button>
+                </div>`;
+        
+            const contentHTML = `
+                <div class="inspiration-content">
+                    <div class="tab-pane active" id="ganqing">
+                        <div class="question-group">
+                            <h4>情感发展状态</h4>
+                            <div class="questions-grid">
+                                <p>他/她对我的真实情感是什么</p><p>我们之间是否有未来或者复合的可能</p><p>我近期的桃花运怎么样？会遇到新的人吗</p><p>我们目前的感情走向如何</p>
+                            </div>
+                        </div>
+                        <div class="question-group">
+                            <h4>感情婚姻</h4>
+                            <div class="questions-grid">
+                                <p>如何吸引我的正缘/桃花</p><p>我什么时候能脱单</p><p>我何时会结婚</p><p>我适合和对方结婚吗</p>
+                            </div>
+                        </div>
+                        <div class="question-group">
+                            <h4>关系状态</h4>
+                            <div class="questions-grid">
+                                <p>我们会复合吗</p><p>他/她想跟我复合吗</p><p>我的正缘是谁</p><p>我的灵魂伴侣有什么特征</p><p>我们之间出了什么问题</p><p>如何解决现在的感情危机</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane" id="shiye">
+                        <div class="question-group"><h4>工作发展</h4><div class="questions-grid"><p>我的工作走向怎么样</p><p>我适合辞职/跳槽吗</p><p>我什么时候能找到工作</p><p>我的事业什么时候才能成功</p></div></div>
+                        <div class="question-group"><h4>职场状态</h4><div class="questions-grid"><p>我最近的职场人际关系如何</p><p>如何改善我的职场人际关系</p><p>如何改善我的工作状态</p><p>我在公司的发展前景如何</p></div></div>
+                        <div class="question-group"><h4>创业发展</h4><div class="questions-grid"><p>我适合创业吗</p><p>我的创业项目前景如何</p><p>我该和什么样的人合伙</p><p>我的创业会成功吗</p></div></div>
+                    </div>
+                    <div class="tab-pane" id="caifu">
+                        <div class="question-group"><h4>财运预测</h4><div class="questions-grid"><p>我近期的财运怎么样</p><p>我会有意外之财吗</p><p>如何提升我的财运</p><p>我什么时候能发财</p></div></div>
+                        <div class="question-group"><h4>投资理财</h4><div class="questions-grid"><p>我适合投资吗</p><p>这个投资项目能赚钱吗</p><p>如何管理我的财富</p><p>我的投资风险大吗</p></div></div>
+                        <div class="question-group"><h4>破财风险</h4><div class="questions-grid"><p>我最近会破财吗</p><p>如何避免破财</p><p>我为什么总是存不住钱</p><p>我该如何处理我的债务</p></div></div>
+                    </div>
+                    <div class="tab-pane" id="renji">
+                        <div class="question-group"><h4>社交关系</h4><div class="questions-grid"><p>我目前的人际关系/社交运如何</p><p>我会吸引哪些人进入我的生活</p><p>如何获得领导的赏识</p><p>我该如何处理与朋友的矛盾</p></div></div>
+                        <div class="question-group"><h4>朋友交往</h4><div class="questions-grid"><p>如何结交更多的朋友</p><p>我该如何维系我的友谊</p><p>我该信任我的朋友吗</p><p>我与朋友的矛盾如何解决</p></div></div>
+                        <div class="question-group"><h4>家庭关系</h4><div class="questions-grid"><p>如何改善我与家人的关系</p><p>我该如何处理家庭矛盾</p><p>我与家人的缘分如何</p><p>我该如何更好地与家人沟通</p></div></div>
+                    </div>
+                    <div class="tab-pane" id="rensheng">
+                        <div class="question-group"><h4>学业考试</h4><div class="questions-grid"><p>我这次考试能通过吗</p><p>我适合考研/考公吗</p><p>如何提升我的学习效率</p><p>我该选择哪个专业/学校</p></div></div>
+                        <div class="question-group"><h4>个人成长</h4><div class="questions-grid"><p>我的人生课题是什么</p><p>如何找到我的人生方向</p><p>如何提升我自己的能量</p><p>我该如何克服我的人性弱点</p></div></div>
+                        <div class="question-group"><h4>未来规划</h4><div class="questions-grid"><p>我未来的人生走向如何</p><p>我该如何实现我的人生目标</p><p>我的人生会有什么重大的转折吗</p><p>如何活出更精彩的人生</p></div></div>
+                    </div>
+                </div>`;
+        
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(`<div>${contentHTML}</div>`, 'text/html');
+        
+            if (isCombined) {
+                const allPanes = doc.querySelectorAll('.tab-pane');
+                allPanes.forEach(pane => {
+                    if (pane.id !== 'ganqing') {
+                        pane.remove();
+                    }
+                });
+            }
+        
+            const finalContent = doc.body.firstChild.innerHTML;
+        
+            const html = [
+                '<div class="inspiration-card">',
+                '<h3 class="inspiration-title">问题灵感</h3>',
+                isCombined ? '' : tabsHTML,
+                finalContent,
+                '</div>'
+            ].join('');
+        
+            return html;
+        }
+        
+        function attachInspirationCardListeners(cardElement, type = 'single') {
+                const tabs = cardElement.querySelectorAll('.tab-btn');
+                const panes = cardElement.querySelectorAll('.tab-pane');
+                const questions = cardElement.querySelectorAll('.questions-grid p');
+            
+                tabs.forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        tabs.forEach(t => t.classList.remove('active'));
+                        tab.classList.add('active');
+            
+                        const targetPaneId = tab.getAttribute('data-tab');
+                        panes.forEach(pane => {
+                            pane.classList.remove('active');
+                            if (pane.id === targetPaneId) {
+                                pane.classList.add('active');
+                            }
+                        });
+                    });
+                });
+            
+                questions.forEach(question => {
+                    question.addEventListener('click', () => {
+                        const questionText = question.textContent;
+                        const customInput = type === 'combined' ? dom.customCombinedQuestion : dom.customQuestion;
+                        const optionsContainer = type === 'combined' ? dom.combinedQuestionOptions : dom.aiQuestionOptions;
+                        
+                        customInput.value = questionText;
+                        customInput.style.display = 'block';
+            
+                        const customButton = Array.from(optionsContainer.querySelectorAll('.unified-button')).find(btn => btn.textContent.trim() === '自定义');
+                        if (customButton) {
+                            selectOption(customButton, type);
+                        }
+    
+                        // Directly trigger the AI query
+                        if (type === 'combined') {
+                            askAIForCompatibility();
+                        } else {
+                            askAI();
+                        }
+                    });
+                });
+            }
+        
+        async function handleAIQuery(prompt) {
         let aiResponseDiv = document.getElementById('aiResponse');
         if (!aiResponseDiv) {
             aiResponseDiv = document.createElement('div');
@@ -117,7 +240,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         aiResponseDiv.style.display = 'block';
         aiResponseDiv.innerHTML = '';
-
+    
+        // Scroll to the newly created/cleared response div
+        aiResponseDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    
         try {
             const aiResponse = await queryAI(prompt);
             for await (const content of aiResponse.streamResponse()) {
@@ -204,8 +330,16 @@ document.addEventListener('DOMContentLoaded', function() {
         if (dom.combinedAnalysisContainer) dom.combinedAnalysisContainer.style.display = 'none';
 
         if (allSuccess) {
+            // Remove any existing inspiration card first
+            const existingCard = document.querySelector('.inspiration-card');
+            if (existingCard) {
+                existingCard.remove();
+            }
+
             let targetElement;
-            if (dom.enableSecondPerson && dom.enableSecondPerson.checked) {
+            const isCombined = dom.enableSecondPerson && dom.enableSecondPerson.checked;
+
+            if (isCombined) {
                 dom.combinedAnalysisContainer.style.display = 'block';
                 dom.combinedQuestionOptions.style.display = 'flex';
                 setDefaultOption('combined');
@@ -216,6 +350,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 setDefaultOption('single');
                 targetElement = dom.aiQuestionContainer;
             }
+
+            // Create and inject the inspiration card
+            const cardHTML = createInspirationCardHTML(isCombined);
+            const cardElement = document.createElement('div');
+            cardElement.innerHTML = cardHTML;
+            // The actual element is the first child of the div
+            const inspirationCard = cardElement.firstChild;
+            targetElement.insertAdjacentElement('afterend', inspirationCard);
+            attachInspirationCardListeners(inspirationCard, isCombined ? 'combined' : 'single');
+
             setTimeout(() => {
                 targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }, 100);
