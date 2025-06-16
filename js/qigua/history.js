@@ -1,6 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
     const historyContainer = document.getElementById('historyContainer');
-    const history = JSON.parse(localStorage.getItem('qigua_history')) || [];
+    let history = [];
+    try {
+        history = JSON.parse(localStorage.getItem('qigua_history')) || [];
+    } catch (e) {
+        console.error("Could not parse history from localStorage", e);
+        history = [];
+    }
 
     if (history.length === 0) {
         historyContainer.innerHTML = '<p>暂无历史记录。</p>';
@@ -8,7 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     history.reverse().forEach(item => {
-<<<<<<< HEAD
         const historyItem = document.createElement('div');
         historyItem.className = 'history-item';
 
@@ -23,11 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const card = document.createElement('div');
         card.className = 'history-item-card';
         
-=======
-        const card = document.createElement('div');
-        card.className = 'history-item-card';
-
->>>>>>> 28b09db9c7aa97e1b216ecabb66fe1f87b36eece
         const title = document.createElement('h3');
         title.textContent = `${item.type} - ${new Date(item.date).toLocaleString()}`;
         card.appendChild(title);
@@ -39,7 +39,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const resultContainer = document.createElement('div');
         resultContainer.innerHTML = item.resultHTML;
         card.appendChild(resultContainer);
-<<<<<<< HEAD
         
         content.appendChild(card);
         
@@ -51,9 +50,5 @@ document.addEventListener('DOMContentLoaded', () => {
         historyItem.appendChild(button);
         historyItem.appendChild(content);
         historyContainer.appendChild(historyItem);
-=======
-
-        historyContainer.appendChild(card);
->>>>>>> 28b09db9c7aa97e1b216ecabb66fe1f87b36eece
     });
 });
