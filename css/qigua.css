@@ -806,7 +806,8 @@ html, body {
     }
 
     .input-card,
-    .inspiration-card {
+    .inspiration-card,
+    .history-card {
         width: 100%;
         max-width: 90%;
         box-sizing: border-box;
