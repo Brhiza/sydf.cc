@@ -219,7 +219,13 @@ document.addEventListener('DOMContentLoaded', function() {
         };
 
         window.saveHistory = (type, userInput, resultHTML) => {
-            const history = JSON.parse(localStorage.getItem('qigua_history')) || [];
+            let history = [];
+            try {
+                history = JSON.parse(localStorage.getItem('qigua_history')) || [];
+            } catch (e) {
+                console.error("Could not parse history from localStorage", e);
+                history = [];
+            }
             const newEntry = {
                 type,
                 userInput,
@@ -231,7 +237,13 @@ document.addEventListener('DOMContentLoaded', function() {
         };
 
         window.loadLatestHistory = (type) => {
-            const history = JSON.parse(localStorage.getItem('qigua_history')) || [];
+            let history = [];
+            try {
+                history = JSON.parse(localStorage.getItem('qigua_history')) || [];
+            } catch (e) {
+                console.error("Could not parse history from localStorage", e);
+                return null;
+            }
             const latestEntry = history.filter(item => item.type === type).pop();
             return latestEntry;
         }
