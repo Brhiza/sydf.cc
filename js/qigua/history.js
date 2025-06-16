@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const button = document.createElement('button');
         button.className = 'history-item-button';
-        button.textContent = `${new Date(item.date).toLocaleDateString()} - ${item.userInput}`;
+        button.textContent = `${new Date(item.date).toLocaleDateString()} ${item.type} ${item.userInput}`;
         
         const content = document.createElement('div');
         content.className = 'history-item-content';
