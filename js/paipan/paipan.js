@@ -404,7 +404,7 @@ this.getDecade = function(gan, zhi) {
   		
           rt['qyy_desc'] = "出生后" + y + "年" + m + "个月" + d + "天起运"; //与十三行八字一致
   		
-          var qyt = spcjd + (y + m/12 + window.calendar.ty)*window.calendar.ty; //转按回归年算
+          var qyt = spcjd + zf; //转按回归年算
           var jt = window.calendar.Jtime(qyt); //將起運時刻的JD值轉換為年月日時分秒
           var qyy = jt[0]; //起運年(公历)
   
