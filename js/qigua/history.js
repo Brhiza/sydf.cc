@@ -1,12 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const historyContainer = document.getElementById('historyContainer');
-    let history = [];
-    try {
-        history = JSON.parse(localStorage.getItem('qigua_history')) || [];
-    } catch (e) {
-        console.error("Could not parse history from localStorage", e);
-        history = [];
-    }
+    const history = JSON.parse(localStorage.getItem('qigua_history')) || [];
 
     if (history.length === 0) {
         historyContainer.innerHTML = '<p>暂无历史记录。</p>';
