@@ -343,12 +343,12 @@ function renderHexagrams(data, lunar) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const latest = window.loadLatestHistory('六爻');
-    if (latest) {
-        document.getElementById('userInput').value = latest.userInput;
-        document.getElementById('outputText').innerHTML = latest.resultHTML;
-        document.getElementById('outputText').style.display = 'block';
-    }
+    // const latest = window.loadLatestHistory('六爻');
+    // if (latest) {
+    //     document.getElementById('userInput').value = latest.userInput;
+    //     document.getElementById('outputText').innerHTML = latest.resultHTML;
+    //     document.getElementById('outputText').style.display = 'block';
+    // }
 });
 
 document.getElementById('submitButton').addEventListener('click', async () => {
