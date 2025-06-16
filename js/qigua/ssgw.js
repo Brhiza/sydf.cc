@@ -107,28 +107,61 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
 
+        const buttonWrapper = button.parentElement;
+        if (buttonWrapper) {
+            buttonWrapper.remove();
+        }
+
+        // Simulate tossing two "bei"
+        const bei1_result = Math.random() > 0.5 ? 'ping' : 'tu'; // ping: 正, tu: 反
+        const bei2_result = Math.random() > 0.5 ? 'ping' : 'tu';
+
+        const bei1_img = document.createElement('img');
+        bei1_img.src = `static/${bei1_result}.png`;
+        bei1_img.alt = bei1_result;
+        bei1_img.className = 'bei-image';
+
+        const bei2_img = document.createElement('img');
+        bei2_img.src = `static/${bei2_result}.png`;
+        bei2_img.alt = bei2_result;
+        bei2_img.className = 'bei-image';
+
+        beiContainer.appendChild(bei1_img);
+        beiContainer.appendChild(bei2_img);
+
+        const animateBei = (imgElement) => {
+            const duration = 800 + Math.random() * 200; // 800ms to 1000ms
+            const peakHeight = -120 - (Math.random() * 40); // -120px to -160px
+            const finalRotation = 720 + (Math.random() - 0.5) * 90; // 675 to 765 degrees
+
+            imgElement.animate([
+                { transform: 'translateY(0)', opacity: 0, offset: 0 },
+                { transform: `translateY(${peakHeight}px) rotate(${finalRotation / 2}deg)`, opacity: 1, offset: 0.4 },
+                { transform: `translateY(0) rotate(${finalRotation}deg)`, opacity: 1, offset: 1 }
+            ], {
+                duration: duration,
+                easing: 'ease-out',
+                fill: 'forwards',
+                delay: Math.random() * 150 // Stagger the start slightly
+            });
+        };
+
+        if (isFirstToss) {
+            animateBei(bei1_img);
+            animateBei(bei2_img);
+        } else {
+            // If not the first toss, just make them appear without animation
+            bei1_img.style.opacity = 1;
+            bei2_img.style.opacity = 1;
+        }
+        isFirstToss = false;
+
+        // Determine result after a delay to allow animation to be seen
         setTimeout(() => {
-            const buttonWrapper = button.parentElement;
-            if (buttonWrapper) {
-                buttonWrapper.remove();
-            }
-
-            // Simulate tossing two "bei"
-            const bei1 = Math.random() > 0.5 ? 'ping' : 'tu'; // ping: 正, tu: 反
-            const bei2 = Math.random() > 0.5 ? 'ping' : 'tu';
-
-            const animationClass = isFirstToss ? ' animated' : '';
-            isFirstToss = false; // Animation only happens on the very first toss
-
-            beiContainer.innerHTML = `
-                <img src="static/${bei1}.png" alt="${bei1}" class="bei-image${animationClass}">
-                <img src="static/${bei2}.png" alt="${bei2}" class="bei-image${animationClass}">
-            `;
-            
             let result = '';
-            if (bei1 !== bei2) {
+            if (bei1_result !== bei2_result) {
                 result = '圣杯';
-            } else if (bei1 === 'ping') {
+            } else if (bei1_result === 'ping') {
                 result = '笑杯';
             } else {
                 result = '阴杯';
@@ -162,7 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     setTimeout(shakeLottle, 2000);
                 }
             }
-        }, 1500);
+        }, 1300); // Wait for animation to mostly finish
     }
 
     function displayResult() {

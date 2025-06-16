@@ -948,19 +948,7 @@ html, body {
 .bei-image {
     width: 80px;
     height: 80px;
-}
-
-.bei-image.animated {
-    animation: toss-animation 1s ease-out;
-}
-
-@keyframes toss-animation {
-    0% {
-        transform: translateY(-100px) rotate(0deg);
-        opacity: 0;
-    }
-    100% {
-        transform: translateY(0) rotate(720deg);
-        opacity: 1;
-    }
+    opacity: 0; /* Start as invisible, JS will control visibility */
+    position: relative; /* Needed for JS animation */
+    will-change: transform, opacity; /* Performance optimization */
 }
