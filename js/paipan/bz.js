@@ -74,7 +74,7 @@ function formatBaziForAI(baziResult, selectedOption = null) {
         const optionId = selectedOption.id;
 
         // 命格总论：显示所有大运
-        if (optionId === 'ai-mingge-zonglun') { // 假设总论按钮也有ID
+        if (optionId === 'ai-mingge-zonglun') {
             result += `### 大运\n`;
             result += `* **起运**: ${baziResult.qyy_desc}\n`;
             baziResult.dy.forEach(yun => {
@@ -138,7 +138,8 @@ function formatBaziForAI(baziResult, selectedOption = null) {
                 }
                 result += `\n`;
             }
-            // 对于"事业财运"、"感情婚姻"、"健康状况"等问题，只提供当前大运信息，让AI聚焦分析，不额外添加流年。
+            // 对于"当前大运"、"事业财运"、"感情婚姻"、"健康状况"等问题，
+            // 只需提供当前大运信息，让AI根据按钮上详细的data-default-text聚焦分析，无需额外添加流年。
         }
     } else {
         // Fallback for no selected option, show all dayun as default
