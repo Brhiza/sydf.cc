@@ -1,4 +1,3 @@
-
 function getWuxingClass(char) {
     const wuxingMap = ['shui', 'mu', 'huo', 'tu', 'jin']; // 修正五行顺序以匹配 calendar.js
     const tgIndex = window.calendar.ctg.indexOf(char);
@@ -68,63 +67,89 @@ function formatBaziForAI(baziResult, selectedOption = null) {
     result += `* **五行个数**: 水(${baziResult.nwx[0]}), 木(${baziResult.nwx[1]}), 火(${baziResult.nwx[2]}), 土(${baziResult.nwx[3]}), 金(${baziResult.nwx[4]})\n\n`;
 
 
-    result += `### 大运\n`;
-    result += `* **起运**: ${baziResult.qyy_desc}\n`;
-    baziResult.dy.forEach(yun => {
-        const tenGodGan = window.calendar.ssq[window.calendar.dgs[yun.zfman][baziResult.tg[2]]];
-        const tenGodZhi = window.calendar.ssq[window.calendar.dzs[yun.zfmbn][baziResult.tg[2]]];
-        result += `* **${yun.syear} - ${yun.eyear} (${yun.zqage}-${yun.zboz}岁)**: ${yun.zfma}${yun.zfmb} (${tenGodGan}, ${tenGodZhi})\n`;
-    });
-    result += `\n`;
+    const currentYear = new Date().getFullYear();
+    const currentLuckCycle = baziResult.dy.find(yun => currentYear >= yun.syear && currentYear <= yun.eyear);
 
-    // Conditionally add Liunian (Flowing Years) info
     if (selectedOption) {
-        const questionText = selectedOption.dataset.defaultText || '';
-        const currentYear = new Date().getFullYear();
-        let relevantYears = [];
-        let title = '';
+        const optionId = selectedOption.id;
 
-        if (questionText.includes('流年') && !questionText.includes('年运')) { //流年
-            relevantYears.push(currentYear);
-            title = '### 流年信息\n';
-        } else if (questionText.includes('年运')) { // 年运
-            relevantYears.push(currentYear);
-            title = '### 流年信息\n';
-        } else if (questionText.includes('三年')) { // 三年
-            relevantYears.push(currentYear, currentYear + 1, currentYear + 2);
-            title = '### 流年信息\n';
-        } else if (
-            questionText.includes('事业财运') ||
-            questionText.includes('感情婚姻') ||
-            questionText.includes('家庭/人际') ||
-            questionText.includes('健康')
-        ) {
-            // No liunian for these topics
-        } else {
-            // Default for '综合', '大运', '自定义'
-            const currentLuckCycle = baziResult.dy.find(yun => currentYear >= yun.syear && currentYear <= yun.eyear);
-            if (currentLuckCycle) {
-                result += `### 当前大运流年\n`;
-                currentLuckCycle.ly.forEach(liunian => {
-                    result += `  - ${liunian.year}年 (${liunian.age}岁): ${liunian.lye}\n`;
-                });
+        // 命格总论：显示所有大运
+        if (optionId === 'ai-mingge-zonglun') { // 假设总论按钮也有ID
+            result += `### 大运\n`;
+            result += `* **起运**: ${baziResult.qyy_desc}\n`;
+            baziResult.dy.forEach(yun => {
+                const tenGodGan = window.calendar.ssq[window.calendar.dgs[yun.zfman][baziResult.tg[2]]];
+                const tenGodZhi = window.calendar.ssq[window.calendar.dzs[yun.zfmbn][baziResult.tg[2]]];
+                result += `* **${yun.syear} - ${yun.eyear} (${yun.zqage}-${yun.zboz}岁)**: ${yun.zfma}${yun.zfmb} (${tenGodGan}, ${tenGodZhi})\n`;
+            });
+            result += `\n`;
+        }
+        // 其他所有情况，都只显示当前大运和相关流年
+        else if (currentLuckCycle) {
+            result += `### 当前大运\n`;
+            const tenGodGan = window.calendar.ssq[window.calendar.dgs[currentLuckCycle.zfman][baziResult.tg[2]]];
+            const tenGodZhi = window.calendar.ssq[window.calendar.dzs[currentLuckCycle.zfmbn][baziResult.tg[2]]];
+            result += `* **${currentLuckCycle.syear} - ${currentLuckCycle.eyear} (${currentLuckCycle.zqage}-${currentLuckCycle.zboz}岁)**: ${currentLuckCycle.zfma}${currentLuckCycle.zfmb} (${tenGodGan}, ${tenGodZhi})\n\n`;
+
+            const getYearInfo = (year) => {
+                const age = year - baziResult.gl[0] + 1;
+                let yearGZ = '', tenGodGan = '', tenGodZhi = '';
+
+                if (baziResult.baziYear && baziResult.sz[0]) {
+                    const birthYearGZIndex = window.calendar.gz.indexOf(baziResult.sz[0]);
+                    if (birthYearGZIndex !== -1) {
+                        const yearOffset = year - baziResult.baziYear;
+                        const yearGZIndex = (birthYearGZIndex + yearOffset + 60) % 60;
+                        yearGZ = window.calendar.gz[yearGZIndex];
+                        
+                        const yearGan = window.calendar.ctg[yearGZIndex % 10];
+                        const yearZhi = window.calendar.cdz[yearGZIndex % 12];
+                        
+                        const riGanIndex = baziResult.tg[2];
+                        tenGodGan = window.calendar.ssq[window.calendar.dgs[window.calendar.ctg.indexOf(yearGan)][riGanIndex]];
+                        tenGodZhi = window.calendar.ssq[window.calendar.dzs[window.calendar.cdz.indexOf(yearZhi)][riGanIndex]];
+                    }
+                }
+                return { age, yearGZ, tenGodGan, tenGodZhi };
+            };
+
+            if (optionId === 'ai-this-year' || optionId === 'ai-year-analysis') {
+                const { age, yearGZ, tenGodGan, tenGodZhi } = getYearInfo(currentYear);
+                result += `### 流年信息\n`;
+                result += `* **年份**: ${currentYear}年 (${age}岁)\n`;
+                result += `* **干支**: ${yearGZ} (${tenGodGan}, ${tenGodZhi})\n`;
+
+                if (optionId === 'ai-year-analysis') {
+                    try {
+                        result += getMonthlyFortuneDetails(currentYear, yearGZ);
+                    } catch (e) {
+                        console.error("生成逐月信息失败:", e);
+                        result += "\n生成逐月信息时发生错误，请检查控制台。\n";
+                    }
+                } else {
+                    result += '\n';
+                }
+            } else if (optionId === 'ai-next-three-years') {
+                result += `### 未来三年流年信息\n`;
+                for (let i = 0; i < 3; i++) {
+                    const yearToFind = currentYear + i;
+                    const { age, yearGZ, tenGodGan, tenGodZhi } = getYearInfo(yearToFind);
+                    result += `* ${yearToFind}年 (${age}岁): ${yearGZ} (${tenGodGan}, ${tenGodZhi})\n`;
+                }
                 result += `\n`;
             }
+            // 对于"事业财运"、"感情婚姻"、"健康状况"等问题，只提供当前大运信息，让AI聚焦分析，不额外添加流年。
         }
-
-        if (relevantYears.length > 0) {
-            let liunianResult = '';
-            baziResult.dy.forEach(yun => {
-                yun.ly.forEach(liunian => {
-                    if (relevantYears.includes(liunian.year)) {
-                        liunianResult += `  - ${liunian.year}年 (${liunian.age}岁): ${liunian.lye}\n`;
-                    }
-                });
-            });
-            if (liunianResult) {
-                result += title + liunianResult + '\n';
-            }
-        }
+    } else {
+        // Fallback for no selected option, show all dayun as default
+        result += `### 大运\n`;
+        result += `* **起运**: ${baziResult.qyy_desc}\n`;
+        baziResult.dy.forEach(yun => {
+            const tenGodGan = window.calendar.ssq[window.calendar.dgs[yun.zfman][baziResult.tg[2]]];
+            const tenGodZhi = window.calendar.ssq[window.calendar.dzs[yun.zfmbn][baziResult.tg[2]]];
+            result += `* **${yun.syear} - ${yun.eyear} (${yun.zqage}-${yun.zboz}岁)**: ${yun.zfma}${yun.zfmb} (${tenGodGan}, ${tenGodZhi})\n`;
+        });
+        result += `\n`;
     }
 
     return result;
@@ -278,26 +303,68 @@ function generateAstrolabeForPerson(personNumber, year, month, day, timeIndex, g
     }
 }
 
-function getLunarCalendarInfoForYear(year) {
-    let info = `\n\n${year}年 农历月历参考：\n`;
-    const [mc, sjd] = window.calendar.GetZQandSMandLunarMonthCode(year);
+function getMonthlyFortuneDetails(year, yearGZ = '') {
+    const displayGZ = yearGZ ? ` (${yearGZ})` : '';
+    let info = `\n### ${year}年${displayGZ} 逐月运势分析参考\n`;
     
-    for (let i = 0; i < sjd.length - 1; i++) {
-        const monthCode = mc[i];
-        if (monthCode < 2) continue;
+    // 1. 获取该年及后一年的节气数据
+    const jqDataCurr = window.calendar.GetAdjustedJQ(year, false);
+    const jqDataNext = window.calendar.GetAdjustedJQ(year + 1, false);
 
-        const monthName = window.calendar.dxy[Math.floor(monthCode - 2) % 12];
-        const isLeap = monthCode !== Math.floor(monthCode);
-        const startDate = window.calendar.Jtime(sjd[i]);
-        const endDate = window.calendar.Jtime(sjd[i+1] - 1);
+    // 2. 获取年干用于五虎遁元
+    // 我们需要的是节气年，所以用立春来判断
+    const liChunJd = jqDataCurr[21];
+    const dateForGz = window.calendar.Jtime(liChunJd + 1); // 立春后一天肯定属于该节气年
+    const baziForYear = window.p.GetGZ(dateForGz[0], dateForGz[1], dateForGz[2], dateForGz[3], dateForGz[4], dateForGz[5]);
+    const yearGanIndex = baziForYear[0][0]; // 年干索引
 
-        const gzYear = window.p.GetGZ(year, 1, 1, 0, 0, 0)[2].ty;
-        const monthGZIndex = (gzYear % 5) * 12 + 2 + Math.floor(monthCode - 2);
-        const monthGZ = window.calendar.gz[(monthGZIndex + 60) % 60];
+    // 3. 五虎遁元计算月干的起始
+    const tigerMonthGan = [2, 4, 6, 8, 0]; // 丙, 戊, 庚, 壬, 甲
+    const monthGanStart = tigerMonthGan[Math.floor(yearGanIndex / 2)];
 
-        info += `农历${isLeap ? '闰' : ''}${monthName}(${monthGZ}月): 西历${startDate[0]}年${startDate[1]}月${startDate[2]}日 - ${endDate[0]}年${endDate[1]}月${endDate[2]}日\n`;
+    // 4. 循环生成每个月的信息
+    const lunarMonths = ['正月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'];
+    
+    // 节气索引: 立春(21) -> 惊蛰(23) -> ... -> 大寒(20)
+    const jqIndices = [21, 23, 1, 3, 5, 7, 9, 11, 13, 15, 17, 19];
+    
+    for (let i = 0; i < 12; i++) {
+        const monthName = lunarMonths[i];
+        
+        // 计算月干支
+        const monthGan = window.calendar.ctg[(monthGanStart + i) % 10];
+        const monthZhi = window.calendar.cdz[(i + 2) % 12]; // 寅月(正月)地支索引是2
+        const monthGZ = monthGan + monthZhi;
+
+        // 获取节气开始和结束的儒略日
+        let startJd, endJd;
+        const currentJqIndex = jqIndices[i];
+
+        startJd = jqDataCurr[currentJqIndex];
+        
+        const nextMonthIndex = (i + 1) % 12;
+        const nextJqIndex = jqIndices[nextMonthIndex];
+
+        if (nextJqIndex >= 21) {
+             // 如果下个月是立春或惊蛰，那它在下一年的数据里
+             if (i === 11) { // 当前是腊月，下一个是正月
+                endJd = jqDataNext[nextJqIndex];
+             } else {
+                endJd = jqDataCurr[nextJqIndex];
+             }
+        } else {
+            endJd = jqDataCurr[nextJqIndex];
+        }
+
+
+        // 转换日期
+        const startDate = window.calendar.Jtime(startJd);
+        const endDate = window.calendar.Jtime(endJd - 0.00001); // 减去一点点时间，确保是前一天
+
+        info += `* **农历${monthName} ${monthGZ}月** (西历${startDate[1]}.${startDate[2]} - ${endDate[1]}.${endDate[2]})\n`;
     }
-    return info;
+
+    return info + '\n';
 }
 
 
@@ -306,18 +373,19 @@ document.addEventListener('DOMContentLoaded', () => {
         chartingFunction: generateAstrolabeForPerson,
         getAIPrompt: (questionText, selectedOption) => {
             const baziData = window.baziResult1 ? formatBaziForAI(window.baziResult1, selectedOption) : "无法获取命盘数据。";
-            let prompt = `你是一个精通八字命理的AI大师，现在是${new Date().toLocaleString()}，请基于以下命盘数据回答问题。\n\n---\n\n${baziData}\n\n---\n\n**问题**: ${questionText}\n\n---\n\n**分析要求**:\n1. **深入浅出**: 请使用通俗易懂的语言和生活化的比喻来解释专业的命理概念。分析的最终目的是为了给用户提供清晰的指引，而不是展示术语。\n2. **先定性，后定量**: 先对命格的核心特点（如性格、优势、挑战）进行定性描述，再结合大运流年进行定量的运势分析。\n3. **积极正向**: 所有的分析都应以积极、善意的视角出发。在指出潜在的挑战或风险时，必须同步提供具体的、可操作的规避方法或转化策略，避免宿命论和不必要的焦虑。\n4. **聚焦建议**: 最终的落脚点是提供清晰、可行的建议。无论是事业、感情还是健康，都要给出用户在现实生活中可以参考和实践的指引。`;
+            let prompt = `你是一个精通八字命理的AI大师，请基于以下命盘数据回答问题。\n\n---\n\n${baziData}\n\n---\n\n**问题**: ${questionText}\n\n---\n\n**分析要求**:\n1. **深入浅出**: 请使用通俗易懂的语言和生活化的比喻来解释专业的命理概念。分析的最终目的是为了给用户提供清晰的指引，而不是展示术语。\n2. **先定性，后定量**: 先对命格的核心特点（如性格、优势、挑战）进行定性描述，再结合大运流年进行定量的运势分析。\n3. **积极正向**: 所有的分析都应以积极、善意的视角出发。在指出潜在的挑战或风险时，必须同步提供具体的、可操作的规避方法或转化策略，避免宿命论和不必要的焦虑。\n4. **聚焦建议**: 最终的落脚点是提供清晰、可行的建议。无论是事业、感情还是健康，都要给出用户在现实生活中可以参考和实践的指引。`;
             
-            if (selectedOption && selectedOption.dataset.defaultText && selectedOption.dataset.defaultText.includes("今年每一个月的运势")) {
-                const year = new Date().getFullYear();
-                prompt += getLunarCalendarInfoForYear(year);
+            // 为“年运分析”添加特定的、更详细的分析要求
+            if (selectedOption && selectedOption.dataset.defaultText && selectedOption.dataset.defaultText.includes("年运分析")) {
+                prompt += `\n\n**特别分析要求（年运分析）**:\n1. **总览先行**: 首先对今年的流年与命盘、大运的整体关系进行一个简要的总评，定下全年运势的基调。\n2. **逐月深入**: 严格按照上面提供的“逐月运势分析参考”列表，逐一分析每个月。\n3. **结合分析**: 每个月的分析都必须结合该月的**干支**与**原命局、大运、流年**产生的生克制化关系来展开。\n4. **具体指引**: 明确指出每个月在事业、财运、感情、健康等方面的**具体机遇和注意事项**。语言要通俗易懂，给出可操作的建议。`;
             }
+
             return prompt;
         },
         getCompatibilityPrompt: (questionText) => {
             const baziData1 = window.baziResult1 ? formatBaziForAI(window.baziResult1) : "无法获取第一人命盘数据。";
             const baziData2 = window.baziResult2 ? formatBaziForAI(window.baziResult2) : "无法获取第二人命盘数据。";
-            return `你是一个精通八字合婚的AI大师，现在是${new Date().toLocaleString()}，请基于以下两个命盘数据进行合盘分析。\n\n# 第一人命盘\n${baziData1}\n\n# 第二人命盘\n${baziData2}\n\n---\n\n**问题**: ${questionText}\n\n---\n\n**分析要求**:\n1. **通俗易懂**: 用生活化的语言解释双方的互动模式，避免生涩的专业术语。\n2. **突出重点**: 聚焦于双方性格的吸引点、潜在的矛盾点，以及五行能量的互补性。\n3. **关系导向**: 分析的目的不是给出“合”或“不合”的简单结论，而是深入剖析双方的相处之道。\n4. **提供策略**: 必须提供具体的、可操作的建议，用于促进双方关系的和谐发展，以及如何化解潜在的矛盾。`;
+            return `你是一个精通八字合婚的AI大师，请基于以下两个命盘数据进行合盘分析。\n\n# 第一人命盘\n${baziData1}\n\n# 第二人命盘\n${baziData2}\n\n---\n\n**问题**: ${questionText}\n\n---\n\n**分析要求**:\n1. **通俗易懂**: 用生活化的语言解释双方的互动模式，避免生涩的专业术语。\n2. **突出重点**: 聚焦于双方性格的吸引点、潜在的矛盾点，以及五行能量的互补性。\n3. **关系导向**: 分析的目的不是给出“合”或“不合”的简单结论，而是深入剖析双方的相处之道。\n4. **提供策略**: 必须提供具体的、可操作的建议，用于促进双方关系的和谐发展，以及如何化解潜在的矛盾。`;
         }
     });
 });

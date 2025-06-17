@@ -114,7 +114,7 @@
         
         <div id="aiQuestionContainer" style="display:none;">
             <div id="aiQuestionOptions">
-                <button class="unified-button" data-default-text="请对该命盘进行一次全面、深入、详尽的命格总论分析，内容需丰富详实，至少1500字。分析需严格按照以下结构展开：
+                <button class="unified-button" data-default-text="请对该命盘进行一次全面、深入、详尽的命格总论分析，内容需丰富详实。分析需严格按照以下结构展开：
 
 1.  **命局核心提要**：
     *   **日主与五行**：分析日主的特性以及命局中五行（金木水火土）的分布、力量与平衡状况。
@@ -135,11 +135,12 @@
     *   **大运趋势**：简要概括未来几步大运（每步大运为十年）的整体走势起伏，点明人生的几个关键转折期。
     *   **核心指导与人生课题**：综合以上所有分析，为命主提炼出最核心、最重要的人生发展建议。明确指出TA此生的主要人生课题是什么，并提供具体的、可操作的策略来帮助TA扬长避短、趋吉避凶，更好地实现人生价值。" onclick="selectOption(this, 'single')">命格总论</button>
                 <button class="unified-button" data-default-text="请详细分析命主当前所处的这步大运。说明这步大运的干支对原局的作用（合、冲、刑、害），并结合十神和星运，解读在此期间事业、财运、感情和健康方面的主要机遇和挑战。最后，提供针对性的行事建议。" onclick="selectOption(this, 'single')">当前大运</button>
-                <button class="unified-button" data-default-text="请详细分析命主在今年的流年运势。说明流年干支与命局、大运的相互作用。重点解读事业、财运、感情、健康四个方面的具体情况，并指出需要特别注意的月份和关键的转折点。" onclick="selectOption(this, 'single')">今年运势</button>
+                <button id="ai-this-year" class="unified-button" data-default-text="请详细分析命主在今年的流年运势。说明流年干支与命局、大运的相互作用。重点解读事业、财运、感情、健康四个方面的具体情况，并指出需要特别注意的月份和关键的转折点。" onclick="selectOption(this, 'single')">今年运势</button>
+                <button id="ai-year-analysis" class="unified-button" data-default-text="请分析我今年的年运，并详细解读每个农历月的运势。" onclick="selectOption(this, 'single')">年运分析</button>
                 <button class="unified-button" data-default-text="请深入分析该命局的事业发展和财富轨迹。结合其格局和喜用神，判断最适合的行业领域和职业方向。分析其事业上的贵人、阻碍以及关键的晋升或变动时期。同时，评估其财富能量、求财方式和需要注意的理财策略。" onclick="selectOption(this, 'single')">事业财运</button>
                 <button class="unified-button" data-default-text="请深入分析该命局的感情婚姻状况。结合夫妻宫（日支）和相关十神，解读其感情观、择偶偏好以及婚姻生活的特点。分析其感情运势的起伏，指出正缘桃花出现的可能年份，并对维系和谐的亲密关系提供建议。" onclick="selectOption(this, 'single')">感情婚姻</button>
                 <button class="unified-button" data-default-text="请根据该命局的五行平衡状况，分析其先天的体质特点和需要注意的健康问题。指出哪些器官或系统较为薄弱，并结合大运流年，提示在哪些时期需要特别关注保养。最后，提供符合其命理的养生建议。" onclick="selectOption(this, 'single')">健康状况</button>
-                <button class="unified-button" data-default-text="请分析命主在未来三年的流年运势。逐年说明运势的起伏变化，并给出每年在事业、感情、生活等方面的规划建议和注意事项。" onclick="selectOption(this, 'single')">未来三年</button>
+                <button id="ai-next-three-years" class="unified-button" data-default-text="请分析命主在未来三年的流年运势。逐年说明运势的起伏变化，并给出每年在事业、感情、生活等方面的规划建议和注意事项。" onclick="selectOption(this, 'single')">未来三年</button>
                 <button class="unified-button" onclick="showCustomInput('single'); selectOption(this, 'single');">自定义...</button>
             </div>
             <div id="customQuestionContainer" style="width: 100%; margin-top: 10px;">

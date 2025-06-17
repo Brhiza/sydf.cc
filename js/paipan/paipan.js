@@ -533,6 +533,7 @@ const getPillarLifeStages = (riGan, baziDz) => {
     });
 };
 rt['pillarLifeStages'] = getPillarLifeStages(rt['ctg'][2], rt['cdz']);
+rt['baziYear'] = ob.ty; // 添加八字所在的节气年，用于精确计算流年
           return rt;
       };
  this.queryShenSha = function(pillarGZ, baziArray, isMan, pillarIndex) {
