@@ -1,9 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
     // --- Start of content from ui.js ---
 
-    // 定义全局变量来存储星盘数据
-    window.astrolabe1 = null;
-    window.astrolabe2 = null;
+    // 将星盘数据存储在局部变量中，避免污染全局作用域
+    let astrolabe1 = null;
+    let astrolabe2 = null;
 
     // 缓存 DOM 元素
     const dom = {
@@ -30,7 +30,11 @@ document.addEventListener('DOMContentLoaded', function() {
         combinedAnalysisContainer: document.getElementById('combinedAnalysisContainer'),
         combinedQuestionOptions: document.getElementById('combinedQuestionOptions'),
         customCombinedQuestion: document.getElementById('customCombinedQuestion'),
-        mainContainer: document.querySelector('.container')
+        mainContainer: document.querySelector('.container'),
+        // 新增交互按钮
+        generateButton: document.getElementById('generateAstrolabe'),
+        askAIButton: document.getElementById('askAI'),
+        askAIForCompatibilityButton: document.getElementById('askAIForCompatibility')
     };
 
     // 性别选择事件监听 - 只处理视觉状态
@@ -59,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    window.setDefaultOption = function(type = 'single') {
+    function setDefaultOption(type = 'single') {
         const containerId = type === 'combined' ? 'combinedQuestionOptions' : 'aiQuestionOptions';
         const container = document.getElementById(containerId);
         if (container) {
@@ -68,27 +72,29 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    window.toggleSecondPersonInputs = function() {
+    function toggleSecondPersonInputs() {
         if (!dom.enableSecondPerson) return;
         const isChecked = dom.enableSecondPerson.checked;
         dom.secondPersonInputs.style.display = isChecked ? 'block' : 'none';
         if (!isChecked) {
             dom.result2Div.innerHTML = '';
             dom.result2Div.style.display = 'none';
-            dom.combinedAnalysisContainer.style.display = 'none';
+            if (dom.combinedAnalysisContainer) dom.combinedAnalysisContainer.style.display = 'none';
         }
     }
 
-    window.selectOption = function(button, type = 'single') {
+    function selectOption(button, type = 'single') {
         const optionsContainer = type === 'combined' ? dom.combinedQuestionOptions : dom.aiQuestionOptions;
         const customInput = type === 'combined' ? dom.customCombinedQuestion : dom.customQuestion;
         
+        if (!optionsContainer) return;
+
         // First, manage the visual selection state of buttons
         optionsContainer.querySelectorAll('.unified-button').forEach(btn => btn.classList.remove('selected'));
         button.classList.add('selected');
     
         // Now, manage the visibility of the custom input box
-        if (button.textContent.trim() === '自定义...') {
+        if (button.dataset.prompt === '') { // Custom buttons have an empty prompt
             customInput.style.display = 'block';
             customInput.focus();
         } else {
@@ -96,130 +102,76 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-        function createInspirationCardHTML(isCombined = false) {
-            const tabsHTML = `
-                <div class="inspiration-tabs">
-                    <button class="tab-btn active" data-tab="ganqing">感情类</button>
-                    <button class="tab-btn" data-tab="shiye">事业类</button>
-                    <button class="tab-btn" data-tab="caifu">财富类</button>
-                    <button class="tab-btn" data-tab="renji">人际关系类</button>
-                    <button class="tab-btn" data-tab="rensheng">人生长成类</button>
-                </div>`;
-        
-            const contentHTML = `
-                <div class="inspiration-content">
-                    <div class="tab-pane active" id="ganqing">
-                        <div class="question-group">
-                            <h4>情感发展</h4>
-                            <div class="questions-grid">
-                                <p>我近期的桃花运怎么样？</p><p>我们目前的感情走向如何？</p><p>他/她对我的真实情感是什么？</p><p>我们之间有未来吗？</p><p>如何改善我们目前的关系？</p><p>这段感情对我的影响？</p>
-                            </div>
-                        </div>
-                        <div class="question-group">
-                            <h4>正缘婚姻</h4>
-                            <div class="questions-grid">
-                                <p>我的正缘什么时候出现？</p><p>我的另一半是什么样的人？</p><p>我何时会结婚？</p><p>我适合和现在的对象结婚吗？</p><p>我的婚姻生活会幸福吗？</p><p>如何吸引我的正缘桃花？</p>
-                            </div>
-                        </div>
-                        <div class="question-group">
-                            <h4>关系难题</h4>
-                            <div class="questions-grid">
-                                <p>我们之间出了什么问题？</p><p>如何解决现在的感情危机？</p><p>我们有机会复合吗？</p><p>我应该放弃这段感情吗？</p><p>我和Ta的缘分有多深？</p><p>我的灵魂伴侣有什么特征？</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="tab-pane" id="shiye">
-                        <div class="question-group"><h4>事业发展</h4><div class="questions-grid"><p>我适合现在的工作/行业吗？</p><p>我的事业什么时候能成功？</p><p>我适合跳槽还是继续坚守？</p><p>我事业上的贵人会是谁？</p><p>我未来的事业走向怎么样？</p><p>我什么时候能找到满意的工作？</p></div></div>
-                        <div class="question-group"><h4>职场机遇</h4><div class="questions-grid"><p>我今年有机会升职加薪吗？</p><p>如何得到领导的赏识和重用？</p><p>我在公司的发展前景如何？</p><p>如何改善我的职场人际关系？</p><p>如何改善当前的工作状态？</p><p>我最近的职场人际运如何？</p></div></div>
-                        <div class="question-group"><h4>创业之路</h4><div class="questions-grid"><p>我适合创业吗？</p><p>我的创业最佳时机是什么时候？</p><p>我该和什么样的人合伙？</p><p>我的创业项目前景如何？</p><p>创业过程中需要注意哪些风险？</p><p>我的创业会成功吗？</p></div></div>
-                    </div>
-                    <div class="tab-pane" id="caifu">
-                        <div class="question-group"><h4>财运趋势</h4><div class="questions-grid"><p>我近期的财运怎么样？</p><p>我这辈子财运的整体趋势？</p><p>我什么时候能发财？</p><p>我适合靠什么方式赚钱？</p><p>如何有效提升我的财运？</p><p>我近期会有意外之财吗？</p></div></div>
-                        <div class="question-group"><h4>投资理财</h4><div class="questions-grid"><p>我适合做投资吗？</p><p>我应该选择什么样的投资方向？</p><p>这个投资项目能赚钱吗？</p><p>如何才能守住我的财富？</p><p>我的投资风险大吗？</p><p>如何更好地管理我的财富？</p></div></div>
-                        <div class="question-group"><h4>财务状况</h4><div class="questions-grid"><p>我为什么总是存不住钱？</p><p>是什么原因导致我财务紧张？</p><p>我最近会有破财风险吗？</p><p>如何避免不必要的财务损失？</p><p>我需要注意哪些年份的破财？</p><p>我该如何处理我的债务问题？</p></div></div>
-                    </div>
-                    <div class="tab-pane" id="renji">
-                        <div class="question-group"><h4>社交模式</h4><div class="questions-grid"><p>我的人际交往模式有何优缺点？</p><p>如何拓展我的高质量社交圈？</p><p>我目前的人际关系状态如何？</p><p>我会吸引哪些人进入我的生活？</p><p>如何获得他人的信任与支持？</p><p>如何处理与朋友的矛盾？</p></div></div>
-                        <div class="question-group"><h4>贵人善缘</h4><div class="questions-grid"><p>什么样的朋友是我的贵人？</p><p>我应该远离什么样的朋友？</p><p>如何结交更多志同道合的朋友？</p><p>我该如何维系重要的友谊？</p><p>我该信任我身边的朋友吗？</p><p>如何获得领导或长辈的赏识？</p></div></div>
-                        <div class="question-group"><h4>家庭关系</h4><div class="questions-grid"><p>我和家人的关系怎么样？</p><p>我的家庭对我有什么样的影响？</p><p>如何改善我与家人的关系？</p><p>我该如何处理家庭矛盾？</p><p>我与家人的缘分有多深？</p><p>如何更好地与家人沟通？</p></div></div>
-                    </div>
-                    <div class="tab-pane" id="rensheng">
-                        <div class="question-group"><h4>学业规划</h4><div class="questions-grid"><p>我的学业运势如何？</p><p>我适合考研/考公吗？</p><p>我适合继续深造还是工作？</p><p>如何提升我的学习效率？</p><p>我该选择哪个专业/学校？</p><p>我这次考试能通过吗？</p></div></div>
-                        <div class="question-group"><h4>个人成长</h4><div class="questions-grid"><p>我的性格优势和劣势是什么？</p><p>我的人生主要课题是什么？</p><p>如何找到我的人生方向？</p><p>如何克服我性格中的弱点？</p><p>如何有效提升自己的能量状态？</p><p>我的人生转折点在何时？</p></div></div>
-                        <div class="question-group"><h4>人生机遇</h4><div class="questions-grid"><p>我未来十年的人生大运怎么样？</p><p>我该如何实现我的人生目标？</p><p>我的人生会有什么重大机遇？</p><p>我应该注意哪些健康问题？</p><p>如何才能活出更精彩的人生？</p><p>未来的人生之路走向如何？</p></div></div>
-                    </div>
-                </div>`;
-        
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(`<div>${contentHTML}</div>`, 'text/html');
-        
-            if (isCombined) {
-                const allPanes = doc.querySelectorAll('.tab-pane');
-                allPanes.forEach(pane => {
-                    if (pane.id !== 'ganqing') {
-                        pane.remove();
+    function createInspirationCard(isCombined = false) {
+        const template = document.getElementById('inspirationCardTemplate');
+        if (!template) return null;
+
+        const cardClone = template.content.cloneNode(true);
+        const cardElement = cardClone.querySelector('.inspiration-card');
+
+        if (isCombined) {
+            // For combined analysis, remove tabs and all panes except 'ganqing'
+            const tabs = cardElement.querySelector('.inspiration-tabs');
+            if (tabs) tabs.remove();
+            
+            const allPanes = cardElement.querySelectorAll('.tab-pane');
+            allPanes.forEach(pane => {
+                if (pane.id !== 'ganqing') {
+                    pane.remove();
+                }
+            });
+        }
+
+        return cardElement;
+    }
+
+    function attachInspirationCardListeners(cardElement, type = 'single') {
+        const tabs = cardElement.querySelectorAll('.tab-btn');
+        const panes = cardElement.querySelectorAll('.tab-pane');
+        const questions = cardElement.querySelectorAll('.questions-grid p');
+    
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+    
+                const targetPaneId = tab.getAttribute('data-tab');
+                panes.forEach(pane => {
+                    pane.classList.remove('active');
+                    if (pane.id === targetPaneId) {
+                        pane.classList.add('active');
                     }
                 });
-            }
-        
-            const finalContent = doc.body.firstChild.innerHTML;
-        
-            const html = [
-                '<div class="inspiration-card">',
-                '<h3 class="inspiration-title">问题灵感</h3>',
-                isCombined ? '' : tabsHTML,
-                finalContent,
-                '</div>'
-            ].join('');
-        
-            return html;
-        }
-        
-        function attachInspirationCardListeners(cardElement, type = 'single') {
-                const tabs = cardElement.querySelectorAll('.tab-btn');
-                const panes = cardElement.querySelectorAll('.tab-pane');
-                const questions = cardElement.querySelectorAll('.questions-grid p');
-            
-                tabs.forEach(tab => {
-                    tab.addEventListener('click', () => {
-                        tabs.forEach(t => t.classList.remove('active'));
-                        tab.classList.add('active');
-            
-                        const targetPaneId = tab.getAttribute('data-tab');
-                        panes.forEach(pane => {
-                            pane.classList.remove('active');
-                            if (pane.id === targetPaneId) {
-                                pane.classList.add('active');
-                            }
-                        });
-                    });
-                });
-            
-                questions.forEach(question => {
-                    question.addEventListener('click', () => {
-                        const questionText = question.textContent;
-                        const customInput = type === 'combined' ? dom.customCombinedQuestion : dom.customQuestion;
-                        const optionsContainer = type === 'combined' ? dom.combinedQuestionOptions : dom.aiQuestionOptions;
-                        
-                        // 1. Set the input value
-                        customInput.value = questionText;
-                        
-                        // 2. Find and programmatically select the 'Custom...' button
-                        const customButton = Array.from(optionsContainer.querySelectorAll('.unified-button')).find(btn => btn.textContent.trim() === '自定义...');
-                        if (customButton) {
-                            // This function now correctly handles showing the input field
-                            selectOption(customButton, type);
-                        }
+            });
+        });
     
-                        // 3. Directly trigger the AI query, which will now read the state from the DOM
-                        if (type === 'combined') {
-                            askAIForCompatibility();
-                        } else {
-                            askAI();
-                        }
-                    });
-                });
-            }
+        questions.forEach(question => {
+            question.addEventListener('click', () => {
+                const questionText = question.textContent;
+                const customInput = type === 'combined' ? dom.customCombinedQuestion : dom.customQuestion;
+                const optionsContainer = type === 'combined' ? dom.combinedQuestionOptions : dom.aiQuestionOptions;
+                
+                if (!customInput || !optionsContainer) return;
+
+                // 1. Set the input value
+                customInput.value = questionText;
+                
+                // 2. Find and programmatically select the 'Custom...' button
+                const customButton = Array.from(optionsContainer.querySelectorAll('.unified-button')).find(btn => btn.dataset.prompt === '');
+                if (customButton) {
+                    // This function now correctly handles showing the input field
+                    selectOption(customButton, type);
+                }
+
+                // 3. Directly trigger the AI query
+                if (type === 'combined') {
+                    askAIForCompatibility();
+                } else {
+                    askAI();
+                }
+            });
+        });
+    }
         
         async function handleAIQuery(prompt) {
         let aiResponseDiv = document.getElementById('aiResponse');
@@ -262,13 +214,40 @@ document.addEventListener('DOMContentLoaded', function() {
         chartingFunction: null,
         getAIPrompt: null,
         getCompatibilityPrompt: null,
+        aiPrompts: null, // To hold AI prompt configurations
     };
 
     window.initializePage = function(config) {
         pageConfig = { ...pageConfig, ...config };
+        // Automatically populate buttons on page load if config is available
+        if (pageConfig.aiPrompts) {
+            populateAIOptions();
+        }
     }
 
-    window.generateAstrolabe = function() {
+    function populateAIOptions() {
+        if (!pageConfig.aiPrompts) return;
+
+        const createButtons = (prompts, container) => {
+            if (!container) return;
+            container.innerHTML = ''; // Clear existing buttons
+            if (!prompts) return;
+            prompts.forEach(prompt => {
+                const button = document.createElement('button');
+                button.id = prompt.id;
+                button.className = 'unified-button';
+                button.textContent = prompt.text;
+                button.dataset.prompt = prompt.prompt; // Store full prompt in data attribute
+                button.addEventListener('click', () => selectOption(button, container === dom.combinedQuestionOptions ? 'combined' : 'single'));
+                container.appendChild(button);
+            });
+        };
+
+        createButtons(pageConfig.aiPrompts.single, dom.aiQuestionOptions);
+        createButtons(pageConfig.aiPrompts.combined, dom.combinedQuestionOptions);
+    }
+
+    function generateAstrolabe() {
         const aiResponseDiv = document.getElementById('aiResponse');
         if (aiResponseDiv) {
             aiResponseDiv.innerHTML = '';
@@ -280,8 +259,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const day1Val = dom.day1.value;
         const hour1Val = dom.hour1.value;
         
-        window.astrolabe1 = null;
-        window.astrolabe2 = null;
+        astrolabe1 = null;
+        astrolabe2 = null;
         let allSuccess = true;
 
         const getSelectedGender = (maleBtn, femaleBtn) => {
@@ -297,8 +276,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const month1 = parseInt(month1Val);
             const day1 = parseInt(day1Val);
             const timeIndex1 = parseInt(hour1Val);
-            window.astrolabe1 = pageConfig.chartingFunction(1, year1, month1, day1, timeIndex1, gender1, dom.result1Div);
-            if (!window.astrolabe1) allSuccess = false;
+            astrolabe1 = pageConfig.chartingFunction(1, year1, month1, day1, timeIndex1, gender1, dom.result1Div);
+            if (!astrolabe1) allSuccess = false;
         } else {
             dom.result1Div.innerHTML = '<p style="color: red;">请输入第一个人的完整出生信息！</p>';
             dom.result1Div.style.display = 'block';
@@ -317,8 +296,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 const month2 = parseInt(month2Val);
                 const day2 = parseInt(day2Val);
                 const timeIndex2 = parseInt(hour2Val);
-                window.astrolabe2 = pageConfig.chartingFunction(2, year2, month2, day2, timeIndex2, gender2, dom.result2Div);
-                if (!window.astrolabe2) allSuccess = false;
+                astrolabe2 = pageConfig.chartingFunction(2, year2, month2, day2, timeIndex2, gender2, dom.result2Div);
+                if (!astrolabe2) allSuccess = false;
             } else {
                 dom.result2Div.innerHTML = '<p style="color: red;">请输入第二个人的完整出生信息！</p>';
                 dom.result2Div.style.display = 'block';
@@ -344,24 +323,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (isCombined) {
                 dom.combinedAnalysisContainer.style.display = 'block';
-                dom.combinedQuestionOptions.style.display = 'flex';
+                if (dom.combinedQuestionOptions) dom.combinedQuestionOptions.style.display = 'flex';
                 setDefaultOption('combined');
                 targetElement = dom.combinedAnalysisContainer;
             } else {
                 dom.aiQuestionContainer.style.display = 'block';
-                dom.aiQuestionOptions.style.display = 'flex';
+                if (dom.aiQuestionOptions) dom.aiQuestionOptions.style.display = 'flex';
                 setDefaultOption('single');
                 targetElement = dom.aiQuestionContainer;
             }
 
             // Create and inject the inspiration card
-            const cardHTML = createInspirationCardHTML(isCombined);
-            const cardElement = document.createElement('div');
-            cardElement.innerHTML = cardHTML;
-            // The actual element is the first child of the div
-            const inspirationCard = cardElement.firstChild;
-            targetElement.insertAdjacentElement('afterend', inspirationCard);
-            attachInspirationCardListeners(inspirationCard, isCombined ? 'combined' : 'single');
+            const inspirationCard = createInspirationCard(isCombined);
+            if (inspirationCard) {
+                targetElement.insertAdjacentElement('afterend', inspirationCard);
+                attachInspirationCardListeners(inspirationCard, isCombined ? 'combined' : 'single');
+            }
 
             setTimeout(() => {
                 targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -372,60 +349,56 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    window.askAI = async function() {
-        if (!pageConfig.getAIPrompt) return;
-        const button = dom.aiQuestionContainer.querySelector('.ai-glow-button');
-        const selectedOption = dom.aiQuestionOptions.querySelector('.unified-button.selected');
+    async function executeAIQuery(type) {
+        const isCombined = type === 'combined';
+        const config = {
+            promptFn: isCombined ? pageConfig.getCompatibilityPrompt : pageConfig.getAIPrompt,
+            button: isCombined ? dom.askAIForCompatibilityButton : dom.askAIButton,
+            optionsContainer: isCombined ? dom.combinedQuestionOptions : dom.aiQuestionOptions,
+            customInput: isCombined ? dom.customCombinedQuestion : dom.customQuestion,
+            loadingText: isCombined ? 'AI 合盘中...' : 'AI 思考中...',
+            defaultText: isCombined ? 'AI 合盘分析' : '向 AI 提问'
+        };
+
+        if (!config.promptFn || !config.button || !config.optionsContainer) return;
+
+        const selectedOption = config.optionsContainer.querySelector('.unified-button.selected');
 
         if (!selectedOption) {
             alert("请选择一个问题选项。");
             return;
         }
 
-        const isCustom = selectedOption.textContent.trim() === '自定义...';
-        const questionText = isCustom ? dom.customQuestion.value : selectedOption.dataset.defaultText;
+        const isCustom = selectedOption.dataset.prompt === '';
+        const questionText = isCustom ? config.customInput.value : selectedOption.dataset.prompt;
 
         if (!questionText) {
             alert("问题不能为空，请输入您的问题。");
             return;
         }
 
-        const prompt = pageConfig.getAIPrompt(questionText, selectedOption);
-        
-        button.classList.add('glowing');
+        const prompt = isCombined
+            ? config.promptFn(questionText, astrolabe1, astrolabe2)
+            : config.promptFn(questionText, selectedOption, astrolabe1);
+
+        config.button.disabled = true;
+        config.button.textContent = config.loadingText;
+        config.button.classList.add('glowing');
         try {
             await handleAIQuery(prompt);
         } finally {
-            button.classList.remove('glowing');
+            config.button.disabled = false;
+            config.button.textContent = config.defaultText;
+            config.button.classList.remove('glowing');
         }
     }
 
-    window.askAIForCompatibility = async function() {
-        if (!pageConfig.getCompatibilityPrompt) return;
-        const button = dom.combinedAnalysisContainer.querySelector('.ai-glow-button');
-        const selectedOption = dom.combinedQuestionOptions.querySelector('.unified-button.selected');
+    function askAI() {
+        executeAIQuery('single');
+    }
 
-        if (!selectedOption) {
-            alert("请选择一个问题选项。");
-            return;
-        }
-
-        const isCustom = selectedOption.textContent.trim() === '自定义...';
-        const questionText = isCustom ? dom.customCombinedQuestion.value : selectedOption.dataset.defaultText;
-
-        if (!questionText) {
-            alert("问题不能为空，请输入您的问题。");
-            return;
-        }
-        
-        const prompt = pageConfig.getCompatibilityPrompt(questionText);
-
-        button.classList.add('glowing');
-        try {
-            await handleAIQuery(prompt);
-        } finally {
-            button.classList.remove('glowing');
-        }
+    function askAIForCompatibility() {
+        executeAIQuery('combined');
     }
 
     function loadDataFromURL() {
@@ -498,10 +471,21 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Initial setup from ui.js
-    if (document.getElementById('aiQuestionOptions')) {
-        setDefaultOption('single');
-    }
     loadDataFromURL();
+
+    // --- Event Listeners ---
+    if (dom.generateButton) {
+        dom.generateButton.addEventListener('click', generateAstrolabe);
+    }
+    if (dom.askAIButton) {
+        dom.askAIButton.addEventListener('click', askAI);
+    }
+    if (dom.askAIForCompatibilityButton) {
+        dom.askAIForCompatibilityButton.addEventListener('click', askAIForCompatibility);
+    }
+    if (dom.enableSecondPerson) {
+        dom.enableSecondPerson.addEventListener('change', toggleSecondPersonInputs);
+    }
 
     // --- End of content from ui.js ---
 

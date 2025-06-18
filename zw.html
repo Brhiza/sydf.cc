@@ -60,7 +60,7 @@
         </div>
 
         <div>
-            <input type="checkbox" id="enableSecondPerson" onchange="toggleSecondPersonInputs()">
+            <input type="checkbox" id="enableSecondPerson">
             <label for="enableSecondPerson" style="display: inline; margin-left: 5px;">合盘</label>
         </div>
 
@@ -107,7 +107,7 @@
             </div>
         </div>
 
-        <button class="ai-question-button" onclick="generateAstrolabe()">开始排盘</button>
+        <button id="generateAstrolabe" class="ai-question-button">开始排盘</button>
         <h2>排盘结果:</h2>
         <div id="result" style="display:none;">
             <div class="chart-wrapper">
@@ -125,462 +125,86 @@
         <!-- AI提问容器 -->
         <div id="aiQuestionContainer" style="display:none;">
             <div id="aiQuestionOptions">
-                <button class="unified-button" data-default-text="请对该紫微斗数命盘进行一次全面、深入、详尽的命格总论分析，内容需丰富详实。分析需严格按照以下结构展开：
-
-1.  **命格核心提要**：
-    *   **命宫与身宫**：深度解读命宫和身宫的主星组合，精准判断命格的基本类型和格局层次（例如，“杀破狼”格的开创型，“机月同梁”格的稳定型等）。
-    *   **三方四正**：综合分析命宫、财帛宫、官禄宫、迁移宫的星曜组合，提炼出命主最核心的、贯穿一生的追求与价值观。
-    *   **生年四化**：点明生年四化（禄、权、科、忌）分别落入的宫位和代表的核心含义，揭示命主与生俱来的优势领域和需要特别关注的人生课题。
-
-2.  **性格、能力与天赋**：
-    *   **核心性格**：根据命宫、福德宫的星曜组合，深入剖析命主最核心的性格特质，包括其外在表现和内在真实的思维模式、情感需求。
-    *   **先天优势**：详细描述命主与生俱来的天赋和才能，例如学习能力（文昌、文曲）、沟通表达（巨门）、领导管理（紫微、天府）、抗压能力（七杀、破军）等，并说明这些优势在哪些领域最能得到发挥。
-    *   **潜在挑战**：客观指出命主性格或命格中可能存在的弱点、盲点或潜在的内在冲突（如空劫、煞忌交侵），并解释这些挑战可能在生活中如何体现。
-
-3.  **人生主要领域剖析**：
-    *   **事业格局**：分析官禄宫，判断其事业心的强弱、适合的职业方向、工作环境以及事业上的贵人与阻力。
-    *   **财富机遇**：分析财帛宫和田宅宫，解读其理财观念、财富能量、获取财富的主要方式以及资产积累的潜力。
-    *   **感情婚姻**：分析夫妻宫，解读其感情观、择偶偏好、理想伴侣的类型以及婚姻生活的真实写照。
-    *   **人际互动**：分析仆役宫和兄弟宫，揭示其与朋友、同事、合作伙伴的相处模式和贵人运。
-
-4.  **人生大运总览与核心建议**：
-    *   **大限趋势**：简要概括未来几步大限（每步大限为十年）的整体走势起伏，点明人生的几个关键转折期和黄金发展阶段。
-    *   **核心指导与人生课题**：综合以上所有分析，为命主提炼出最核心、最重要的人生发展建议。明确指出TA此生的主要人生课题是什么，并提供具体的、可操作的策略来帮助TA扬长避短、趋吉避凶，更好地实现人生价值。" onclick="selectOption(this, 'single')">命格总论</button>
-                <button class="unified-button" data-default-text="请详细分析命主当前所处的这步大限（十年运势）。重点解读大限命宫、财帛宫、官禄宫、夫妻宫的星曜组合及四化影响。说明在此期间，命主在事业、财运、感情和人际关系方面的主要机遇和挑战，并提供针对性的发展建议。" onclick="selectOption(this, 'single')">当前大限</button>
-                <button class="unified-button" data-default-text="请详细分析命主在今年的流年运势。重点解读流年命宫、流年四化（禄权科忌）对原局各宫位的影响。具体分析事业、财运、感情、健康四个方面的运势走向，并指出需要特别注意的关键月份。" onclick="selectOption(this, 'single')">今年运势</button>
-                <button class="unified-button" data-default-text="请深入分析该命盘的事业发展潜力。重点解读官禄宫和三方四正的星曜组合，判断其事业心、领导力、适合的职业方向（如创业、职场、技术、艺术等）。结合大限走势，分析其职业生涯的关键上升期和可能遇到的瓶颈。" onclick="selectOption(this, 'single')">事业格局</button>
-                <button class="unified-button" data-default-text="请深入分析该命盘的财富格局。重点解读财帛宫和田宅宫，判断其理财观念、财富能量、主要收入来源和资产积累能力。分析其一生的财运起伏，并提供符合其命盘特性的求财和守财建议。" onclick="selectOption(this, 'single')">财富机遇</button>
-                <button class="unified-button" data-default-text="请深入分析该命盘的感情与婚姻状况。重点解读夫妻宫，分析其对待感情的态度、理想伴侣的类型以及婚姻生活的真实写照。结合大限和流年，判断感情运势的起伏和正缘出现的可能时机，并为经营长期稳定的亲密关系提供建议。" onclick="selectOption(this, 'single')">感情婚姻</button>
-                <button class="unified-button" data-default-text="请分析该命盘的人际关系模式。重点解读兄弟宫（与同辈、朋友）和仆役宫（与下属、合作者），评估其社交能力、贵人运和需要注意的人际交往问题。提供改善人际互动、化解潜在矛盾的具体方法。" onclick="selectOption(this, 'single')">人际关系</button>
-                <button class="unified-button" onclick="selectOption(this, 'single');">自定义...</button>
+                <!-- AI options will be dynamically generated here -->
             </div>
             <div id="customQuestionContainer" style="width: 100%; margin-top: 10px;">
                 <input type="text" id="customQuestion" placeholder="请输入您的问题" style="display: none; width: 100%; padding: 12px; border: 1px solid #c5cae9; border-radius: 6px; box-sizing: border-box; font-size: 16px;">
             </div>
-            <button class="ai-question-button ai-glow-button" onclick="askAI()" style="margin-top: 10px;">向 AI 提问</button>
+            <button id="askAI" class="ai-question-button ai-glow-button" style="margin-top: 10px;">向 AI 提问</button>
         </div>
 
         <!-- 合盘分析容器 -->
         <div id="combinedAnalysisContainer" style="display:none;">
             <div id="combinedQuestionOptions">
-                <button class="unified-button" data-default-text="请对这两个紫微斗数命盘进行婚恋匹配分析。从命宫的性格互补性、夫妻宫的星曜呼应、四化星的相互影响等角度，系统评估双方的缘分深浅和相处模式。总结双方的匹配优势和潜在矛盾，并为促进关系和谐提供具体建议。" onclick="selectOption(this, 'combined');">婚恋匹配</button>
-                <button class="unified-button" data-default-text="请对这两个紫微斗数命盘进行事业合作匹配分析。评估双方在性格、能力、资源上的互补性，以及合作的默契程度。分析合作过程中可能出现的机遇和矛盾点，并对如何建立长期、共赢的合作关系提供策略建议。" onclick="selectOption(this, 'combined');">事业合作</button>
-                <button class="unified-button" onclick="selectOption(this, 'combined');">自定义...</button>
+                <!-- Combined analysis options will be dynamically generated here -->
             </div>
             <div id="customCombinedQuestionContainer" style="width: 100%; margin-top: 10px;">
                 <input type="text" id="customCombinedQuestion" placeholder="请输入您的问题" style="display: none; width: 100%; padding: 12px; border: 1px solid #c5cae9; border-radius: 6px; box-sizing: border-box; font-size: 16px;">
             </div>
-            <button class="ai-question-button ai-glow-button" onclick="askAIForCompatibility()" style="margin-top: 10px;">AI 合盘分析</button>
+            <button id="askAIForCompatibility" class="ai-question-button ai-glow-button" style="margin-top: 10px;">AI 合盘分析</button>
         </div>
 
     </div>
+
+    <template id="inspirationCardTemplate">
+        <div class="inspiration-card">
+            <h3 class="inspiration-title">问题灵感</h3>
+            <div class="inspiration-tabs">
+                <button class="tab-btn active" data-tab="ganqing">感情类</button>
+                <button class="tab-btn" data-tab="shiye">事业类</button>
+                <button class="tab-btn" data-tab="caifu">财富类</button>
+                <button class="tab-btn" data-tab="renji">人际关系类</button>
+                <button class="tab-btn" data-tab="rensheng">人生长成类</button>
+            </div>
+            <div class="inspiration-content">
+                <div class="tab-pane active" id="ganqing">
+                    <div class="question-group">
+                        <h4>情感发展</h4>
+                        <div class="questions-grid">
+                            <p>我近期的桃花运怎么样？</p><p>我们目前的感情走向如何？</p><p>他/她对我的真实情感是什么？</p><p>我们之间有未来吗？</p><p>如何改善我们目前的关系？</p><p>这段感情对我的影响？</p>
+                        </div>
+                    </div>
+                    <div class="question-group">
+                        <h4>正缘婚姻</h4>
+                        <div class="questions-grid">
+                            <p>我的正缘什么时候出现？</p><p>我的另一半是什么样的人？</p><p>我何时会结婚？</p><p>我适合和现在的对象结婚吗？</p><p>我的婚姻生活会幸福吗？</p><p>如何吸引我的正缘桃花？</p>
+                        </div>
+                    </div>
+                    <div class="question-group">
+                        <h4>关系难题</h4>
+                        <div class="questions-grid">
+                            <p>我们之间出了什么问题？</p><p>如何解决现在的感情危机？</p><p>我们有机会复合吗？</p><p>我应该放弃这段感情吗？</p><p>我和Ta的缘分有多深？</p><p>我的灵魂伴侣有什么特征？</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane" id="shiye">
+                    <div class="question-group"><h4>事业发展</h4><div class="questions-grid"><p>我适合现在的工作/行业吗？</p><p>我的事业什么时候能成功？</p><p>我适合跳槽还是继续坚守？</p><p>我事业上的贵人会是谁？</p><p>我未来的事业走向怎么样？</p><p>我什么时候能找到满意的工作？</p></div></div>
+                    <div class="question-group"><h4>职场机遇</h4><div class="questions-grid"><p>我今年有机会升职加薪吗？</p><p>如何得到领导的赏识和重用？</p><p>我在公司的发展前景如何？</p><p>如何改善我的职场人际关系？</p><p>如何改善当前的工作状态？</p><p>我最近的职场人际运如何？</p></div></div>
+                    <div class="question-group"><h4>创业之路</h4><div class="questions-grid"><p>我适合创业吗？</p><p>我的创业最佳时机是什么时候？</p><p>我该和什么样的人合伙？</p><p>我的创业项目前景如何？</p><p>创业过程中需要注意哪些风险？</p><p>我的创业会成功吗？</p></div></div>
+                </div>
+                <div class="tab-pane" id="caifu">
+                    <div class="question-group"><h4>财运趋势</h4><div class="questions-grid"><p>我近期的财运怎么样？</p><p>我这辈子财运的整体趋势？</p><p>我什么时候能发财？</p><p>我适合靠什么方式赚钱？</p><p>如何有效提升我的财运？</p><p>我近期会有意外之财吗？</p></div></div>
+                    <div class="question-group"><h4>投资理财</h4><div class="questions-grid"><p>我适合做投资吗？</p><p>我应该选择什么样的投资方向？</p><p>这个投资项目能赚钱吗？</p><p>如何才能守住我的财富？</p><p>我的投资风险大吗？</p><p>如何更好地管理我的财富？</p></div></div>
+                    <div class="question-group"><h4>财务状况</h4><div class="questions-grid"><p>我为什么总是存不住钱？</p><p>是什么原因导致我财务紧张？</p><p>我最近会有破财风险吗？</p><p>如何避免不必要的财务损失？</p><p>我需要注意哪些年份的破财？</p><p>我该如何处理我的债务问题？</p></div></div>
+                </div>
+                <div class="tab-pane" id="renji">
+                    <div class="question-group"><h4>社交模式</h4><div class="questions-grid"><p>我的人际交往模式有何优缺点？</p><p>如何拓展我的高质量社交圈？</p><p>我目前的人际关系状态如何？</p><p>我会吸引哪些人进入我的生活？</p><p>如何获得他人的信任与支持？</p><p>如何处理与朋友的矛盾？</p></div></div>
+                    <div class="question-group"><h4>贵人善缘</h4><div class="questions-grid"><p>什么样的朋友是我的贵人？</p><p>我应该远离什么样的朋友？</p><p>如何结交更多志同道合的朋友？</p><p>我该如何维系重要的友谊？</p><p>我该信任我身边的朋友吗？</p><p>如何获得领导或长辈的赏识？</p></div></div>
+                    <div class="question-group"><h4>家庭关系</h4><div class="questions-grid"><p>我和家人的关系怎么样？</p><p>我的家庭对我有什么样的影响？</p><p>如何改善我与家人的关系？</p><p>我该如何处理家庭矛盾？</p><p>我与家人的缘分有多深？</p><p>如何更好地与家人沟通？</p></div></div>
+                </div>
+                <div class="tab-pane" id="rensheng">
+                    <div class="question-group"><h4>学业规划</h4><div class="questions-grid"><p>我的学业运势如何？</p><p>我适合考研/考公吗？</p><p>我适合继续深造还是工作？</p><p>如何提升我的学习效率？</p><p>我该选择哪个专业/学校？</p><p>我这次考试能通过吗？</p></div></div>
+                    <div class="question-group"><h4>个人成长</h4><div class="questions-grid"><p>我的性格优势和劣势是什么？</p><p>我的人生主要课题是什么？</p><p>如何找到我的人生方向？</p><p>如何克服我性格中的弱点？</p><p>如何有效提升自己的能量状态？</p><p>我的人生转折点在何时？</p></div></div>
+                    <div class="question-group"><h4>人生机遇</h4><div class="questions-grid"><p>我未来十年的人生大运怎么样？</p><p>我该如何实现我的人生目标？</p><p>我的人生会有什么重大机遇？</p><p>我应该注意哪些健康问题？</p><p>如何才能活出更精彩的人生？</p><p>未来的人生之路走向如何？</p></div></div>
+                </div>
+            </div>
+        </div>
+    </template>
 
     <script src="https://cdn.jsdelivr.net/gh/6tail/lunar-javascript@master/lunar.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/iztro@latest/dist/iztro.min.js"></script>
     <script src="js/ai.js"></script>
     <script src="js/paipan/common.js"></script>
-    <script>
-const MUTAGEN_MAP = {
-    '甲': { '禄': '廉贞', '权': '破军', '科': '武曲', '忌': '太阳' },
-    '乙': { '禄': '天机', '权': '天梁', '科': '紫微', '忌': '太阴' },
-    '丙': { '禄': '天同', '权': '天机', '科': '文昌', '忌': '廉贞' },
-    '丁': { '禄': '太阴', '权': '天同', '科': '天机', '忌': '巨门' },
-    '戊': { '禄': '贪狼', '权': '太阴', '科': '右弼', '忌': '天机' },
-    '己': { '禄': '武曲', '权': '贪狼', '科': '天梁', '忌': '文曲' },
-    '庚': { '禄': '太阳', '权': '武曲', '科': '太阴', '忌': '天同' },
-    '辛': { '禄': '巨门', '权': '太阳', '科': '文曲', '忌': '文昌' },
-    '壬': { '禄': '天梁', '权': '紫微', '科': '左辅', '忌': '武曲' },
-    '癸': { '禄': '破军', '权': '巨门', '科': '太阴', '忌': '贪狼' },
-};
-
-function renderAstrolabe(astrolabe, horoscope, horoscopeDate, taijiPalaces, container, activeHeavenlyStem, activePalaceIndex, handleStemClick, handlePalaceClick, handleHoroscopeDateChange) {
-    // 清空容器
-    container.innerHTML = '';
-
-    // 1. 创建主星盘容器
-    const astrolabeContainer = document.createElement('div');
-    astrolabeContainer.className = 'iztro-astrolabe iztro-astrolabe-theme-default';
-
-    // 2. 渲染所有宫位
-    astrolabe.palaces.forEach(palaceData => {
-        const palaceElement = createPalaceElement(palaceData, horoscope, taijiPalaces, activeHeavenlyStem, activePalaceIndex, handleStemClick, handlePalaceClick);
-        astrolabeContainer.appendChild(palaceElement);
-    });
-
-    // 3. 渲染中央区域
-    const centerElement = createCenterElement(astrolabe, horoscope, horoscopeDate, handleHoroscopeDateChange);
-    astrolabeContainer.appendChild(centerElement);
-
-    // 4. 将完整的星盘挂载到页面
-    container.appendChild(astrolabeContainer);
-}
-
-function createPalaceElement(palace, horoscope, taijiPalaces, activeHeavenlyStem, activePalaceIndex, handleStemClick, handlePalaceClick) {
-    const palaceDiv = document.createElement('div');
-    palaceDiv.className = 'iztro-palace';
-    palaceDiv.style.gridArea = `g${palace.index}`;
-    palaceDiv.onclick = () => handlePalaceClick(palace.index); // Add click handler for Taiji
-
-    if (palace.index === activePalaceIndex) {
-        palaceDiv.classList.add('taiji-active');
-    }
-
-    // Main content container
-    const contentDiv = document.createElement('div');
-    contentDiv.className = 'iztro-palace-content';
-
-    // Stars container
-    const starsContainer = document.createElement('div');
-    starsContainer.className = 'iztro-stars-container';
-
-    palace.majorStars.forEach(star => starsContainer.appendChild(createStarElement(star, activeHeavenlyStem)));
-    palace.minorStars.forEach(star => starsContainer.appendChild(createStarElement(star, activeHeavenlyStem)));
-    palace.adjectiveStars.forEach(star => starsContainer.appendChild(createStarElement(star, activeHeavenlyStem)));
-    
-    contentDiv.appendChild(starsContainer);
-
-    // Dynamic info container
-    const dynamicInfoDiv = document.createElement('div');
-    dynamicInfoDiv.className = 'iztro-palace-dynamic-info';
-
-    if (horoscope && horoscope.ages) {
-        const ageData = horoscope.ages[palace.index];
-
-        if (ageData && ageData.palaceName) {
-            const dynamicNameDiv = document.createElement('div');
-            dynamicNameDiv.className = 'dynamic-palace-name yearly';
-            dynamicNameDiv.textContent = `流年${ageData.palaceName}`;
-            dynamicInfoDiv.appendChild(dynamicNameDiv);
-        }
-
-        if (ageData && ageData.stars && ageData.stars.length > 0) {
-            const horoscopeStarsDiv = document.createElement('div');
-            horoscopeStarsDiv.className = 'horoscope-stars yearly';
-            ageData.stars.forEach(star => horoscopeStarsDiv.appendChild(createStarElement(star, null))); // No highlight for horoscope stars
-            dynamicInfoDiv.appendChild(horoscopeStarsDiv);
-        }
-    }
-    
-    contentDiv.appendChild(dynamicInfoDiv);
-
-    // Footer container
-    const footerDiv = document.createElement('div');
-    footerDiv.className = 'iztro-palace-footer';
-
-    const footerLeft = document.createElement('div');
-    footerLeft.innerHTML = `
-        <div class="iztro-palace-lft24">
-            <div>${palace.changsheng12 || ''}</div>
-            <div>${palace.boshi12 || ''}</div>
-        </div>
-    `;
-
-    const footerCenter = document.createElement('div');
-    const taijiPalaceName = taijiPalaces[palace.index];
-    const originalName = `${palace.name}${palace.isBodyPalace ? '·身' : ''}`;
-    let displayName = originalName;
-
-    // If a taiji point is active and the name is different, show the temporary name
-    if (taijiPalaceName && taijiPalaceName !== palace.name) {
-        displayName = `<span class="taiji-palace-name">${taijiPalaceName}</span> <span class="original-palace-name">(${originalName})</span>`;
-    }
-
-    footerCenter.innerHTML = `
-        <div class="iztro-palace-name">${displayName}</div>
-        <div class="iztro-palace-scope-decadal">${palace.decadal.range.join(" - ")}</div>
-    `;
-
-    const footerRight = document.createElement('div');
-    footerRight.className = 'footer-right-container'; // Add a class for styling
-
-    const rgt24Div = document.createElement('div');
-    rgt24Div.className = 'iztro-palace-rgt24';
-    rgt24Div.innerHTML = `
-        <div>${palace.suiqian12 || ''}</div>
-        <div>${palace.jiangqian12 || ''}</div>
-    `;
-
-    const gzDiv = document.createElement('div');
-    gzDiv.className = 'iztro-palace-gz';
-    if (palace.heavenlyStem === activeHeavenlyStem) {
-        gzDiv.classList.add('active');
-    }
-    gzDiv.textContent = `${palace.heavenlyStem}${palace.earthlyBranch}`;
-    gzDiv.onclick = () => handleStemClick(palace.heavenlyStem);
-
-    footerRight.appendChild(rgt24Div);
-    footerRight.appendChild(gzDiv);
-    
-    footerDiv.appendChild(footerLeft);
-    footerDiv.appendChild(footerCenter);
-    footerDiv.appendChild(footerRight);
-
-    palaceDiv.appendChild(contentDiv);
-    palaceDiv.appendChild(footerDiv);
-
-    return palaceDiv;
-}
-
-function createStarElement(star, activeHeavenlyStem) {
-    const starSpan = document.createElement('span');
-    starSpan.className = `iztro-star iztro-star-${star.type}`;
-    
-    const nameSpan = document.createElement('span');
-    nameSpan.className = 'iztro-star-name';
-    nameSpan.textContent = star.name;
-    
-    starSpan.appendChild(nameSpan);
-
-    if (star.brightness) {
-        const brightnessSpan = document.createElement('span');
-        brightnessSpan.className = 'iztro-star-brightness';
-        brightnessSpan.textContent = `(${star.brightness})`;
-        starSpan.appendChild(brightnessSpan);
-    }
-
-    if (activeHeavenlyStem && MUTAGEN_MAP[activeHeavenlyStem]) {
-        const mutagens = MUTAGEN_MAP[activeHeavenlyStem];
-        for (const key in mutagens) {
-            if (mutagens[key] === star.name) {
-                const mutagenTag = document.createElement('span');
-                mutagenTag.className = `iztro-mutagen-tag mutagen-${key.toLowerCase()}`;
-                mutagenTag.textContent = key;
-                starSpan.appendChild(mutagenTag);
-                starSpan.classList.add('star-highlight');
-            }
-        }
-    }
-
-    return starSpan;
-}
-
-function createCenterElement(astrolabe, horoscope, horoscopeDate, handleHoroscopeDateChange) {
-    const centerDiv = document.createElement('div');
-    centerDiv.className = 'iztro-palace-center';
-
-    // Basic Info Section
-    const basicInfoContainer = document.createElement('div');
-    basicInfoContainer.className = 'center-section basic-info';
-
-    const createItem = (labelText, valueText) => {
-        const itemDiv = document.createElement('div');
-        itemDiv.className = 'iztro-palace-center-item';
-        const label = document.createElement('label');
-        label.textContent = labelText;
-        const span = document.createElement('span');
-        span.textContent = valueText;
-        itemDiv.appendChild(label);
-        itemDiv.appendChild(span);
-        return itemDiv;
-    };
-
-    if (astrolabe.name) {
-        basicInfoContainer.appendChild(createItem('姓名：', astrolabe.name));
-    }
-    // The iztro library returns Chinese characters for gender in the astrolabe object.
-    const genderText = astrolabe.gender; // This will be '男' or '女'
-    const genderClass = genderText === '男' ? 'male' : 'female';
-    basicInfoContainer.appendChild(createItem('性别：', genderText));
-    basicInfoContainer.querySelector('span:last-child').classList.add('gender', `gender-${genderClass}`);
-    basicInfoContainer.appendChild(createItem('阳历：', astrolabe.solarDate));
-    basicInfoContainer.appendChild(createItem('农历：', astrolabe.lunarDate));
-    basicInfoContainer.appendChild(createItem('干支：', astrolabe.chineseDate));
-    basicInfoContainer.appendChild(createItem('命主：', astrolabe.soul));
-    basicInfoContainer.appendChild(createItem('身主：', astrolabe.body));
-    basicInfoContainer.appendChild(createItem('五行局：', astrolabe.fiveElementsClass));
-
-    // Horoscope Section
-    const horoscopeContainer = document.createElement('div');
-    horoscopeContainer.className = 'center-section horoscope-controls';
-    horoscopeContainer.innerHTML = '<label>运限推算</label>';
-
-    const dateInput = document.createElement('input');
-    dateInput.type = 'date';
-    // Format date to YYYY-MM-DD for input value
-    const y = horoscopeDate.getFullYear();
-    const m = String(horoscopeDate.getMonth() + 1).padStart(2, '0');
-    const d = String(horoscopeDate.getDate()).padStart(2, '0');
-    dateInput.value = `${y}-${m}-${d}`;
-    dateInput.onchange = (e) => {
-        handleHoroscopeDateChange(new Date(e.target.value));
-    };
-
-    horoscopeContainer.appendChild(dateInput);
-    
-    centerDiv.appendChild(basicInfoContainer);
-    centerDiv.appendChild(horoscopeContainer);
-
-    return centerDiv;
-}
-
-        function formatAstrolabeForAI(astrolabe) {
-            if (!astrolabe) {
-                return "无法获取命盘数据。";
-            }
-
-            const yearStem = astrolabe.chineseDate.substring(0, 1);
-            const yearMutagens = MUTAGEN_MAP[yearStem];
-
-            let result = `### 基本信息\n`;
-            result += `* **阳历**: ${astrolabe.solarDate}\n`;
-            result += `* **农历**: ${astrolabe.lunarDate}\n`;
-            result += `* **干支**: ${astrolabe.chineseDate}\n`;
-            result += `* **性别**: ${astrolabe.gender}\n`;
-            result += `* **时辰**: ${astrolabe.time}\n`;
-            result += `* **命主**: ${astrolabe.soul}\n`;
-            result += `* **身主**: ${astrolabe.body}\n`;
-            result += `* **五行局**: ${astrolabe.fiveElementsClass}\n`;
-            result += `\n`;
-            result += `### 四化星\n`;
-            result += `* **生年四化**: 天干【${yearStem}】\n`;
-            result += `  - **化禄**: ${yearMutagens['禄']}\n`;
-            result += `  - **化权**: ${yearMutagens['权']}\n`;
-            result += `  - **化科**: ${yearMutagens['科']}\n`;
-            result += `  - **化忌**: ${yearMutagens['忌']}\n\n`;
-
-            result += `### 宫位信息\n`;
-            astrolabe.palaces.forEach(palace => {
-                const majorStars = palace.majorStars.map(s => `${s.name} ${s.brightness}`).join(' ') || '无';
-                const minorStars = palace.minorStars.map(s => s.name).join(' ') || '无'; // 移除辅星亮度
-                const selfPalace = palace.isBodyPalace ? ' (身宫)' : '';
-                const palaceMutagens = MUTAGEN_MAP[palace.heavenlyStem];
-
-                result += `* **${palace.name}宫 (${palace.heavenlyStem}${palace.earthlyBranch})${selfPalace}**: \n`;
-                result += `  - **主星**: ${majorStars}\n`;
-                result += `  - **辅星**: ${minorStars}\n`;
-                result += `  - **大限**: ${palace.decadal.range.join('-')}岁\n`;
-                result += `  - **宫干四化**: 天干【${palace.heavenlyStem}】禄入${palaceMutagens['禄']}, 权入${palaceMutagens['权']}, 科入${palaceMutagens['科']}, 忌入${palaceMutagens['忌']}\n`;
-            });
-
-            return result;
-        }
-
-        function generateAstrolabeForPerson(personNumber, year, month, day, timeIndex, gender, resultDiv) {
-            resultDiv.style.display = 'none';
-            // Pre-create the necessary containers to prevent null errors
-            resultDiv.innerHTML = '<div class="iztro-container"></div><div class="original-result" style="display: none;"></div>';
-
-            if (isNaN(year) || isNaN(month) || isNaN(day) || timeIndex === null) {
-                resultDiv.innerHTML = `<p style="color: red;">第${personNumber}人：请输入所有必填的出生信息！</p>`;
-                resultDiv.style.display = 'block';
-                return null;
-            }
-
-            if (!gender) {
-                resultDiv.innerHTML = `<p style="color: red;">第${personNumber}人：性别都不告诉我？</p>`;
-                resultDiv.style.display = 'block';
-                return null;
-            }
-
-            const solarDate = `${year}-${month}-${day}`;
-
-            try {
-                const astrolabe = iztro.astro.bySolar(solarDate, timeIndex, gender, true, 'zh-CN');
-                console.log(formatAstrolabeForAI(astrolabe)); // 使用新的格式化函数
-                let activeHeavenlyStem = null;
-                let horoscopeDate = new Date();
-                // 1. 初始化太极点状态，默认为命宫
-                let activePalaceIndex = astrolabe.palaces.findIndex(p => p.name === '命宫');
-
-                const redrawAstrolabe = () => {
-                    const container = resultDiv.querySelector('.iztro-container');
-                    const horoscope = iztro.astro.getHoroscope(astrolabe, horoscopeDate);
-                    // Manually generate shifted palace names as a robust workaround for the unreliable API
-                    const getShiftedPalaceNames = (targetPalaceIndex) => {
-                        const PALACE_NAMES_ORDER = ['命宫', '兄弟宫', '夫妻宫', '子女宫', '财帛宫', '疾厄宫', '迁移宫', '仆役宫', '官禄宫', '田宅宫', '福德宫', '父母宫'];
-                        const originalLifePalaceIndex = astrolabe.palaces.findIndex(p => p.name === '命宫');
-
-                        // If the target is the original life palace, no shift is needed.
-                        if (targetPalaceIndex === originalLifePalaceIndex) {
-                            return astrolabe.palaces.map(p => p.name);
-                        }
-
-                        const newNames = [];
-                        for (let i = 0; i < 12; i++) {
-                            // Calculate the new name for the palace at original index `i`
-                            newNames[i] = PALACE_NAMES_ORDER[(i - targetPalaceIndex + 12) % 12];
-                        }
-                        return newNames;
-                    };
-
-                    const taijiPalaces = getShiftedPalaceNames(activePalaceIndex);
-
-                    const handleStemClick = (stem) => {
-                        activeHeavenlyStem = activeHeavenlyStem === stem ? null : stem;
-                        redrawAstrolabe();
-                    };
-
-                    const handleHoroscopeDateChange = (date) => {
-                        horoscopeDate = date;
-                        redrawAstrolabe();
-                    };
-
-                    // 2. 定义太极点点击事件处理函数
-                    const handlePalaceClick = (palaceIndex) => {
-                        // 如果点击的已经是激活的太极点，则重置回命宫
-                        const lifePalaceIndex = astrolabe.palaces.findIndex(p => p.name === '命宫');
-                        activePalaceIndex = activePalaceIndex === palaceIndex ? lifePalaceIndex : palaceIndex;
-                        redrawAstrolabe();
-                    };
-
-                    renderAstrolabe(astrolabe, horoscope, horoscopeDate, taijiPalaces, container, activeHeavenlyStem, activePalaceIndex, handleStemClick, handlePalaceClick, handleHoroscopeDateChange);
-                };
-                
-                redrawAstrolabe();
-
-                // 生成并存储原始文本结果
-                const originalResultContainer = resultDiv.querySelector('.original-result');
-                const name = document.getElementById('name').value.trim();
-                if (name && personNumber === 1) {
-                    document.title = `${name}的紫微斗数排盘`;
-                }
-                let htmlResult = `<h3>${personNumber === 1 ? (name ? `${name}的基本信息` : '基本信息') : `第${personNumber}人 - 基本信息`}</h3>`;
-                htmlResult += `<p><strong>阳历：</strong>${astrolabe.solarDate}</p>`;
-                htmlResult += `<p><strong>农历：</strong>${astrolabe.lunarDate}</p>`;
-                htmlResult += `<p><strong>干支：</strong>${astrolabe.chineseDate}</p>`;
-                htmlResult += `<p><strong>性别：</strong>${astrolabe.gender}</p>`;
-                htmlResult += `<p><strong>时辰：</strong>${astrolabe.time}</p>`;
-                htmlResult += `<p><strong>命主：</strong>${astrolabe.soul}</p>`;
-                htmlResult += `<p><strong>身主：</strong>${astrolabe.body}</p>`;
-                htmlResult += `<p><strong>五行局：</strong>${astrolabe.fiveElementsClass}</p>`;
-                htmlResult += `<p><strong>星座：</strong>${astrolabe.sign}</p>`;
-                htmlResult += `<p><strong>生肖：</strong>${astrolabe.zodiac}</p>`;
-                htmlResult += `<h3>${personNumber === 1 ? '宫位信息：' : `第${personNumber}人 - 宫位信息：`}</h3>`;
-                htmlResult += '<ul>';
-                astrolabe.palaces.forEach(palace => {
-                    htmlResult += `<li><strong>${palace.name}宫 (${palace.heavenlyStem}${palace.earthlyBranch}):</strong>`;
-                    htmlResult += ` 主星: ${palace.majorStars.map(s => s.name).join(', ') || '无'}`;
-                    htmlResult += `; 副星: ${palace.minorStars.map(s => s.name).join(', ') || '无'}`;
-                    htmlResult += `; 小星: ${palace.adjectiveStars.map(s => s.name).join(', ') || '无'}`;
-                    htmlResult += `</li>`;
-                });
-                htmlResult += '</ul>';
-                originalResultContainer.innerHTML = htmlResult;
-
-                resultDiv.style.display = 'block';
-                return astrolabe;
-            } catch (error) {
-                console.error(`第${personNumber}人排盘错误:`, error);
-                resultDiv.innerHTML = `<p style="color: red;">第${personNumber}人排盘失败，请检查输入或查看控制台错误信息。</p><p>${error.message}</p>`;
-                resultDiv.style.display = 'block';
-                return null;
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            initializePage({
-                chartingFunction: generateAstrolabeForPerson,
-                getAIPrompt: (questionText, selectedOption) => {
-                    const formattedAstrolabe = window.astrolabe1 ? formatAstrolabeForAI(window.astrolabe1) : "无法获取命盘数据。";
-                    return `你是一个紫微斗数大师，现在是${new Date().toLocaleString()}，请基于以下命盘数据回答问题。\n\n${formattedAstrolabe}\n\n---\n\n**问题**: ${questionText}\n\n---\n\n**分析要求**:\n1. **深入浅出**: 请使用通俗易懂的语言和生活化的比喻来解释专业的命理概念（如星曜、宫位、四化）。分析的最终目的是为了给用户提供清晰的指引，而不是展示术语。\n2. **先定性，后定量**: 先对命格的核心特点（如性格、优势、挑战）进行定性描述，再结合大限、流年进行定量的运势分析。\n3. **积极正向**: 所有的分析都应以积极、善意的视角出发。在指出潜在的挑战或风险时，必须同步提供具体的、可操作的规避方法或转化策略，避免宿命论和不必要的焦虑。\n4. **聚焦建议**: 最终的落脚点是提供清晰、可行的建议。无论是事业、感情还是健康，都要给出用户在现实生活中可以参考和实践的指引。`;
-                },
-                getCompatibilityPrompt: (questionText) => {
-                    const formattedAstrolabe1 = window.astrolabe1 ? formatAstrolabeForAI(window.astrolabe1) : "无法获取第一人命盘数据。";
-                    const formattedAstrolabe2 = window.astrolabe2 ? formatAstrolabeForAI(window.astrolabe2) : "无法获取第二人命盘数据。";
-                    return `你是一个紫微斗数大师，现在是${new Date().toLocaleString()}，请基于以下两个命盘数据进行合盘分析。\n\n# 第一人命盘\n${formattedAstrolabe1}\n\n# 第二人命盘\n${formattedAstrolabe2}\n\n---\n\n**问题**: ${questionText}\n\n---\n\n**分析要求**:\n1. **通俗易懂**: 用生活化的语言解释双方的互动模式，避免生涩的专业术语。\n2. **突出重点**: 聚焦于双方性格的吸引点、潜在的矛盾点，以及星曜能量的互补性。\n3. **关系导向**: 分析的目的不是给出“合”或“不合”的简单结论，而是深入剖析双方的相处之道。\n4. **提供策略**: 必须提供具体的、可操作的建议，用于促进双方关系的和谐发展，以及如何化解潜在的矛盾。`;
-                }
-            });
-        });
-    </script>
+    <script src="js/paipan/zw.js"></script>
 </body>
 </html>

@@ -60,7 +60,7 @@
         </div>
 
         <div>
-            <input type="checkbox" id="enableSecondPerson" onchange="toggleSecondPersonInputs()">
+            <input type="checkbox" id="enableSecondPerson">
             <label for="enableSecondPerson" style="display: inline; margin-left: 5px;">合盘</label>
         </div>
 
@@ -107,62 +107,88 @@
             </div>
         </div>
 
-        <button class="ai-question-button" onclick="generateAstrolabe()">开始排盘</button>
+        <button id="generateAstrolabe" class="ai-question-button">开始排盘</button>
         <h2>排盘结果:</h2>
         <div id="result" style="display:none;"></div>
         <div id="result2" style="margin-top: 20px; display:none;"></div>
         
         <div id="aiQuestionContainer" style="display:none;">
             <div id="aiQuestionOptions">
-                <button id="ai-mingge-zonglun" class="unified-button" data-default-text="请对该命盘进行一次全面、深入、详尽的命格总论分析，内容需丰富详实。分析需严格按照以下结构展开：
-
-1.  **命局核心提要**：
-    *   **日主与五行**：分析日主的特性以及命局中五行（金木水火土）的分布、力量与平衡状况。
-    *   **格局与旺衰**：明确判断八字属于何种格局（如正官格、七杀格、食神格等），并精确判断日主的强弱（旺衰）。
-    *   **喜用神与忌神**：基于格局和旺衰，清晰地指出本命局的喜用神和忌神是什么，并简要说明理由。
-
-2.  **性格、能力与天赋**：
-    *   **核心性格**：根据日主、十神组合和格局，深入剖析命主最核心的性格特质，包括其思维模式、价值观和行为倾向。
-    *   **先天优势**：详细描述命主与生俱来的天赋和才能，例如学习能力、社交手腕、创造力、领导力等，并说明这些优势在哪些领域最能得到发挥。
-    *   **潜在挑战**：客观指出命主性格中可能存在的弱点、盲点或潜在的内在冲突，并解释这些挑战可能在生活中如何体现。
-
-3.  **人生主要领域剖析**：
-    *   **事业财运**：分析命主的事业发展方向、适合的行业领域、财富能量等级以及获取财富的主要方式。
-    *   **感情婚姻**：解读命主的感情观、择偶偏好、婚姻生活的特点以及与伴侣的互动模式。
-    *   **健康状况**：根据五行平衡，提示命主需要先天关注的身体部位和易发健康问题。
-
-4.  **人生大运总览与核心建议**：
-    *   **大运趋势**：简要概括未来几步大运（每步大运为十年）的整体走势起伏，点明人生的几个关键转折期。
-    *   **核心指导与人生课题**：综合以上所有分析，为命主提炼出最核心、最重要的人生发展建议。明确指出TA此生的主要人生课题是什么，并提供具体的、可操作的策略来帮助TA扬长避短、趋吉避凶，更好地实现人生价值。" onclick="selectOption(this, 'single')">命格总论</button>
-                <button id="ai-current-luck" class="unified-button" data-default-text="请详细分析命主当前所处的这步大运。说明这步大运的干支对原局的作用（合、冲、刑、害），并结合十神和星运，解读在此期间事业、财运、感情和健康方面的主要机遇和挑战。最后，提供针对性的行事建议。" onclick="selectOption(this, 'single')">当前大运</button>
-                <button id="ai-this-year" class="unified-button" data-default-text="请详细分析命主在今年的流年运势。说明流年干支与命局、大运的相互作用。重点解读事业、财运、感情、健康四个方面的具体情况，并指出需要特别注意的月份和关键的转折点。" onclick="selectOption(this, 'single')">今年运势</button>
-                <button id="ai-year-analysis" class="unified-button" data-default-text="请分析我今年的年运，并详细解读每个农历月的运势。" onclick="selectOption(this, 'single')">年运分析</button>
-                <button id="ai-career" class="unified-button" data-default-text="请根据以下八字信息，从【整体命格】和【当前大运】两个角度，详细分析我的事业和财运状况。在整体命格方面，请分析我的事业发展方向、适合的行业领域、财富能量等级以及获取财富的主要方式。在当前大运方面，请分析这十年事业和财运上的主要机遇和挑战，并提供针对性的行事建议。" onclick="selectOption(this, 'single')">事业财运</button>
-                <button id="ai-marriage" class="unified-button" data-default-text="请根据以下八字信息，从【整体命格】和【当前大运】两个角度，详细分析我的感情和婚姻状况。在整体命格方面，请解读我的感情观、择偶偏好、婚姻生活的特点以及与伴侣的互动模式。在当前大运方面，请分析这十年感情上的主要机遇和挑战，并提供针对性的行事建议。" onclick="selectOption(this, 'single')">感情婚姻</button>
-                <button id="ai-health" class="unified-button" data-default-text="请根据以下八字信息，从【整体命格】和【当前大运】两个角度，详细分析我的健康状况。在整体命格方面，请根据五行平衡，提示我需要先天关注的身体部位和易发健康问题。在当前大运方面，请分析这十年健康上的主要机遇和挑战，并提供针对性的保养建议。" onclick="selectOption(this, 'single')">健康状况</button>
-                <button id="ai-next-three-years" class="unified-button" data-default-text="请分析命主在未来三年的流年运势。逐年说明运势的起伏变化，并给出每年在事业、感情、生活等方面的规划建议和注意事项。" onclick="selectOption(this, 'single')">未来三年</button>
-                <button class="unified-button" onclick="selectOption(this, 'single');">自定义...</button>
+                <!-- AI aptions will be dynamically generated here -->
             </div>
             <div id="customQuestionContainer" style="width: 100%; margin-top: 10px;">
                 <input type="text" id="customQuestion" placeholder="请输入您的问题" style="display: none; width: 100%; padding: 12px; border: 1px solid #c5cae9; border-radius: 6px; box-sizing: border-box; font-size: 16px;">
             </div>
-            <button class="ai-question-button ai-glow-button" onclick="askAI()" style="margin-top: 10px;">向 AI 提问</button>
+            <button id="askAI" class="ai-question-button ai-glow-button" style="margin-top: 10px;">向 AI 提问</button>
         </div>
 
         <!-- 合盘分析容器 -->
         <div id="combinedAnalysisContainer" style="display:none;">
             <div id="combinedQuestionOptions">
-                <button class="unified-button" data-default-text="请对这两个命盘进行婚恋匹配分析。从五行互补、十神吸引、夫妻宫互动、大运同步性等角度，系统评估双方的缘分深浅和相处模式。总结双方的匹配优势和潜在矛盾，并为促进关系和谐提供具体建议。" onclick="selectOption(this, 'combined');">婚恋匹配</button>
-                <button class="unified-button" data-default-text="请对这两个命盘进行事业合作匹配分析。评估双方在性格、资源、行事风格上的互补性。分析合作过程中可能出现的机遇和矛盾点，并对如何建立长期、共赢的合作关系提供策略建议。" onclick="selectOption(this, 'combined');">事业合作</button>
-                <button class="unified-button" onclick="selectOption(this, 'combined');">自定义...</button>
+                <!-- Combined analysis options will be dynamically generated here -->
             </div>
             <div id="customCombinedQuestionContainer" style="width: 100%; margin-top: 10px;">
                 <input type="text" id="customCombinedQuestion" placeholder="请输入您的问题" style="display: none; width: 100%; padding: 12px; border: 1px solid #c5cae9; border-radius: 6px; box-sizing: border-box; font-size: 16px;">
             </div>
-            <button class="ai-question-button ai-glow-button" onclick="askAIForCompatibility()" style="margin-top: 10px;">AI 合盘分析</button>
+            <button id="askAIForCompatibility" class="ai-question-button ai-glow-button" style="margin-top: 10px;">AI 合盘分析</button>
         </div>
 
     </div>
+
+    <template id="inspirationCardTemplate">
+        <div class="inspiration-card">
+            <h3 class="inspiration-title">问题灵感</h3>
+            <div class="inspiration-tabs">
+                <button class="tab-btn active" data-tab="ganqing">感情类</button>
+                <button class="tab-btn" data-tab="shiye">事业类</button>
+                <button class="tab-btn" data-tab="caifu">财富类</button>
+                <button class="tab-btn" data-tab="renji">人际关系类</button>
+                <button class="tab-btn" data-tab="rensheng">人生长成类</button>
+            </div>
+            <div class="inspiration-content">
+                <div class="tab-pane active" id="ganqing">
+                    <div class="question-group">
+                        <h4>情感发展</h4>
+                        <div class="questions-grid">
+                            <p>我近期的桃花运怎么样？</p><p>我们目前的感情走向如何？</p><p>他/她对我的真实情感是什么？</p><p>我们之间有未来吗？</p><p>如何改善我们目前的关系？</p><p>这段感情对我的影响？</p>
+                        </div>
+                    </div>
+                    <div class="question-group">
+                        <h4>正缘婚姻</h4>
+                        <div class="questions-grid">
+                            <p>我的正缘什么时候出现？</p><p>我的另一半是什么样的人？</p><p>我何时会结婚？</p><p>我适合和现在的对象结婚吗？</p><p>我的婚姻生活会幸福吗？</p><p>如何吸引我的正缘桃花？</p>
+                        </div>
+                    </div>
+                    <div class="question-group">
+                        <h4>关系难题</h4>
+                        <div class="questions-grid">
+                            <p>我们之间出了什么问题？</p><p>如何解决现在的感情危机？</p><p>我们有机会复合吗？</p><p>我应该放弃这段感情吗？</p><p>我和Ta的缘分有多深？</p><p>我的灵魂伴侣有什么特征？</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane" id="shiye">
+                    <div class="question-group"><h4>事业发展</h4><div class="questions-grid"><p>我适合现在的工作/行业吗？</p><p>我的事业什么时候能成功？</p><p>我适合跳槽还是继续坚守？</p><p>我事业上的贵人会是谁？</p><p>我未来的事业走向怎么样？</p><p>我什么时候能找到满意的工作？</p></div></div>
+                    <div class="question-group"><h4>职场机遇</h4><div class="questions-grid"><p>我今年有机会升职加薪吗？</p><p>如何得到领导的赏识和重用？</p><p>我在公司的发展前景如何？</p><p>如何改善我的职场人际关系？</p><p>如何改善当前的工作状态？</p><p>我最近的职场人际运如何？</p></div></div>
+                    <div class="question-group"><h4>创业之路</h4><div class="questions-grid"><p>我适合创业吗？</p><p>我的创业最佳时机是什么时候？</p><p>我该和什么样的人合伙？</p><p>我的创业项目前景如何？</p><p>创业过程中需要注意哪些风险？</p><p>我的创业会成功吗？</p></div></div>
+                </div>
+                <div class="tab-pane" id="caifu">
+                    <div class="question-group"><h4>财运趋势</h4><div class="questions-grid"><p>我近期的财运怎么样？</p><p>我这辈子财运的整体趋势？</p><p>我什么时候能发财？</p><p>我适合靠什么方式赚钱？</p><p>如何有效提升我的财运？</p><p>我近期会有意外之财吗？</p></div></div>
+                    <div class="question-group"><h4>投资理财</h4><div class="questions-grid"><p>我适合做投资吗？</p><p>我应该选择什么样的投资方向？</p><p>这个投资项目能赚钱吗？</p><p>如何才能守住我的财富？</p><p>我的投资风险大吗？</p><p>如何更好地管理我的财富？</p></div></div>
+                    <div class="question-group"><h4>财务状况</h4><div class="questions-grid"><p>我为什么总是存不住钱？</p><p>是什么原因导致我财务紧张？</p><p>我最近会有破财风险吗？</p><p>如何避免不必要的财务损失？</p><p>我需要注意哪些年份的破财？</p><p>我该如何处理我的债务问题？</p></div></div>
+                </div>
+                <div class="tab-pane" id="renji">
+                    <div class="question-group"><h4>社交模式</h4><div class="questions-grid"><p>我的人际交往模式有何优缺点？</p><p>如何拓展我的高质量社交圈？</p><p>我目前的人际关系状态如何？</p><p>我会吸引哪些人进入我的生活？</p><p>如何获得他人的信任与支持？</p><p>如何处理与朋友的矛盾？</p></div></div>
+                    <div class="question-group"><h4>贵人善缘</h4><div class="questions-grid"><p>什么样的朋友是我的贵人？</p><p>我应该远离什么样的朋友？</p><p>如何结交更多志同道合的朋友？</p><p>我该如何维系重要的友谊？</p><p>我该信任我身边的朋友吗？</p><p>如何获得领导或长辈的赏识？</p></div></div>
+                    <div class="question-group"><h4>家庭关系</h4><div class="questions-grid"><p>我和家人的关系怎么样？</p><p>我的家庭对我有什么样的影响？</p><p>如何改善我与家人的关系？</p><p>我该如何处理家庭矛盾？</p><p>我与家人的缘分有多深？</p><p>如何更好地与家人沟通？</p></div></div>
+                </div>
+                <div class="tab-pane" id="rensheng">
+                    <div class="question-group"><h4>学业规划</h4><div class="questions-grid"><p>我的学业运势如何？</p><p>我适合考研/考公吗？</p><p>我适合继续深造还是工作？</p><p>如何提升我的学习效率？</p><p>我该选择哪个专业/学校？</p><p>我这次考试能通过吗？</p></div></div>
+                    <div class="question-group"><h4>个人成长</h4><div class="questions-grid"><p>我的性格优势和劣势是什么？</p><p>我的人生主要课题是什么？</p><p>如何找到我的人生方向？</p><p>如何克服我性格中的弱点？</p><p>如何有效提升自己的能量状态？</p><p>我的人生转折点在何时？</p></div></div>
+                    <div class="question-group"><h4>人生机遇</h4><div class="questions-grid"><p>我未来十年的人生大运怎么样？</p><p>我该如何实现我的人生目标？</p><p>我的人生会有什么重大机遇？</p><p>我应该注意哪些健康问题？</p><p>如何才能活出更精彩的人生？</p><p>未来的人生之路走向如何？</p></div></div>
+                </div>
+            </div>
+        </div>
+    </template>
 
     <script src="https://cdn.jsdelivr.net/gh/6tail/lunar-javascript@master/lunar.js"></script>
     <script src="js/ai.js"></script>
