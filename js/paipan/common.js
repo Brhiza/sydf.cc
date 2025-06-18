@@ -79,23 +79,22 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    window.showCustomInput = function(type = 'single') {
-        const customInput = type === 'combined' ? dom.customCombinedQuestion : dom.customQuestion;
-        customInput.style.display = 'block';
-        customInput.focus();
-    }
-
     window.selectOption = function(button, type = 'single') {
-            const optionsContainer = type === 'combined' ? dom.combinedQuestionOptions : dom.aiQuestionOptions;
-            const customInput = type === 'combined' ? dom.customCombinedQuestion : dom.customQuestion;
-            
-            optionsContainer.querySelectorAll('.unified-button').forEach(btn => btn.classList.remove('selected'));
-            button.classList.add('selected');
+        const optionsContainer = type === 'combined' ? dom.combinedQuestionOptions : dom.aiQuestionOptions;
+        const customInput = type === 'combined' ? dom.customCombinedQuestion : dom.customQuestion;
+        
+        // First, manage the visual selection state of buttons
+        optionsContainer.querySelectorAll('.unified-button').forEach(btn => btn.classList.remove('selected'));
+        button.classList.add('selected');
     
-            if (button.textContent.trim() !== '自定义') {
-                customInput.style.display = 'none';
-            }
+        // Now, manage the visibility of the custom input box
+        if (button.textContent.trim() === '自定义...') {
+            customInput.style.display = 'block';
+            customInput.focus();
+        } else {
+            customInput.style.display = 'none';
         }
+    }
     
         function createInspirationCardHTML(isCombined = false) {
             const tabsHTML = `
@@ -202,15 +201,17 @@ document.addEventListener('DOMContentLoaded', function() {
                         const customInput = type === 'combined' ? dom.customCombinedQuestion : dom.customQuestion;
                         const optionsContainer = type === 'combined' ? dom.combinedQuestionOptions : dom.aiQuestionOptions;
                         
+                        // 1. Set the input value
                         customInput.value = questionText;
-                        customInput.style.display = 'block';
-            
-                        const customButton = Array.from(optionsContainer.querySelectorAll('.unified-button')).find(btn => btn.textContent.trim() === '自定义');
+                        
+                        // 2. Find and programmatically select the 'Custom...' button
+                        const customButton = Array.from(optionsContainer.querySelectorAll('.unified-button')).find(btn => btn.textContent.trim() === '自定义...');
                         if (customButton) {
+                            // This function now correctly handles showing the input field
                             selectOption(customButton, type);
                         }
     
-                        // Directly trigger the AI query
+                        // 3. Directly trigger the AI query, which will now read the state from the DOM
                         if (type === 'combined') {
                             askAIForCompatibility();
                         } else {
@@ -375,8 +376,20 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!pageConfig.getAIPrompt) return;
         const button = dom.aiQuestionContainer.querySelector('.ai-glow-button');
         const selectedOption = dom.aiQuestionOptions.querySelector('.unified-button.selected');
-        const isCustom = selectedOption.textContent.trim() === '自定义';
+
+        if (!selectedOption) {
+            alert("请选择一个问题选项。");
+            return;
+        }
+
+        const isCustom = selectedOption.textContent.trim() === '自定义...';
         const questionText = isCustom ? dom.customQuestion.value : selectedOption.dataset.defaultText;
+
+        if (!questionText) {
+            alert("问题不能为空，请输入您的问题。");
+            return;
+        }
+
         const prompt = pageConfig.getAIPrompt(questionText, selectedOption);
         
         button.classList.add('glowing');
@@ -391,8 +404,20 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!pageConfig.getCompatibilityPrompt) return;
         const button = dom.combinedAnalysisContainer.querySelector('.ai-glow-button');
         const selectedOption = dom.combinedQuestionOptions.querySelector('.unified-button.selected');
-        const isCustom = selectedOption.textContent.trim() === '自定义';
+
+        if (!selectedOption) {
+            alert("请选择一个问题选项。");
+            return;
+        }
+
+        const isCustom = selectedOption.textContent.trim() === '自定义...';
         const questionText = isCustom ? dom.customCombinedQuestion.value : selectedOption.dataset.defaultText;
+
+        if (!questionText) {
+            alert("问题不能为空，请输入您的问题。");
+            return;
+        }
+        
         const prompt = pageConfig.getCompatibilityPrompt(questionText);
 
         button.classList.add('glowing');

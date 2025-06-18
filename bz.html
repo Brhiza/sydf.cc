@@ -141,7 +141,7 @@
                 <button id="ai-marriage" class="unified-button" data-default-text="请根据以下八字信息，从【整体命格】和【当前大运】两个角度，详细分析我的感情和婚姻状况。在整体命格方面，请解读我的感情观、择偶偏好、婚姻生活的特点以及与伴侣的互动模式。在当前大运方面，请分析这十年感情上的主要机遇和挑战，并提供针对性的行事建议。" onclick="selectOption(this, 'single')">感情婚姻</button>
                 <button id="ai-health" class="unified-button" data-default-text="请根据以下八字信息，从【整体命格】和【当前大运】两个角度，详细分析我的健康状况。在整体命格方面，请根据五行平衡，提示我需要先天关注的身体部位和易发健康问题。在当前大运方面，请分析这十年健康上的主要机遇和挑战，并提供针对性的保养建议。" onclick="selectOption(this, 'single')">健康状况</button>
                 <button id="ai-next-three-years" class="unified-button" data-default-text="请分析命主在未来三年的流年运势。逐年说明运势的起伏变化，并给出每年在事业、感情、生活等方面的规划建议和注意事项。" onclick="selectOption(this, 'single')">未来三年</button>
-                <button class="unified-button" onclick="showCustomInput('single'); selectOption(this, 'single');">自定义...</button>
+                <button class="unified-button" onclick="selectOption(this, 'single');">自定义...</button>
             </div>
             <div id="customQuestionContainer" style="width: 100%; margin-top: 10px;">
                 <input type="text" id="customQuestion" placeholder="请输入您的问题" style="display: none; width: 100%; padding: 12px; border: 1px solid #c5cae9; border-radius: 6px; box-sizing: border-box; font-size: 16px;">
@@ -154,7 +154,7 @@
             <div id="combinedQuestionOptions">
                 <button class="unified-button" data-default-text="请对这两个命盘进行婚恋匹配分析。从五行互补、十神吸引、夫妻宫互动、大运同步性等角度，系统评估双方的缘分深浅和相处模式。总结双方的匹配优势和潜在矛盾，并为促进关系和谐提供具体建议。" onclick="selectOption(this, 'combined');">婚恋匹配</button>
                 <button class="unified-button" data-default-text="请对这两个命盘进行事业合作匹配分析。评估双方在性格、资源、行事风格上的互补性。分析合作过程中可能出现的机遇和矛盾点，并对如何建立长期、共赢的合作关系提供策略建议。" onclick="selectOption(this, 'combined');">事业合作</button>
-                <button class="unified-button" onclick="showCustomInput('combined'); selectOption(this, 'combined');">自定义...</button>
+                <button class="unified-button" onclick="selectOption(this, 'combined');">自定义...</button>
             </div>
             <div id="customCombinedQuestionContainer" style="width: 100%; margin-top: 10px;">
                 <input type="text" id="customCombinedQuestion" placeholder="请输入您的问题" style="display: none; width: 100%; padding: 12px; border: 1px solid #c5cae9; border-radius: 6px; box-sizing: border-box; font-size: 16px;">

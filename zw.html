@@ -125,7 +125,7 @@
         <!-- AI提问容器 -->
         <div id="aiQuestionContainer" style="display:none;">
             <div id="aiQuestionOptions">
-                <button class="unified-button" data-default-text="请对该紫微斗数命盘进行一次全面、深入、详尽的命格总论分析，内容需丰富详实，至少1500字。分析需严格按照以下结构展开：
+                <button class="unified-button" data-default-text="请对该紫微斗数命盘进行一次全面、深入、详尽的命格总论分析，内容需丰富详实。分析需严格按照以下结构展开：
 
 1.  **命格核心提要**：
     *   **命宫与身宫**：深度解读命宫和身宫的主星组合，精准判断命格的基本类型和格局层次（例如，“杀破狼”格的开创型，“机月同梁”格的稳定型等）。
@@ -152,7 +152,7 @@
                 <button class="unified-button" data-default-text="请深入分析该命盘的财富格局。重点解读财帛宫和田宅宫，判断其理财观念、财富能量、主要收入来源和资产积累能力。分析其一生的财运起伏，并提供符合其命盘特性的求财和守财建议。" onclick="selectOption(this, 'single')">财富机遇</button>
                 <button class="unified-button" data-default-text="请深入分析该命盘的感情与婚姻状况。重点解读夫妻宫，分析其对待感情的态度、理想伴侣的类型以及婚姻生活的真实写照。结合大限和流年，判断感情运势的起伏和正缘出现的可能时机，并为经营长期稳定的亲密关系提供建议。" onclick="selectOption(this, 'single')">感情婚姻</button>
                 <button class="unified-button" data-default-text="请分析该命盘的人际关系模式。重点解读兄弟宫（与同辈、朋友）和仆役宫（与下属、合作者），评估其社交能力、贵人运和需要注意的人际交往问题。提供改善人际互动、化解潜在矛盾的具体方法。" onclick="selectOption(this, 'single')">人际关系</button>
-                <button class="unified-button" onclick="showCustomInput('single'); selectOption(this, 'single');">自定义...</button>
+                <button class="unified-button" onclick="selectOption(this, 'single');">自定义...</button>
             </div>
             <div id="customQuestionContainer" style="width: 100%; margin-top: 10px;">
                 <input type="text" id="customQuestion" placeholder="请输入您的问题" style="display: none; width: 100%; padding: 12px; border: 1px solid #c5cae9; border-radius: 6px; box-sizing: border-box; font-size: 16px;">
@@ -165,7 +165,7 @@
             <div id="combinedQuestionOptions">
                 <button class="unified-button" data-default-text="请对这两个紫微斗数命盘进行婚恋匹配分析。从命宫的性格互补性、夫妻宫的星曜呼应、四化星的相互影响等角度，系统评估双方的缘分深浅和相处模式。总结双方的匹配优势和潜在矛盾，并为促进关系和谐提供具体建议。" onclick="selectOption(this, 'combined');">婚恋匹配</button>
                 <button class="unified-button" data-default-text="请对这两个紫微斗数命盘进行事业合作匹配分析。评估双方在性格、能力、资源上的互补性，以及合作的默契程度。分析合作过程中可能出现的机遇和矛盾点，并对如何建立长期、共赢的合作关系提供策略建议。" onclick="selectOption(this, 'combined');">事业合作</button>
-                <button class="unified-button" onclick="showCustomInput('combined'); selectOption(this, 'combined');">自定义...</button>
+                <button class="unified-button" onclick="selectOption(this, 'combined');">自定义...</button>
             </div>
             <div id="customCombinedQuestionContainer" style="width: 100%; margin-top: 10px;">
                 <input type="text" id="customCombinedQuestion" placeholder="请输入您的问题" style="display: none; width: 100%; padding: 12px; border: 1px solid #c5cae9; border-radius: 6px; box-sizing: border-box; font-size: 16px;">
