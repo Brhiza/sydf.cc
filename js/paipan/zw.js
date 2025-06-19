@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
             {
                 id: 'ai-mingge-zonglun',
                 text: '命格总论',
-                prompt: `你是一位学贯古今的命理宗师，既精通《紫微斗数全书》等古籍，也了解现代社会的心理学和职业发展。请根据以下命盘信息，为用户提供一份详尽的命格总论。
+                prompt: `
 
 **命盘信息:**
 [命盘信息]
