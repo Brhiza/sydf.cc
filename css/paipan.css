@@ -349,7 +349,6 @@ html, body {
     font-size: 16px;
     line-height: 1.8;
     color: #343a40;
-    white-space: pre-wrap;
     word-break: break-word;
 }
 /* ==========================================================================
@@ -1533,11 +1532,18 @@ select:focus {
 .ai-response h1, .ai-response h2, .ai-response h3, .ai-response h4, .ai-response h5, .ai-response h6 {
     margin-top: 0.6em;
     margin-bottom: 0.3em;
+    font-weight: 600;
+    line-height: 1.4;
+    color: #111;
 }
+.ai-response h1 { font-size: 1.4em; }
+.ai-response h2 { font-size: 1.2em; }
+.ai-response h3 { font-size: 1.1em; }
+
 .ai-response p {
-    margin-top: 0.15em;
-    margin-bottom: 0.15em;
-    line-height: 1.65; /* 保持良好的可读性 */
+    margin-top: 0;
+    margin-bottom: 0.25em;
+    line-height: 1.6;
 }
 .ai-response ul, .ai-response ol {
     margin-top: 0.2em;
@@ -1548,12 +1554,15 @@ select:focus {
     margin-bottom: 0.1em;
 }
 .ai-response blockquote {
-    margin-left: 1em;
-    padding-left: 1em;
-    border-left: 3px solid #eee;
-    color: #666;
+    margin: 0.5em 0;
+    padding: 0.2em 1em;
+    border-left: 3px solid #e0e0e0;
+    background-color: #f9f9f9;
+    color: #555;
+}
+.ai-response strong {
+    font-weight: 600;
 }
 .ai-response hr {
-    margin-top: 0.8em;
-    margin-bottom: 0.8em;
+    display: none;
 }

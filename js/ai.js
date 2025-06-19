@@ -27,28 +27,44 @@ async function queryAI(prompt) {
 
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
-        let accumulatedText = '';
-
         return {
             async *streamResponse() {
+                let buffer = '';
                 while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-
-                    const chunk = decoder.decode(value);
-                    const lines = chunk.split('\n').filter(line => line.trim() !== '');
-
-                    for (const line of lines) {
-                        if (line.startsWith('data: ')) {
+                    const {
+                        done,
+                        value
+                    } = await reader.read();
+                    if (done) {
+                        if (buffer.startsWith('data: ')) {
                             try {
-                                const jsonData = JSON.parse(line.slice(6));
+                                const jsonData = JSON.parse(buffer.slice(6));
                                 if (jsonData.choices && jsonData.choices[0].delta && jsonData.choices[0].delta.content) {
-                                    const content = jsonData.choices[0].delta.content;
-                                    yield content;
+                                    yield jsonData.choices[0].delta.content;
                                 }
                             } catch (e) {
-                                console.debug('跳过非 JSON 数据:', line, e);
+                                console.debug('跳过最后不完整的 JSON 数据:', buffer, e);
                             }
+                        }
+                        break;
+                    }
+                    buffer += decoder.decode(value, {
+                        stream: true
+                    });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop() || '';
+                    for (const line of lines) {
+                        if (line.trim() === '' || !line.startsWith('data: ')) {
+                            continue;
+                        }
+                        try {
+                            const jsonData = JSON.parse(line.slice(6));
+                            if (jsonData.choices && jsonData.choices[0].delta && jsonData.choices[0].delta.content) {
+                                const content = jsonData.choices[0].delta.content;
+                                yield content;
+                            }
+                        } catch (e) {
+                            console.debug('跳过非 JSON 数据:', line, e);
                         }
                     }
                 }
