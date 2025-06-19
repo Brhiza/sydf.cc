@@ -194,7 +194,9 @@ document.addEventListener('DOMContentLoaded', function() {
             
             let accumulatedContent = '';
             for await (const chunk of aiResponse.streamResponse()) {
-                accumulatedContent += chunk;
+                // Clean up excessive newlines before processing
+                const cleanedChunk = chunk.replace(/\n{3,}/g, '\n\n');
+                accumulatedContent += cleanedChunk;
                 // Use marked.parse to convert Markdown to HTML
                 aiResponseDiv.innerHTML = marked.parse(accumulatedContent);
             }
