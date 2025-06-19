@@ -43,8 +43,7 @@ async function queryAI(prompt) {
                             try {
                                 const jsonData = JSON.parse(line.slice(6));
                                 if (jsonData.choices && jsonData.choices[0].delta && jsonData.choices[0].delta.content) {
-                                    let content = jsonData.choices[0].delta.content;
-                                    content = content.replace(/\*/g, '');
+                                    const content = jsonData.choices[0].delta.content;
                                     yield content;
                                 }
                             } catch (e) {

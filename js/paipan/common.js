@@ -174,35 +174,29 @@ document.addEventListener('DOMContentLoaded', function() {
     }
         
         async function handleAIQuery(prompt) {
-        let aiResponseDiv = document.getElementById('aiResponse');
+        // Use the container we created in the HTML
+        const aiResponseDiv = document.getElementById('aiResponseOutput');
         if (!aiResponseDiv) {
-            aiResponseDiv = document.createElement('div');
-            aiResponseDiv.id = 'aiResponse';
-            aiResponseDiv.className = 'ai-response';
-            aiResponseDiv.style.marginTop = '20px';
-            aiResponseDiv.style.padding = '15px';
-            aiResponseDiv.style.borderRadius = '8px';
-            aiResponseDiv.style.backgroundColor = '#f8f9fa';
-            aiResponseDiv.style.whiteSpace = 'pre-wrap';
-            aiResponseDiv.style.wordWrap = 'break-word';
-            aiResponseDiv.style.overflowY = 'auto'; 
-            if (dom.mainContainer) {
-                dom.mainContainer.appendChild(aiResponseDiv);
-            }
+            console.error("AI response container 'aiResponseOutput' not found.");
+            return;
         }
         
         aiResponseDiv.style.display = 'block';
-        aiResponseDiv.innerHTML = '';
+        aiResponseDiv.innerHTML = ''; // Clear previous content
     
-        // Scroll to the newly created/cleared response div
+        // Scroll to the newly cleared response div
         aiResponseDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
     
         try {
             const currentTime = new Date().toLocaleString('zh-CN');
             const promptWithTime = `当前公历时间：${currentTime}\n\n${prompt}`;
             const aiResponse = await queryAI(promptWithTime);
-            for await (const content of aiResponse.streamResponse()) {
-                aiResponseDiv.append(document.createTextNode(content));
+            
+            let accumulatedContent = '';
+            for await (const chunk of aiResponse.streamResponse()) {
+                accumulatedContent += chunk;
+                // Use marked.parse to convert Markdown to HTML
+                aiResponseDiv.innerHTML = marked.parse(accumulatedContent);
             }
         } catch (error) {
             console.error('请求失败:', error);
