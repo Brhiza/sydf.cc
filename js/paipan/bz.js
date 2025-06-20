@@ -511,29 +511,15 @@ function generateAstrolabeForPerson(personNumber, year, month, day, timeIndex, g
         htmlResult += `</div>`;
         // --- 结束 ---
 
-        htmlResult += `<h3>大运</h3>`;
-        htmlResult += `<p><strong>起运：</strong>${baziResult.qyy_desc}</p>`;
-        htmlResult += `<table class="bazi-table">`;
-        htmlResult += `<thead><tr><th>大运</th><th>岁数</th><th>起止年份</th><th>星运</th></tr></thead>`;
-        htmlResult += `<tbody>`;
-        baziResult.dy.forEach((yun) => {
-            const tenGodGan = window.calendar.ssq[window.calendar.dgs[yun.zfman][baziResult.tg[2]]];
-            const tenGodZhi = window.calendar.ssq[window.calendar.dzs[yun.zfmbn][baziResult.tg[2]]];
-            const luckLifeStage = yun.nzsc;
-            htmlResult += `<tr class="luck-cycle">`;
-            htmlResult += `<td><span class="luck-info">${colorizeGanZhi(yun.zfma)} <small class="luck-ten-god" data-term="${tenGodGan}">${tenGodGan}</small><br>${colorizeGanZhi(yun.zfmb)} <small class="luck-ten-god" data-term="${tenGodZhi}">${tenGodZhi}</small></span></td>`;
-            htmlResult += `<td>${yun.zqage}岁</td>`;
-            htmlResult += `<td>${yun.syear}-${yun.eyear}</td>`;
-            htmlResult += `<td><span class="luck-life-stage" data-term="${luckLifeStage}">${luckLifeStage}</span></td>`;
-            htmlResult += `</tr>`;
-        });
-        htmlResult += `</tbody></table>`;
-
         resultDiv.innerHTML = htmlResult;
         resultDiv.style.display = 'block';
 
         if (personNumber === 1) {
             document.getElementById('aiQuestionContainer').style.display = 'block';
+            // --- 初始化运势分析器 ---
+            if (window.HoroscopeAnalyzer) {
+                new window.HoroscopeAnalyzer(baziResult, 'horoscope-analyzer-container');
+            }
         }
 
         return baziResult; // Return the full object
@@ -608,6 +594,169 @@ function getMonthlyFortuneDetails(year, yearGZ = '') {
 
     return info + '\n';
 }
+
+class HoroscopeAnalyzer {
+    constructor(baziResult, containerId) {
+        this.baziResult = baziResult;
+        this.container = document.getElementById(containerId);
+        this.state = {
+            selectedDaYun: null,
+            selectedLiuNian: null,
+            selectedLiuYue: null,
+        };
+        this.init();
+    }
+
+    init() {
+        this.render();
+        this.addEventListeners();
+        // Defer the default selection to ensure the DOM is fully updated.
+        setTimeout(() => this.setDefaultSelection(), 0);
+    }
+
+    setDefaultSelection() {
+        const currentYear = new Date().getFullYear();
+        const daYunIndex = this.baziResult.dy.findIndex(yun => currentYear >= yun.syear && currentYear <= yun.eyear);
+
+        if (daYunIndex !== -1) {
+            const daYun = this.baziResult.dy[daYunIndex];
+            const liuNian = daYun.liuNian.find(nian => nian.year === currentYear);
+            
+            // Directly call setState to trigger a re-render with the correct selections
+            this.setState({
+                selectedDaYun: daYun,
+                selectedLiuNian: liuNian || null,
+                selectedLiuYue: null
+            });
+
+            // After re-render, scroll the container if needed
+            setTimeout(() => {
+                const daYunElement = this.container.querySelector(`.horoscope-item[data-type="dayun"][data-index="${daYunIndex}"]`);
+                if (daYunElement && daYunElement.scrollIntoView) {
+                    daYunElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                }
+            }, 100);
+        }
+    }
+
+    setState(newState) {
+        this.state = { ...this.state, ...newState };
+        this.render();
+        this.addEventListeners();
+    }
+
+    render() {
+        const { dy } = this.baziResult;
+        const { selectedDaYun, selectedLiuNian } = this.state;
+
+        let html = `
+            <div class="horoscope-row stretch-row">${this.renderDaYun(dy)}</div>
+            <div class="horoscope-row stretch-row">${this.renderLiuNian(selectedDaYun)}</div>
+            <div class="horoscope-row">${this.renderLiuYue(selectedLiuNian)}</div>
+        `;
+        this.container.innerHTML = html;
+    }
+
+    renderDaYun(daYunData) {
+        const TEN_GOD_ABBREVIATIONS = {
+            '比肩': '比', '劫财': '劫', '食神': '食', '伤官': '伤', '偏财': '才',
+            '正财': '财', '七杀': '杀', '正官': '官', '偏印': '枭', '正印': '印'
+        };
+
+        let content = daYunData.map((yun, index) => {
+            const isSelected = this.state.selectedDaYun === yun;
+            const tenGodGan = window.calendar.ssq[window.calendar.dgs[yun.zfman][this.baziResult.tg[2]]];
+            const tenGodZhi = window.calendar.ssq[window.calendar.dzs[yun.zfmbn][this.baziResult.tg[2]]];
+            const tenGodGanAbbr = TEN_GOD_ABBREVIATIONS[tenGodGan] || '';
+            const tenGodZhiAbbr = TEN_GOD_ABBREVIATIONS[tenGodZhi] || '';
+
+            return `
+                <div class="horoscope-item ${isSelected ? 'selected' : ''}" data-type="dayun" data-index="${index}">
+                    <div class="year">${yun.syear}</div>
+                    <div class="age">${yun.zqage}岁</div>
+                    <div class="ganzhi">
+                        ${colorizeGanZhi(yun.zfma)}<span class="ten-god-abbr" data-term="${tenGodGan}">(${tenGodGanAbbr})</span>
+                        <br>
+                        ${colorizeGanZhi(yun.zfmb)}<span class="ten-god-abbr" data-term="${tenGodZhi}">(${tenGodZhiAbbr})</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        return `<div class="horoscope-label">大运</div><div class="horoscope-content">${content}</div>`;
+    }
+
+    renderLiuNian(daYun) {
+        if (!daYun) return `<div class="horoscope-label">流年</div><div class="horoscope-content" style="align-items:center; justify-content:center; color:#999;">请先选择大运</div>`;
+        
+        let content = daYun.liuNian.map((nian, index) => {
+            const isSelected = this.state.selectedLiuNian === nian;
+            const gan = nian.ganZhi[0];
+            const zhi = nian.ganZhi[1];
+            const tenGodGan = window.calendar.ssq[window.calendar.dgs[window.calendar.ctg.indexOf(gan)][this.baziResult.tg[2]]];
+            const tenGodZhi = window.calendar.ssq[window.calendar.dzs[window.calendar.cdz.indexOf(zhi)][this.baziResult.tg[2]]];
+            return `
+                <div class="horoscope-item ${isSelected ? 'selected' : ''}" data-type="liunian" data-dayun-index="${this.baziResult.dy.indexOf(daYun)}" data-index="${index}">
+                    <div class="year">${nian.year}</div>
+                    <div class="age">${nian.age}岁</div>
+                    <div class="ganzhi">${colorizeGanZhi(gan)}<br>${colorizeGanZhi(zhi)}</div>
+                    <div class="ten-god">
+                        <span data-term="${tenGodGan}">${tenGodGan}</span>,
+                        <span data-term="${tenGodZhi}">${tenGodZhi}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        return `<div class="horoscope-label">流年</div><div class="horoscope-content">${content}</div>`;
+    }
+
+    renderLiuYue(liuNian) {
+        if (!liuNian) return `<div class="horoscope-label">流月</div><div class="horoscope-content" style="align-items:center; justify-content:center; color:#999;">请先选择流年</div>`;
+
+        let content = liuNian.liuYue.map((yue, index) => {
+            const isSelected = this.state.selectedLiuYue === yue;
+            const gan = yue.ganZhi[0];
+            const zhi = yue.ganZhi[1];
+            const tenGodGan = window.calendar.ssq[window.calendar.dgs[window.calendar.ctg.indexOf(gan)][this.baziResult.tg[2]]];
+            const tenGodZhi = window.calendar.ssq[window.calendar.dzs[window.calendar.cdz.indexOf(zhi)][this.baziResult.tg[2]]];
+            return `
+                <div class="horoscope-item ${isSelected ? 'selected' : ''}" data-type="liuyue" data-liunian-index="${this.state.selectedDaYun.liuNian.indexOf(liuNian)}" data-dayun-index="${this.baziResult.dy.indexOf(this.state.selectedDaYun)}" data-index="${index}">
+                    <div class="jieqi">${index === 0 ? '正月' : (index+1)+'月'}</div>
+                    <div class="ganzhi">${colorizeGanZhi(gan)}<br>${colorizeGanZhi(zhi)}</div>
+                    <div class="ten-god">
+                        <span data-term="${tenGodGan}">${tenGodGan}</span>,
+                        <span data-term="${tenGodZhi}">${tenGodZhi}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        return `<div class="horoscope-label">流月</div><div class="horoscope-content">${content}</div>`;
+    }
+
+    addEventListeners() {
+        this.container.querySelectorAll('.horoscope-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                const target = e.currentTarget;
+                const type = target.dataset.type;
+                const index = parseInt(target.dataset.index, 10);
+
+                if (type === 'dayun') {
+                    const daYun = this.baziResult.dy[index];
+                    this.setState({ selectedDaYun: daYun, selectedLiuNian: null, selectedLiuYue: null });
+                } else if (type === 'liunian') {
+                    const daYunIndex = parseInt(target.dataset.dayunIndex, 10);
+                    const liuNian = this.baziResult.dy[daYunIndex].liuNian[index];
+                    this.setState({ selectedLiuNian: liuNian, selectedLiuYue: null });
+                } else if (type === 'liuyue') {
+                    const daYunIndex = parseInt(target.dataset.dayunIndex, 10);
+                    const liuNianIndex = parseInt(target.dataset.liunianIndex, 10);
+                    const liuYue = this.baziResult.dy[daYunIndex].liuNian[liuNianIndex].liuYue[index];
+                    this.setState({ selectedLiuYue: liuYue });
+                }
+            });
+        });
+    }
+}
+window.HoroscopeAnalyzer = HoroscopeAnalyzer;
 
 // --- Tooltip and Highlighting Logic ---
 document.addEventListener('DOMContentLoaded', () => {

@@ -1567,6 +1567,181 @@ select:focus {
     display: none;
 }
 
+/* --- Horoscope Analyzer Styles --- */
+#horoscope-analyzer-container {
+    margin-top: 30px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.horoscope-row {
+    display: flex;
+    align-items: stretch;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.horoscope-row:last-child {
+    border-bottom: none;
+}
+
+.horoscope-label {
+    flex: 0 0 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    background-color: #f5f5f5;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    padding: 10px 0;
+    font-size: 16px;
+    border-right: 1px solid #e0e0e0;
+}
+
+.horoscope-content {
+    flex: 1;
+    display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #ccc #f0f0f0;
+}
+
+/* New styles for stretching rows */
+.stretch-row .horoscope-content {
+    overflow-x: hidden; /* Hide scrollbar for stretched rows */
+}
+
+.stretch-row .horoscope-item {
+    flex: 1 1 0; /* Allow items to grow and shrink */
+    min-width: 0; /* Override previous min-width */
+}
+
+
+.horoscope-content::-webkit-scrollbar {
+    height: 8px;
+}
+
+.horoscope-content::-webkit-scrollbar-track {
+    background: #f0f0f0;
+}
+
+.horoscope-content::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 4px;
+}
+
+.horoscope-item {
+    flex: 0 0 auto;
+    padding: 6px 8px;
+    text-align: center;
+    border-right: 1px solid #e0e0e0;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    min-width: 70px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+@media (max-width: 768px) {
+    .horoscope-label {
+        flex: 0 0 35px;
+        font-size: 14px;
+    }
+    .horoscope-item {
+        min-width: 60px;
+        padding: 5px 6px;
+    }
+    .horoscope-item .year {
+        font-size: 14px;
+    }
+    .horoscope-item .ganzhi {
+        font-size: 14px;
+    }
+    .horoscope-item .ten-god {
+        font-size: 10px;
+    }
+    .horoscope-item .age {
+        font-size: 11px;
+    }
+    .horoscope-item .date {
+        font-size: 13px;
+    }
+    .horoscope-item .jieqi {
+        font-size: 11px;
+    }
+}
+
+.horoscope-item:last-child {
+    border-right: none;
+}
+
+.horoscope-item:hover {
+    background-color: #f0f2f5;
+}
+
+.horoscope-item.selected {
+    background-color: #e9e9e9; /* A light gray for selection */
+    color: #000; /* Ensure text is readable */
+}
+
+.horoscope-item.selected .year,
+.horoscope-item.selected .age,
+.horoscope-item.selected .ganzhi,
+.horoscope-item.selected .ten-god,
+.horoscope-item.selected .date,
+.horoscope-item.selected .jieqi {
+    color: #000; /* Ensure text is readable */
+}
+
+.horoscope-item .year {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.horoscope-item .age {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.horoscope-item .ganzhi {
+    font-size: 15px;
+    font-weight: bold;
+    line-height: 1.3;
+}
+
+.ten-god-abbr {
+    font-size: 12px;
+    font-weight: normal;
+    color: #666;
+    margin-left: 2px;
+}
+
+.horoscope-item.selected .ten-god-abbr {
+    color: #000;
+}
+
+.horoscope-item .ten-god {
+    font-size: 10px;
+    color: #666;
+    line-height: 1.2;
+}
+
+.horoscope-item .date {
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.horoscope-item .jieqi {
+    font-size: 12px;
+    color: #666;
+}
+
 /* --- Tooltip Styles --- */
 #tooltip {
     position: absolute;

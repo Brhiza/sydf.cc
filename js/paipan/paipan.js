@@ -439,7 +439,7 @@ this.getDecade = function(gan, zhi) {
           var zfmb = []; //大運月支文字
           var nzs = []; //大运对应的十二长生
           var mgz = ((10 + tg[1] - dz[1]) % 10) / 2 * 12 + dz[1]; //这里是根据天干地支代码计算月柱的六十甲子代码
-          for (var k = 0; k <= 8; k++) { //求各階段的起迄歲數及該階段的大運
+          for (var k = 0; k <= 11; k++) { // 求各階段的起迄歲數及該階段的大運, 增加到12个大运
               if (rt['dy'][k] === undefined) {
                   rt['dy'][k] = [];
               }
@@ -476,7 +476,7 @@ this.getDecade = function(gan, zhi) {
           var lyean = []; //流年天干
           var lyebn = []; //流年地支
           var lye = []; //流年所對應的干支文字
-          for (var j = 0; j <= 89; j++) {
+          for (var j = 0; j <= 119; j++) { // 增加到120年
               var k = window.calendar.intval(j / 10); //大运
               var i = j % 10; //流年
               if (rt['dy'][k]['ly'] === undefined) { //大运对应的流年
@@ -554,6 +554,42 @@ rt['mingGong'] = window.calendar.ctg[mingGongGanIndex] + window.calendar.cdz[min
 // 格局和旺衰
 rt['pattern'] = this.getBaziPattern(tg, dz);
 rt['strength'] = this.getStrengthInfo(tg, dz);
+
+          // --- 流月、流日计算 ---
+          rt['dy'].forEach(dayun => {
+              dayun.liuNian = [];
+              for (let i = 0; i < 10; i++) {
+                  const year = dayun.syear + i;
+                  if (year > dayun.eyear) continue;
+
+                  const age = year - ob.ty;
+                  const lnGanIndex = (rt.tg[0] + age) % 10;
+                  const lnZhiIndex = (rt.dz[0] + age) % 12;
+                  const yearGZ = window.calendar.ctg[lnGanIndex] + window.calendar.cdz[lnZhiIndex];
+                  
+                  const liuNianData = {
+                      year: year,
+                      age: age + 1,
+                      ganZhi: yearGZ,
+                      liuYue: []
+                  };
+
+                  // 计算流月
+                  const currentYearGanIndex = window.calendar.ctg.indexOf(yearGZ[0]);
+                  const tigerMonthGan = [2, 4, 6, 8, 0]; // 丙, 戊, 庚, 壬, 甲
+                  const monthGanStart = tigerMonthGan[Math.floor(currentYearGanIndex / 2)];
+
+                  for (let m = 0; m < 12; m++) {
+                      const monthGan = window.calendar.ctg[(monthGanStart + m) % 10];
+                      const monthZhi = window.calendar.cdz[(m + 2) % 12];
+                      liuNianData.liuYue.push({
+                          month: m + 1,
+                          ganZhi: monthGan + monthZhi
+                      });
+                  }
+                  dayun.liuNian.push(liuNianData);
+              }
+          });
 
           return rt;
       };
