@@ -204,7 +204,17 @@ function formatBaziForAI(baziResult, selectedOption = null) {
     result += `* **性别**: ${baziResult.xb}\n`;
     result += `* **公历**: ${baziResult.gl.join('-')}\n`;
     result += `* **农历**: ${baziResult.nl[0]}年 ${baziResult.nl[4].ym}${baziResult.nl[2]}日\n`;
-    result += `* **日主**: ${baziResult.ctg[2]} (${window.calendar.cyy[baziResult.yytg[2]]} ${window.calendar.wuxing[baziResult.ewxtg[2]]})\n\n`;
+    result += `* **日主**: ${baziResult.ctg[2]} (${window.calendar.cyy[baziResult.yytg[2]]} ${window.calendar.wuxing[baziResult.ewxtg[2]]})\n`;
+    if (baziResult.mingGong) {
+        result += `* **命宫**: ${baziResult.mingGong}\n`;
+    }
+    if (baziResult.pattern) {
+        result += `* **格局**: ${baziResult.pattern}\n`;
+    }
+    if (baziResult.strength) {
+        result += `* **旺衰**: ${baziResult.strength.analysis} (得分: ${baziResult.strength.score}, 依据: ${baziResult.strength.details})\n`;
+    }
+    result += `\n`;
 
     result += `### 八字四柱\n`;
     const pillars = ['年柱', '月柱', '日柱', '时柱'];
@@ -373,6 +383,9 @@ function generateAstrolabeForPerson(personNumber, year, month, day, timeIndex, g
         let htmlResult = `<h3>${personNumber === 1 ? (name ? `${name}的基本信息` : '基本信息') : `第${personNumber}人 - 基本信息`}</h3>`;
         htmlResult += `<p><strong>性别:</strong> ${baziResult.xb} | <strong>公历:</strong> ${baziResult.gl.join('-')} | <strong>农历:</strong> ${baziResult.nl[0]}年 ${baziResult.nl[4].ym}${baziResult.nl[2]}日</p>`;
         htmlResult += `<p><strong>生肖:</strong> ${baziResult.sx} | <strong>星座:</strong> ${baziResult.xz} | <strong>日主:</strong> ${baziResult.ctg[2]} (${window.calendar.cyy[baziResult.yytg[2]]} ${window.calendar.wuxing[baziResult.ewxtg[2]]})</p>`;
+        if (baziResult.mingGong && baziResult.pattern && baziResult.strength) {
+            htmlResult += `<p><strong>命宫:</strong> ${baziResult.mingGong} | <strong>格局:</strong> ${baziResult.pattern} | <strong>旺衰:</strong> ${baziResult.strength.analysis} (得分: ${baziResult.strength.score})</p>`;
+        }
         
         htmlResult += `<h3>八字排盘</h3>`;
         htmlResult += `<table class="bazi-table">`;
@@ -380,7 +393,10 @@ function generateAstrolabeForPerson(personNumber, year, month, day, timeIndex, g
         htmlResult += `<tbody>`;
         // 十神
         htmlResult += `<tr><th>主星</th>`;
-        for (let i = 0; i < 4; i++) { htmlResult += `<td><span class="ten-god">${window.calendar.ssq[window.calendar.dgs[baziResult.tg[i]][baziResult.tg[2]]]}</span></td>`; }
+        for (let i = 0; i < 4; i++) {
+            const tenGod = window.calendar.ssq[window.calendar.dgs[baziResult.tg[i]][baziResult.tg[2]]];
+            htmlResult += `<td><span class="ten-god" data-term="${tenGod}">${tenGod}</span></td>`;
+        }
         htmlResult += `</tr>`;
         // 四柱
         htmlResult += `<tr><th>四柱</th>`;
@@ -399,14 +415,19 @@ function generateAstrolabeForPerson(personNumber, year, month, day, timeIndex, g
         htmlResult += `</tr>`;
         // 藏干十神
         htmlResult += `<tr><th>副星</th>`;
-        for (let i = 0; i < 4; i++) { htmlResult += `<td><span class="hidden-gods">${baziResult.bzcg.slice(i * 3, i * 3 + 3).filter(s => s).join('<br>')}</span></td>`; }
+        for (let i = 0; i < 4; i++) {
+            const hiddenGods = baziResult.bzcg.slice(i * 3, i * 3 + 3).filter(s => s);
+            const hiddenGodsHtml = hiddenGods.map(god => `<span data-term="${god}">${god}</span>`).join('<br>');
+            htmlResult += `<td><span class="hidden-gods">${hiddenGodsHtml}</span></td>`;
+        }
         htmlResult += `</tr>`;
 
         // 十二长生 (from paipan.js)
         if (baziResult.pillarLifeStages) {
            htmlResult += `<tr><th>星运</th>`;
            for (let i = 0; i < 4; i++) {
-               htmlResult += `<td><span class="life-stage">${baziResult.pillarLifeStages[i]}</span></td>`;
+               const lifeStage = baziResult.pillarLifeStages[i];
+               htmlResult += `<td><span class="life-stage" data-term="${lifeStage}">${lifeStage}</span></td>`;
            }
            htmlResult += `</tr>`;
         }
@@ -415,7 +436,8 @@ function generateAstrolabeForPerson(personNumber, year, month, day, timeIndex, g
         if (baziResult.naYin) {
             htmlResult += `<tr><th>纳音</th>`;
             for (let i = 0; i < 4; i++) {
-                htmlResult += `<td><span class="shen-sha">${baziResult.naYin[i]}</span></td>`;
+                const naYin = baziResult.naYin[i];
+                htmlResult += `<td><span class="shen-sha" data-term="${naYin}">${naYin}</span></td>`;
             }
             htmlResult += `</tr>`;
         }
@@ -425,9 +447,9 @@ function generateAstrolabeForPerson(personNumber, year, month, day, timeIndex, g
             const kw = baziResult.kongWang;
             htmlResult += `<tr><th>空亡</th>`;
             htmlResult += `<td><span class="shen-sha">${kw.year.join('')}</span></td>`;
-            htmlResult += `<td></td>`;
+            htmlResult += `<td><span class="shen-sha">${kw.month.join('')}</span></td>`;
             htmlResult += `<td><span class="shen-sha">${kw.day.join('')}</span></td>`;
-            htmlResult += `<td></td>`;
+            htmlResult += `<td><span class="shen-sha">${kw.hour.join('')}</span></td>`;
             htmlResult += `</tr>`;
         }
 
@@ -438,10 +460,56 @@ function generateAstrolabeForPerson(personNumber, year, month, day, timeIndex, g
         htmlResult += `<tr><th>神煞</th>`;
         for (let i = 0; i < 4; i++) {
             const shenShaList = p.queryShenSha(baziResult.sz[i], baziArray, isMan, i + 1);
-            htmlResult += `<td><span class="shen-sha">${shenShaList.sort((a, b) => b.length - a.length).join('<br>')}</span></td>`;
+            console.log(`Pillar ${i + 1} ShenSha:`, shenShaList); // Debugging line to check generated ShenSha
+            const shenShaHtml = shenShaList.sort((a, b) => b.length - a.length).map(sha => `<span data-term="${sha}">${sha}</span>`).join('<br>');
+            htmlResult += `<td><span class="shen-sha">${shenShaHtml}</span></td>`;
         }
         htmlResult += `</tr>`;
         htmlResult += `</tbody></table>`;
+
+        // --- 添加干支关系和五行状态 ---
+        const relationships = p.getRelationships(baziResult.sz);
+        const wuxingStatus = p.getWuxingStatus(baziResult.sz[1][1]); // 根据月支判断
+
+        htmlResult += `<div class="bazi-extra-info">`;
+        if (Object.keys(relationships).length > 0) {
+            const tianGanKeys = ['tianGanHe', 'tianGanKe'];
+            const diZhiKeys = ['diZhiSanHui', 'diZhiSanHe', 'diZhiLiuHe', 'diZhiChong', 'diZhiXing', 'diZhiHai', 'diZhiPo'];
+            const relMap = {
+                tianGanHe: '天干五合', tianGanKe: '天干相克', diZhiSanHui: '三会局',
+                diZhiSanHe: '三合局', diZhiLiuHe: '六合', diZhiChong: '相冲',
+                diZhiXing: '相刑', diZhiHai: '相害', diZhiPo: '相破'
+            };
+
+            const formatRelations = (keys) => {
+                return keys.map(key => {
+                    const value = relationships[key];
+                    if (!value || value.length === 0) return null;
+                    const title = relMap[key];
+                    const details = value.map(item => {
+                        if (key === 'tianGanKe') return `${item.gans[0]}克${item.gans[1]}`;
+                        if (item.gans) return `${item.gans.join('')}合化${item.he}`;
+                        if (item.zhis) return item.zhis.join('');
+                        if (item.type && item.members) return `${item.members.join('')}${item.type}`;
+                        return '';
+                    }).join(' ');
+                    return `${title}(${details})`;
+                }).filter(Boolean).join('; ');
+            };
+
+            const tianGanRelations = formatRelations(tianGanKeys);
+            const diZhiRelations = formatRelations(diZhiKeys);
+
+            if (tianGanRelations) {
+                htmlResult += `<p><strong>原局天干：</strong>${tianGanRelations}</p>`;
+            }
+            if (diZhiRelations) {
+                htmlResult += `<p><strong>原局地支：</strong>${diZhiRelations}</p>`;
+            }
+        }
+        htmlResult += `<p><strong>五行状态：</strong>${wuxingStatus}</p>`;
+        htmlResult += `</div>`;
+        // --- 结束 ---
 
         htmlResult += `<h3>大运</h3>`;
         htmlResult += `<p><strong>起运：</strong>${baziResult.qyy_desc}</p>`;
@@ -451,11 +519,12 @@ function generateAstrolabeForPerson(personNumber, year, month, day, timeIndex, g
         baziResult.dy.forEach((yun) => {
             const tenGodGan = window.calendar.ssq[window.calendar.dgs[yun.zfman][baziResult.tg[2]]];
             const tenGodZhi = window.calendar.ssq[window.calendar.dzs[yun.zfmbn][baziResult.tg[2]]];
+            const luckLifeStage = yun.nzsc;
             htmlResult += `<tr class="luck-cycle">`;
-            htmlResult += `<td><span class="luck-info">${colorizeGanZhi(yun.zfma)} <small class="luck-ten-god">${tenGodGan}</small><br>${colorizeGanZhi(yun.zfmb)} <small class="luck-ten-god">${tenGodZhi}</small></span></td>`;
+            htmlResult += `<td><span class="luck-info">${colorizeGanZhi(yun.zfma)} <small class="luck-ten-god" data-term="${tenGodGan}">${tenGodGan}</small><br>${colorizeGanZhi(yun.zfmb)} <small class="luck-ten-god" data-term="${tenGodZhi}">${tenGodZhi}</small></span></td>`;
             htmlResult += `<td>${yun.zqage}岁</td>`;
             htmlResult += `<td>${yun.syear}-${yun.eyear}</td>`;
-            htmlResult += `<td><span class="luck-life-stage">${yun.nzsc}</span></td>`;
+            htmlResult += `<td><span class="luck-life-stage" data-term="${luckLifeStage}">${luckLifeStage}</span></td>`;
             htmlResult += `</tr>`;
         });
         htmlResult += `</tbody></table>`;
@@ -539,4 +608,82 @@ function getMonthlyFortuneDetails(year, yearGZ = '') {
 
     return info + '\n';
 }
+
+// --- Tooltip and Highlighting Logic ---
+document.addEventListener('DOMContentLoaded', () => {
+    if (!window.BaziDefinitions) {
+        console.error('BaziDefinitions not found. Make sure definitions.js is loaded.');
+        return;
+    }
+
+    // 1. Create and append the tooltip element
+    const tooltip = document.createElement('div');
+    tooltip.id = 'tooltip';
+    document.body.appendChild(tooltip);
+
+    // Function to show the tooltip
+    const showTooltip = (e) => {
+        const term = e.target.dataset.term;
+        if (!term) return;
+
+        const definition = window.BaziDefinitions[term];
+        if (definition) {
+            tooltip.innerHTML = `<h4>${definition.title}</h4><p>${definition.definition}</p>`;
+            
+            // Position the tooltip
+            // Adjust for page scroll and tooltip dimensions
+            const scrollX = window.scrollX || document.documentElement.scrollLeft;
+            const scrollY = window.scrollY || document.documentElement.scrollTop;
+            let x = e.clientX + scrollX + 15;
+            let y = e.clientY + scrollY + 15;
+
+            tooltip.style.left = `${x}px`;
+            tooltip.style.top = `${y}px`;
+            tooltip.classList.add('visible');
+
+            // Reposition if it goes off-screen
+            if (x + tooltip.offsetWidth > window.innerWidth) {
+                tooltip.style.left = `${x - tooltip.offsetWidth - 30}px`;
+            }
+            if (y + tooltip.offsetHeight > window.innerHeight + scrollY) {
+                tooltip.style.top = `${y - tooltip.offsetHeight - 30}px`;
+            }
+            
+            e.target.classList.add('highlight-term');
+        }
+    };
+
+    // Function to hide the tooltip
+    const hideTooltip = (e) => {
+        tooltip.classList.remove('visible');
+        if (e.target.dataset.term) {
+            e.target.classList.remove('highlight-term');
+        }
+    };
+
+    // 2. Add event listeners to the result containers
+    const resultContainer1 = document.getElementById('result');
+    const resultContainer2 = document.getElementById('result2');
+
+    const setupEventListeners = (container) => {
+        if (container) {
+            container.addEventListener('mouseover', showTooltip);
+            container.addEventListener('mouseout', hideTooltip);
+            container.addEventListener('mousemove', (e) => {
+                // Update position on move, but only if visible
+                if (tooltip.classList.contains('visible')) {
+                    const scrollX = window.scrollX || document.documentElement.scrollLeft;
+                    const scrollY = window.scrollY || document.documentElement.scrollTop;
+                    let x = e.clientX + scrollX + 15;
+                    let y = e.clientY + scrollY + 15;
+                    tooltip.style.left = `${x}px`;
+                    tooltip.style.top = `${y}px`;
+                }
+            });
+        }
+    };
+
+    setupEventListeners(resultContainer1);
+    setupEventListeners(resultContainer2);
+});
 

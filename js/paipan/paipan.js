@@ -297,7 +297,7 @@ this.getDecade = function(gan, zhi) {
               return false;
           }
   		
-  		var rt = []; //要返回的数组 return
+  		var rt = {}; //要返回的对象 return
   		
   		if(J !== undefined){ //有传参,需要转地方真太阳时
   			rt['pty'] = spcjd - (window.calendar.J - window.calendar.floatval(J)) * 4 / 60 / 24; //计算地方平太阳时,每经度时差4分钟
@@ -314,7 +314,11 @@ this.getDecade = function(gan, zhi) {
   
           var szs = [1, 6, 10, 9, 10, 9, 7, 0, 4, 3]; //日干對地支爲"子"者所對應的運程代碼
   
-          var [tg, dz, ob] = this.GetGZ(yy, mm, dd, hh, mt, ss);
+          var gdz_res = this.GetGZ(yy, mm, dd, hh, mt, ss);
+          if (!gdz_res) {
+              return false; // Return early if GZ calculation fails
+          }
+          var [tg, dz, ob] = gdz_res;
   
           //計算年月日時辰等四柱干支的陰陽屬性和個數及五行屬性和個數
           var yytg = []; //YinYang TianGan
@@ -519,7 +523,9 @@ const getKongWang = (ganZhi) => {
 }
 rt['kongWang'] = {
     year: getKongWang(rt['sz'][0]),
-    day: getKongWang(rt['sz'][2])
+    month: getKongWang(rt['sz'][1]),
+    day: getKongWang(rt['sz'][2]),
+    hour: getKongWang(rt['sz'][3])
 };
 
 // 十二长生 (星运)
@@ -534,8 +540,122 @@ const getPillarLifeStages = (riGan, baziDz) => {
 };
 rt['pillarLifeStages'] = getPillarLifeStages(rt['ctg'][2], rt['cdz']);
 rt['baziYear'] = ob.ty; // 添加八字所在的节气年，用于精确计算流年
+
+// 命宫
+// 地支寅月为2, 卯月为3...丑月为1; 时支子为0, 丑为1...亥为11
+const mingGongZhiIndex = (3 - dz[1] - dz[3] + 24) % 12;
+const yearGanIndex = tg[0];
+const tigerMonthGan = [2, 4, 6, 8, 0]; // 丙, 戊, 庚, 壬, 甲 for 甲己, 乙庚, 丙辛, 丁壬, 戊癸
+const monthGanStart = tigerMonthGan[Math.floor(yearGanIndex / 2)];
+// 月干以寅(2)为始，所以要减去2
+const mingGongGanIndex = (monthGanStart + mingGongZhiIndex - 2 + 12) % 10;
+rt['mingGong'] = window.calendar.ctg[mingGongGanIndex] + window.calendar.cdz[mingGongZhiIndex];
+
+// 格局和旺衰
+rt['pattern'] = this.getBaziPattern(tg, dz);
+rt['strength'] = this.getStrengthInfo(tg, dz);
+
           return rt;
       };
+
+this.getStrengthInfo = function(tg, dz) {
+    const riGan = tg[2];
+    const riGanWuXing = window.calendar.wxtg[riGan];
+    const yueZhi = dz[1];
+    
+    let score = 0;
+    const analysis = [];
+
+    // 1. 得令 (De Ling) - 40%
+    const yueZhiWuXing = window.calendar.wxdz[yueZhi];
+    if (yueZhiWuXing === riGanWuXing) {
+        score += 40;
+        analysis.push('得令');
+    } else if (window.calendar.wuxingSheng[yueZhiWuXing] === riGanWuXing) {
+        score += 20;
+        analysis.push('得令');
+    }
+
+    // 2. 得地 (De Di) - 30% (日支 15%, 年时支 15%)
+    const deDiZhis = [];
+    // 日支
+    const riZhi = dz[2];
+    const riZhiWuXing = window.calendar.wxdz[riZhi];
+    if (riZhiWuXing === riGanWuXing || window.calendar.wuxingSheng[riZhiWuXing] === riGanWuXing) {
+        score += 15;
+        deDiZhis.push(window.calendar.cdz[riZhi]);
+    }
+    // 年时支
+    [dz[0], dz[3]].forEach(zhi => {
+        const zhiWuXing = window.calendar.wxdz[zhi];
+        if (zhiWuXing === riGanWuXing || window.calendar.wuxingSheng[zhiWuXing] === riGanWuXing) {
+            score += 7.5;
+            deDiZhis.push(window.calendar.cdz[zhi]);
+        }
+    });
+    if (deDiZhis.length > 0) {
+        analysis.push(`得地于(${deDiZhis.join(',')})`);
+    }
+
+    // 3. 得助 (De Zhu) - 30%
+    const deZhuGans = [];
+    [tg[0], tg[1], tg[3]].forEach(gan => {
+        const ganWuXing = window.calendar.wxtg[gan];
+        if (ganWuXing === riGanWuXing || window.calendar.wuxingSheng[ganWuXing] === riGanWuXing) {
+            score += 10;
+            deZhuGans.push(window.calendar.ctg[gan]);
+        }
+    });
+    if (deZhuGans.length > 0) {
+        analysis.push(`得助于(${deZhuGans.join(',')})`);
+    }
+
+    let result;
+    if (score >= 55) result = '身强';
+    else if (score >= 45) result = '中和';
+    else result = '身弱';
+
+    return {
+        score: Math.round(score),
+        analysis: result,
+        details: analysis.join(', ')
+    };
+};
+
+this.getBaziPattern = function(tg, dz) {
+    const riGan = tg[2];
+    const yueZhi = dz[1];
+    const yueCangGan = window.calendar.zcg[yueZhi].filter(g => g !== -1);
+    
+    // 检查月令藏干是否透出
+    const touGan = [tg[0], tg[1], tg[3]].find(g => yueCangGan.includes(g));
+
+    let patternGan;
+    if (touGan !== undefined) {
+        patternGan = touGan;
+    } else {
+        // 无透干，取月令主气为格
+        patternGan = yueCangGan[0];
+    }
+
+    const patternTenGod = window.calendar.ssq[window.calendar.dgs[patternGan][riGan]];
+    
+    // 处理特殊情况，如日主本身的比肩劫财不立格
+    if (['比肩', '劫财'].includes(patternTenGod)) {
+        // 如果是建禄月刃格，但有官杀透出，则取官杀为格
+        const guanSha = [tg[0], tg[1], tg[3]].find(g => {
+            const tenGod = window.calendar.ssq[window.calendar.dgs[g][riGan]];
+            return tenGod === '正官' || tenGod === '七杀';
+        });
+        if (guanSha) {
+            return window.calendar.ssq[window.calendar.dgs[guanSha][riGan]] + '格';
+        }
+        return '建禄格'; // 或月刃格，这里简化
+    }
+
+    return patternTenGod + '格';
+};
+
  this.queryShenSha = function(pillarGZ, baziArray, isMan, pillarIndex) {
      const gan = pillarGZ[0];
      const zhi = pillarGZ[1];
@@ -577,12 +697,12 @@ rt['baziYear'] = ob.ty; // 添加八字所在的节气年，用于精确计算�
              return map[yueZhi] === gan || map[yueZhi] === zhi;
          },
          '月德贵人': () => {
-             // 专业软件规则：按三会局季节论。春(寅卯辰)德在甲；夏(巳午未)德在丙；秋(申酉戌)德在庚；冬(亥子丑)德在壬。
+             // 寅午戌月在丙，申子辰月在壬，亥卯未月在甲，巳酉丑月在庚。
              const map = {
-                 '寅': '甲', '卯': '甲', '辰': '甲',
-                 '巳': '丙', '午': '丙', '未': '丙',
-                 '申': '庚', '酉': '庚', '戌': '庚',
-                 '亥': '壬', '子': '壬', '丑': '壬'
+                 '寅': '丙', '午': '丙', '戌': '丙',
+                 '申': '壬', '子': '壬', '辰': '壬',
+                 '亥': '甲', '卯': '甲', '未': '甲',
+                 '巳': '庚', '酉': '庚', '丑': '庚'
              };
              return map[yueZhi] === gan;
          },
@@ -641,7 +761,8 @@ rt['baziYear'] = ob.ty; // 添加八字所在的节气年，用于精确计算�
              return map[nianZhi] === zhi || map[riZhi] === zhi;
          },
          '天医': () => {
-             const targetIdx = (zhiIdx(yueZhi) + 1) % 12;
+             // 正月生见丑，二月生见寅，为前一位
+             const targetIdx = (zhiIdx(yueZhi) - 1 + 12) % 12;
              return cdz[targetIdx] === zhi;
          },
          '金舆': () => {
@@ -672,8 +793,8 @@ rt['baziYear'] = ob.ty; // 添加八字所在的节气年，用于精确计算�
              return map[riGan] === zhi;
          },
          '血刃': () => {
-             // 寅月起戌，顺行十二支 (寅在数组中是2, 戌是10, 所以是+8)
-             const targetIdx = (zhiIdx(yueZhi) + 8) % 12;
+             // 以月支的前一位为血刃。例如寅月在丑，卯月在寅。
+             const targetIdx = (zhiIdx(yueZhi) - 1 + 12) % 12;
              return cdz[targetIdx] === zhi;
          },
          '四废日': () => {
@@ -682,12 +803,15 @@ rt['baziYear'] = ob.ty; // 添加八字所在的节气年，用于精确计算�
              const season = { '寅': '春', '卯': '春', '辰': '春', '巳': '夏', '午': '夏', '未': '夏', '申': '秋', '酉': '秋', '戌': '秋', '亥': '冬', '子': '冬', '丑': '冬' };
              return map[season[yueZhi]] && map[season[yueZhi]].includes(riGZ);
          },
-         '天罗地网': () => {
+         '天罗': () => {
              if (zhi === '戌' || zhi === '亥') {
-                 if (baziArray.some(p => p[1] === '辰' || p[1] === '巳')) return '天罗';
+                 if (baziArray.some(p => p[1] === '辰' || p[1] === '巳')) return true;
              }
+             return false;
+         },
+         '地网': () => {
              if (zhi === '辰' || zhi === '巳') {
-                 if (baziArray.some(p => p[1] === '戌' || p[1] === '亥')) return '地网';
+                 if (baziArray.some(p => p[1] === '戌' || p[1] === '亥')) return true;
              }
              return false;
          },
@@ -823,14 +947,57 @@ rt['baziYear'] = ob.ty; // 添加八字所在的节气年，用于精确计算�
      }
  
      return [...new Set(results)];
+  };
+ 
+  this.getWuxingStatus = function(yueZhi) {
+     const yueZhiIndex = window.calendar.cdz.indexOf(yueZhi);
+     const wuxingNames = ['水', '木', '火', '土', '金'];
+     const statusNames = ['旺', '相', '休', '囚', '死'];
+     let statusResult = {};
+ 
+     // 旺相休囚死规律:
+     // 我生者相，生我者休，克我者囚，我克者死
+     // 春(木): 木旺, 火相, 水休, 金囚, 土死 (木生火，水生木，金克木，木克土)
+     // 夏(火): 火旺, 土相, 木休, 水囚, 金死 (火生土，木生火，水克火，火克金)
+     // 秋(金): 金旺, 水相, 土休, 火囚, 木死 (金生水，土生金，火克金，金克木)
+     // 冬(水): 水旺, 木相, 金休, 土囚, 火死 (水生木，金生水，土克水，水克火)
+     // 辰戌丑未四季月(土): 土旺, 金相, 火休, 木囚, 水死 (土生金，火生土，木克土，土克水)
+ 
+     const seasonStatusMap = {
+         // 春 (寅卯辰)
+         2: { '木': '旺', '火': '相', '水': '休', '金': '囚', '土': '死' },
+         3: { '木': '旺', '火': '相', '水': '休', '金': '囚', '土': '死' },
+         // 夏 (巳午未)
+         5: { '火': '旺', '土': '相', '木': '休', '水': '囚', '金': '死' },
+         6: { '火': '旺', '土': '相', '木': '休', '水': '囚', '金': '死' },
+         // 秋 (申酉戌)
+         8: { '金': '旺', '水': '相', '土': '休', '火': '囚', '木': '死' },
+         9: { '金': '旺', '水': '相', '土': '休', '火': '囚', '木': '死' },
+         // 冬 (亥子丑)
+         11: { '水': '旺', '木': '相', '金': '休', '土': '囚', '火': '死' },
+         0: { '水': '旺', '木': '相', '金': '休', '土': '囚', '火': '死' },
+         // 四季 (辰戌丑未)
+         4: { '土': '旺', '金': '相', '火': '休', '木': '囚', '水': '死' },
+         7: { '土': '旺', '金': '相', '火': '休', '木': '囚', '水': '死' },
+         10: { '土': '旺', '金': '相', '火': '休', '木': '囚', '水': '死' },
+         1: { '土': '旺', '金': '相', '火': '休', '木': '囚', '水': '死' },
+     };
+     
+     const season = seasonStatusMap[yueZhiIndex];
+     if (season) {
+         return `木${season['木']}，火${season['火']}，土${season['土']}，金${season['金']}，水${season['水']}`;
+     }
+     return '无法确定五行状态';
  };
-this.getRelationships = function(baziSz) {
-    const ctg = baziSz.map(p => p[0]);
-    const cdz = baziSz.map(p => p[1]);
-    const relationships = {
-        tianGanHe: [],
-        diZhiSanHui: [],
-        diZhiSanHe: [],
+ 
+ this.getRelationships = function(baziSz) {
+     const ctg = baziSz.map(p => p[0]);
+     const cdz = baziSz.map(p => p[1]);
+     const relationships = {
+         tianGanHe: [],
+         tianGanKe: [],
+         diZhiSanHui: [],
+         diZhiSanHe: [],
         diZhiLiuHe: [],
         diZhiChong: [],
         diZhiXing: [],
@@ -850,6 +1017,26 @@ this.getRelationships = function(baziSz) {
                 relationships.tianGanHe.push({ gans: [ctg[i], ctg[j]], he: heHuaMap[pairKey] });
             }
             checkedTgPairs.add(pairKey);
+        }
+    }
+
+    // --- 天干相克 ---
+    const checkedTgKePairs = new Set();
+    for (let i = 0; i < 4; i++) {
+        for (let j = i + 1; j < 4; j++) {
+            const pairKey = [ctg[i], ctg[j]].sort().join('');
+            if (checkedTgKePairs.has(pairKey)) continue;
+
+            const gan1Wuxing = window.calendar.wxtg[window.calendar.ctg.indexOf(ctg[i])];
+            const gan2Wuxing = window.calendar.wxtg[window.calendar.ctg.indexOf(ctg[j])];
+
+            if (window.calendar.wuxingKe[gan1Wuxing] === gan2Wuxing) {
+                relationships.tianGanKe.push({ gans: [ctg[i], ctg[j]] });
+                checkedTgKePairs.add(pairKey);
+            } else if (window.calendar.wuxingKe[gan2Wuxing] === gan1Wuxing) {
+                relationships.tianGanKe.push({ gans: [ctg[j], ctg[i]] });
+                checkedTgKePairs.add(pairKey);
+            }
         }
     }
 

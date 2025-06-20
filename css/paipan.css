@@ -302,7 +302,7 @@ html, body {
 
 /* Paipan Styles */
 .paipan-container {
-    font-family: 'SimSun', 'STSong', serif;
+    /* font-family: 'SimSun', 'STSong', serif; */
 }
 
 .paipan-header {
@@ -920,37 +920,13 @@ select:focus {
 
 #aiQuestionOptions, #combinedQuestionOptions {
     display: none;
-    flex-wrap: nowrap;
-    overflow-x: auto;
+    flex-wrap: wrap;
     gap: 10px;
     margin-top: 20px;
     border-top: 1px solid #eee;
-    justify-content: flex-start; /* Align to start for better scrolling */
-    
+    justify-content: center;
     padding: 20px 0;
     box-sizing: border-box;
-
-    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-    scrollbar-width: thin; /* Firefox */
-    scrollbar-color: #ccc #f0f0f0; /* Firefox */
-}
-
-#aiQuestionOptions::-webkit-scrollbar, #combinedQuestionOptions::-webkit-scrollbar {
-    height: 8px;
-}
-
-#aiQuestionOptions::-webkit-scrollbar-track, #combinedQuestionOptions::-webkit-scrollbar-track {
-    background: #f0f0f0;
-    border-radius: 4px;
-}
-
-#aiQuestionOptions::-webkit-scrollbar-thumb, #combinedQuestionOptions::-webkit-scrollbar-thumb {
-    background: #ccc;
-    border-radius: 4px;
-}
-
-#aiQuestionOptions::-webkit-scrollbar-thumb:hover, #combinedQuestionOptions::-webkit-scrollbar-thumb:hover {
-    background: #aaa;
 }
     
 #aiQuestionOptions .unified-button, #combinedQuestionOptions .unified-button {
@@ -1016,6 +992,7 @@ select:focus {
     overflow: hidden;
     box-shadow: 0 4px 8px rgba(0,0,0,0.05);
     font-size: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 .bazi-table th, .bazi-table td {
@@ -1023,6 +1000,7 @@ select:focus {
     padding: 10px 12px;
     text-align: center;
     transition: background-color 0.3s;
+    vertical-align: top;
 }
 
 .bazi-table thead th {
@@ -1076,9 +1054,9 @@ select:focus {
     padding: 12px;
 }
 
-.bazi-table .luck-cycle td {
-    font-family: monospace;
-    font-size: 18px;
+.bazi-table .luck-cycle td, .bazi-table .luck-cycle td span {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 20px;
     white-space: pre-wrap;
     text-align: center;
     vertical-align: middle;
@@ -1106,6 +1084,28 @@ select:focus {
     font-size: 14px;
     color: #555;
     line-height: 1.4;
+}
+
+.bazi-extra-info {
+    margin: 15px 0;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+.bazi-extra-info p {
+    margin: 0 0 8px 0;
+}
+
+.bazi-extra-info p:last-child {
+    margin-bottom: 0;
+}
+
+.bazi-extra-info strong {
+    color: #333;
 }
 
 @media (max-width: 600px) {
@@ -1565,4 +1565,47 @@ select:focus {
 }
 .ai-response hr {
     display: none;
+}
+
+/* --- Tooltip Styles --- */
+#tooltip {
+    position: absolute;
+    visibility: hidden;
+    background-color: #000;
+    color: #fff;
+    text-align: left;
+    border-radius: 6px;
+    padding: 10px 15px;
+    z-index: 1010;
+    opacity: 0;
+    transition: opacity 0.2s;
+    max-width: 300px;
+    font-size: 14px;
+    line-height: 1.6;
+    pointer-events: none; /* So it doesn't interfere with mouse events */
+}
+
+#tooltip.visible {
+    visibility: visible;
+    opacity: 1;
+}
+
+#tooltip h4 {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    border-bottom: 1px solid #444;
+    padding-bottom: 6px;
+}
+
+#tooltip p {
+    margin: 0;
+}
+
+/* --- Highlight Styles --- */
+.highlight-term {
+    background-color: #fffbe6;
+    border-radius: 3px;
+    cursor: pointer;
 }

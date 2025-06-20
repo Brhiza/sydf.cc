@@ -148,26 +148,11 @@ document.addEventListener('DOMContentLoaded', function() {
         questions.forEach(question => {
             question.addEventListener('click', () => {
                 const questionText = question.textContent;
-                const customInput = type === 'combined' ? dom.customCombinedQuestion : dom.customQuestion;
-                const optionsContainer = type === 'combined' ? dom.combinedQuestionOptions : dom.aiQuestionOptions;
-                
-                if (!customInput || !optionsContainer) return;
-
-                // 1. Set the input value
-                customInput.value = questionText;
-                
-                // 2. Find and programmatically select the 'Custom...' button
-                const customButton = Array.from(optionsContainer.querySelectorAll('.unified-button')).find(btn => btn.dataset.prompt === '');
-                if (customButton) {
-                    // This function now correctly handles showing the input field
-                    selectOption(customButton, type);
-                }
-
-                // 3. Directly trigger the AI query
+                // Directly trigger the AI query with the question text
                 if (type === 'combined') {
-                    askAIForCompatibility();
+                    askAIForCompatibility(questionText);
                 } else {
-                    askAI();
+                    askAI(questionText);
                 }
             });
         });
@@ -345,7 +330,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    async function executeAIQuery(type) {
+    async function executeAIQuery(type, directQuestionText = null) {
         const isCombined = type === 'combined';
         const config = {
             promptFn: isCombined ? pageConfig.getCompatibilityPrompt : pageConfig.getAIPrompt,
@@ -358,19 +343,31 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (!config.promptFn || !config.button || !config.optionsContainer) return;
 
-        const selectedOption = config.optionsContainer.querySelector('.unified-button.selected');
+        let questionText;
+        let selectedOption;
 
-        if (!selectedOption) {
-            alert("请选择一个问题选项。");
-            return;
-        }
+        if (directQuestionText) {
+            questionText = directQuestionText;
+            // When a question is passed directly, it's conceptually a "custom" question.
+            // We find the custom button to get its dataset for the prompt builder.
+            selectedOption = config.optionsContainer.querySelector('.unified-button[data-prompt=""]');
+            if (!selectedOption) {
+                alert("自定义问题按钮未找到，无法提交。");
+                return;
+            }
+        } else {
+            selectedOption = config.optionsContainer.querySelector('.unified-button.selected');
+            if (!selectedOption) {
+                alert("请选择一个问题选项。");
+                return;
+            }
+            const isCustom = selectedOption.dataset.prompt === '';
+            questionText = isCustom ? config.customInput.value : selectedOption.textContent; // Use textContent for non-custom questions
 
-        const isCustom = selectedOption.dataset.prompt === '';
-        const questionText = isCustom ? config.customInput.value : selectedOption.dataset.prompt;
-
-        if (!questionText) {
-            alert("问题不能为空，请输入您的问题。");
-            return;
+            if (!questionText) { // Check for empty custom question
+                alert("问题不能为空，请输入您的问题。");
+                return;
+            }
         }
 
         const prompt = isCombined
@@ -389,12 +386,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    function askAI() {
-        executeAIQuery('single');
+    function askAI(arg) {
+        const directQuestionText = typeof arg === 'string' ? arg : null;
+        executeAIQuery('single', directQuestionText);
     }
 
-    function askAIForCompatibility() {
-        executeAIQuery('combined');
+    function askAIForCompatibility(arg) {
+        const directQuestionText = typeof arg === 'string' ? arg : null;
+        executeAIQuery('combined', directQuestionText);
     }
 
     function loadDataFromURL() {
