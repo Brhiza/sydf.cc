@@ -1,4 +1,15 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // --- Dependency Check ---
+    if (typeof marked === 'undefined') {
+        console.error('Error: `marked.js` library is missing. Please check the script tag for the CDN.');
+        // Display an error message to the user
+        const container = document.querySelector('.container');
+        if (container) {
+            container.innerHTML = '<p style="color: red; text-align: center; padding: 20px;">错误：缺少核心组件，页面无法加载。请检查网络连接或联系管理员。</p>';
+        }
+        return; // Stop execution
+    }
+
     // --- Start of content from ui.js ---
 
     // 将星盘数据存储在局部变量中，避免污染全局作用域

@@ -212,11 +212,23 @@ function formatBaziForAI(baziResult, selectedOption = null) {
         return "无法获取八字数据。";
     }
 
+    const safeAccess = (accessor, defaultValue = '') => {
+        try {
+            const value = accessor();
+            return value === undefined || value === null ? defaultValue : value;
+        } catch (e) {
+            // console.warn('safeAccess caught an error:', e); // Optional: for debugging
+            return defaultValue;
+        }
+    };
+
     let result = `### 基本信息\n`;
     result += `* **性别**: ${baziResult.xb}\n`;
     result += `* **公历**: ${baziResult.gl.join('-')}\n`;
     result += `* **农历**: ${baziResult.nl[0]}年 ${baziResult.nl[4].ym}${baziResult.nl[2]}日\n`;
-    result += `* **日主**: ${baziResult.ctg[2]} (${window.calendar.cyy[baziResult.yytg[2]]} ${window.calendar.wuxing[baziResult.ewxtg[2]]})\n`;
+    const riGanYinYang = safeAccess(() => window.calendar.cyy[baziResult.yytg[2]]);
+    const riGanWuXing = safeAccess(() => window.calendar.wuxing[baziResult.ewxtg[2]]);
+    result += `* **日主**: ${baziResult.ctg[2]} (${riGanYinYang} ${riGanWuXing})\n`;
     if (baziResult.mingGong) {
         result += `* **命宫**: ${baziResult.mingGong}\n`;
     }
@@ -231,7 +243,7 @@ function formatBaziForAI(baziResult, selectedOption = null) {
     result += `### 八字四柱\n`;
     const pillars = ['年柱', '月柱', '日柱', '时柱'];
     for (let i = 0; i < 4; i++) {
-        const tenGodGan = window.calendar.ssq[window.calendar.dgs[baziResult.tg[i]][baziResult.tg[2]]];
+        const tenGodGan = safeAccess(() => window.calendar.ssq[window.calendar.dgs[baziResult.tg[i]][baziResult.tg[2]]]);
         const hiddenStems = baziResult.bctg.slice(i * 3, i * 3 + 3).filter(s => s).join(',');
         const hiddenGods = baziResult.bzcg.slice(i * 3, i * 3 + 3).filter(s => s).join(',');
         result += `* **${pillars[i]}**: ${baziResult.sz[i]} (${tenGodGan}) | 藏干: ${hiddenStems} (${hiddenGods})\n`;
@@ -278,8 +290,8 @@ function formatBaziForAI(baziResult, selectedOption = null) {
             result += `### 大运\n`;
             result += `* **起运**: ${baziResult.qyy_desc}\n`;
             baziResult.dy.forEach(yun => {
-                const tenGodGan = calendar.ssq[calendar.dgs[yun.zfman][baziResult.tg[2]]];
-                const tenGodZhi = calendar.ssq[calendar.dzs[yun.zfmbn][baziResult.tg[2]]];
+                const tenGodGan = safeAccess(() => calendar.ssq[calendar.dgs[yun.zfman][baziResult.tg[2]]]);
+                const tenGodZhi = safeAccess(() => calendar.ssq[calendar.dzs[yun.zfmbn][baziResult.tg[2]]]);
                 result += `* **${yun.syear} - ${yun.eyear} (${yun.zqage}-${yun.zboz}岁)**: ${yun.zfma}${yun.zfmb} (${tenGodGan}, ${tenGodZhi})\n`;
             });
             result += `\n`;
@@ -287,8 +299,8 @@ function formatBaziForAI(baziResult, selectedOption = null) {
         // 其他所有情况，都只显示当前大运和相关流年
         else if (currentLuckCycle) {
             result += `### 当前大运\n`;
-            const tenGodGan = window.calendar.ssq[window.calendar.dgs[currentLuckCycle.zfman][baziResult.tg[2]]];
-            const tenGodZhi = window.calendar.ssq[window.calendar.dzs[currentLuckCycle.zfmbn][baziResult.tg[2]]];
+            const tenGodGan = safeAccess(() => window.calendar.ssq[window.calendar.dgs[currentLuckCycle.zfman][baziResult.tg[2]]]);
+            const tenGodZhi = safeAccess(() => window.calendar.ssq[window.calendar.dzs[currentLuckCycle.zfmbn][baziResult.tg[2]]]);
             result += `* **${currentLuckCycle.syear} - ${currentLuckCycle.eyear} (${currentLuckCycle.zqage}-${currentLuckCycle.zboz}岁)**: ${currentLuckCycle.zfma}${currentLuckCycle.zfmb} (${tenGodGan}, ${tenGodZhi})\n\n`;
 
             const getYearInfo = (year) => {
@@ -300,14 +312,18 @@ function formatBaziForAI(baziResult, selectedOption = null) {
                     if (birthYearGZIndex !== -1) {
                         const yearOffset = year - baziResult.baziYear;
                         const yearGZIndex = (birthYearGZIndex + yearOffset + 60) % 60;
-                        yearGZ = window.calendar.gz[yearGZIndex];
+                        yearGZ = safeAccess(() => window.calendar.gz[yearGZIndex]);
                         
-                        const yearGan = window.calendar.ctg[yearGZIndex % 10];
-                        const yearZhi = window.calendar.cdz[yearGZIndex % 12];
+                        const yearGan = safeAccess(() => window.calendar.ctg[yearGZIndex % 10]);
+                        const yearZhi = safeAccess(() => window.calendar.cdz[yearGZIndex % 12]);
                         
                         const riGanIndex = baziResult.tg[2];
-                        tenGodGan = window.calendar.ssq[window.calendar.dgs[window.calendar.ctg.indexOf(yearGan)][riGanIndex]];
-                        tenGodZhi = window.calendar.ssq[window.calendar.dzs[window.calendar.cdz.indexOf(yearZhi)][riGanIndex]];
+                        if (yearGan) {
+                           tenGodGan = safeAccess(() => window.calendar.ssq[window.calendar.dgs[window.calendar.ctg.indexOf(yearGan)][riGanIndex]]);
+                        }
+                        if (yearZhi) {
+                           tenGodZhi = safeAccess(() => window.calendar.ssq[window.calendar.dzs[window.calendar.cdz.indexOf(yearZhi)][riGanIndex]]);
+                        }
                     }
                 }
                 return { age, yearGZ, tenGodGan, tenGodZhi };
@@ -346,8 +362,8 @@ function formatBaziForAI(baziResult, selectedOption = null) {
         result += `### 大运\n`;
         result += `* **起运**: ${baziResult.qyy_desc}\n`;
         baziResult.dy.forEach(yun => {
-            const tenGodGan = window.calendar.ssq[window.calendar.dgs[yun.zfman][baziResult.tg[2]]];
-            const tenGodZhi = window.calendar.ssq[window.calendar.dzs[yun.zfmbn][baziResult.tg[2]]];
+            const tenGodGan = safeAccess(() => window.calendar.ssq[window.calendar.dgs[yun.zfman][baziResult.tg[2]]]);
+            const tenGodZhi = safeAccess(() => window.calendar.ssq[window.calendar.dzs[yun.zfmbn][baziResult.tg[2]]]);
             result += `* **${yun.syear} - ${yun.eyear} (${yun.zqage}-${yun.zboz}岁)**: ${yun.zfma}${yun.zfmb} (${tenGodGan}, ${tenGodZhi})\n`;
         });
         result += `\n`;
@@ -574,6 +590,10 @@ function getMonthlyFortuneDetails(year, yearGZ = '') {
     const liChunJd = jqDataCurr[21];
     const dateForGz = window.calendar.Jtime(liChunJd + 1); // 立春后一天肯定属于该节气年
     const baziForYear = window.p.GetGZ(dateForGz[0], dateForGz[1], dateForGz[2], dateForGz[3], dateForGz[4], dateForGz[5]);
+    if (!baziForYear) {
+        console.error(`无法计算年份 ${year} 的干支信息。`);
+        return `\n### 无法生成 ${year}年 的逐月运势分析\n`;
+    }
     const yearGanIndex = baziForYear[0][0]; // 年干索引
 
     // 3. 五虎遁元计算月干的起始
@@ -636,6 +656,15 @@ class HoroscopeAnalyzer {
             selectedLiuRi: null,
         };
         this.init();
+    }
+
+    safeAccess(accessor, defaultValue = '') {
+        try {
+            const value = accessor();
+            return value === undefined || value === null ? defaultValue : value;
+        } catch (e) {
+            return defaultValue;
+        }
     }
 
     init() {
@@ -729,8 +758,8 @@ class HoroscopeAnalyzer {
 
         let content = daYunData.map((yun, index) => {
             const isSelected = this.state.selectedDaYun === yun;
-            const tenGodGan = window.calendar.ssq[window.calendar.dgs[yun.zfman][this.baziResult.tg[2]]];
-            const tenGodZhi = window.calendar.ssq[window.calendar.dzs[yun.zfmbn][this.baziResult.tg[2]]];
+            const tenGodGan = this.safeAccess(() => window.calendar.ssq[window.calendar.dgs[yun.zfman][this.baziResult.tg[2]]]);
+            const tenGodZhi = this.safeAccess(() => window.calendar.ssq[window.calendar.dzs[yun.zfmbn][this.baziResult.tg[2]]]);
             const tenGodGanAbbr = TEN_GOD_ABBREVIATIONS[tenGodGan] || '';
             const tenGodZhiAbbr = TEN_GOD_ABBREVIATIONS[tenGodZhi] || '';
 
@@ -761,8 +790,8 @@ class HoroscopeAnalyzer {
             const isSelected = this.state.selectedLiuNian === nian;
             const gan = nian.ganZhi[0];
             const zhi = nian.ganZhi[1];
-            const tenGodGan = window.calendar.ssq[window.calendar.dgs[window.calendar.ctg.indexOf(gan)][this.baziResult.tg[2]]];
-            const tenGodZhi = window.calendar.ssq[window.calendar.dzs[window.calendar.cdz.indexOf(zhi)][this.baziResult.tg[2]]];
+            const tenGodGan = this.safeAccess(() => window.calendar.ssq[window.calendar.dgs[window.calendar.ctg.indexOf(gan)][this.baziResult.tg[2]]]);
+            const tenGodZhi = this.safeAccess(() => window.calendar.ssq[window.calendar.dzs[window.calendar.cdz.indexOf(zhi)][this.baziResult.tg[2]]]);
             const tenGodGanAbbr = TEN_GOD_ABBREVIATIONS[tenGodGan] || '';
             const tenGodZhiAbbr = TEN_GOD_ABBREVIATIONS[tenGodZhi] || '';
 
@@ -793,8 +822,8 @@ class HoroscopeAnalyzer {
             const isSelected = this.state.selectedLiuYue === yue;
             const gan = yue.ganZhi[0];
             const zhi = yue.ganZhi[1];
-            const tenGodGan = window.calendar.ssq[window.calendar.dgs[window.calendar.ctg.indexOf(gan)][this.baziResult.tg[2]]];
-            const tenGodZhi = window.calendar.ssq[window.calendar.dzs[window.calendar.cdz.indexOf(zhi)][this.baziResult.tg[2]]];
+            const tenGodGan = this.safeAccess(() => window.calendar.ssq[window.calendar.dgs[window.calendar.ctg.indexOf(gan)][this.baziResult.tg[2]]]);
+            const tenGodZhi = this.safeAccess(() => window.calendar.ssq[window.calendar.dzs[window.calendar.cdz.indexOf(zhi)][this.baziResult.tg[2]]]);
             const tenGodGanAbbr = TEN_GOD_ABBREVIATIONS[tenGodGan] || '';
             const tenGodZhiAbbr = TEN_GOD_ABBREVIATIONS[tenGodZhi] || '';
 
@@ -850,11 +879,11 @@ class HoroscopeAnalyzer {
             
             const ganIndex = dayBazi[0][2];
             const zhiIndex = dayBazi[1][2];
-            const gan = window.calendar.ctg[ganIndex];
-            const zhi = window.calendar.cdz[zhiIndex];
+            const gan = this.safeAccess(() => window.calendar.ctg[ganIndex]);
+            const zhi = this.safeAccess(() => window.calendar.cdz[zhiIndex]);
 
-            const tenGodGan = window.calendar.ssq[window.calendar.dgs[ganIndex][this.baziResult.tg[2]]];
-            const tenGodZhi = window.calendar.ssq[window.calendar.dzs[zhiIndex][this.baziResult.tg[2]]];
+            const tenGodGan = this.safeAccess(() => window.calendar.ssq[window.calendar.dgs[ganIndex][this.baziResult.tg[2]]]);
+            const tenGodZhi = this.safeAccess(() => window.calendar.ssq[window.calendar.dzs[zhiIndex][this.baziResult.tg[2]]]);
             const tenGodGanAbbr = TEN_GOD_ABBREVIATIONS[tenGodGan] || '';
             const tenGodZhiAbbr = TEN_GOD_ABBREVIATIONS[tenGodZhi] || '';
 
