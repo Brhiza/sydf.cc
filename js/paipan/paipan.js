@@ -539,12 +539,31 @@ rt['strength'] = this.getStrengthInfo(tg, dz);
                   const tigerMonthGan = [2, 4, 6, 8, 0]; // 丙, 戊, 庚, 壬, 甲
                   const monthGanStart = tigerMonthGan[Math.floor(currentYearGanIndex / 2)];
 
+                  const jqDataCurr = window.calendar.GetAdjustedJQ(year, false);
+                  const jqDataNext = window.calendar.GetAdjustedJQ(year + 1, false);
+                  const jieqiNames = ['立春', '惊蛰', '清明', '立夏', '芒种', '小暑', '立秋', '白露', '寒露', '立冬', '大雪', '小寒'];
+                  // 节气在 calendar.js GetAdjustedJQ 返回数组中的索引
+                  const jieqiIndicesInDj = [3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 1];
+
                   for (let m = 0; m < 12; m++) {
                       const monthGan = window.calendar.ctg[(monthGanStart + m) % 10];
-                      const monthZhi = window.calendar.cdz[(m + 2) % 12];
+                      const monthZhi = window.calendar.cdz[(m + 2) % 12]; // 寅月(m=0)地支索引是2
+
+                      const jieqiName = jieqiNames[m];
+                      const jieqiIndex = jieqiIndicesInDj[m];
+                      
+                      // 节气横跨公历新年，丑月(小寒)在下一个公历年
+                      const jdSource = (jieqiName === '小寒') ? jqDataNext : jqDataCurr;
+                      const startJd = jdSource[jieqiIndex];
+                      
+                      const startDate = window.calendar.Jtime(startJd);
+                      const jieqiDate = `${startDate[1]}/${startDate[2]}`;
+
                       liuNianData.liuYue.push({
                           month: m + 1,
-                          ganZhi: monthGan + monthZhi
+                          ganZhi: monthGan + monthZhi,
+                          jieqiName: jieqiName,
+                          jieqiDate: jieqiDate
                       });
                   }
                   dayun.liuNian.push(liuNianData);

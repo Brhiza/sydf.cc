@@ -1644,7 +1644,7 @@ select:focus {
     border-right: 1px solid #e0e0e0;
     cursor: pointer;
     transition: background-color 0.2s;
-    min-width: 80px;
+    min-width: 49px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -1665,6 +1665,10 @@ select:focus {
 
 .horoscope-item .year {
     font-size: 16px;
+    font-weight: bold;
+}
+
+.horoscope-item .jieqi-name {
     font-weight: bold;
 }
 
@@ -1721,8 +1725,8 @@ select:focus {
 /* Mobile Responsive Styles */
 @media (max-width: 768px) {
     .horoscope-label {
-        flex: 0 0 35px;
-        font-size: 14px;
+        flex: 0 0 30px;
+        font-size: 12px;
     }
 
     /* On mobile, all rows scroll. Remove stretching. */
@@ -1730,23 +1734,29 @@ select:focus {
         overflow-x: auto;
     }
 
-    .stretch-row .horoscope-item {
-        flex: 0 0 auto;
-        min-width: 65px; /* Ensure items have a minimum width */
-    }
+
 
     .horoscope-item {
-        min-width: 65px;
-        padding: 6px;
+        min-width: 30px;
+        height: 80px; /* Set a fixed height */
+        box-sizing: border-box; /* Include padding in height */
+        padding: 4px 3px;
+        justify-content: flex-start; /* Align to top for compactness */
     }
 
-    .horoscope-item .year { font-size: 14px; }
-    .horoscope-item .age { font-size: 11px; }
-    .horoscope-item .ganzhi { font-size: 14px; }
-    .horoscope-item .ten-god { font-size: 10px; }
-    .horoscope-item .date { font-size: 13px; }
-    .horoscope-item .jieqi { font-size: 11px; }
-    .ten-god-abbr { font-size: 11px; }
+    .horoscope-item .year { font-size: 12px; }
+    .horoscope-item .age {
+        font-size: 9px;
+        margin-bottom: 2px;
+    }
+    .horoscope-item .ganzhi { font-size: 12px; }
+    .horoscope-item .ten-god { font-size: 8px; }
+    .horoscope-item .date {
+        font-size: 11px;
+        margin-bottom: 2px;
+    }
+    .horoscope-item .jieqi { font-size: 9px; }
+    .ten-god-abbr { font-size: 9px; }
 }
 
 /* --- Tooltip Styles --- */

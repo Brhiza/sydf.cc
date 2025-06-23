@@ -628,8 +628,8 @@ class HoroscopeAnalyzer {
         const { selectedDaYun, selectedLiuNian } = this.state;
 
         let html = `
-            <div class="horoscope-row stretch-row">${this.renderDaYun(dy)}</div>
-            <div class="horoscope-row stretch-row">${this.renderLiuNian(selectedDaYun)}</div>
+            <div class="horoscope-row">${this.renderDaYun(dy)}</div>
+            <div class="horoscope-row">${this.renderLiuNian(selectedDaYun)}</div>
             <div class="horoscope-row">${this.renderLiuYue(selectedLiuNian)}</div>
         `;
         this.container.innerHTML = html;
@@ -714,7 +714,8 @@ class HoroscopeAnalyzer {
 
             return `
                 <div class="horoscope-item ${isSelected ? 'selected' : ''}" data-type="liuyue" data-liunian-index="${this.state.selectedDaYun.liuNian.indexOf(liuNian)}" data-dayun-index="${this.baziResult.dy.indexOf(this.state.selectedDaYun)}" data-index="${index}">
-                    <div class="jieqi">${index === 0 ? '正月' : (index+1)+'月'}</div>
+                    <div class="year jieqi-name">${yue.jieqiName}</div>
+                    <div class="age">${yue.jieqiDate}</div>
                     <div class="ganzhi">
                         ${colorizeGanZhi(gan)}${colorizeGanZhi(zhi)}
                         <br>
