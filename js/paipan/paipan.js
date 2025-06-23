@@ -7,32 +7,6 @@
   * 农历校正及古代农历算法完全来自寿星万年历,感谢福建莆田第十中学许剑伟老师,项目地址: http://www.nongli.net/sxwnl/
   */
  function paipan() {
-this.NAYIN_MAP = {
-    '甲子': '海中金', '乙丑': '海中金', '丙寅': '炉中火', '丁卯': '炉中火', '戊辰': '大林木', '己巳': '大林木', '庚午': '路旁土', '辛未': '路旁土', '壬申': '剑锋金', '癸酉': '剑锋金',
-    '甲戌': '山头火', '乙亥': '山头火', '丙子': '涧下水', '丁丑': '涧下水', '戊寅': '城头土', '己卯': '城头土', '庚辰': '白蜡金', '辛巳': '白蜡金', '壬午': '杨柳木', '癸未': '杨柳木',
-    '甲申': '泉中水', '乙酉': '泉中水', '丙戌': '屋上土', '丁亥': '屋上土', '戊子': '霹雳火', '己丑': '霹雳火', '庚寅': '松柏木', '辛卯': '松柏木', '壬辰': '长流水', '癸巳': '长流水',
-    '甲午': '沙中金', '乙未': '沙中金', '丙申': '山下火', '丁酉': '山下火', '戊戌': '平地木', '己亥': '平地木', '庚子': '壁上土', '辛丑': '壁上土', '壬寅': '金箔金', '癸卯': '金箔金',
-    '甲辰': '覆灯火', '乙巳': '覆灯火', '丙午': '天河水', '丁未': '天河水', '戊申': '大驿土', '己酉': '大驿土', '庚申': '石榴木', '辛酉': '石榴木', '庚戌': '钗钏金', '辛亥': '钗钏金', '壬子': '桑柘木', '癸丑': '桑柘木'
-};
-
-this.getNayin = function(ganzhi) {
-    return this.NAYIN_MAP[ganzhi] || '';
-};
-this.KONGWANG_MAP = {
- 	  '甲子': '戌亥', '甲戌': '申酉', '甲申': '午未', '甲午': '辰巳', '甲辰': '寅卯', '甲寅': '子丑'
-};
-
-this.getWuxing = function(ganZhi) {
- 	  const nayin = this.getNayin(ganZhi);
- 	  if (!nayin) return '';
- 	  // 简单从纳音名称中提取五行
- 	  if (nayin.includes('金')) return '金';
- 	  if (nayin.includes('木')) return '木';
- 	  if (nayin.includes('水')) return '水';
- 	  if (nayin.includes('火')) return '火';
- 	  if (nayin.includes('土')) return '土';
- 	  return '';
-};
 
 this.getDecade = function(gan, zhi) {
  	  const ganIndex = window.calendar.ctg.indexOf(gan);
@@ -513,20 +487,6 @@ this.getDecade = function(gan, zhi) {
           rt['xz'] = window.calendar.cxz[xz]; //星座
           rt['cyy'] = window.calendar.cyy[yytg[2]]; //日干阴阳
   
-// 纳音
-rt['naYin'] = rt['sz'].map(gz => this.getNayin(gz));
-
-// 空亡
-const getKongWang = (ganZhi) => {
-    const decade = this.getDecade(ganZhi[0], ganZhi[1]);
-    return this.KONGWANG_MAP[decade] ? this.KONGWANG_MAP[decade].split('') : [];
-}
-rt['kongWang'] = {
-    year: getKongWang(rt['sz'][0]),
-    month: getKongWang(rt['sz'][1]),
-    day: getKongWang(rt['sz'][2]),
-    hour: getKongWang(rt['sz'][3])
-};
 
 // 十二长生 (星运)
 const getPillarLifeStages = (riGan, baziDz) => {
@@ -710,8 +670,6 @@ this.getBaziPattern = function(tg, dz) {
      const riZhi = riGZ[1];
      const shiZhi = shiGZ[1];
  
-     const nianNayin = this.getNayin(nianGZ);
-     const riNayin = this.getNayin(riGZ);
  
      const results = [];
      const isYangNian = ['甲', '丙', '戊', '庚', '壬'].includes(nianGan);
@@ -805,13 +763,6 @@ this.getBaziPattern = function(tg, dz) {
              const map = { '甲': '辰', '乙': '巳', '丙': '未', '丁': '申', '戊': '未', '己': '申', '庚': '戌', '辛': '亥', '壬': '丑', '癸': '寅' };
              return map[riGan] === zhi;
          },
-         '空亡': () => {
-             const decadeNian = this.getDecade(nianGan, nianZhi);
-             const decadeRi = this.getDecade(riGan, riZhi);
-             const kwNian = this.KONGWANG_MAP[decadeNian];
-             const kwRi = this.KONGWANG_MAP[decadeRi];
-             return (kwNian && kwNian.includes(zhi)) || (kwRi && kwRi.includes(zhi));
-         },
          '灾煞': () => {
              const map = { '申': '午', '子': '午', '辰': '午', '亥': '酉', '卯': '酉', '未': '酉', '寅': '子', '午': '子', '戌': '子', '巳': '卯', '酉': '卯', '丑': '卯' };
              return map[nianZhi] === zhi;
@@ -888,14 +839,6 @@ this.getBaziPattern = function(tg, dz) {
          '红艳煞': () => {
              const map = { '甲': '午', '乙': '申', '丙': '寅', '丁': '未', '戊': '辰', '己': '辰', '庚': '戌', '辛': '酉', '壬': '子', '癸': '申' };
              return map[riGan] === zhi;
-         },
-         '十恶大败': () => {
-             if (pillarIndex !== 3) return false;
-             const decade = this.getDecade(nianGan, nianZhi);
-             const kongwangPair = this.KONGWANG_MAP[decade];
-             const luZhi = { '甲': '寅', '乙': '卯', '丙': '巳', '丁': '午', '戊': '巳', '己': '午', '庚': '申', '辛': '酉', '壬': '亥', '癸': '子' };
-             const nianGanLu = luZhi[nianGan];
-             return kongwangPair && kongwangPair.includes(nianGanLu) && ['甲辰', '乙巳', '丙申', '丁亥', '戊戌', '己丑', '庚辰', '辛巳', '壬申', '癸亥'].includes(riGZ);
          },
          '元辰': () => {
              let targetIdx;

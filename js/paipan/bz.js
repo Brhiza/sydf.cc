@@ -227,9 +227,7 @@ function formatBaziForAI(baziResult, selectedOption = null) {
     result += `\n`;
 
     result += `### 命盘结构\n`;
-    result += `* **四柱纳音**: ${baziResult.naYin.join(', ')}\n`;
     result += `* **四柱星运**: ${baziResult.pillarLifeStages.join(', ')}\n`;
-    result += `* **空亡**: 年柱(${baziResult.kongWang.year.join('')}), 日柱(${baziResult.kongWang.day.join('')})\n`;
 
     const relationships = p.getRelationships(baziResult.sz);
     if (Object.keys(relationships).length > 0) {
@@ -432,26 +430,6 @@ function generateAstrolabeForPerson(personNumber, year, month, day, timeIndex, g
            htmlResult += `</tr>`;
         }
 
-        // Nayin
-        if (baziResult.naYin) {
-            htmlResult += `<tr><th>纳音</th>`;
-            for (let i = 0; i < 4; i++) {
-                const naYin = baziResult.naYin[i];
-                htmlResult += `<td><span class="shen-sha" data-term="${naYin}">${naYin}</span></td>`;
-            }
-            htmlResult += `</tr>`;
-        }
-
-        // Kong Wang
-        if (baziResult.kongWang) {
-            const kw = baziResult.kongWang;
-            htmlResult += `<tr><th>空亡</th>`;
-            htmlResult += `<td><span class="shen-sha">${kw.year.join('')}</span></td>`;
-            htmlResult += `<td><span class="shen-sha">${kw.month.join('')}</span></td>`;
-            htmlResult += `<td><span class="shen-sha">${kw.day.join('')}</span></td>`;
-            htmlResult += `<td><span class="shen-sha">${kw.hour.join('')}</span></td>`;
-            htmlResult += `</tr>`;
-        }
 
         // 神煞
         const baziArray = baziResult.sz;
@@ -675,9 +653,9 @@ class HoroscopeAnalyzer {
                     <div class="year">${yun.syear}</div>
                     <div class="age">${yun.zqage}岁</div>
                     <div class="ganzhi">
-                        ${colorizeGanZhi(yun.zfma)}<span class="ten-god-abbr" data-term="${tenGodGan}">(${tenGodGanAbbr})</span>
+                        ${colorizeGanZhi(yun.zfma)}${colorizeGanZhi(yun.zfmb)}
                         <br>
-                        ${colorizeGanZhi(yun.zfmb)}<span class="ten-god-abbr" data-term="${tenGodZhi}">(${tenGodZhiAbbr})</span>
+                        <span class="ten-god-abbr" data-term="${tenGodGan}">${tenGodGanAbbr}</span> <span class="ten-god-abbr" data-term="${tenGodZhi}">${tenGodZhiAbbr}</span>
                     </div>
                 </div>
             `;
@@ -688,20 +666,28 @@ class HoroscopeAnalyzer {
     renderLiuNian(daYun) {
         if (!daYun) return `<div class="horoscope-label">流年</div><div class="horoscope-content" style="align-items:center; justify-content:center; color:#999;">请先选择大运</div>`;
         
+        const TEN_GOD_ABBREVIATIONS = {
+            '比肩': '比', '劫财': '劫', '食神': '食', '伤官': '伤', '偏财': '才',
+            '正财': '财', '七杀': '杀', '正官': '官', '偏印': '枭', '正印': '印'
+        };
+
         let content = daYun.liuNian.map((nian, index) => {
             const isSelected = this.state.selectedLiuNian === nian;
             const gan = nian.ganZhi[0];
             const zhi = nian.ganZhi[1];
             const tenGodGan = window.calendar.ssq[window.calendar.dgs[window.calendar.ctg.indexOf(gan)][this.baziResult.tg[2]]];
             const tenGodZhi = window.calendar.ssq[window.calendar.dzs[window.calendar.cdz.indexOf(zhi)][this.baziResult.tg[2]]];
+            const tenGodGanAbbr = TEN_GOD_ABBREVIATIONS[tenGodGan] || '';
+            const tenGodZhiAbbr = TEN_GOD_ABBREVIATIONS[tenGodZhi] || '';
+
             return `
                 <div class="horoscope-item ${isSelected ? 'selected' : ''}" data-type="liunian" data-dayun-index="${this.baziResult.dy.indexOf(daYun)}" data-index="${index}">
                     <div class="year">${nian.year}</div>
                     <div class="age">${nian.age}岁</div>
-                    <div class="ganzhi">${colorizeGanZhi(gan)}<br>${colorizeGanZhi(zhi)}</div>
-                    <div class="ten-god">
-                        <span data-term="${tenGodGan}">${tenGodGan}</span>,
-                        <span data-term="${tenGodZhi}">${tenGodZhi}</span>
+                    <div class="ganzhi">
+                        ${colorizeGanZhi(gan)}${colorizeGanZhi(zhi)}
+                        <br>
+                        <span class="ten-god-abbr" data-term="${tenGodGan}">${tenGodGanAbbr}</span> <span class="ten-god-abbr" data-term="${tenGodZhi}">${tenGodZhiAbbr}</span>
                     </div>
                 </div>
             `;
@@ -712,19 +698,27 @@ class HoroscopeAnalyzer {
     renderLiuYue(liuNian) {
         if (!liuNian) return `<div class="horoscope-label">流月</div><div class="horoscope-content" style="align-items:center; justify-content:center; color:#999;">请先选择流年</div>`;
 
+        const TEN_GOD_ABBREVIATIONS = {
+            '比肩': '比', '劫财': '劫', '食神': '食', '伤官': '伤', '偏财': '才',
+            '正财': '财', '七杀': '杀', '正官': '官', '偏印': '枭', '正印': '印'
+        };
+
         let content = liuNian.liuYue.map((yue, index) => {
             const isSelected = this.state.selectedLiuYue === yue;
             const gan = yue.ganZhi[0];
             const zhi = yue.ganZhi[1];
             const tenGodGan = window.calendar.ssq[window.calendar.dgs[window.calendar.ctg.indexOf(gan)][this.baziResult.tg[2]]];
             const tenGodZhi = window.calendar.ssq[window.calendar.dzs[window.calendar.cdz.indexOf(zhi)][this.baziResult.tg[2]]];
+            const tenGodGanAbbr = TEN_GOD_ABBREVIATIONS[tenGodGan] || '';
+            const tenGodZhiAbbr = TEN_GOD_ABBREVIATIONS[tenGodZhi] || '';
+
             return `
                 <div class="horoscope-item ${isSelected ? 'selected' : ''}" data-type="liuyue" data-liunian-index="${this.state.selectedDaYun.liuNian.indexOf(liuNian)}" data-dayun-index="${this.baziResult.dy.indexOf(this.state.selectedDaYun)}" data-index="${index}">
                     <div class="jieqi">${index === 0 ? '正月' : (index+1)+'月'}</div>
-                    <div class="ganzhi">${colorizeGanZhi(gan)}<br>${colorizeGanZhi(zhi)}</div>
-                    <div class="ten-god">
-                        <span data-term="${tenGodGan}">${tenGodGan}</span>,
-                        <span data-term="${tenGodZhi}">${tenGodZhi}</span>
+                    <div class="ganzhi">
+                        ${colorizeGanZhi(gan)}${colorizeGanZhi(zhi)}
+                        <br>
+                        <span class="ten-god-abbr" data-term="${tenGodGan}">${tenGodGanAbbr}</span> <span class="ten-god-abbr" data-term="${tenGodZhi}">${tenGodZhiAbbr}</span>
                     </div>
                 </div>
             `;
