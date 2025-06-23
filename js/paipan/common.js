@@ -350,7 +350,7 @@ document.addEventListener('DOMContentLoaded', function() {
             questionText = directQuestionText;
             // When a question is passed directly, it's conceptually a "custom" question.
             // We find the custom button to get its dataset for the prompt builder.
-            selectedOption = config.optionsContainer.querySelector('.unified-button[data-prompt=""]');
+            selectedOption = config.optionsContainer.querySelector('.unified-button[id$="-custom"]');
             if (!selectedOption) {
                 alert("自定义问题按钮未找到，无法提交。");
                 return;
@@ -372,7 +372,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const prompt = isCombined
             ? config.promptFn(questionText, astrolabe1, astrolabe2)
-            : config.promptFn(questionText, selectedOption, astrolabe1);
+            : config.promptFn(questionText, selectedOption, astrolabe1, window.horoscopeAnalyzerInstance ? window.horoscopeAnalyzerInstance.state : null);
 
         config.button.disabled = true;
         config.button.textContent = config.loadingText;

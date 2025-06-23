@@ -28,6 +28,10 @@ document.addEventListener('DOMContentLoaded', () => {
 [PROMPT_BODY]
 `,
         build: (chartData, question, requirements = '') => {
+            if (question === undefined) {
+                console.warn("PROMPT_BUILDER.build received an undefined question. Defaulting to empty string.");
+                question = '';
+            }
             let promptBody = `**问题:**\n${question}`;
             if (requirements) {
                 promptBody += `\n\n**分析要求:**\n${requirements}`;
@@ -41,10 +45,18 @@ document.addEventListener('DOMContentLoaded', () => {
     initializePage({
         chartingFunction: generateAstrolabeForPerson,
         aiPrompts: BAZI_AI_PROMPTS,
-        getAIPrompt: (questionText, selectedOption, baziResult1) => {
+        getAIPrompt: (questionText, selectedOption, baziResult1, horoscopeState = null) => {
             const baziData = baziResult1 ? formatBaziForAI(baziResult1, selectedOption) : "无法获取命盘数据。";
             const promptTemplate = selectedOption.dataset.prompt;
             const optionId = selectedOption.id;
+
+            if (optionId === 'ask-ai-with-date') {
+                const dateInfo = formatHoroscopeSelectionForAI(horoscopeState);
+                const customQuestion = document.getElementById('customQuestion').value.trim();
+                const userQuestion = (questionText && questionText !== '选定日期...') ? questionText : customQuestion;
+                const finalQuestion = userQuestion ? `在${dateInfo}这个时间点, ${userQuestion}` : `请详细分析${dateInfo}的运势。`;
+                 return PROMPT_BUILDER.build(baziData, finalQuestion, "请结合用户提供的具体日期进行分析，越详细越好。");
+            }
 
             // “命格总论”使用其独立的、高度结构化的模板
             if (optionId === 'ai-mingge-zonglun') {
@@ -56,7 +68,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // 其他所有问题（包括自定义）都使用新的 PROMPT_BUILDER
-            // 对于预设问题，promptTemplate 是分析要求；对于自定义问题，它是空字符串
             return PROMPT_BUILDER.build(baziData, questionText, promptTemplate);
         },
         getCompatibilityPrompt: (questionText, baziResult1, baziResult2) => {
@@ -168,6 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: 'ai-marriage', text: '感情婚姻', prompt: '请从【整体命格】和【当前大运】两个角度，详细分析我的感情和婚姻状况。在整体命格方面，请解读我的感情观、择偶偏好、婚姻生活的特点以及与伴侣的互动模式。在当前大运方面，请分析这十年感情上的主要机遇和挑战，并提供针对性的行事建议。' },
         { id: 'ai-health', text: '健康状况', prompt: '请从【整体命格】和【当前大运】两个角度，详细分析我的健康状况。在整体命格方面，请根据五行平衡，提示我需要先天关注的身体部位和易发健康问题。在当前大运方面，请分析这十年健康上的主要机遇和挑战，并提供针对性的保养建议。' },
         { id: 'ai-next-three-years', text: '未来三年', prompt: '请分析命主在未来三年的流年运势。逐年说明运势的起伏变化，并给出每年在事业、感情、生活等方面的规划建议和注意事项。' },
+        { id: 'ask-ai-with-date', text: '选定日期...', prompt: '' },
         { id: 'ai-custom', text: '自定义...', prompt: '' }
     ],
     combined: [
@@ -232,14 +244,15 @@ function formatBaziForAI(baziResult, selectedOption = null) {
     const relationships = p.getRelationships(baziResult.sz);
     if (Object.keys(relationships).length > 0) {
         const relMap = {
-            tianGanHe: '天干五合', diZhiSanHui: '三会局', diZhiSanHe: '三合局',
+            tianGanHe: '天干五合', tianGanKe: '天干相克', diZhiSanHui: '三会局', diZhiSanHe: '三合局',
             diZhiLiuHe: '六合', diZhiChong: '相冲', diZhiXing: '相刑',
             diZhiHai: '相害', diZhiPo: '相破'
         };
         const relEntries = Object.entries(relationships).map(([key, value]) => {
             const title = relMap[key];
             const details = value.map(item => {
-                if (item.gans) return `${item.gans.join('')}合化${item.he}`;
+                if (item.gans && item.he) return `${item.gans.join('')}合化${item.he}`;
+                if (item.gans && !item.he) return `${item.gans[0]}克${item.gans[1]}`;
                 if (item.zhis) return item.zhis.join('');
                 if (item.type && item.members) return `${item.members.join('')}${item.type}`;
                 return '';
@@ -343,6 +356,45 @@ function formatBaziForAI(baziResult, selectedOption = null) {
     return result;
 }
 
+function formatHoroscopeSelectionForAI(horoscopeState) {
+    if (!horoscopeState) {
+        return "未指定具体日期";
+    }
+
+    const { selectedDaYun, selectedLiuNian, selectedLiuYue, selectedLiuRi } = horoscopeState;
+    let parts = [];
+
+    if (selectedDaYun) {
+        parts.push(`大运“${selectedDaYun.zfma}${selectedDaYun.zfmb}”`);
+    }
+    if (selectedLiuNian) {
+        parts.push(`流年“${selectedLiuNian.year}年（${selectedLiuNian.ganZhi}）”`);
+    }
+    if (selectedLiuYue) {
+        parts.push(`流月“${selectedLiuYue.jieqiName}（${selectedLiuYue.ganZhi}）”`);
+    }
+    if (selectedLiuRi && selectedLiuRi.date) {
+        try {
+            const [y, m, d] = selectedLiuRi.date.split('-').map(Number);
+            const dayBazi = window.p.GetGZ(y, m, d, 1, 0, 0);
+            if (dayBazi) {
+                const gan = window.calendar.ctg[dayBazi[0][2]];
+                const zhi = window.calendar.cdz[dayBazi[1][2]];
+                parts.push(`流日“${selectedLiuRi.date}（${gan}${zhi}）”`);
+            } else {
+                parts.push(`流日“${selectedLiuRi.date}”`);
+            }
+        } catch (e) {
+             parts.push(`流日“${selectedLiuRi.date}”`);
+        }
+    }
+
+    if (parts.length === 0) {
+        return "未选择任何时间点";
+    }
+
+    return parts.join(' ');
+}
 
 function generateAstrolabeForPerson(personNumber, year, month, day, timeIndex, gender, resultDiv) {
     resultDiv.innerHTML = '';
@@ -496,7 +548,7 @@ function generateAstrolabeForPerson(personNumber, year, month, day, timeIndex, g
             document.getElementById('aiQuestionContainer').style.display = 'block';
             // --- 初始化运势分析器 ---
             if (window.HoroscopeAnalyzer) {
-                new window.HoroscopeAnalyzer(baziResult, 'horoscope-analyzer-container');
+                window.horoscopeAnalyzerInstance = new window.HoroscopeAnalyzer(baziResult, 'horoscope-analyzer-container');
             }
         }
 
@@ -581,6 +633,7 @@ class HoroscopeAnalyzer {
             selectedDaYun: null,
             selectedLiuNian: null,
             selectedLiuYue: null,
+            selectedLiuRi: null,
         };
         this.init();
     }
@@ -593,28 +646,60 @@ class HoroscopeAnalyzer {
     }
 
     setDefaultSelection() {
-        const currentYear = new Date().getFullYear();
-        const daYunIndex = this.baziResult.dy.findIndex(yun => currentYear >= yun.syear && currentYear <= yun.eyear);
+        const today = new Date();
+        const currentYear = today.getFullYear();
+        const currentMonth = today.getMonth() + 1;
+        const currentDay = today.getDate();
 
-        if (daYunIndex !== -1) {
-            const daYun = this.baziResult.dy[daYunIndex];
-            const liuNian = daYun.liuNian.find(nian => nian.year === currentYear);
-            
-            // Directly call setState to trigger a re-render with the correct selections
-            this.setState({
-                selectedDaYun: daYun,
-                selectedLiuNian: liuNian || null,
-                selectedLiuYue: null
-            });
+        const daYun = this.baziResult.dy.find(yun => currentYear >= yun.syear && currentYear <= yun.eyear);
+        if (!daYun) return;
 
-            // After re-render, scroll the container if needed
-            setTimeout(() => {
-                const daYunElement = this.container.querySelector(`.horoscope-item[data-type="dayun"][data-index="${daYunIndex}"]`);
-                if (daYunElement && daYunElement.scrollIntoView) {
-                    daYunElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-                }
-            }, 100);
+        const liuNian = daYun.liuNian.find(nian => nian.year === currentYear);
+        if (!liuNian) {
+            this.setState({ selectedDaYun: daYun, selectedLiuNian: null, selectedLiuYue: null, selectedLiuRi: null });
+            return;
         }
+
+        let liuYue = null;
+        for (let i = 0; i < liuNian.liuYue.length; i++) {
+            const yue = liuNian.liuYue[i];
+            const nextYue = liuNian.liuYue[(i + 1) % 12];
+            if (!yue.jieqiDate || !nextYue.jieqiDate) continue;
+
+            const [startMonth, startDay] = yue.jieqiDate.split('/').map(Number);
+            const [endMonth, endDay] = nextYue.jieqiDate.split('/').map(Number);
+            
+            const startDate = new Date(currentYear, startMonth - 1, startDay);
+            const endYear = endMonth < startMonth ? currentYear + 1 : currentYear;
+            const endDate = new Date(endYear, endMonth - 1, endDay);
+
+            if (today >= startDate && today < endDate) {
+                liuYue = yue;
+                break;
+            }
+        }
+        
+        if (!liuYue) {
+            liuYue = liuNian.liuYue[0];
+        }
+
+        const liuRi = { date: `${currentYear}-${currentMonth}-${currentDay}` };
+
+        this.setState({
+            selectedDaYun: daYun,
+            selectedLiuNian: liuNian,
+            selectedLiuYue: liuYue,
+            selectedLiuRi: liuRi
+        });
+
+        setTimeout(() => {
+            ['dayun', 'liunian', 'liuyue', 'liuri'].forEach(type => {
+                const el = this.container.querySelector(`.horoscope-item[data-type="${type}"].selected`);
+                if (el && el.scrollIntoView) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                }
+            });
+        }, 100);
     }
 
     setState(newState) {
@@ -625,12 +710,13 @@ class HoroscopeAnalyzer {
 
     render() {
         const { dy } = this.baziResult;
-        const { selectedDaYun, selectedLiuNian } = this.state;
+        const { selectedDaYun, selectedLiuNian, selectedLiuYue } = this.state;
 
         let html = `
             <div class="horoscope-row">${this.renderDaYun(dy)}</div>
             <div class="horoscope-row">${this.renderLiuNian(selectedDaYun)}</div>
             <div class="horoscope-row">${this.renderLiuYue(selectedLiuNian)}</div>
+            <div class="horoscope-row">${this.renderLiuRi(selectedLiuYue)}</div>
         `;
         this.container.innerHTML = html;
     }
@@ -727,28 +813,108 @@ class HoroscopeAnalyzer {
         return `<div class="horoscope-label">流月</div><div class="horoscope-content">${content}</div>`;
     }
 
+    renderLiuRi(liuYue) {
+        if (!liuYue) return `<div class="horoscope-label">流日</div><div class="horoscope-content" style="align-items:center; justify-content:center; color:#999;">请先选择流月</div>`;
+
+        const TEN_GOD_ABBREVIATIONS = { '比肩': '比', '劫财': '劫', '食神': '食', '伤官': '伤', '偏财': '才', '正财': '财', '七杀': '杀', '正官': '官', '偏印': '枭', '正印': '印' };
+        const WEEKDAY_NAMES = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+        const liuNian = this.state.selectedLiuNian;
+        if (!liuNian) return `<div class="horoscope-label">流日</div><div class="horoscope-content" style="align-items:center; justify-content:center; color:#999;">内部错误：未选择流年</div>`;
+        
+        const year = liuNian.year;
+        const monthIndex = liuNian.liuYue.indexOf(liuYue);
+        if (monthIndex === -1) return `<div class="horoscope-label">流日</div><div class="horoscope-content" style="align-items:center; justify-content:center; color:#999;">内部错误：无法定位流月</div>`;
+
+        if (!liuYue.jieqiDate || !liuYue.jieqiDate.includes('/')) return `<div class="horoscope-label">流日</div><div class="horoscope-content" style="align-items:center; justify-content:center; color:#999;">流月数据格式错误</div>`;
+        const [startMonth, startDay] = liuYue.jieqiDate.split('/').map(Number);
+        
+        const nextYueIndex = (monthIndex + 1) % 12;
+        const nextYue = liuNian.liuYue[nextYueIndex];
+        if (!nextYue.jieqiDate || !nextYue.jieqiDate.includes('/')) return `<div class="horoscope-label">流日</div><div class="horoscope-content" style="align-items:center; justify-content:center; color:#999;">下一个流月数据格式错误</div>`;
+        const [endMonth, endDay] = nextYue.jieqiDate.split('/').map(Number);
+
+        const startDate = new Date(year, startMonth - 1, startDay);
+        const endYearForEndDate = (endMonth < startMonth) ? year + 1 : year;
+        const endDate = new Date(endYearForEndDate, endMonth - 1, endDay);
+
+        let content = '';
+        let currentDate = new Date(startDate);
+
+        while (currentDate < endDate) {
+            const y = currentDate.getFullYear();
+            const m = currentDate.getMonth() + 1;
+            const d = currentDate.getDate();
+            
+            const dayBazi = window.p.GetGZ(y, m, d, 1, 0, 0);
+            if (!dayBazi) { currentDate.setDate(currentDate.getDate() + 1); continue; };
+            
+            const ganIndex = dayBazi[0][2];
+            const zhiIndex = dayBazi[1][2];
+            const gan = window.calendar.ctg[ganIndex];
+            const zhi = window.calendar.cdz[zhiIndex];
+
+            const tenGodGan = window.calendar.ssq[window.calendar.dgs[ganIndex][this.baziResult.tg[2]]];
+            const tenGodZhi = window.calendar.ssq[window.calendar.dzs[zhiIndex][this.baziResult.tg[2]]];
+            const tenGodGanAbbr = TEN_GOD_ABBREVIATIONS[tenGodGan] || '';
+            const tenGodZhiAbbr = TEN_GOD_ABBREVIATIONS[tenGodZhi] || '';
+
+            const dateString = `${y}-${m}-${d}`;
+            const isSelected = this.state.selectedLiuRi && this.state.selectedLiuRi.date === dateString;
+            
+            content += `
+                <div class="horoscope-item ${isSelected ? 'selected' : ''}" data-type="liuri" data-date="${dateString}">
+                    <div class="year">${m}.${d}</div>
+                    <div class="age">${WEEKDAY_NAMES[currentDate.getDay()]}</div>
+                    <div class="ganzhi">
+                        ${colorizeGanZhi(gan)}${colorizeGanZhi(zhi)}
+                        <br>
+                        <span class="ten-god-abbr" data-term="${tenGodGan}">${tenGodGanAbbr}</span><span class="ten-god-abbr" data-term="${tenGodZhi}">${tenGodZhiAbbr}</span>
+                    </div>
+                </div>
+            `;
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+
+        return `<div class="horoscope-label">流日</div><div class="horoscope-content">${content}</div>`;
+    }
+
     addEventListeners() {
         this.container.querySelectorAll('.horoscope-item').forEach(item => {
             item.addEventListener('click', (e) => {
+                e.preventDefault(); // 阻止链接或按钮的默认行为
                 const target = e.currentTarget;
                 const type = target.dataset.type;
                 const index = parseInt(target.dataset.index, 10);
 
                 if (type === 'dayun') {
                     const daYun = this.baziResult.dy[index];
-                    this.setState({ selectedDaYun: daYun, selectedLiuNian: null, selectedLiuYue: null });
+                    const liuNian = daYun.liuNian[0];
+                    const liuYue = liuNian.liuYue[0];
+                    const liuRi = this.getFirstDayOfLiuYue(liuNian.year, liuYue);
+                    this.setState({ selectedDaYun: daYun, selectedLiuNian: liuNian, selectedLiuYue: liuYue, selectedLiuRi: liuRi });
                 } else if (type === 'liunian') {
                     const daYunIndex = parseInt(target.dataset.dayunIndex, 10);
                     const liuNian = this.baziResult.dy[daYunIndex].liuNian[index];
-                    this.setState({ selectedLiuNian: liuNian, selectedLiuYue: null });
+                    const liuYue = liuNian.liuYue[0];
+                    const liuRi = this.getFirstDayOfLiuYue(liuNian.year, liuYue);
+                    this.setState({ selectedLiuNian: liuNian, selectedLiuYue: liuYue, selectedLiuRi: liuRi });
                 } else if (type === 'liuyue') {
                     const daYunIndex = parseInt(target.dataset.dayunIndex, 10);
                     const liuNianIndex = parseInt(target.dataset.liunianIndex, 10);
                     const liuYue = this.baziResult.dy[daYunIndex].liuNian[liuNianIndex].liuYue[index];
-                    this.setState({ selectedLiuYue: liuYue });
+                    const liuRi = this.getFirstDayOfLiuYue(this.state.selectedLiuNian.year, liuYue);
+                    this.setState({ selectedLiuYue: liuYue, selectedLiuRi: liuRi });
+                } else if (type === 'liuri') {
+                    const date = target.dataset.date;
+                    this.setState({ selectedLiuRi: { date } });
                 }
             });
         });
+    }
+    getFirstDayOfLiuYue(year, liuYue) {
+        if (!liuYue || !liuYue.jieqiDate || !liuYue.jieqiDate.includes('/')) return null;
+        const [startMonth, startDay] = liuYue.jieqiDate.split('/').map(Number);
+        return { date: `${year}-${startMonth}-${startDay}` };
     }
 }
 window.HoroscopeAnalyzer = HoroscopeAnalyzer;

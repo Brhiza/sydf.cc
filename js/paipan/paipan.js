@@ -1012,7 +1012,7 @@ this.getBaziPattern = function(tg, dz) {
             const pairKey = [ctg[i], ctg[j]].sort().join('');
             if (checkedTgPairs.has(pairKey)) continue;
             if (tgHeMap[ctg[i]] === ctg[j] || tgHeMap[ctg[j]] === ctg[i]) {
-                relationships.tianGanHe.push({ gans: [ctg[i], ctg[j]], he: heHuaMap[pairKey] });
+                relationships.tianGanHe.push({ gans: [ctg[i], ctg[j]].sort(), he: heHuaMap[pairKey] });
             }
             checkedTgPairs.add(pairKey);
         }
