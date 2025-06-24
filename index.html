@@ -9,7 +9,48 @@
     <link rel="icon" href="static/favicon.png" type="image/png">
     <link rel="apple-touch-icon" sizes="180x180" href="static/apple-touch-icon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="时月东方">
+
+    <!-- 安全策略 -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://flow.ovo.gs; font-src 'self' https://cdn.jsdelivr.net;">
+
+    <!-- 预加载关键资源 -->
+    <link rel="preload" href="css/qigua.css" as="style">
+    <link rel="preload" href="js/ai.js" as="script">
+    <link rel="preload" href="js/cdn-fallback.js" as="script">
+    <link rel="preload" href="js/image-optimizer.js" as="script">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://flow.ovo.gs">
+
     <link rel="stylesheet" href="css/qigua.css">
+
+    <!-- 结构化数据 -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "时月东方",
+        "description": "免费AI算命占卜网站，提供六爻、梅花易数、奇门遁甲、塔罗牌等专业占卜服务",
+        "url": "https://sydf.cc",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://sydf.cc/?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+        },
+        "provider": {
+            "@type": "Organization",
+            "name": "时月东方",
+            "url": "https://sydf.cc"
+        }
+    }
+    </script>
 </head>
 <body>
     <main class="main-content">
@@ -59,8 +100,43 @@
         </div>
     </main>
 
-    <script src="https://cdn.jsdelivr.net/gh/6tail/lunar-javascript@master/lunar.js"></script>
+    <!-- 优化脚本加载顺序 -->
+    <script src="js/cdn-fallback.js"></script>
+    <script src="js/image-optimizer.js"></script>
+    <script src="js/performance.js"></script>
     <script src="js/ai.js"></script>
     <script src="js/qigua/main.js"></script>
+
+    <!-- Service Worker 注册和调试 -->
+    <script src="js/sw-fix.js"></script>
+    <script src="js/sw-debug.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('Service Worker 注册成功:', registration.scope);
+
+                        // 检查更新
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            console.log('发现 Service Worker 更新');
+
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // 新版本可用，提示用户刷新
+                                    if (confirm('发现新版本，是否立即刷新页面？')) {
+                                        window.location.reload();
+                                    }
+                                }
+                            });
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Service Worker 注册失败:', error);
+                    });
+            });
+        }
+    </script>
 </body>
 </html>

@@ -18,7 +18,14 @@ async function queryAI(prompt) {
 
         if (!response.ok) {
             const errorText = await response.text();
-            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+            // 根据不同的错误状态码提供更友好的错误信息
+            let userFriendlyMessage = "AI服务暂时不可用，请稍后再试";
+            if (response.status === 429) {
+                userFriendlyMessage = "请求过于频繁，请稍等片刻再试";
+            } else if (response.status >= 500) {
+                userFriendlyMessage = "服务器暂时繁忙，请稍后再试";
+            }
+            throw new Error(`${userFriendlyMessage} (状态码: ${response.status})`);
         }
 
         if (!response.body) {

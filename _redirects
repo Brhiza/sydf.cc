@@ -1,0 +1,19 @@
+# Cloudflare Pages Redirects Configuration
+
+# 移除.html扩展名的重定向
+/ly /ly.html 200
+/mh /mh.html 200
+/qm /qm.html 200
+/dp /dp.html 200
+/sp /sp.html 200
+/ssgw /ssgw.html 200
+/history /history.html 200
+/about /about.html 200
+/rengong /rengong.html 200
+
+# 隐藏页面的访问控制（可选，根据需要启用）
+# /bz.html /404.html 404
+# /zw.html /404.html 404
+
+# 404页面处理
+/* /404.html 404

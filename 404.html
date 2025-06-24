@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>页面未找到 - 时月东方</title>
+    <meta name="description" content="抱歉，您访问的页面不存在。返回时月东方首页继续您的占卜之旅。">
+    <link rel="icon" href="static/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="static/favicon.png" type="image/png">
+    <link rel="apple-touch-icon" sizes="180x180" href="static/apple-touch-icon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+        
+        .error-container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 60px 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            margin: 20px;
+        }
+        
+        .error-code {
+            font-size: 120px;
+            font-weight: bold;
+            color: #6366f1;
+            margin: 0;
+            line-height: 1;
+        }
+        
+        .error-title {
+            font-size: 28px;
+            margin: 20px 0 10px;
+            color: #1f2937;
+        }
+        
+        .error-message {
+            font-size: 16px;
+            color: #6b7280;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: #6366f1;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5856eb;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        
+        .btn-secondary:hover {
+            background: #e5e7eb;
+            transform: translateY(-2px);
+        }
+        
+        .divination-links {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .divination-links h3 {
+            color: #1f2937;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+        
+        .quick-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .quick-link {
+            padding: 8px 12px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            text-decoration: none;
+            color: #475569;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+        
+        .quick-link:hover {
+            background: #e2e8f0;
+            color: #334155;
+        }
+        
+        @media (max-width: 480px) {
+            .error-container {
+                padding: 40px 20px;
+                margin: 10px;
+            }
+            
+            .error-code {
+                font-size: 80px;
+            }
+            
+            .error-title {
+                font-size: 24px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-code">404</div>
+        <h1 class="error-title">页面走失了</h1>
+        <p class="error-message">
+            抱歉，您要访问的页面可能已经移动、删除或者从未存在过。<br>
+            不如让我们为您指引新的方向？
+        </p>
+        
+        <div class="action-buttons">
+            <a href="/" class="btn btn-primary">返回首页</a>
+            <a href="javascript:history.back()" class="btn btn-secondary">返回上页</a>
+        </div>
+        
+        <div class="divination-links">
+            <h3>或者试试这些占卜服务</h3>
+            <div class="quick-links">
+                <a href="/ly.html" class="quick-link">六爻占卜</a>
+                <a href="/mh.html" class="quick-link">梅花易数</a>
+                <a href="/qm.html" class="quick-link">奇门遁甲</a>
+                <a href="/dp.html" class="quick-link">塔罗单牌</a>
+                <a href="/sp.html" class="quick-link">塔罗三牌</a>
+                <a href="/ssgw.html" class="quick-link">三山国王</a>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 简单的页面访问统计
+        console.log('404页面访问:', {
+            url: window.location.href,
+            referrer: document.referrer,
+            timestamp: new Date().toISOString()
+        });
+    </script>
+</body>
+</html>

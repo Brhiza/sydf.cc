@@ -1,4 +1,24 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // 图片懒加载优化
+    if ('IntersectionObserver' in window) {
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    if (img.dataset.src) {
+                        img.src = img.dataset.src;
+                        img.removeAttribute('data-src');
+                        observer.unobserve(img);
+                    }
+                }
+            });
+        });
+
+        // 观察所有带有data-src属性的图片
+        document.querySelectorAll('img[data-src]').forEach(img => {
+            imageObserver.observe(img);
+        });
+    }
     // --- HTML TEMPLATES ---
     function createCommonLayoutHTML() {
         const html = [

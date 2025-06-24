@@ -3,10 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>紫薇</title>
+    <title>紫微斗数排盘 - 时月东方 | 免费AI紫微斗数算命</title>
+    <meta name="description" content="时月东方提供专业的免费AI紫微斗数排盘服务。精准绘制命盘星图，结合AI智能解读，为您分析命宫、事业宫、财帛宫等十二宫位运势。">
+    <meta name="keywords" content="紫微斗数, 紫微排盘, 免费紫微斗数, AI紫微斗数, 命盘分析, 十二宫位, 星曜解读, 时月东方">
+    <meta name="robots" content="noindex, nofollow">
     <link rel="icon" href="static/favicon.ico" type="image/x-icon">
     <link rel="icon" href="static/favicon.png" type="image/png">
     <link rel="apple-touch-icon" sizes="180x180" href="static/apple-touch-icon.png">
+
+    <!-- 预加载关键资源 -->
+    <link rel="preload" href="css/paipan.css" as="style">
+    <link rel="preload" href="js/ai.js" as="script">
+    <link rel="preload" href="js/cdn-fallback.js" as="script">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://flow.ovo.gs">
+
     <link rel="stylesheet" href="css/paipan.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
@@ -205,9 +216,16 @@
         </div>
     </template>
 
-    <script src="https://cdn.jsdelivr.net/gh/6tail/lunar-javascript@master/lunar.js" defer></script>
+    <!-- 优化脚本加载顺序 -->
+    <script src="js/cdn-fallback.js"></script>
+    <script src="js/performance.js"></script>
+    <script src="js/paipan/loading-manager.js"></script>
+    <script src="js/paipan/error-handler.js"></script>
+    <script src="js/paipan/mobile-optimizer.js"></script>
+    <script src="js/paipan/cache-manager.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/iztro@latest/dist/iztro.min.js" defer></script>
     <script src="js/ai.js" defer></script>
+    <script src="js/paipan/inspiration-template.js" defer></script>
     <script src="js/paipan/common.js" defer></script>
     <script src="js/paipan/zw.js" defer></script>
 </body>
