@@ -783,10 +783,10 @@ select:focus {
 
 /* Special glowing style for designated AI buttons */
 .ai-glow-button {
-    display: inline-block; /* Override block display */
+    display: inline-block !important; /* Override any display property with !important */
     width: auto; /* Override width */
     max-width: none; /* Override max-width */
-    margin: 10px 0; /* Adjust margin */
+    margin: 10px auto; /* Change from 10px 0 to 10px auto to center it */
     padding: 14px 100px; /* Increase padding to make the button larger */
     border-radius: 12px; /* Slightly larger radius to match */
     border: none;
