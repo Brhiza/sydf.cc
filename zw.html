@@ -9,24 +9,20 @@
     <script src="/js/ai.js"></script>
     <!-- AI 适配器：让 zw 项目使用原项目的 AI 功能 -->
     <script>
-      // 直接替换全局 queryAI 函数，确保所有调用都使用原项目的 AI
       window.addEventListener('DOMContentLoaded', function() {
         console.log('🔄 开始 AI 功能适配...');
 
-        // 检查原项目的 queryAI 函数是否可用
         if (typeof window.queryAI === 'function') {
           console.log('✅ 原项目 queryAI 函数已加载');
 
-          // 保存原项目的 queryAI 函数
           const originalQueryAI = window.queryAI;
 
-          // 创建适配器函数，将原项目的接口适配为 zw 项目期望的异步生成器
+          // 创建适配器函数
           const adaptedQueryAI = async function*(prompt, options = {}) {
             try {
               console.log('🚀 调用原项目 AI:', prompt.substring(0, 50) + '...');
               const response = await originalQueryAI(prompt);
 
-              // 适配流式响应接口
               for await (const chunk of response.streamResponse()) {
                 yield chunk;
               }
@@ -36,159 +32,31 @@
             }
           };
 
-          // 等待 zw 项目加载完成，然后替换 AI 实例
+          // 替换 AI 实例
           const replaceAI = () => {
-            // 方法1：替换全局 ye 实例的 queryAI 方法
             if (window.ye && typeof window.ye.queryAI === 'function') {
               console.log('✅ 找到 ye 实例，替换其 queryAI 方法');
               window.ye.queryAI = adaptedQueryAI;
             }
 
-            // 方法2：替换可能的其他 AI 实例
             if (window.mn && typeof window.mn === 'function') {
-              console.log('✅ 找到 mn 类，尝试替换原型方法');
+              console.log('✅ 找到 mn 类，替换原型方法');
               window.mn.prototype.queryAI = adaptedQueryAI;
             }
-
-            // 方法3：监听新的 AI 实例创建
-            const originalMn = window.mn;
-            if (originalMn) {
-              window.mn = function(...args) {
-                const instance = new originalMn(...args);
-                instance.queryAI = adaptedQueryAI;
-                return instance;
-              };
-              // 保持原有的静态属性
-              Object.setPrototypeOf(window.mn, originalMn);
-              Object.assign(window.mn, originalMn);
-            }
-
-            console.log('✅ AI 功能适配完成！');
           };
 
-          // 立即尝试替换
+          // 多次尝试替换，确保成功
           replaceAI();
-
-          // 延迟替换，确保 zw 项目完全加载
           setTimeout(replaceAI, 1000);
           setTimeout(replaceAI, 3000);
 
-          // 直接修改智能建议功能的数据检查逻辑
-          setTimeout(() => {
-            console.log('🔍 开始修复智能建议功能的数据检查...');
-
-            // 直接修改 JavaScript 代码中的数据检查逻辑
-            const fixDataCheck = () => {
-              try {
-                // 查找所有 script 标签
-                const scripts = document.querySelectorAll('script[src*="ZiWeiView"]');
-
-                if (scripts.length > 0) {
-                  console.log('✅ 找到 ZiWeiView 脚本，准备修复数据检查...');
-
-                  // 使用字符串替换的方式修改检查逻辑
-                  // 将 !n.value.baziResult1 替换为检查紫薇数据
-                  const originalFetch = window.fetch;
-                  window.fetch = function(...args) {
-                    const result = originalFetch.apply(this, args);
-                    return result;
-                  };
-
-                  // 直接修改全局变量和函数
-                  const patchSuggestionCheck = () => {
-                    // 查找并修改智能建议函数
-                    const allFunctions = [];
-
-                    // 遍历所有全局对象，查找可能的智能建议函数
-                    for (const key in window) {
-                      try {
-                        if (typeof window[key] === 'function') {
-                          const funcStr = window[key].toString();
-                          if (funcStr.includes('baziResult1') && funcStr.includes('没有八字数据')) {
-                            console.log(`✅ 找到包含数据检查的函数: ${key}`);
-                            allFunctions.push(key);
-                          }
-                        }
-                      } catch (e) {
-                        // 忽略无法访问的属性
-                      }
-                    }
-
-                    // 如果找不到函数，直接修改检查逻辑
-                    if (allFunctions.length === 0) {
-                      console.log('🔄 直接修改数据检查逻辑...');
-
-                      // 创建一个全局的数据检查修复函数
-                      window.fixBaziCheck = function(store) {
-                        if (!store) return false;
-
-                        // 在紫薇斗数页面，检查 hasResults 而不是 baziResult1
-                        if (store.hasResults && store.hasResults.value) {
-                          console.log('✅ 检测到紫薇数据存在');
-                          return true;
-                        }
-
-                        // 检查是否有 ziWeiResult1 或 result1
-                        if (store.ziWeiResult1 && store.ziWeiResult1.value) {
-                          console.log('✅ 检测到 ziWeiResult1 数据存在');
-                          return true;
-                        }
-
-                        if (store.result1 && store.result1.value) {
-                          console.log('✅ 检测到 result1 数据存在');
-                          return true;
-                        }
-
-                        console.log('❌ 未检测到紫薇数据');
-                        return false;
-                      };
-
-                      // 重写 console.log 来拦截和修改数据检查
-                      const originalConsoleLog = console.log;
-                      console.log = function(...args) {
-                        if (args[0] === '没有八字数据，跳过建议生成') {
-                          console.log('🔄 拦截到数据检查失败，尝试使用紫薇数据检查...');
-
-                          // 检查紫薇数据
-                          try {
-                            if (window.Ce && typeof window.Ce === 'function') {
-                              const store = window.Ce();
-                              if (window.fixBaziCheck(store)) {
-                                console.log('✅ 紫薇数据检查通过，继续生成建议');
-                                return; // 不输出原始的错误信息
-                              }
-                            }
-                          } catch (e) {
-                            console.error('检查紫薇数据时出错:', e);
-                          }
-                        }
-
-                        return originalConsoleLog.apply(this, args);
-                      };
-                    }
-                  };
-
-                  patchSuggestionCheck();
-                }
-
-              } catch (error) {
-                console.error('❌ 修复数据检查失败:', error);
-              }
-            };
-
-            // 多次尝试修复
-            fixDataCheck();
-            setTimeout(fixDataCheck, 1000);
-            setTimeout(fixDataCheck, 3000);
-
-          }, 500);
-
+          console.log('✅ AI 功能适配完成！');
         } else {
           console.error('❌ 原项目的 queryAI 函数未找到');
         }
       });
     </script>
-    <script type="module" crossorigin src="/assets/zw-4474403d.js"></script>
+    <script type="module" crossorigin src="/assets/zw-4e13828c.js"></script>
     <link rel="modulepreload" crossorigin href="/assets/vendor-2cc2d261.js">
     <link rel="stylesheet" href="/assets/zw-707b0906.css">
   </head>
