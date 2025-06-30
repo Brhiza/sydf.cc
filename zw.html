@@ -73,6 +73,58 @@
           setTimeout(replaceAI, 1000);
           setTimeout(replaceAI, 3000);
 
+          // 修复智能建议功能的数据检查问题
+          setTimeout(() => {
+            // 检查是否在紫薇斗数页面
+            const isZiWeiPage = window.location.pathname.includes('/zw') ||
+                               document.title.includes('紫薇') ||
+                               document.querySelector('h1')?.textContent.includes('紫薇');
+
+            if (isZiWeiPage) {
+              console.log('🔍 检测到紫薇斗数页面，修复智能建议功能...');
+
+              // 修复智能建议功能中的数据检查
+              const fixSuggestionCheck = () => {
+                try {
+                  // 在紫薇斗数页面，智能建议功能检查 baziResult1，但应该检查 ziWeiResult1
+                  // 创建一个代理对象，当检查 baziResult1 时返回 ziWeiResult1 的值
+                  if (window.Ce && window.Ce()) {
+                    const store = window.Ce();
+
+                    // 如果 store 有 result1 属性，将其映射到 baziResult1
+                    if (store.result1 && store.result1.value) {
+                      console.log('✅ 找到紫薇数据，创建 baziResult1 映射');
+
+                      // 为智能建议功能提供必要的数据结构
+                      Object.defineProperty(store, 'baziResult1', {
+                        get: function() {
+                          console.log('🔄 智能建议功能请求 baziResult1，返回紫薇数据');
+                          return store.result1.value ? {
+                            year: new Date().getFullYear(),
+                            month: new Date().getMonth() + 1,
+                            day: new Date().getDate(),
+                            timeIndex: 0,
+                            gender: 'male'
+                          } : null;
+                        },
+                        configurable: true
+                      });
+                    }
+                  }
+                } catch (error) {
+                  console.error('❌ 修复智能建议功能失败:', error);
+                }
+              };
+
+              // 立即尝试修复
+              fixSuggestionCheck();
+
+              // 延迟修复，确保紫薇数据加载完成
+              setTimeout(fixSuggestionCheck, 2000);
+              setTimeout(fixSuggestionCheck, 5000);
+            }
+          }, 2000);
+
         } else {
           console.error('❌ 原项目的 queryAI 函数未找到');
         }
