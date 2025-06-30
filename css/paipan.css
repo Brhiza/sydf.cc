@@ -783,10 +783,10 @@ select:focus {
 
 /* Special glowing style for designated AI buttons */
 .ai-glow-button {
-    display: inline-block; /* Override block display */
+    display: inline-block !important; /* Override any display property with !important */
     width: auto; /* Override width */
     max-width: none; /* Override max-width */
-    margin: 10px 0; /* Adjust margin */
+    margin: 20px auto; /* 增加上下间距 */
     padding: 14px 100px; /* Increase padding to make the button larger */
     border-radius: 12px; /* Slightly larger radius to match */
     border: none;
@@ -1144,6 +1144,7 @@ select:focus {
 
     #aiQuestionContainer, #combinedAnalysisContainer {
         padding: 0;
+        text-align: center !important; /* 确保文本居中对齐 */
     }
 
     #aiQuestionOptions, #combinedQuestionOptions {
@@ -1757,6 +1758,13 @@ select:focus {
     }
     .horoscope-item .jieqi { font-size: 9px; }
     .ten-god-abbr { font-size: 9px; }
+    
+    /* 移动端按钮样式调整 */
+    .ai-glow-button {
+        padding: 12px 20px; /* 减小内边距使按钮更适合移动设备 */
+        width: 80%; /* 设置宽度为容器的80% */
+        max-width: 300px; /* 限制最大宽度 */
+    }
 }
 
 /* --- Tooltip Styles --- */
