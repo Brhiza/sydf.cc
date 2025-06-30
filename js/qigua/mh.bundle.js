@@ -232,13 +232,17 @@ document.getElementById('submitButton').addEventListener('click', async () => {
     aiResponseDiv.innerHTML = "";
 
     try {
+        // 确保 marked 库可用
+        await ensureMarkedLibrary();
+
         const currentTime = new Date().toLocaleString('zh-CN');
         const promptWithTime = `当前公历时间：${currentTime}\n\n${prompt}`;
         const aiResponse = await queryAI(promptWithTime);
         let fullResponse = "";
         for await (const content of aiResponse.streamResponse()) {
             fullResponse += content;
-            aiResponseDiv.append(document.createTextNode(content));
+            // 使用 markdown 渲染
+            aiResponseDiv.innerHTML = renderMarkdown(fullResponse);
         }
         window.saveHistory('梅花易数', userInput, document.getElementById('outputText').innerHTML);
     } catch (error) {

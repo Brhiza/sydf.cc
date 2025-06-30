@@ -1,3 +1,69 @@
+// 确保 marked 库可用的辅助函数
+function ensureMarkedLibrary() {
+    return new Promise((resolve) => {
+        if (typeof marked !== 'undefined') {
+            resolve();
+            return;
+        }
+
+        // 如果 marked 不存在，动态加载
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/marked/marked.min.js';
+        script.onload = () => {
+            // 配置 marked 以获得紧凑的输出
+            if (typeof marked !== 'undefined' && marked.setOptions) {
+                marked.setOptions({
+                    breaks: false,    // 不将单个换行符转换为 <br>
+                    gfm: true,        // 启用 GitHub 风格的 markdown
+                    sanitize: false,  // 允许 HTML（但要小心 XSS）
+                    smartypants: false, // 禁用智能标点符号
+                    headerIds: false,   // 禁用标题 ID
+                    mangle: false      // 禁用邮箱地址混淆
+                });
+            }
+            resolve();
+        };
+        script.onerror = () => {
+            console.warn('无法加载 marked 库，将使用纯文本渲染');
+            resolve();
+        };
+        document.head.appendChild(script);
+    });
+}
+
+// 渲染 markdown 内容的辅助函数
+function renderMarkdown(text) {
+    if (typeof marked !== 'undefined') {
+        try {
+            // 预处理文本以获得更紧凑的输出
+            const processedText = text
+                .replace(/\n{3,}/g, '\n\n')    // 将多个连续换行符减少为最多两个
+                .replace(/^\s+|\s+$/g, '')     // 去除首尾空白
+                .replace(/\n\s*\n\s*\n/g, '\n\n') // 清理多余的空行
+                .trim();
+
+            let html = marked.parse(processedText);
+
+            // 后处理 HTML 以获得更紧凑的输出
+            html = html
+                .replace(/<p><\/p>/g, '')           // 移除空段落
+                .replace(/>\s+</g, '><')            // 移除标签间的空白
+                .replace(/(<\/p>)\s*(<p>)/g, '$1$2') // 减少段落间距
+                .replace(/(<\/h[1-6]>)\s*(<p>)/g, '$1$2') // 减少标题和段落间距
+                .replace(/(<\/li>)\s*(<li>)/g, '$1$2')    // 减少列表项间距
+                .trim();
+
+            return html;
+        } catch (error) {
+            console.warn('Markdown 解析失败，使用纯文本:', error);
+            return text.replace(/\n/g, '<br>');
+        }
+    } else {
+        // 如果没有 marked 库，简单地将换行符转换为 <br>
+        return text.replace(/\n/g, '<br>');
+    }
+}
+
 async function queryAI(prompt) {
     try {
         const controller = new AbortController();
@@ -81,7 +147,32 @@ async function queryAI(prompt) {
         console.error('请求失败:', error);
         throw error;
     }
-} 
+}
+
+// 为观音灵签等页面提供的兼容函数
+async function getAIResponse(prompt, callback) {
+    try {
+        // 确保 marked 库可用
+        await ensureMarkedLibrary();
+
+        const aiResponse = await queryAI(prompt);
+        let fullResponse = "";
+
+        for await (const content of aiResponse.streamResponse()) {
+            fullResponse += content;
+            // 实时更新，使用 markdown 渲染
+            const renderedContent = renderMarkdown(fullResponse);
+            callback(renderedContent);
+        }
+    } catch (error) {
+        console.error('getAIResponse 失败:', error);
+        callback(`<div style="color: #ff4081; padding: 10px; border: 1px solid #ff4081; border-radius: 5px;">
+            <p>😔 AI解读遇到了一些问题：</p>
+            <p>${error.message}</p>
+            <p>请稍后再试或刷新页面。</p>
+        </div>`);
+    }
+}
 
 if (typeof window !== 'undefined') {
     let userHasScrolled = false;

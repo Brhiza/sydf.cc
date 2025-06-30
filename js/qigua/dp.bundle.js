@@ -80,11 +80,15 @@ document.getElementById('submitButton').addEventListener('click', async () => {
     const aiResponseDiv = renderSingleTarotCard(cardData);
     aiResponseDiv.innerHTML = "";
     try {
+        // 确保 marked 库可用
+        await ensureMarkedLibrary();
+
         const aiResponse = await queryAI(prompt);
         let fullResponse = "";
         for await (const content of aiResponse.streamResponse()) {
             fullResponse += content;
-            aiResponseDiv.append(document.createTextNode(content));
+            // 使用 markdown 渲染
+            aiResponseDiv.innerHTML = renderMarkdown(fullResponse);
         }
         window.saveHistory('塔罗牌·单牌', userInput, document.getElementById('outputText').innerHTML);
     } catch (error) {

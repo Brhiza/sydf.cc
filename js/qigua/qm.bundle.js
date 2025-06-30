@@ -399,14 +399,17 @@ document.getElementById('submitButton').addEventListener('click', async () => {
 **你可以：**
 [在此处给出具体的建议和行动方向]`;
     try {
+        // 确保 marked 库可用
+        await ensureMarkedLibrary();
+
         const currentTime = new Date().toLocaleString('zh-CN');
         const promptWithTime = `当前公历时间：${currentTime}\n\n${prompt}`;
         const aiResponse = await queryAI(promptWithTime);
         let fullResponse = "";
         for await (const content of aiResponse.streamResponse()) {
-            const processedContent = content.replace(/[*#]/g, '');
-            fullResponse += processedContent;
-            aiResponseDiv.append(document.createTextNode(processedContent));
+            fullResponse += content;
+            // 使用 markdown 渲染（不再移除 * 和 # 符号，让 markdown 处理）
+            aiResponseDiv.innerHTML = renderMarkdown(fullResponse);
         }
         window.saveHistory('奇门遁甲', userInput, document.getElementById('outputText').innerHTML);
     } catch (error) {
