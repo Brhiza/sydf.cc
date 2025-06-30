@@ -7,6 +7,60 @@
     <title>紫薇排盘</title>
     <!-- 引入原项目的 AI 功能 -->
     <script src="/js/ai.js"></script>
+    <!-- AI 适配器：让 zw 项目使用原项目的 AI 功能 -->
+    <script>
+      // 等待页面加载完成后，替换 zw 项目的 AI 实现
+      window.addEventListener('DOMContentLoaded', function() {
+        // 检查原项目的 queryAI 函数是否可用
+        if (typeof window.queryAI === 'function') {
+          console.log('🔄 正在适配 AI 功能...');
+
+          // 创建适配器，将原项目的 queryAI 适配到 zw 项目期望的接口
+          const originalQueryAI = window.queryAI;
+
+          // 等待 zw 项目加载完成
+          setTimeout(() => {
+            // 尝试替换 zw 项目内部的 AI 实现
+            if (window.ye && window.ye.queryAI) {
+              console.log('✅ 找到 zw 项目的 AI 实例，正在替换...');
+
+              // 保存原始方法
+              const originalZwQueryAI = window.ye.queryAI.bind(window.ye);
+
+              // 替换为使用原项目的 queryAI
+              window.ye.queryAI = async function*(prompt, options = {}) {
+                try {
+                  console.log('🚀 使用原项目 AI 功能:', prompt.substring(0, 50) + '...');
+                  const response = await originalQueryAI(prompt);
+
+                  // 适配流式响应接口
+                  for await (const chunk of response.streamResponse()) {
+                    yield chunk;
+                  }
+                } catch (error) {
+                  console.error('❌ AI 调用失败，尝试使用备用方法:', error);
+                  // 如果失败，回退到原始实现
+                  try {
+                    for await (const chunk of originalZwQueryAI(prompt, options)) {
+                      yield chunk;
+                    }
+                  } catch (fallbackError) {
+                    console.error('❌ 备用 AI 方法也失败:', fallbackError);
+                    throw fallbackError;
+                  }
+                }
+              };
+
+              console.log('✅ AI 功能适配完成！zw 项目现在使用原项目的 AI 功能');
+            } else {
+              console.log('⚠️ 未找到 zw 项目的 AI 实例，可能需要更长时间加载');
+            }
+          }, 1000);
+        } else {
+          console.error('❌ 原项目的 queryAI 函数未找到');
+        }
+      });
+    </script>
     <script type="module" crossorigin src="/assets/zw-4474403d.js"></script>
     <link rel="modulepreload" crossorigin href="/assets/vendor-2cc2d261.js">
     <link rel="stylesheet" href="/assets/zw-707b0906.css">
