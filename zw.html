@@ -18,9 +18,14 @@
           // 创建适配器，将原项目的 queryAI 适配到 zw 项目期望的接口
           const originalQueryAI = window.queryAI;
 
-          // 等待 zw 项目加载完成
-          setTimeout(() => {
-            // 尝试替换 zw 项目内部的 AI 实现
+          // 多次尝试替换，确保 zw 项目完全加载
+          let attempts = 0;
+          const maxAttempts = 10;
+
+          const tryReplace = () => {
+            attempts++;
+
+            // 尝试替换 zw 项目内部的 AI 实例
             if (window.ye && window.ye.queryAI) {
               console.log('✅ 找到 zw 项目的 AI 实例，正在替换...');
 
@@ -52,10 +57,20 @@
               };
 
               console.log('✅ AI 功能适配完成！zw 项目现在使用原项目的 AI 功能');
+              return true; // 成功替换
+            } else if (attempts < maxAttempts) {
+              console.log(`⏳ 第 ${attempts} 次尝试，未找到 zw 项目的 AI 实例，${1000 * attempts}ms 后重试...`);
+              setTimeout(tryReplace, 1000 * attempts); // 递增延迟
+              return false;
             } else {
-              console.log('⚠️ 未找到 zw 项目的 AI 实例，可能需要更长时间加载');
+              console.warn('⚠️ 达到最大尝试次数，未能找到 zw 项目的 AI 实例');
+              return false;
             }
-          }, 1000);
+          };
+
+          // 开始尝试替换
+          setTimeout(tryReplace, 500);
+
         } else {
           console.error('❌ 原项目的 queryAI 函数未找到');
         }
