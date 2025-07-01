@@ -222,3 +222,14 @@ if (typeof window !== 'undefined') {
         observer.observe(targetNode, config);
     });
 }
+
+// 导出 AI 功能到全局作用域，供其他项目使用
+window.queryAI = queryAI;
+window.getAIResponse = getAIResponse;
+window.renderMarkdown = renderMarkdown;
+
+console.log('✅ AI 功能已导出到全局作用域:', {
+    queryAI: typeof window.queryAI,
+    getAIResponse: typeof window.getAIResponse,
+    renderMarkdown: typeof window.renderMarkdown
+});
