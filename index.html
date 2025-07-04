@@ -1,142 +1,26 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="description"
+      content="探索未来，解读命运。时月东方是您的专属免费AI算命占卜顾问，提供专业的六爻、梅花易数、奇门遁甲及塔罗牌在线占卜。我们融合中华传统周易智慧与尖端人工智能技术，为您提供精准、有趣的命理分析和决策参考。"
+    />
+    <meta
+      name="keywords"
+      content="AI算命, 免费算命, 在线占卜, 周易占卜, 六爻排盘, 梅花易数, 奇门遁甲, 塔罗牌在线, 免费抽卡, 运势预测, 事业运, 感情运, 时月东方, AI卜卦, 智能算命"
+    />
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/static/favicon.png" type="image/png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <base href="/" />
     <title>时月东方 - 免费AI算命占卜</title>
-    <meta name="description" content="探索未来，解读命运。时月东方是您的专属免费AI算命占卜顾问，提供专业的六爻、梅花易数、奇门遁甲及塔罗牌在线占卜。我们融合中华传统周易智慧与尖端人工智能技术，为您提供精准、有趣的命理分析和决策参考。">
-    <meta name="keywords" content="AI算命, 免费算命, 在线占卜, 周易占卜, 六爻排盘, 梅花易数, 奇门遁甲, 塔罗牌在线, 免费抽卡, 运势预测, 事业运, 感情运, 时月东方, AI卜卦, 智能算命">
-    <link rel="icon" href="static/favicon.ico" type="image/x-icon">
-    <link rel="icon" href="static/favicon.png" type="image/png">
-    <link rel="apple-touch-icon" sizes="180x180" href="static/apple-touch-icon.png">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#6366f1">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="时月东方">
-
-    <!-- 安全策略 -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://flow.ovo.gs; font-src 'self' https://cdn.jsdelivr.net;">
-
-    <!-- 预加载关键资源 -->
-    <link rel="preload" href="css/qigua.css" as="style">
-    <link rel="preload" href="js/ai.js" as="script">
-    <link rel="preload" href="js/cdn-fallback.js" as="script">
-    <link rel="preload" href="js/image-optimizer.js" as="script">
-    <link rel="preconnect" href="https://cdn.jsdelivr.net">
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-    <link rel="preconnect" href="https://flow.ovo.gs">
-
-    <link rel="stylesheet" href="css/qigua.css">
-
-    <!-- 结构化数据 -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "WebSite",
-        "name": "时月东方",
-        "description": "免费AI算命占卜网站，提供六爻、梅花易数、奇门遁甲、塔罗牌等专业占卜服务",
-        "url": "https://sydf.cc",
-        "potentialAction": {
-            "@type": "SearchAction",
-            "target": "https://sydf.cc/?q={search_term_string}",
-            "query-input": "required name=search_term_string"
-        },
-        "provider": {
-            "@type": "Organization",
-            "name": "时月东方",
-            "url": "https://sydf.cc"
-        }
-    }
-    </script>
-</head>
-<body>
-    <main class="main-content">
-        <div class="welcome-card">
-            <h2>探索未来，解读命运</h2>
-            <p>一个免费的AI算命网站，内容由AI生成，仅供娱乐参考。命理玄学虽有趣，但现实生活中的相处与沟通更为重要。愿您在人生的路上，既能享受命理分析的乐趣，也能珍惜当下的每一份真挚情感。</p>
-            <p class="mobile-tip">点击右上角的菜单按钮 <span>&#9776;</span> 可以实现快速切换。</p>
-        </div>
-
-        <div class="nav-grid">
-            <a href="ly" class="nav-card">
-                <h3>六爻</h3>
-                <p>深入剖析事情的内在联系和发展趋势。</p>
-            </a>
-            <a href="mh" class="nav-card">
-                <h3>梅花易数</h3>
-                <p>快速抓住事物发展的关键点，判断吉凶。</p>
-            </a>
-            <a href="qm" class="nav-card">
-                <h3>奇门遁甲</h3>
-                <p>分析复杂局势，为决策提供全面参考。</p>
-            </a>
-            <a href="dp" class="nav-card">
-                <h3>塔罗牌·单牌</h3>
-                <p>在需要快速得到答案或建议时非常实用。</p>
-            </a>
-            <a href="sp" class="nav-card">
-                <h3>塔罗牌·三牌</h3>
-                <p>提供更丰富的细节和更全面的视角。</p>
-            </a>
-            <a href="ssgw" class="nav-card">
-                <h3>三山国王灵签</h3>
-                <p>为迷茫者指点迷津，解答人生困惑。</p>
-            </a>
-           <a href="history" class="nav-card">
-                <h3>历史记录</h3>
-                <p>这里保存了您最近的占卜记录，仅保存在本地哦。</p>
-            </a>
-            <a href="rengong" class="nav-card">
-                <h3>转人工</h3>
-                <p>与真人专家进行一对一交流。</p>
-            </a>
-            <a href="about" class="nav-card">
-                <h3>关于本站</h3>
-                <p>了解时月东方的故事和愿景。</p>
-            </a>
-        </div>
-    </main>
-
-    <!-- 优化脚本加载顺序 -->
-    <script src="js/cdn-fallback.js"></script>
-    <script src="js/image-optimizer.js"></script>
-    <script src="js/performance.js"></script>
-    <script src="js/ai.js"></script>
-    <script src="js/qigua/main.js"></script>
-
-    <!-- Service Worker 注册和调试 -->
-    <script src="js/sw-fix.js"></script>
-    <script src="js/sw-debug.js"></script>
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(registration => {
-                        console.log('Service Worker 注册成功:', registration.scope);
-
-                        // 检查更新
-                        registration.addEventListener('updatefound', () => {
-                            const newWorker = registration.installing;
-                            console.log('发现 Service Worker 更新');
-
-                            newWorker.addEventListener('statechange', () => {
-                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                    // 新版本可用，提示用户刷新
-                                    if (confirm('发现新版本，是否立即刷新页面？')) {
-                                        window.location.reload();
-                                    }
-                                }
-                            });
-                        });
-                    })
-                    .catch(error => {
-                        console.error('Service Worker 注册失败:', error);
-                    });
-            });
-        }
-    </script>
-</body>
+    <script type="module" crossorigin src="/assets/index-BC5h_unE.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-BMxQmIbb.css">
+  </head>
+  <body>
+    <div id="app"></div>
+  </body>
 </html>
