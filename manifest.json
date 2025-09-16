@@ -4,6 +4,8 @@
   "description": "一个免费的AI占卜站",
   "theme_color": "#6b46c1",
   "background_color": "#ffffff",
+  "dark_theme_color": "#1d1d1d",
+  "dark_background_color": "#1d1d1d",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
   "start_url": "/",
@@ -11,6 +13,7 @@
   "id": "/",
   "orientation": "portrait",
   "lang": "zh-CN",
+  "categories": ["lifestyle", "entertainment"],
   "icons": [
     {
       "src": "static/favicon.png",
