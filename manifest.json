@@ -1,7 +1,7 @@
 {
   "name": "时月东方",
   "short_name": "时月东方",
-  "description": "一个免费的AI占卜站",
+  "description": "一个永久免费的AI占卜站",
   "theme_color": "#ffffff",
   "background_color": "#ffffff",
   "dark_theme_color": "#1d1d1d",
@@ -60,18 +60,18 @@
   ],
   "screenshots": [
     {
-      "src": "tarot/1.jpg",
+      "src": "pwa1.jpg",
       "sizes": "540x720",
       "type": "image/jpeg",
       "form_factor": "narrow",
-      "label": "占卜界面"
+      "label": "首页"
     },
     {
-      "src": "tarot/2.jpg",
+      "src": "pwa2.jpg",
       "sizes": "540x720",
       "type": "image/jpeg",
       "form_factor": "narrow",
-      "label": "卡牌选择"
+      "label": "占卜"
     }
   ],
   "related_applications": [],
