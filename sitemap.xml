@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:news="http://www.google.com/schemas/sitemap-news/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml"
+        xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+        xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
+  
+  <!-- 首页 -->
+  <url>
+    <loc>https://sydf.cc/</loc>
+    <lastmod>2025-10-07</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://sydf.cc/" />
+    <image:image>
+      <image:loc>https://sydf.cc/static/pwa1.jpg</image:loc>
+      <image:title>时月东方占卜界面</image:title>
+      <image:caption>专业的AI算命占卜界面</image:caption>
+    </image:image>
+  </url>
+  
+  <!-- 主要功能页面 -->
+  <url>
+    <loc>https://sydf.cc/divination/liuyao</loc>
+    <lastmod>2025-10-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://sydf.cc/divination/liuyao" />
+  </url>
+  
+  <url>
+    <loc>https://sydf.cc/divination/meihua</loc>
+    <lastmod>2025-10-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://sydf.cc/divination/meihua" />
+  </url>
+  
+  <url>
+    <loc>https://sydf.cc/divination/qimen</loc>
+    <lastmod>2025-10-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://sydf.cc/divination/qimen" />
+  </url>
+  
+  <url>
+    <loc>https://sydf.cc/divination/tarot</loc>
+    <lastmod>2025-10-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://sydf.cc/divination/tarot" />
+  </url>
+  
+  <!-- 其他重要页面 -->
+  <url>
+    <loc>https://sydf.cc/daily-fortune</loc>
+    <lastmod>2025-10-07</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://sydf.cc/daily-fortune" />
+  </url>
+  
+  <url>
+    <loc>https://sydf.cc/history</loc>
+    <lastmod>2025-10-07</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://sydf.cc/history" />
+  </url>
+  
+  <url>
+    <loc>https://sydf.cc/about</loc>
+    <lastmod>2025-10-07</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://sydf.cc/about" />
+  </url>
+  
+</urlset>

@@ -1,0 +1,61 @@
+# 主页面缓存策略 - 短缓存以确保及时更新
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  Cache-Control: public, max-age=0, must-revalidate
+  # SEO 相关头部
+  X-Robots-Tag: index, follow
+  Link: <https://sydf.cc/>; rel="canonical"
+
+# HTML 文件 - 不缓存，确保始终获取最新版本
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+  X-Frame-Options: DENY
+
+# JavaScript 和 CSS 文件 - 中等缓存时间，带版本号时可以缓存更久
+/assets/*.js
+  Cache-Control: public, max-age=31536000, immutable
+/assets/*.css
+  Cache-Control: public, max-age=31536000, immutable
+
+# 静态资源图片 - 长期缓存
+/static/*.*
+  Cache-Control: public, max-age=31536000, immutable
+
+# 图标和清单文件 - 长期缓存
+/*.ico
+  Cache-Control: public, max-age=31536000, immutable
+/*.png
+  Cache-Control: public, max-age=31536000, immutable
+/*.jpg
+  Cache-Control: public, max-age=31536000, immutable
+/*.jpeg
+  Cache-Control: public, max-age=31536000, immutable
+/*.webp
+  Cache-Control: public, max-age=31536000, immutable
+/*.svg
+  Cache-Control: public, max-age=31536000, immutable
+
+# Manifest 文件 - 中等缓存
+/manifest.webmanifest
+  Cache-Control: public, max-age=86400, must-revalidate
+
+# Service Worker - 短缓存以确保更新
+/sw.js
+  Cache-Control: public, max-age=0, must-revalidate
+
+# API 路由（如果有）- 不缓存
+/api/*
+  Cache-Control: no-cache, no-store, must-revalidate
+
+# 字体文件 - 长期缓存
+/*.woff
+  Cache-Control: public, max-age=31536000, immutable
+/*.woff2
+  Cache-Control: public, max-age=31536000, immutable
+/*.ttf
+  Cache-Control: public, max-age=31536000, immutable
+/*.eot
+  Cache-Control: public, max-age=31536000, immutable
