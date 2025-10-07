@@ -1,11 +1,10 @@
 # SPA 路由支持 - 所有非文件路径都重定向到 index.html
-/*    /index.html   200
-
-# 强制 HTTPS 重定向
-http://*    https://*:443    301
-
-# 移除尾部斜杠（可选）
-/*    /:splat    301
+# 只对不存在的文件路径进行重定向
+/api/*    /index.html   200
+/divination/*    /index.html   200
+/daily-fortune    /index.html   200
+/history    /index.html   200
+/about    /index.html   200
 
 # 旧路径重定向（如果有历史路径需要保持）
 # /old-path    /new-path    301
