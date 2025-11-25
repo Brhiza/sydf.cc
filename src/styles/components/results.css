@@ -1,0 +1,171 @@
+/* 基础信息区块 */
+.basic-info-section {
+  margin-bottom: var(--spacing-3);
+}
+
+.info-line,
+.hexagram-line {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--spacing-1);
+  justify-content: space-between;
+  line-height: 1.4;
+}
+
+.info-line:last-child,
+.hexagram-line:last-child {
+  margin-bottom: 0;
+}
+
+.info-label,
+.hexagram-label {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  width: 80px;
+  text-align: justify;
+  text-align-last: justify;
+  flex-shrink: 0;
+  font-size: 16px;
+}
+
+.info-value,
+.hexagram-value {
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-medium);
+  flex: 1;
+  text-align: left;
+  margin-left: var(--spacing-2);
+  font-size: 16px;
+}
+
+/* 卦象信息区块 */
+.hexagram-info {
+  margin-bottom: var(--spacing-3);
+}
+
+/* 排盘信息区块 */
+.paipan-section {
+  margin-bottom: var(--spacing-4);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.hexagram-container {
+  display: flex;
+  gap: var(--spacing-3);
+  align-items: flex-start;
+}
+
+.yao-line {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 3px 0;
+  gap: var(--spacing-1);
+  white-space: nowrap;
+}
+
+.yao-line:last-child {
+  border-bottom: none;
+}
+
+.yao-symbol {
+  width: 65px;
+  text-align: center;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.main-yao strong,
+.changed-yao strong {
+  font-size: 13px;
+  letter-spacing: -1px;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-mono);
+}
+
+.change-mark {
+  color: var(--color-warning);
+  font-weight: bold;
+  font-size: var(--font-size-xs);
+  width: 12px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .hexagram-container {
+    gap: var(--spacing-2);
+  }
+
+  .yao-line {
+    font-size: var(--font-size-xs);
+    gap: 3px;
+  }
+
+  .yao-symbol {
+    width: 55px;
+  }
+
+  .main-yao strong,
+  .changed-yao strong {
+    font-size: 12px;
+  }
+
+  .change-mark {
+    width: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .paipan-section {
+    font-size: 13px;
+  }
+
+  .hexagram-container {
+    gap: var(--spacing-1);
+  }
+
+  .yao-line {
+    font-size: 13px;
+    line-height: 1.4;
+    gap: 3px;
+    padding: 3px 0;
+  }
+
+  .yao-symbol {
+    width: 52px;
+  }
+
+  .main-yao strong,
+  .changed-yao strong {
+    font-size: 12px;
+    letter-spacing: -0.5px;
+  }
+
+  .change-mark {
+    width: 8px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 360px) {
+  .paipan-section {
+    font-size: 10px;
+  }
+
+  .yao-line {
+    font-size: 10px;
+    gap: 1px;
+  }
+
+  .yao-symbol {
+    width: 42px;
+  }
+
+  .main-yao strong,
+  .changed-yao strong {
+    font-size: 9px;
+  }
+}

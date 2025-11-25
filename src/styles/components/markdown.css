@@ -1,0 +1,192 @@
+/* Markdown内容渲染样式 */
+
+.markdown-content {
+  line-height: 1.6;
+  color: var(--color-text-primary);
+}
+
+/* 标题样式 */
+.markdown-content :deep(h1) {
+  font-size: 1.5em;
+  font-weight: 600;
+  margin: 1.2em 0 0.8em 0;
+  color: var(--color-text-primary);
+  border-bottom: 2px solid var(--color-border);
+  padding-bottom: 0.3em;
+}
+
+.markdown-content :deep(h2) {
+  font-size: 1.3em;
+  font-weight: 600;
+  margin: 1em 0 0.6em 0;
+  color: var(--color-text-primary);
+}
+
+.markdown-content :deep(h3) {
+  font-size: 1.1em;
+  font-weight: 600;
+  margin: 0.8em 0 0.4em 0;
+  color: var(--color-text-primary);
+}
+
+/* 段落样式 */
+.markdown-content :deep(p) {
+  margin: 0.8em 0;
+  text-align: justify;
+}
+
+/* 列表样式 */
+.markdown-content :deep(ul),
+.markdown-content :deep(ol) {
+  margin: 0.8em 0;
+  padding-left: 1.5em;
+}
+
+.markdown-content :deep(li) {
+  margin: 0.3em 0;
+}
+
+/* 强调样式 */
+.markdown-content :deep(strong) {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.markdown-content :deep(em) {
+  font-style: italic;
+  color: var(--color-text-secondary);
+}
+
+/* 代码样式 */
+.markdown-content :deep(code) {
+  background-color: var(--color-background-muted);
+  color: var(--color-primary);
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+}
+
+.markdown-content :deep(pre) {
+  background-color: var(--color-background-muted);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 1em;
+  overflow-x: auto;
+  margin: 1em 0;
+}
+
+.markdown-content :deep(pre code) {
+  background: none;
+  color: inherit;
+  padding: 0;
+}
+
+/* 引用样式 */
+.markdown-content :deep(blockquote) {
+  border-left: 4px solid var(--color-primary);
+  background-color: var(--color-background-muted);
+  margin: 1em 0;
+  padding: 0.8em 1.2em;
+  font-style: italic;
+  color: var(--color-text-secondary);
+}
+
+/* 表格样式 */
+.markdown-content :deep(table) {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+}
+
+.markdown-content :deep(th),
+.markdown-content :deep(td) {
+  border: 1px solid var(--color-border);
+  padding: 0.6em 1em;
+  text-align: left;
+}
+
+.markdown-content :deep(th) {
+  background-color: var(--color-background-muted);
+  font-weight: 600;
+}
+
+/* 分隔线样式 */
+.markdown-content :deep(hr) {
+  border: none;
+  border-top: 2px solid var(--color-border);
+  margin: 2em 0;
+}
+
+/* 链接样式 */
+.markdown-content :deep(a) {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.markdown-content :deep(a:hover) {
+  text-decoration: underline;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .markdown-content :deep(h1) {
+    font-size: 1.3em;
+  }
+
+  .markdown-content :deep(h2) {
+    font-size: 1.2em;
+  }
+
+  .markdown-content :deep(h3) {
+    font-size: 1.1em;
+  }
+
+  .markdown-content :deep(pre) {
+    padding: 0.8em;
+    font-size: 0.9em;
+  }
+
+  .markdown-content :deep(table) {
+    font-size: 0.9em;
+  }
+
+  .markdown-content :deep(th),
+  .markdown-content :deep(td) {
+    padding: 0.4em 0.6em;
+  }
+}
+
+/* thinking 标签 (details/summary) 样式 */
+.markdown-content :deep(details) {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin: 1em 0;
+  background-color: var(--color-background-muted);
+  transition: all 0.3s ease;
+}
+
+.markdown-content :deep(details[open]) {
+  box-shadow: var(--shadow-sm);
+}
+
+.markdown-content :deep(summary) {
+  padding: 0.8em 1.2em;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  outline: none;
+  transition: color 0.3s ease;
+}
+
+.markdown-content :deep(summary:hover) {
+  color: var(--color-primary);
+}
+
+.markdown-content :deep(details .thinking-content) {
+  padding: 0 1.2em 1.2em 1.2em;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-size: 0.9em;
+  opacity: 0.8;
+}

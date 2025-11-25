@@ -1,0 +1,147 @@
+/* ==========================================================================
+   滚动容器布局样式
+   ========================================================================== */
+
+/* 全局隐藏所有垂直滚动条 */
+* {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE and Edge */
+}
+*::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, and Opera */
+}
+
+/* 
+  滚动容器设计原则：
+  1. 使用绝对定位确保正确的滚动区域计算
+  2. 伪元素创建底部间距，确保在所有浏览器中正确显示
+  3. 统一的响应式断点和间距系统
+*/
+
+/* 主滚动容器 */
+.scroll-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  /* 隐藏滚动条但保持滚动功能 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+/* 滚动内容区域 */
+.scroll-content {
+  min-height: 100%;
+  padding: var(--spacing-6);
+}
+
+/* 底部间距伪元素 */
+.scroll-content::after {
+  content: '';
+  display: block;
+  height: 60px;
+  width: 100%;
+}
+
+/* 内容容器 */
+.content-container {
+  max-width: 800px;
+  margin: 0 auto;
+  overflow: visible;
+}
+
+/* 结果容器 */
+.result-item {
+  margin-bottom: 60px;
+}
+
+.result-item:last-child {
+  margin-bottom: 0; /* 最后一个元素不需要底部间距，由伪元素控制 */
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .scroll-content {
+    padding: var(--spacing-5) var(--spacing-4);
+  }
+
+  .scroll-content::after {
+    height: 40px;
+  }
+
+  .result-item {
+    margin-bottom: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .scroll-content {
+    padding: var(--spacing-3);
+  }
+
+  .scroll-content::after {
+    height: 30px;
+  }
+
+  .result-item {
+    margin-bottom: 30px;
+  }
+}
+
+/* 错误和加载状态 */
+.scroll-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  text-align: center;
+}
+
+/* 空状态 */
+.scroll-empty {
+  padding: var(--spacing-8) var(--spacing-4);
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+
+/* 移动端隐藏所有垂直滚动条 */
+@media (max-width: 768px) {
+  /* 隐藏所有元素的滚动条 */
+  * {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;  /* IE and Edge */
+  }
+  
+  /* 隐藏 Webkit 浏览器滚动条 */
+  *::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+  
+  *::-webkit-scrollbar-thumb {
+    display: none;
+  }
+  
+  *::-webkit-scrollbar-track {
+    display: none;
+  }
+  
+  /* 提高特异性，确保在 html 和 body 元素上生效 */
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+}

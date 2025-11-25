@@ -1,0 +1,122 @@
+.app-container {
+  display: flex;
+  height: 100vh;
+}
+
+.main-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  transition: margin-left 0.3s ease;
+}
+
+@media (min-width: 769px) {
+  .main-wrapper {
+    margin-left: 240px;
+  }
+
+  .main-wrapper.sidebar-collapsed {
+    margin-left: 0;
+  }
+}
+
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  position: relative;
+}
+
+
+html.dark .main-content {
+  /* 使用标准暗色模式卡片样式 - 与欢迎语卡片保持一致 */
+  background: #1d1d1d;
+  border: 1px solid rgba(255, 255, 255, 0.1); /* 使用更明显的暗色模式边框 */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+
+.content-wrapper {
+  flex: 1;
+  width: 100%;
+  display: block; /* 改为block布局，简化滚动逻辑 */
+  position: absolute; /* 绝对定位，确保正确的滚动区域 */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-y: auto; /* 内容过长时在容器内部滚动 */
+  overflow-x: hidden; /* 防止水平滚动 */
+  padding: 24px; /* 统一内边距 */
+  /* 隐藏滚动条但保持滚动功能 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  box-sizing: border-box;
+}
+
+/* 使用伪元素创建底部间距，确保在滚动容器中正确显示 */
+.content-wrapper::after {
+  content: '';
+  display: block;
+  height: 60px; /* 底部间距 */
+  width: 100%;
+}
+
+/* 隐藏WebKit浏览器的滚动条 */
+.content-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .app-container {
+    grid-template-areas:
+      'topbar'
+      'main';
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    height: auto;
+    min-height: 100vh;
+  }
+
+  html.dark .app-container {
+    background: #1d1d1d; /* 移动端暗色模式背景 */
+  }
+
+  .main-content,
+  .main-content.sidebar-collapsed {
+    margin-left: 0;
+    width: 100%;
+    padding-top: 60px; /* 为顶部导航栏留出空间 */
+    background: transparent; /* 移动端也保持透明背景 */
+    border-radius: 0; /* 移动端移除圆角 */
+    box-shadow: none; /* 移动端移除阴影 */
+    border: none; /* 移动端移除边框 */
+    min-height: calc(100vh - 60px); /* 移动端最小高度，减去顶部导航栏 */
+    height: auto; /* 移动端使用自动高度 */
+    overflow: visible; /* 移动端允许内容溢出 */
+    position: relative; /* 移动端使用相对定位 */
+  }
+
+  .content-wrapper {
+    padding: 20px 16px; /* 移动端统一内边距 */
+    position: static; /* 移动端使用静态定位 */
+    height: auto; /* 移动端使用自动高度 */
+    overflow: visible; /* 移动端允许页面滚动 */
+    width: 100%; /* 确保占满宽度 */
+    box-sizing: border-box; /* 包含padding在内的盒模型 */
+  }
+
+  .content-wrapper::after {
+    height: 40px; /* 移动端减少底部间距 */
+  }
+}
+
+@media (max-width: 480px) {
+  .content-wrapper {
+    padding: 12px; /* 小屏幕统一内边距 */
+  }
+
+  .content-wrapper::after {
+    height: 30px; /* 小屏幕进一步减少底部间距 */
+  }
+}

@@ -1,0 +1,179 @@
+/* ==========================================================================
+   主样式文件 - 集中管理所有样式
+   ========================================================================== */
+
+/* 导入重置样式 */
+@import './reset.css';
+
+/* 导入设计令牌 */
+@import './tokens.css';
+@import './variables.css';
+
+/* 导入布局样式 */
+@import './layout/main.css';
+@import './layout/scroll.css';
+
+/* 导入组件样式 */
+@import './components/base.css';
+@import './components/page.css';
+@import './components/forms.css';
+@import './components/buttons.css';
+@import './components/divination.css';
+@import './components/results.css';
+@import './components/markdown.css';
+
+/* 导入工具类 */
+@import './utilities/index.css';
+
+/* 全局自定义样式 */
+body {
+  font-family: var(--font-family-base);
+  color: var(--color-text-primary);
+  background-color: var(--color-background);
+  line-height: var(--line-height-normal);
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+/* 链接样式 */
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: var(--transition-fast);
+}
+
+a:hover {
+  color: var(--color-primary-dark);
+  text-decoration: underline;
+}
+
+/* 去除按钮点击的圆形动画和焦点样式 */
+button,
+input,
+textarea,
+select,
+.nav-link-content,
+.history-item,
+.dropdown-item {
+  outline: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* 去除所有元素的默认焦点样式 */
+*:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+/* 去除按钮的默认样式 */
+button {
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+/* 去除输入框的默认样式 */
+input,
+textarea {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border-radius: 0;
+}
+
+/* 防止iOS Safari在输入框聚焦时缩放页面 */
+input[type='text'],
+input[type='email'],
+input[type='password'],
+input[type='search'],
+input[type='tel'],
+input[type='url'],
+textarea,
+select {
+  font-size: 16px !important; /* 确保字体大小不小于16px */
+}
+
+/* 移动端输入框优化 */
+@media (max-width: 768px) {
+  input[type='text'],
+  input[type='email'],
+  input[type='password'],
+  input[type='search'],
+  input[type='tel'],
+  input[type='url'],
+  textarea,
+  select {
+    font-size: 16px !important; /* 强制16px以防止缩放 */
+    transform: translateZ(0); /* 启用硬件加速，改善性能 */
+  }
+}
+
+/* 禁用所有的点击高亮效果 */
+* {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
+  -webkit-focus-ring-color: rgba(0, 0, 0, 0) !important;
+}
+
+/* 滚动条样式 (仅桌面端) */
+@media (min-width: 769px) {
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--color-background-secondary);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--color-gray-400);
+    border-radius: var(--radius-full);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-gray-500);
+  }
+}
+
+/* 响应式断点 */
+@media (max-width: var(--mobile-breakpoint)) {
+  html {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+/* 确保旧样式不会影响新组件 */
+.liuyao-paipan {
+  /* 重置可能的继承样式 */
+  all: unset;
+  display: block;
+}
+
+/* 覆盖旧的全局样式 */
+.yao-line {
+  /* 重置旧的全局样式 */
+  position: static !important;
+  height: auto !important;
+  width: auto !important;
+  background: transparent !important;
+  background-color: transparent !important;
+}
