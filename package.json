@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:oyyy": "vite --mode build",
+    "dev:oyyy": "vite --mode oyyy",
     "build": "vite build",
-    "oyyy": "vite build --mode build",
+    "oyyy": "vite build --mode oyyy",
     "preview": "vite preview",
     "lint": "eslint . --ext .vue,.js,.ts --fix",
     "format": "prettier --write \"src/**/*.{vue,ts,css,md}\""
