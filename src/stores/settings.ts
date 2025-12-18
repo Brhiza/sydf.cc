@@ -22,7 +22,7 @@ interface Model {
 const DEFAULT_SETTINGS: UserSettings = {
   customApiKey: import.meta.env.VITE_APP_API_KEY || '',
   customApiEndpoint: import.meta.env.VITE_APP_API_ENDPOINT || '',
-  useCustomApi: !!import.meta.env.VITE_APP_API_KEY,
+  useCustomApi: false, // 默认不启用自定义API
   selectedModel: import.meta.env.VITE_APP_DEFAULT_MODEL || '',
   availableModels: [],
 };
