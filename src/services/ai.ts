@@ -87,7 +87,8 @@ class AIServiceSingleton {
       apiKey = customApiKey;
       model = modelOverride || 'gpt-3.5-turbo';
     } else {
-      endpoint = '/ai';
+      // 统一使用 /api/ai 作为所有版本的标准API路径
+      endpoint = '/api/ai';
       apiKey = undefined;
       model = modelOverride || 'default-model';
     }

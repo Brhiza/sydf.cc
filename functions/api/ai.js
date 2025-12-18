@@ -1,4 +1,4 @@
-// functions/ai.js
+// functions/api/ai.js
 
 export async function onRequest(context) {
   const { request, env } = context;
