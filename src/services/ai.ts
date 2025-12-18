@@ -75,7 +75,10 @@ class AIServiceSingleton {
     let apiKey: string | undefined;
     let model: string;
     
+    const isCustomBuild = import.meta.env.VITE_APP_BUILD_TARGET === 'CUSTOM';
+
     if (useCustomApi && customApiEndpoint && customApiKey) {
+      // 用户自定义API优先
       if (customApiEndpoint.endsWith('/v1/chat/completions')) {
         endpoint = customApiEndpoint;
       } else if (customApiEndpoint.endsWith('/v1')) {
@@ -86,7 +89,21 @@ class AIServiceSingleton {
       }
       apiKey = customApiKey;
       model = modelOverride || 'gpt-3.5-turbo';
+    } else if (isCustomBuild) {
+      // oyyy 分支的特定配置
+      const customEndpoint = import.meta.env.VITE_APP_API_ENDPOINT || '';
+      if (customEndpoint.endsWith('/v1/chat/completions')) {
+        endpoint = customEndpoint;
+      } else if (customEndpoint.endsWith('/v1')) {
+        endpoint = `${customEndpoint}/chat/completions`;
+      } else {
+        const cleanEndpoint = customEndpoint.replace(/\/$/, '');
+        endpoint = `${cleanEndpoint}/v1/chat/completions`;
+      }
+      apiKey = import.meta.env.VITE_APP_API_KEY;
+      model = modelOverride || import.meta.env.VITE_APP_DEFAULT_MODEL || 'default-model';
     } else {
+      // 默认生产环境，使用Cloudflare代理
       endpoint = '/ai';
       apiKey = undefined;
       model = modelOverride || 'default-model';
