@@ -3,6 +3,12 @@
    ========================================================================== */
 
 /// <reference types="vite/client" />
+/// <reference types="vite-plugin-pwa/client" />
+declare module '*.vue' {
+  import type { DefineComponent } from 'vue'
+  const component: DefineComponent<object, object, unknown>
+  export default component
+}
 
 // Vite 环境变量类型定义
 interface ImportMetaEnv {
@@ -162,6 +168,15 @@ declare module 'some-library-without-types' {
   export interface SomeInterface {
     property: number;
   }
+}
+
+// PWA
+declare module 'virtual:pwa-register' {
+  export function registerSW(options?: {
+    immediate?: boolean
+    onOfflineReady?: () => void
+    onNeedRefresh?: () => void
+  }): () => Promise<void>
 }
 
 export {};

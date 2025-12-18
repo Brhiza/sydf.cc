@@ -330,7 +330,6 @@ export interface DivinationResult {
 export interface SupplementaryInfo {
   gender?: '男' | '女';
   birthYear?: number;
-  model?: string;
   interpretationStyle?: '入门' | '专业';
   outputLength?: '精简' | '详细' | '超详细';
   dayPillar?: {
@@ -339,6 +338,7 @@ export interface SupplementaryInfo {
   };
   divinationMethod?: 'default' | 'random' | 'number'; // 起卦方式
   divinationNumber?: number; // 数字起卦的数字
+  date?: string; // YYYY-MM-DD for daily fortune
 }
 
 // 占卜请求

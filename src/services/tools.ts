@@ -67,7 +67,7 @@ export const getGanZhiForYearTool = {
  * 工具执行器映射
  * 当 AI 决定调用某个工具时，我们在这里查找并执行对应的本地函数
  */
-export const toolExecutors: { [key: string]: (args: any) => Promise<any> } = {
+export const toolExecutors: { [key: string]: (args: unknown) => Promise<string> } = {
   get_current_time_info: async () => {
     try {
       const timeInfo = LunarUtil.getCurrentTimeInfo();
@@ -77,9 +77,9 @@ export const toolExecutors: { [key: string]: (args: any) => Promise<any> } = {
       return JSON.stringify({ error: '获取当前时间信息失败' });
     }
   },
-  get_ganzhi_for_month: async (args: { year: number; month: number }) => {
+  get_ganzhi_for_month: async (args: unknown) => {
     try {
-      const { year, month } = args;
+      const { year, month } = args as { year: number; month: number };
       if (!year || !month) {
         return JSON.stringify({ error: '缺少年份或月份参数' });
       }
@@ -90,9 +90,9 @@ export const toolExecutors: { [key: string]: (args: any) => Promise<any> } = {
       return JSON.stringify({ error: '获取月份干支信息失败' });
     }
   },
-  get_ganzhi_for_year: async (args: { year: number }) => {
+  get_ganzhi_for_year: async (args: unknown) => {
     try {
-      const { year } = args;
+      const { year } = args as { year: number };
       if (!year) {
         return JSON.stringify({ error: '缺少年份参数' });
       }

@@ -109,40 +109,8 @@ watch(
 </script>
 
 <style scoped>
-.thinking-bubble {
-  background-color: var(--color-bg-tertiary);
-  border-radius: 12px;
-  padding: 12px 18px;
-  margin-top: var(--spacing-4);
-  border: 1px solid var(--color-border-light);
-}
+.thinking-bubble,
 .streaming-markdown-content :deep(details) {
-  background-color: var(--color-bg-tertiary);
-  border-radius: 12px;
-  padding: 12px 18px;
-  margin-top: var(--spacing-4);
-  border: 1px solid var(--color-border-light);
-}
-.streaming-markdown-content :deep(summary) {
-  cursor: pointer;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-}
-
-/* 为不同类型的思考标签添加样式 */
-.streaming-markdown-content :deep(.thinking-think) {
-  border-left: 4px solid #8b5cf6;
-}
-.streaming-markdown-content :deep(.thinking-thinking) {
-  border-left: 4px solid #8b5cf6;
-}
-.streaming-markdown-content :deep(.thinking-reason) {
-  border-left: 4px solid #10b981;
-}
-.streaming-markdown-content :deep(.thinking-analyze) {
-  border-left: 4px solid #f59e0b;
-}
-.streaming-markdown-content :deep(.thinking-reflect) {
-  border-left: 4px solid #ef4444;
+  display: none;
 }
 </style>

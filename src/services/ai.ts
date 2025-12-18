@@ -11,13 +11,26 @@ import {
 } from './tools';
 
 // OpenAI 兼容请求体接口
+interface AITool {
+  type: 'function';
+  function: {
+    name: string;
+    description: string;
+    parameters: {
+      type: 'object';
+      properties: Record<string, unknown>;
+      required?: string[];
+    };
+  };
+}
+
 interface OpenAIRequestBody {
   model: string;
   messages: ChatMessage[];
   max_tokens?: number;
   temperature?: number;
   stream: boolean;
-  tools?: any[];
+  tools?: AITool[];
   tool_choice?: 'auto' | 'none' | { type: 'function', function: { name: string } };
 }
 
@@ -56,7 +69,7 @@ class AIServiceSingleton {
     modelOverride?: string
   ): Promise<AIResponse> {
     const settingsStore = useSettingsStore();
-    const { useCustomApi, customApiEndpoint, customApiKey, selectedModel } = settingsStore.settings;
+    const { useCustomApi, customApiEndpoint, customApiKey } = settingsStore.settings;
     
     let endpoint: string;
     let apiKey: string | undefined;
@@ -72,11 +85,11 @@ class AIServiceSingleton {
         endpoint = `${cleanEndpoint}/v1/chat/completions`;
       }
       apiKey = customApiKey;
-      model = modelOverride || selectedModel || 'gpt-3.5-turbo';
+      model = modelOverride || 'gpt-3.5-turbo';
     } else {
-      endpoint = 'https://flow.ovo.gs/ai';
+      endpoint = '/ai';
       apiKey = undefined;
-      model = modelOverride || 'sydf/v1-250520';
+      model = modelOverride || 'default-model';
     }
 
     if (!Array.isArray(initialMessages)) {
@@ -176,32 +189,32 @@ class AIServiceSingleton {
       if (tool_calls && tool_calls.length > 0) {
         messages.push({ role: 'assistant', content: content || null, tool_calls });
 
-        for (const toolCall of tool_calls) {
-          const executor = toolExecutors[toolCall.function.name];
-          if (executor) {
-            try {
-              const args = JSON.parse(toolCall.function.arguments);
-              const result = await executor(args);
-              messages.push({
-                role: 'tool',
-                tool_call_id: toolCall.id,
-                content: result,
-              });
-            } catch (e) {
-              console.error(`Error executing tool ${toolCall.function.name}:`, e);
-              messages.push({
-                role: 'tool',
-                tool_call_id: toolCall.id,
-                content: JSON.stringify({ error: `Error executing tool: ${e}` }),
-              });
-            }
-          } else {
+        // 只处理第一个工具调用，以避免一次性执行多个工具
+        const toolCall = tool_calls[0];
+        const executor = toolExecutors[toolCall.function.name];
+        if (executor) {
+          try {
+            const args = JSON.parse(toolCall.function.arguments);
+            const result = await executor(args);
             messages.push({
               role: 'tool',
               tool_call_id: toolCall.id,
-              content: JSON.stringify({ error: `Tool not found: ${toolCall.function.name}` }),
+              content: result,
+            });
+          } catch (e) {
+            console.error(`Error executing tool ${toolCall.function.name}:`, e);
+            messages.push({
+              role: 'tool',
+              tool_call_id: toolCall.id,
+              content: JSON.stringify({ error: `Error executing tool: ${e}` }),
             });
           }
+        } else {
+          messages.push({
+            role: 'tool',
+            tool_call_id: toolCall.id,
+            content: JSON.stringify({ error: `Tool not found: ${toolCall.function.name}` }),
+          });
         }
       } else {
         return { ...responseResult, content: content || '' };
@@ -291,6 +304,9 @@ class AIServiceSingleton {
               }
               for (const toolCallChunk of delta.tool_calls) {
                 const index = toolCallChunk.index;
+                // 只处理和显示第一个工具调用
+                if (index > 0) continue;
+
                 if (!toolCalls[index]) {
                   toolCalls[index] = { id: '', type: 'function', function: { name: '', arguments: '' } };
                   if (toolCallChunk.id) toolCalls[index].id = toolCallChunk.id;
@@ -495,18 +511,8 @@ export async function generateTwoStageAIResponseWithSystem<T>(
       content: finalPrompt,
     };
     
-    // 根据API类型决定使用哪个模型
-    const settingsStore = useSettingsStore();
-    const { useCustomApi, selectedModel } = settingsStore.settings;
-    
-    let model: string;
-    if (useCustomApi) {
-      // 自定义API忽略补充信息中的模型，使用设置中的模型
-      model = selectedModel || 'gpt-3.5-turbo';
-    } else {
-      // 内置API使用补充信息中的模型或默认模型
-      model = supplementaryInfo?.model || 'sydf/v1-250520';
-    }
+    // 模型选择已移至后端，前端不再处理
+    const model = 'default-model'; // 占位符，实际模型由后端决定
     
     const response = await AIService.generateResponse([systemMessage, userMessage], signal, onChunk, model);
     

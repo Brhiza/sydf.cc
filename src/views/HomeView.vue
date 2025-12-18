@@ -105,7 +105,7 @@ function goToRandomDivination() {
       <p class="content-text">
         
       </p>
-      <div class="merit-box-link" v-if="!isCustomBuild">
+      <div v-if="!isCustomBuild" class="merit-box-link">
         <a href="/#/gongdebox">
           🙏 功德箱
         </a>

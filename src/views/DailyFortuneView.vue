@@ -10,8 +10,10 @@
       :loading-text="loadingTip"
       divination-type="daily"
       :show-inspiration="false"
+      :selected-date="selectedDate"
       @submit="handleSubmit"
       @clear="handleClear"
+      @update:selected-date="selectedDate = $event"
     />
 
     <!-- 结果页头操作 -->
@@ -22,7 +24,7 @@
     <!-- 运势结果 -->
     <div v-if="result" class="content-card">
       <div class="section-header">
-        <h2 class="section-title">今日运势</h2>
+        <h2 class="section-title">{{ pageTitle }}</h2>
       </div>
       
       <!-- AI加载状态 -->
@@ -124,7 +126,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { DailyLimitService } from '@/services/dailyLimitService';
 import { divinationService } from '@/services/divination';
@@ -137,6 +139,12 @@ import DailyResult from '@/components/divination/results/DailyResult.vue';
 const route = useRoute();
 
 // 响应式数据
+const getTodayDateString = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
+const selectedDate = ref(getTodayDateString());
 const isLoading = ref(false);
 const isAILoading = ref(false);
 const result = ref<DailyFortuneData | null>(null);
@@ -160,6 +168,13 @@ const loadingTips = [
 
 // 计算属性
 const hasAiResponse = computed(() => aiResponse.value !== '');
+const pageTitle = computed(() => {
+  if (selectedDate.value === getTodayDateString()) {
+    return '今日运势';
+  }
+  const date = new Date(selectedDate.value);
+  return `${date.getMonth() + 1}月${date.getDate()}日运势`;
+});
 const loadingTip = computed(() => {
   const randomIndex = Math.floor(Math.random() * loadingTips.length);
   return loadingTips[randomIndex];
@@ -209,28 +224,31 @@ const parsedDetailedAnalysis = computed(() => {
 // 初始化
 onMounted(() => {
   DailyLimitService.cleanupExpiredRecord();
-  checkTodayFortune();
 });
 
-// 检查今日运势
-function checkTodayFortune() {
-  const todayRecord = historyService.findTodayDailyFortune();
-  if (todayRecord) {
-    // 如果找到今天的记录，直接显示
-    const recordData = todayRecord.result.data as DailyFortuneData;
+watch(selectedDate, (date) => {
+  if (date) checkFortuneForDate(date);
+}, { immediate: true });
+
+// 检查指定日期的运势
+function checkFortuneForDate(date: string) {
+  const record = historyService.getDailyFortuneForDate(date);
+  if (record) {
+    const recordData = record.result.data as DailyFortuneData;
     
     result.value = recordData;
-    aiResponse.value = todayRecord.result.aiResponse || '';
-    conversationHistory.value = todayRecord.conversationHistory || [];
-    isFromCache.value = true; // 标记为缓存结果
+    aiResponse.value = record.result.aiResponse || '';
+    conversationHistory.value = record.conversationHistory || [];
+    isFromCache.value = true;
     
-    // 确保标记为已使用
-    if (!DailyLimitService.hasUsedToday()) {
+    if (date === getTodayDateString() && !DailyLimitService.hasUsedToday()) {
       DailyLimitService.markAsUsed();
     }
   } else {
-    isFromCache.value = false; // 重置缓存状态
+    result.value = null;
+    aiResponse.value = '';
     conversationHistory.value = [];
+    isFromCache.value = false;
   }
 }
 
@@ -244,16 +262,17 @@ function handleSubmit() {
 async function startDailyFortune(forceRegenerateAI = false) {
   if (isLoading.value) return;
   
-  // 首先检查是否已经有今天的运势记录
-  const todayRecord = historyService.findTodayDailyFortune();
-  if (todayRecord && !forceRegenerateAI) {
-    const recordData = todayRecord.result.data as DailyFortuneData;
+  // 首先检查是否已经有当天的运势记录
+  const date = selectedDate.value;
+  const record = historyService.getDailyFortuneForDate(date);
+
+  if (record && !forceRegenerateAI) {
+    const recordData = record.result.data as DailyFortuneData;
     result.value = recordData;
-    aiResponse.value = todayRecord.result.aiResponse || '';
+    aiResponse.value = record.result.aiResponse || '';
     isFromCache.value = true;
     
-    // 确保标记为已使用
-    if (!DailyLimitService.hasUsedToday()) {
+    if (date === getTodayDateString() && !DailyLimitService.hasUsedToday()) {
       DailyLimitService.markAsUsed();
     }
     
@@ -261,8 +280,8 @@ async function startDailyFortune(forceRegenerateAI = false) {
   }
   
   // 如果是强制重新生成AI，且已有记录，则使用现有数据
-  if (todayRecord && forceRegenerateAI) {
-    const recordData = todayRecord.result.data as DailyFortuneData;
+  if (record && forceRegenerateAI) {
+    const recordData = record.result.data as DailyFortuneData;
     result.value = recordData;
     isFromCache.value = true;
     
@@ -276,8 +295,8 @@ async function startDailyFortune(forceRegenerateAI = false) {
       await divinationService.startDivination(
         {
           type: 'daily',
-          question: '请为我分析今日运势',
-          supplementaryInfo: {}
+          question: `请为我分析${date}的运势`,
+          supplementaryInfo: { date }
         },
         {
           onInitialResult: () => {
@@ -293,8 +312,8 @@ async function startDailyFortune(forceRegenerateAI = false) {
             isLoading.value = false; // 整体流程完成
             
             // 更新历史记录中的AI响应
-            todayRecord.result.aiResponse = finalResult.aiResponse || '';
-            historyService.updateRecord(todayRecord.id, todayRecord);
+            record.result.aiResponse = finalResult.aiResponse || '';
+            historyService.updateRecord(record.id, record);
           },
           onAIError: (errorMessage) => {
             isAILoading.value = false;
@@ -326,8 +345,8 @@ async function startDailyFortune(forceRegenerateAI = false) {
     await divinationService.startDivination(
       {
         type: 'daily',
-        question: '请为我分析今日运势',
-        supplementaryInfo: {}
+        question: `请为我分析${date}的运势`,
+        supplementaryInfo: { date }
       },
       {
         onInitialResult: (divinationResult) => {
@@ -344,7 +363,9 @@ async function startDailyFortune(forceRegenerateAI = false) {
           isLoading.value = false; // 整体流程完成
           
           // 标记已使用
-          DailyLimitService.markAsUsed();
+          if (date === getTodayDateString()) {
+            DailyLimitService.markAsUsed();
+          }
         },
         onAIError: (errorMessage) => {
           isAILoading.value = false;
@@ -368,15 +389,17 @@ async function startDailyFortune(forceRegenerateAI = false) {
 
 // 删除今日运势（开发模式）
 async function deleteTodayFortune() {
-  if (!confirm('确定要删除今日运势吗？此操作将清除所有相关数据，不可撤销。')) {
+  const date = selectedDate.value;
+  const dateLabel = date === getTodayDateString() ? '今日' : `${new Date(date).getMonth() + 1}月${new Date(date).getDate()}日`;
+  if (!confirm(`确定要删除${dateLabel}运势吗？此操作将清除所有相关数据，不可撤销。`)) {
     return;
   }
   
   try {
-    // 1. 查找并删除所有今日的历史记录
-    const todayRecord = historyService.findTodayDailyFortune();
-    if (todayRecord) {
-      await historyService.deleteRecord(todayRecord.id);
+    // 1. 查找并删除所有指定日期的历史记录
+    const record = historyService.getDailyFortuneForDate(date);
+    if (record) {
+      await historyService.deleteRecord(record.id);
     }
     
     // 2. 清除所有本地存储相关的数据
@@ -384,10 +407,15 @@ async function deleteTodayFortune() {
       'daily_fortune_limit',
       'sydf-history',
       'daily-fortune-cache',
-      'today-fortune-result',
-      'fortune-cache-' + new Date().toISOString().split('T')[0]
+      'today-fortune-result', // This might be legacy, but good to clear
+      `fortune-cache-${date}`
     ];
     
+    // Also clear today's limit if deleting today's fortune
+    if (date === getTodayDateString()) {
+      keysToRemove.push('daily_fortune_limit');
+    }
+
     keysToRemove.forEach(key => {
       localStorage.removeItem(key);
     });
@@ -407,20 +435,22 @@ async function deleteTodayFortune() {
     isLoading.value = false;
     isAILoading.value = false;
     
-    // 5. 重置每日限制服务
-    DailyLimitService.resetRecord();
+    // 5. 重置每日限制服务 (only if it's today)
+    if (date === getTodayDateString()) {
+      DailyLimitService.resetRecord();
+    }
     
     // 6. 强制刷新页面状态
     // 立即重新检查状态
     await new Promise(resolve => setTimeout(resolve, 50));
     
     // 重新检查今日运势状态
-    checkTodayFortune();
+    checkFortuneForDate(date);
     
     // 7. 强制触发响应式更新
     await new Promise(resolve => setTimeout(resolve, 100));
     
-    alert('今日运势已彻底删除，页面已重置');
+    alert(`${dateLabel}运势已彻底删除，页面已重置`);
   } catch (error) {
     alert('删除失败，请稍后重试');
   }
@@ -487,11 +517,11 @@ function handleSendFollowUp() {
   followUpQuestion.value = ''; // Clear input immediately
 
   // 查找今日运势的历史记录ID
-  const todayRecord = historyService.findTodayDailyFortune();
+  const record = historyService.getDailyFortuneForDate(selectedDate.value);
   let recordId = '';
   
-  if (todayRecord) {
-    recordId = todayRecord.id;
+  if (record) {
+    recordId = record.id;
   } else {
     // 如果没有找到历史记录，说明记录可能还没有保存，需要等待或创建
     error.value = '占卜记录尚未保存完成，请稍后再试';

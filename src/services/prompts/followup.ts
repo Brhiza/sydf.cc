@@ -3,11 +3,12 @@
  * 重用原始占卜的完整数据，确保追问的准确性和一致性
  */
 import { generatePrompt } from './index';
+import type { DivinationData, DivinationType } from '@/types/divination';
 
 export interface FollowUpContext {
   originalQuestion: string;
   originalResponse: string;
-  divinationType: string;
+  divinationType: DivinationType;
   followUpQuestion: string;
   currentTime: string;
   timeInfo?: {
@@ -16,7 +17,7 @@ export interface FollowUpContext {
     ganzhi: string;
     jieqi: string;
   };
-  originalData?: any;
+  originalData?: DivinationData;
   supplementaryInfo?: {
     gender?: '男' | '女';
     birthYear?: number;
@@ -89,7 +90,7 @@ export async function generateFollowUpPrompt(context: FollowUpContext): Promise<
   if (originalData) {
     try {
       // 使用静态导入的提示词生成器
-      basePrompt = await generatePrompt(divinationType as any, followUpQuestion, originalData, supplementaryInfo || undefined);
+      basePrompt = await generatePrompt(divinationType, followUpQuestion, originalData, supplementaryInfo || undefined);
     } catch (error) {
       console.error('生成基础提示词失败:', error);
     }

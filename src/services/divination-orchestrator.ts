@@ -55,9 +55,9 @@ export class DivinationOrchestrator {
       // 5. 立即保存初始记录到历史，确保追问时能找到
       let finalQuestion = question;
       if (type === 'daily') {
-        const today = new Date();
-        const month = today.getMonth() + 1;
-        const day = today.getDate();
+        const date = supplementaryInfo?.date ? new Date(supplementaryInfo.date) : new Date();
+        const month = date.getMonth() + 1;
+        const day = date.getDate();
         finalQuestion = `${month} 月 ${day} 日运势`;
       }
       

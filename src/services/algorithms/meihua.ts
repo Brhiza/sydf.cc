@@ -13,10 +13,10 @@
  *    - 用为事之始，互为事之中，变为事之终。
  */
 
-import { hexagramsData, trigramsByIndex } from '../../utils/hexagram-data.ts';
-import { dizhi } from '../../config/divination-data.ts';
-import { MeihuaHelpers } from '../../utils/divination-helpers.ts';
-import { getDivinationTime } from '../../utils/timeManager.ts';
+import { hexagramsData, trigramsByIndex } from '../../utils/hexagram-data';
+import { dizhi } from '../../config/divination-data';
+import { MeihuaHelpers } from '../../utils/divination-helpers';
+import { getDivinationTime } from '../../utils/timeManager';
 
 const hexagrams = hexagramsData.map((hex) => ({
   number: hex.id,
@@ -80,7 +80,7 @@ export function generateMeihua(
       movingYaoIndex = (divinationNumber % 6) || 6;
       calculation = { method: '数字起卦法', number: divinationNumber };
       break;
-    default:
+    default: {
       const yearZhi = ganzhi.year.substring(1, 2);
       const month = lunar.monthNumber;
       const day = lunar.dayNumber;
@@ -103,6 +103,7 @@ export function generateMeihua(
         movingYaoIndex,
       };
       break;
+    }
   }
 
   // 3. 确定主卦、互卦、变卦

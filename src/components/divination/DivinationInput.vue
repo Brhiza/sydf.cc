@@ -9,7 +9,7 @@
     />
     <h2 class="card-title">{{ computedTitle }}</h2>
     <p v-if="!isCustomBuild" class="card-description">{{ computedDescription }}</p>
-
+    
     <!-- 塔罗牌阵选择 -->
     <TarotSpreadSelector
       v-if="isTarot"
@@ -56,6 +56,12 @@
           {{ showSupplementaryInfo ? '收起' : supplementaryInfoToggleText }}
           <span class="arrow" :class="{ down: !showSupplementaryInfo, up: showSupplementaryInfo }"></span>
         </a>
+
+        <!-- 日期选择 -->
+        <DatePicker
+          v-if="divinationType === 'daily'"
+          v-model="localDate"
+        />
 
         <!-- 起卦方式选择 -->
         <div v-if="showDivinationMethodSelector" class="divination-method-selector">
@@ -152,13 +158,6 @@
               </label>
             </div>
           </div>
-          <div class="form-group" style="align-items: flex-start">
-            <label for="model" class="form-label" style="padding-top: 8px">选择模型:</label>
-            <div class="input-with-remark">
-              <CustomSelect v-model="selectedModel" :options="models" />
-              <p class="model-remark">不同的模型会影响解读结果的风格和侧重点。</p>
-            </div>
-          </div>
           <div class="form-group form-actions">
             <button class="reset-button" @click="resetSupplementaryInfo">重置</button>
           </div>
@@ -236,9 +235,11 @@ import { useSsgw } from '@/composables/useSsgw';
 import { useSupplementaryInfo } from '@/composables/useSupplementaryInfo';
 import { tarotSpreads } from '@/utils/tarot';
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
-const isCustomBuild = computed(() => import.meta.env.VITE_APP_BUILD_TARGET === 'CUSTOM');
 import { useRoute, useRouter } from 'vue-router';
 import CustomSelect from '@/components/common/CustomSelect.vue';
+
+const isCustomBuild = computed(() => import.meta.env.VITE_APP_BUILD_TARGET === 'CUSTOM');
+import DatePicker from '@/components/common/DatePicker.vue';
 import InspirationPanel from './InspirationPanel.vue';
 import TarotSpreadSelector from './TarotSpreadSelector.vue';
 
@@ -250,6 +251,7 @@ interface Props {
   loadingText?: string;
   loading?: boolean;
   modelValue?: string;
+  selectedDate?: string; // YYYY-MM-DD
   examples?: (QuestionExample | string)[];
   showInspiration?: boolean;
   hideAfterSubmit?: boolean; // 提交后是否隐藏问题灵感
@@ -258,7 +260,8 @@ interface Props {
 
 interface Emits {
   (e: 'update:modelValue', value: string): void;
-  (e: 'submit', payload: { question: string; signNumber?: number; supplementaryInfo?: SupplementaryInfo | undefined }): void;
+  (e: 'update:selectedDate', value: string): void;
+  (e: 'submit', payload: { question: string; signNumber?: number; supplementaryInfo?: SupplementaryInfo | undefined; date?: string }): void;
   (e: 'typeChange', type: string): void;
   (e: 'clear'): void;
 }
@@ -269,6 +272,7 @@ const props = withDefaults(defineProps<Props>(), {
   loadingText: 'AI思考中',
   loading: false,
   modelValue: '',
+  selectedDate: '',
   examples: () => [],
   showInspiration: true,
   hideAfterSubmit: true,
@@ -280,6 +284,7 @@ const route = useRoute();
 useRouter();
 
 const question = ref(props.modelValue);
+const localDate = ref(props.selectedDate);
 const tarotType = ref(getTarotTypeFromRoute());
 const selectedSpread = ref('single'); // 默认选择单牌
 const submitted = ref(false); // 是否已提交
@@ -289,14 +294,12 @@ const {
   showSupplementaryInfo,
   gender,
   birthYear,
-  selectedModel,
   interpretationStyle,
   outputLength,
   dayPillarHeavenlyStem,
   dayPillarEarthlyBranch,
   heavenlyStems,
   earthlyBranches,
-  models,
   supplementaryInfoToggleText,
   getSupplementaryInfo,
   resetSupplementaryInfo,
@@ -401,14 +404,20 @@ function getTarotTypeFromRoute(): string {
 // 监听外部值变化
 watch(
   () => props.modelValue,
-  (newValue) => {
+  (newValue: string) => {
     question.value = newValue;
   }
 );
 
 // 监听内部值变化
-watch(question, (newValue) => {
+watch(question, (newValue: string) => {
   emit('update:modelValue', newValue);
+});
+
+watch(localDate, (newDate: string) => {
+  if (newDate) {
+    emit('update:selectedDate', newDate);
+  }
 });
 
 // 重置问题内容
@@ -420,7 +429,7 @@ function resetQuestion() {
 // 监听占卜类型变化
 watch(
   () => props.divinationType,
-  (newType, oldType) => {
+  (newType: string, oldType: string) => {
     if (oldType && newType !== oldType) {
             // 重置状态
       resetQuestion();
@@ -442,7 +451,7 @@ watch(
 );
 
 function handleSubmit() {
-  const supplementaryInfo = getSupplementaryInfo();
+  const supplementaryInfo = getSupplementaryInfo({ date: localDate.value });
   
   // 三山国王灵签允许空问题
   if (props.divinationType === 'ssgw' || route.path.includes('/ssgw')) {
@@ -469,6 +478,7 @@ function handleSubmit() {
     emit('submit', {
       question: '请为我分析今日运势',
       supplementaryInfo,
+      date: localDate.value,
     });
     return;
   }
@@ -516,7 +526,7 @@ function handleDirectSubmit(questionText: string) {
   submitted.value = true;
 
   // 直接提交问题
-  const supplementaryInfo = getSupplementaryInfo();
+  const supplementaryInfo = getSupplementaryInfo({ date: localDate.value });
   emit('submit', {
     question: questionText,
     supplementaryInfo,

@@ -240,7 +240,7 @@ function addGanzhiGuidance(prompt: string, divinationType: string, timeInfo?: st
   if (ganzhiTypes.includes(divinationType) && timeInfo) {
     return prompt + `
 
-请基于上述准确的农历干支信息进行占卜分析。在解读时，请将干支五行与占卜结果结合分析，考虑时间因素对结果的影响。如需推算其他时间的干支，请严格按照传统历法规则进行计算。`;
+请基于上述准确的农历干支信息进行占卜分析。`;
   }
   
   return prompt;

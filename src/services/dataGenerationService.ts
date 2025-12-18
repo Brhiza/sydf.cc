@@ -38,7 +38,7 @@ export class DataGenerationService {
         const meihuaData = generateMeihua(undefined, method, number);
         // 确保 calculation 属性符合 MeihuaCalculation 接口
         if (meihuaData.calculation) {
-          (meihuaData.calculation as any).method = (meihuaData.calculation as any).method || 'unknown';
+          meihuaData.calculation.method = meihuaData.calculation.method || 'unknown';
         }
         return meihuaData;
       }
@@ -79,7 +79,8 @@ export class DataGenerationService {
         return sign;
       }
       case 'daily': {
-        return await calculateDailyFortune();
+        const date = supplementaryInfo?.date ? new Date(supplementaryInfo.date) : undefined;
+        return calculateDailyFortune(date);
       }
       default:
         throw new Error(`不支持的占卜类型: ${type}`);
