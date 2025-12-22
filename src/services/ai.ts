@@ -69,7 +69,7 @@ class AIServiceSingleton {
     modelOverride?: string
   ): Promise<AIResponse> {
     const settingsStore = useSettingsStore();
-    const { useCustomApi, customApiEndpoint, customApiKey } = settingsStore.settings;
+    const { useCustomApi, customApiEndpoint, customApiKey, selectedModel } = settingsStore.settings;
     
     let endpoint: string;
     let apiKey: string | undefined;
@@ -85,7 +85,7 @@ class AIServiceSingleton {
         endpoint = `${cleanEndpoint}/v1/chat/completions`;
       }
       apiKey = customApiKey;
-      model = modelOverride || 'gpt-3.5-turbo';
+      model = modelOverride || selectedModel;
     } else {
       // 统一使用 /api/ai 作为所有版本的标准API路径
       endpoint = '/api/ai';
@@ -116,8 +116,8 @@ class AIServiceSingleton {
         tool_choice: 'auto',
       };
 
-      const maxRetries = 5;
-      const timeout = 50000;
+      const maxRetries = 3;
+      const timeout = 30000;
       let lastError = null;
       
       let responseResult: AIResponse | null = null;
@@ -168,7 +168,7 @@ class AIServiceSingleton {
             throw error;
           }
           if (attempt < maxRetries) {
-            const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000);
+            const delay = Math.min(500 * Math.pow(2, attempt - 1), 2000);
             console.debug(`AI服务调用失败，后台自动重试 (${attempt}/${maxRetries})，${delay}ms后重试`);
             await new Promise(resolve => setTimeout(resolve, delay));
           } else {
@@ -266,6 +266,9 @@ class AIServiceSingleton {
     let content: string | null = null;
     const toolCalls: ToolCall[] = [];
     let inThinkingState = false;
+    let contentBuffer = '';
+    let lastFlushTime = Date.now();
+    const FLUSH_INTERVAL = 50; // 50ms刷新间隔
 
     try {
       while (true) {
@@ -277,7 +280,9 @@ class AIServiceSingleton {
         const lines = buffer.split('\n');
         buffer = lines.pop() || '';
 
-        for (const line of lines) {
+        // 批量处理lines，减少循环次数
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
           if (line.trim() === '' || !line.startsWith('data: ')) continue;
 
           const data = line.slice(6).trim();
@@ -292,16 +297,24 @@ class AIServiceSingleton {
             if (delta.content) {
               if (inThinkingState) {
                 inThinkingState = false;
-                onChunk('</think>');
+                if (contentBuffer) {
+                  onChunk(contentBuffer);
+                  contentBuffer = '';
+                }
+                onChunk('');
               }
-              onChunk(delta.content);
+              contentBuffer += delta.content;
               content = (content || '') + delta.content;
             }
 
             if (delta.tool_calls) {
               if (!inThinkingState) {
                 inThinkingState = true;
-                onChunk('<think>');
+                if (contentBuffer) {
+                  onChunk(contentBuffer);
+                  contentBuffer = '';
+                }
+                onChunk('');
               }
               for (const toolCallChunk of delta.tool_calls) {
                 const index = toolCallChunk.index;
@@ -313,7 +326,7 @@ class AIServiceSingleton {
                   if (toolCallChunk.id) toolCalls[index].id = toolCallChunk.id;
                   if (toolCallChunk.function?.name) {
                     toolCalls[index].function.name = toolCallChunk.function.name;
-                    onChunk(`\n调用工具: ${toolCallChunk.function.name}...`);
+                    contentBuffer += `\n调用工具: ${toolCallChunk.function.name}...`;
                   }
                 }
                 if (toolCallChunk.function?.arguments) {
@@ -327,21 +340,38 @@ class AIServiceSingleton {
             if (reasoningChunk) {
               if (isThinking && !inThinkingState) {
                 inThinkingState = true;
-                onChunk('<think>');
+                if (contentBuffer) {
+                  onChunk(contentBuffer);
+                  contentBuffer = '';
+                }
+                onChunk('');
               }
-              onChunk(reasoningChunk);
+              contentBuffer += reasoningChunk;
+            }
+
+            // 定期刷新缓冲区，提升响应速度
+            const now = Date.now();
+            if (now - lastFlushTime > FLUSH_INTERVAL && contentBuffer) {
+              onChunk(contentBuffer);
+              contentBuffer = '';
+              lastFlushTime = now;
             }
           } catch (e) {
             console.debug('跳过非 JSON 数据:', data, e);
           }
         }
       }
+      
+      // 确保剩余缓冲区内容被刷新
+      if (contentBuffer) {
+        onChunk(contentBuffer);
+      }
     } finally {
       reader.releaseLock();
     }
 
     if (inThinkingState) {
-      onChunk('</think>');
+      onChunk('');
     }
 
     const result: AIResponse = { content };
@@ -512,10 +542,7 @@ export async function generateTwoStageAIResponseWithSystem<T>(
       content: finalPrompt,
     };
     
-    // 模型选择已移至后端，前端不再处理
-    const model = 'default-model'; // 占位符，实际模型由后端决定
-    
-    const response = await AIService.generateResponse([systemMessage, userMessage], signal, onChunk, model);
+    const response = await AIService.generateResponse([systemMessage, userMessage], signal, onChunk);
     
     return response;
   } catch (error) {
