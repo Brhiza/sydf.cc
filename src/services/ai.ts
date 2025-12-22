@@ -50,6 +50,7 @@ export interface AIResponse {
  */
 class AIServiceSingleton {
   private static instance: AIServiceSingleton;
+  private pendingRequests: Map<string, Promise<AIResponse>> = new Map();
 
   private constructor() {
     // 构造函数不需要做任何特殊处理
@@ -99,13 +100,40 @@ class AIServiceSingleton {
     }
 
     const messages = [...initialMessages];
+    
+    // 请求去重：如果相同的请求正在进行中，直接返回该Promise
+    const requestKey = `${endpoint}:${model}:${JSON.stringify(messages)}`;
+    if (this.pendingRequests.has(requestKey) && !onChunk) {
+      return this.pendingRequests.get(requestKey)!;
+    }
+
+    const requestPromise = this.executeRequest(messages, endpoint, apiKey, model, signal, onChunk);
+    
+    if (!onChunk) {
+      this.pendingRequests.set(requestKey, requestPromise);
+      requestPromise.finally(() => {
+        this.pendingRequests.delete(requestKey);
+      });
+    }
+    
+    return requestPromise;
+  }
+
+  private async executeRequest(
+    messages: ChatMessage[],
+    endpoint: string,
+    apiKey: string | undefined,
+    model: string,
+    signal?: AbortSignal,
+    onChunk?: (chunk: string) => void
+  ): Promise<AIResponse> {
     const availableTools = [
       getCurrentTimeInfoTool,
       getGanZhiForMonthTool,
       getGanZhiForYearTool,
     ];
 
-    const maxToolCalls = 5;
+    const maxToolCalls = 3;
     for (let i = 0; i < maxToolCalls; i++) {
       const body: OpenAIRequestBody = {
         model: model,
@@ -268,7 +296,7 @@ class AIServiceSingleton {
     let inThinkingState = false;
     let contentBuffer = '';
     let lastFlushTime = Date.now();
-    const FLUSH_INTERVAL = 50; // 50ms刷新间隔
+    const FLUSH_INTERVAL = 16; // 16ms刷新间隔（60fps）
 
     try {
       while (true) {
