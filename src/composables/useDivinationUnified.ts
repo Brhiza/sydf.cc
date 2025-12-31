@@ -29,6 +29,8 @@ export function useDivinationUnified(props: { divinationType: DivinationType }) 
   const conversationHistory = ref<ChatMessage[]>([]);
   const followUpQuestion = ref('');
   const isFollowUpLoading = ref(false);
+  // 用于追踪当前活跃的请求会话ID，解决"上一条结果显示在当前"的问题，同时支持后台生成
+  const currentSessionId = ref(0);
 
   // 计算属性
   const hasResult = computed(() => result.value !== null);
@@ -58,6 +60,13 @@ export function useDivinationUnified(props: { divinationType: DivinationType }) 
   ) {
     if (isLoading.value || !question.value.trim()) return;
 
+    // 增加会话ID，标记新的请求开始
+    currentSessionId.value++;
+    const thisSessionId = currentSessionId.value;
+
+    // 注意：不再中止上一次的请求(abortController)，让其在后台继续完成并保存到历史记录
+    // 仅更新当前UI引用的 abortController 为新的，以便用户点击"取消"时只取消当前任务
+    
     // 重置状态
     isLoading.value = true;
     isAiLoading.value = true;
@@ -66,6 +75,7 @@ export function useDivinationUnified(props: { divinationType: DivinationType }) 
     aiResponse.value = '';
     isCancelled.value = false;
     abortController.value = new AbortController();
+    // 强制清空对话历史，防止上一次的记录残留
     conversationHistory.value = [];
     
     const { supplementaryInfo, ...restOptions } = options;
@@ -82,24 +92,29 @@ export function useDivinationUnified(props: { divinationType: DivinationType }) 
 
     performDivination(request, {
       onInitialResult: (initialResult: DivinationResult) => {
+        if (thisSessionId !== currentSessionId.value) return;
         result.value = initialResult;
         isLoading.value = false; // 允许UI立即渲染
       },
       onAIChunk: (chunk) => {
+        if (thisSessionId !== currentSessionId.value) return;
         aiResponse.value += chunk;
       },
       onAIComplete: (finalResult: DivinationResult) => {
+        if (thisSessionId !== currentSessionId.value) return;
         isAiLoading.value = false;
         if (result.value) {
           result.value.aiResponse = finalResult.aiResponse || '';
         }
       },
       onAIError: (errorMessage: string) => {
+        if (thisSessionId !== currentSessionId.value) return;
         error.value = errorMessage;
         isAiLoading.value = false;
         isLoading.value = false;
       },
       onConversationUpdate: (history: ChatMessage[]) => {
+        if (thisSessionId !== currentSessionId.value) return;
         conversationHistory.value = history;
       },
     });
@@ -109,11 +124,26 @@ export function useDivinationUnified(props: { divinationType: DivinationType }) 
    * 清除结果
    */
   function clearResult() {
+    // 用户显式清除时，可以选择是否中止后台生成。
+    // 为了节省资源，显式"返回/清除"操作仍然建议中止当前正在进行的任务
+    if (abortController.value) {
+      abortController.value.abort();
+      abortController.value = null;
+    }
+    
+    // 增加会话ID，确保任何残留的后台回调不会更新UI
+    currentSessionId.value++;
+
+    isAiLoading.value = false;
+    isFollowUpLoading.value = false;
+    isCancelled.value = false;
+
     result.value = null;
     aiResponse.value = '';
     error.value = null;
     question.value = '';
     viewingHistory.value = false;
+    // 强制清空对话历史
     conversationHistory.value = [];
     followUpQuestion.value = '';
   }

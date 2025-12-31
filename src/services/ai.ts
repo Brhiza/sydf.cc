@@ -69,6 +69,11 @@ class AIServiceSingleton {
     onChunk?: (chunk: string) => void,
     modelOverride?: string
   ): Promise<AIResponse> {
+    // Check if signal is already aborted
+    if (signal?.aborted) {
+      return Promise.reject(new DOMException('Aborted', 'AbortError'));
+    }
+
     const settingsStore = useSettingsStore();
     const { useCustomApi, customApiEndpoint, customApiKey, selectedModel } = settingsStore.settings;
     
@@ -201,6 +206,7 @@ class AIServiceSingleton {
             await new Promise(resolve => setTimeout(resolve, delay));
           } else {
             console.error(`AI服务调用失败，所有重试均已用尽:`, lastError);
+            const { useCustomApi } = useSettingsStore().settings;
             if (!useCustomApi) {
               return { content: '抱歉，AI服务暂时不可用，请稍后重试。' };
             }
