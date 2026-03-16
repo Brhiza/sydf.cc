@@ -4,7 +4,7 @@
 
 ## 1. 基础信息
 
-- Base URL：`https://<你的域名>`
+- Base URL（服务端/占卜项目）：`https://sydf.cc`
 - API 版本前缀：`/api/v1`
 - 时区：后端固定按 **北京时间（UTC+8）** 进行排盘/干支/节气相关计算
 - 返回语言：解读内容固定为 **简体中文**
@@ -26,6 +26,8 @@
 
 - `xushuo.cc`
 - `*.xushuo.cc`
+
+说明：本 API 部署在 `sydf.cc`，用于供 `xushuo.cc` 项目跨域调用（已按上述规则做白名单控制）。
 
 不满足规则的 `Origin` 将不会获得 CORS 许可（浏览器会拦截跨域读取）。
 
@@ -172,7 +174,7 @@ data: [DONE]
 六爻（非流式）：
 
 ```bash
-curl -s https://<你的域名>/api/v1/divination \
+curl -s https://sydf.cc/api/v1/divination \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <DEV_API_KEY>" \
   -d '{"type":"liuyao","question":"我最近换工作是否顺利？","stream":false,"options":{"method":"default","supplementaryInfo":{"outputLength":"详细"}}}'
@@ -181,7 +183,7 @@ curl -s https://<你的域名>/api/v1/divination \
 今日运势（指定日期，非流式）：
 
 ```bash
-curl -s https://<你的域名>/api/v1/divination \
+curl -s https://sydf.cc/api/v1/divination \
   -H "Content-Type: application/json" \
   -H "X-Api-Key: <DEV_API_KEY>" \
   -d '{"type":"daily","stream":false,"options":{"date":"2026-03-16"}}'
@@ -190,9 +192,8 @@ curl -s https://<你的域名>/api/v1/divination \
 塔罗（三牌阵，流式）：
 
 ```bash
-curl -N https://<你的域名>/api/v1/divination \
+curl -N https://sydf.cc/api/v1/divination \
   -H "Content-Type: application/json" \
   -H "X-Api-Key: <DEV_API_KEY>" \
   -d '{"type":"tarot","question":"我和TA的关系接下来会如何发展？","stream":true,"options":{"spreadType":"three"}}'
 ```
-
