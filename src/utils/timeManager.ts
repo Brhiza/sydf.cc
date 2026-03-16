@@ -23,11 +23,66 @@ export interface DivinationTime {
  */
 export class TimeManager {
   /**
+   * 时区偏移覆盖（单位：分钟，正数表示 UTC+）
+   * - null：不覆盖，使用运行环境本地时区
+   * - 例如：北京时间为 480
+   */
+  private static timezoneOffsetMinutesOverride: number | null = null;
+
+  /**
+   * 设置时区偏移覆盖（用于服务端/边缘环境固定时区）
+   */
+  static setTimezoneOffsetMinutesOverride(offsetMinutes: number | null): void {
+    this.timezoneOffsetMinutesOverride = offsetMinutes;
+  }
+
+  /**
+   * 获取目标时区偏移（分钟）
+   */
+  private static getTimezoneOffsetMinutes(date: Date): number {
+    const override = this.timezoneOffsetMinutesOverride;
+    if (typeof override === 'number' && Number.isFinite(override)) {
+      return override;
+    }
+    // Date#getTimezoneOffset 返回“本地到UTC需要加多少分钟”，因此本地偏移 = -getTimezoneOffset
+    return -date.getTimezoneOffset();
+  }
+
+  /**
+   * 在指定时区偏移下提取年月日时分（不改变原始时间戳）
+   */
+  private static getDatePartsInOffset(date: Date, offsetMinutes: number): {
+    year: number;
+    month: number;
+    day: number;
+    hour: number;
+    minute: number;
+  } {
+    const shifted = new Date(date.getTime() + offsetMinutes * 60 * 1000);
+    return {
+      year: shifted.getUTCFullYear(),
+      month: shifted.getUTCMonth() + 1,
+      day: shifted.getUTCDate(),
+      hour: shifted.getUTCHours(),
+      minute: shifted.getUTCMinutes(),
+    };
+  }
+
+  /**
    * 获取占卜用的统一时间数据
    * @param customTime 自定义时间（可选）
    * @returns 统一的时间数据
    */
   static getDivinationTime(customTime?: Date): DivinationTime {
+    // 当启用时区覆盖时，不再依赖 LunarUtil.getCurrentTimeInfo() 的运行时本地时区
+    if (!customTime && this.timezoneOffsetMinutesOverride !== null) {
+      const now = new Date();
+      const timeInfo = this.getTimeInfo(now);
+      const ganzhi = this.getGanZhi(now);
+      const timestamp = now.getTime();
+      return { timeInfo, ganzhi, timestamp };
+    }
+
     const timeInfo = customTime ? this.getTimeInfo(customTime) : getCurrentTimeInfo();
     const ganzhi = customTime ? this.getGanZhi(customTime) : getCurrentGanZhi();
     const timestamp = customTime ? customTime.getTime() : Date.now();
@@ -108,11 +163,14 @@ export class TimeManager {
    * 获取指定时间的干支信息
    */
   private static getGanZhi(date: Date): GanZhiInfo {
+    const offsetMinutes = this.getTimezoneOffsetMinutes(date);
+    const parts = this.getDatePartsInOffset(date, offsetMinutes);
+
     // 复用现有逻辑，但移除错误处理
-    const solar = SolarDay.fromYmd(date.getFullYear(), date.getMonth() + 1, date.getDate());
+    const solar = SolarDay.fromYmd(parts.year, parts.month, parts.day);
     const lunar = solar.getLunarDay();
     
-    const currentHour = date.getHours();
+    const currentHour = parts.hour;
     const hours = lunar.getHours();
     const hourIndex = this.calculateHourIndex(currentHour);
     const currentLunarHour = hours[hourIndex] || hours[0];
@@ -129,12 +187,15 @@ export class TimeManager {
    * 获取指定时间的完整信息
    */
   private static getTimeInfo(date: Date): TimeInfo {
+    const offsetMinutes = this.getTimezoneOffsetMinutes(date);
+    const parts = this.getDatePartsInOffset(date, offsetMinutes);
+
     // 复用现有逻辑，但移除错误处理
-    const solar = SolarDay.fromYmd(date.getFullYear(), date.getMonth() + 1, date.getDate());
+    const solar = SolarDay.fromYmd(parts.year, parts.month, parts.day);
     const lunar = solar.getLunarDay();
     const jieQi = solar.getTerm();
 
-    const currentHour = date.getHours();
+    const currentHour = parts.hour;
     const hours = lunar.getHours();
     const hourIndex = this.calculateHourIndex(currentHour);
     const currentLunarHour = hours[hourIndex] || hours[0];
@@ -144,8 +205,8 @@ export class TimeManager {
         year: solar.getYear(),
         month: solar.getMonth(),
         day: solar.getDay(),
-        hour: date.getHours(),
-        minute: date.getMinutes(),
+        hour: parts.hour,
+        minute: parts.minute,
       },
       lunar: {
         year: lunar.getYearSixtyCycle().toString(),
@@ -200,3 +261,4 @@ export const getDivinationTime = TimeManager.getDivinationTime.bind(TimeManager)
 export const generateYaosByTime = TimeManager.generateYaosByTime.bind(TimeManager);
 export const generateYaosByRandom = TimeManager.generateYaosByRandom.bind(TimeManager);
 export const generateYaosByNumber = TimeManager.generateYaosByNumber.bind(TimeManager);
+export const setTimezoneOffsetMinutesOverride = TimeManager.setTimezoneOffsetMinutesOverride.bind(TimeManager);

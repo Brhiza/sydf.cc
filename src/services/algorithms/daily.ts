@@ -1,6 +1,6 @@
-import type { DailyFortuneData, BaseGanZhi, DailyQimenJiuGongGe, DailyQimenTimeInfo } from '@/types/divination';
-import { getDivinationTime } from '@/utils/timeManager';
-import { qimen, tiangan, dizhi } from '@/config/divination-data';
+import type { DailyFortuneData, BaseGanZhi, DailyQimenJiuGongGe, DailyQimenTimeInfo } from '../../types/divination.ts';
+import { getDivinationTime } from '../../utils/timeManager.ts';
+import { qimen, tiangan, dizhi } from '../../config/divination-data.ts';
 
 /**
  * 日家奇门今日运势算法服务
