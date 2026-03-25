@@ -197,32 +197,32 @@ describe('useDailyFortune', () => {
       isDevMode: false,
     });
 
-    dailyFortune.selectedDate.value = '2026-03-25';
+    const selectedDate = dailyFortune.selectedDate.value;
     await dailyFortune.startDailyFortune();
 
     capturedCallbacks?.onInitialResult({
-      data: { date: '2026-03-25' },
+      data: { date: selectedDate },
     });
     capturedCallbacks?.onConversationUpdate([
-      { role: 'user', content: '请为我分析2026-03-25的运势' },
+      { role: 'user', content: `请为我分析${selectedDate}的运势` },
       { role: 'assistant', content: '' },
     ]);
     capturedCallbacks?.onAIError('抱歉，AI服务暂时不可用，请稍后重试。');
 
     expect(dailyFortune.error.value).toBe('抱歉，AI服务暂时不可用，请稍后重试。');
     expect(dailyFortune.conversationHistory.value).toMatchObject([
-      { role: 'user', content: '请为我分析2026-03-25的运势' },
+      { role: 'user', content: `请为我分析${selectedDate}的运势` },
       { role: 'assistant', content: '抱歉，AI服务暂时不可用，请稍后重试。' },
     ]);
     expect(hasVisibleDailyConversation(dailyFortune.conversationHistory.value, false)).toBe(true);
     expect(mockUpdateRecord).toHaveBeenCalledWith(
-      'daily-2026-03-25',
+      `daily-${selectedDate}`,
       expect.objectContaining({
         result: expect.objectContaining({
           aiResponse: '抱歉，AI服务暂时不可用，请稍后重试。',
         }),
         conversationHistory: expect.arrayContaining([
-          expect.objectContaining({ role: 'user', content: '请为我分析2026-03-25的运势' }),
+          expect.objectContaining({ role: 'user', content: `请为我分析${selectedDate}的运势` }),
           expect.objectContaining({
             role: 'assistant',
             content: '抱歉，AI服务暂时不可用，请稍后重试。',

@@ -5,10 +5,8 @@ import router from './router';
 // 导入插件
 import { registerPlugins } from './plugins';
 import { initializeServices } from './services';
+import { registerAppServiceWorker } from './services/serviceWorkerRegistration';
 import { setupSeo } from './seo';
-
-// 导入 PWA Service Worker 注册函数
-import { registerSW } from 'virtual:pwa-register';
 
 const app = createApp(App);
 
@@ -25,15 +23,7 @@ setupSeo(router, {
 });
 
 // 4. 注册 Service Worker
-registerSW({ 
-  immediate: true,
-  onOfflineReady() {
-    // 应用已准备好离线使用
-  },
-  onNeedRefresh() {
-    // 发现新版本，请刷新页面
-  }
-});
+registerAppServiceWorker();
 
 // 5. PWA 安装提示处理
 import { pwa } from './services/pwa';

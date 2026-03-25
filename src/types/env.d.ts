@@ -180,7 +180,7 @@ declare module 'virtual:pwa-register' {
     immediate?: boolean
     onOfflineReady?: () => void
     onNeedRefresh?: () => void
-  }): () => Promise<void>
+  }): (reloadPage?: boolean) => Promise<void>
 }
 
 export {};

@@ -1,0 +1,93 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e6]:
+      - generic [ref=e7]: 时月东方
+      - img "网站Logo" [ref=e8]
+      - generic "自动主题" [ref=e9] [cursor=pointer]:
+        - generic [ref=e10]: 🌓
+    - navigation [ref=e11]:
+      - list [ref=e13]:
+        - listitem [ref=e14]:
+          - generic [ref=e15] [cursor=pointer]:
+            - generic [ref=e16]: 🏠
+            - generic [ref=e17]: 首页
+        - listitem [ref=e18]:
+          - generic [ref=e19] [cursor=pointer]:
+            - generic [ref=e20]: ☰
+            - generic [ref=e21]: 六爻占卜
+        - listitem [ref=e22]:
+          - generic [ref=e23] [cursor=pointer]:
+            - generic [ref=e24]: 🌸
+            - generic [ref=e25]: 梅花易数
+        - listitem [ref=e26]:
+          - generic [ref=e27] [cursor=pointer]:
+            - generic [ref=e28]: ⚡
+            - generic [ref=e29]: 奇门遁甲
+        - listitem [ref=e30]:
+          - generic [ref=e31] [cursor=pointer]:
+            - generic [ref=e32]: 🏛️
+            - generic [ref=e33]: 三山国王灵签
+        - listitem [ref=e34]:
+          - generic [ref=e35] [cursor=pointer]:
+            - generic [ref=e36]: 🔮
+            - generic [ref=e37]: 塔罗占卜
+        - listitem [ref=e38]:
+          - generic [ref=e39] [cursor=pointer]:
+            - generic [ref=e40]: 🌟
+            - generic [ref=e41]: 今日运势
+    - generic [ref=e42]:
+      - generic [ref=e43]:
+        - heading "最近" [level=3] [ref=e44]
+        - generic [ref=e45]:
+          - button "搜索" [ref=e46] [cursor=pointer]:
+            - img [ref=e47]
+          - button "筛选" [ref=e49] [cursor=pointer]:
+            - img [ref=e50]
+          - button "更多" [ref=e53] [cursor=pointer]:
+            - img [ref=e54]
+      - generic [ref=e59]:
+        - generic [ref=e60]: 📜
+        - paragraph [ref=e61]: 暂无历史记录
+    - list [ref=e63]:
+      - listitem [ref=e64]:
+        - generic [ref=e66] [cursor=pointer]: 配置 Key
+      - listitem [ref=e67]:
+        - generic [ref=e69] [cursor=pointer]: 关于本站
+  - main [ref=e71]:
+    - generic [ref=e73]:
+      - heading "欢迎 👋" [level=1] [ref=e74]
+      - generic [ref=e75]:
+        - heading "探索未来 解读术数" [level=2] [ref=e76]
+        - paragraph [ref=e77]: 一个基于国产前沿 AI 大模型及算法测试的免费网站，内容由 AI 生成，仅供娱乐参考。中国传统术数文化虽有趣，但现实生活中的相处与沟通更为重要。愿您在人生的路上，既能享受术数的神秘智慧，也能珍惜当下的每一份真挚情感。如果项目对你有帮助，可以将网站分享出去，或者点击下方功德箱跟主播一起助力中国公益事业。
+        - link "🙏 功德箱" [ref=e79] [cursor=pointer]:
+          - /url: /gongdebox
+      - generic [ref=e80]:
+        - heading "工具" [level=2] [ref=e82]
+        - generic [ref=e83]:
+          - generic [ref=e85] [cursor=pointer]:
+            - generic [ref=e86]: 🎲 随便
+            - generic [ref=e87]: 随便给你选一个
+          - generic [ref=e89] [cursor=pointer]:
+            - generic [ref=e90]: 今日运势
+            - generic [ref=e91]: 基于日家奇门遁甲的专业运势解读
+          - generic [ref=e93] [cursor=pointer]:
+            - generic [ref=e94]: 六爻占卜
+            - generic [ref=e95]: 传统易学精髓，剖析事情发展趋势
+          - generic [ref=e97] [cursor=pointer]:
+            - generic [ref=e98]: 梅花易数
+            - generic [ref=e99]: 快速判断吉凶，抓住关键发展点
+          - generic [ref=e101] [cursor=pointer]:
+            - generic [ref=e102]: 奇门遁甲
+            - generic [ref=e103]: 分析复杂局势，为决策提供参考
+          - generic [ref=e105] [cursor=pointer]:
+            - generic [ref=e106]: 塔罗占卜
+            - generic [ref=e107]: 多种专业牌阵，探索内心指引
+          - generic [ref=e109] [cursor=pointer]:
+            - generic [ref=e110]: 三山国王灵签
+            - generic [ref=e111]: 灵签指点迷津，解答人生困惑
+          - generic [ref=e113] [cursor=pointer]:
+            - generic [ref=e114]: 转人工
+            - generic [ref=e115]: 专业人工咨询，深度解答疑惑
+          - generic [ref=e117] [cursor=pointer]:
+            - generic [ref=e118]: 关于本站
+            - generic [ref=e119]: 了解网站信息，使用说明指南
