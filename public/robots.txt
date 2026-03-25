@@ -3,7 +3,6 @@ Allow: /
 
 # 主要页面
 Allow: /divination/
-Allow: /daily-fortune
 Allow: /history
 Allow: /about
 Allow: /static/

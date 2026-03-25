@@ -1,4 +1,5 @@
 import { storageService } from './storageService';
+import { formatLocalDateKey, formatTimestamp, getStartOfTomorrow } from '@/utils/date-formatter';
 
 /**
  * 每日限制服务
@@ -11,7 +12,7 @@ interface DailyLimitRecord {
   timestamp: number;
 }
 
-const DAILY_LIMIT_KEY = 'daily_fortune_limit';
+export const DAILY_LIMIT_STORAGE_KEY = 'divination:daily:limit';
 
 /**
  * 每日限制服务类
@@ -21,11 +22,7 @@ export class DailyLimitService {
    * 检查今日是否已经使用过今日运势
    */
   static hasUsedToday(): boolean {
-    const today = new Date();
-    // 使用本地时间而不是UTC时间，避免时区问题
-    const todayStr = today.getFullYear() + '-' + 
-      String(today.getMonth() + 1).padStart(2, '0') + '-' + 
-      String(today.getDate()).padStart(2, '0');
+    const todayStr = formatLocalDateKey();
     const record = this.getRecord();
     
     return record.date === todayStr && record.hasUsed;
@@ -35,25 +32,21 @@ export class DailyLimitService {
    * 记录今日已使用今日运势
    */
   static markAsUsed(): void {
-    const today = new Date();
-    // 使用本地时间而不是UTC时间，避免时区问题
-    const todayStr = today.getFullYear() + '-' + 
-      String(today.getMonth() + 1).padStart(2, '0') + '-' + 
-      String(today.getDate()).padStart(2, '0');
+    const todayStr = formatLocalDateKey();
     const record: DailyLimitRecord = {
       date: todayStr,
       hasUsed: true,
       timestamp: Date.now()
     };
     
-    storageService.setItem(DAILY_LIMIT_KEY, record);
+    storageService.setItem(DAILY_LIMIT_STORAGE_KEY, record);
   }
 
   /**
    * 获取当前记录
    */
   static getRecord(): DailyLimitRecord {
-    const record = storageService.getItem<DailyLimitRecord>(DAILY_LIMIT_KEY);
+    const record = storageService.getItem<DailyLimitRecord>(DAILY_LIMIT_STORAGE_KEY);
     
     if (!record) {
       return {
@@ -92,9 +85,7 @@ export class DailyLimitService {
     }
 
     const now = new Date();
-    const tomorrow = new Date(now);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    tomorrow.setHours(0, 0, 0, 0);
+    const tomorrow = getStartOfTomorrow(now);
     
     const timeDiff = tomorrow.getTime() - now.getTime();
     const hours = Math.floor(timeDiff / (1000 * 60 * 60));
@@ -125,25 +116,18 @@ export class DailyLimitService {
     nextAvailableTime?: string;
   } {
     const record = this.getRecord();
-    const today = new Date();
-    // 使用本地时间而不是UTC时间，避免时区问题
-    const todayStr = today.getFullYear() + '-' + 
-      String(today.getMonth() + 1).padStart(2, '0') + '-' + 
-      String(today.getDate()).padStart(2, '0');
+    const todayStr = formatLocalDateKey();
     const hasUsed = record.date === todayStr && record.hasUsed;
     
     let usedTime: string | undefined;
     let nextAvailableTime: string | undefined;
     
     if (hasUsed) {
-      usedTime = new Date(record.timestamp).toLocaleString('zh-CN');
+      usedTime = formatTimestamp(record.timestamp);
     }
     
     if (!this.canDrawToday()) {
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      tomorrow.setHours(0, 0, 0, 0);
-      nextAvailableTime = tomorrow.toLocaleString('zh-CN');
+      nextAvailableTime = formatTimestamp(getStartOfTomorrow().getTime());
     }
     
     const result: {
@@ -171,7 +155,7 @@ export class DailyLimitService {
    * 重置记录（用于测试或特殊情况）
    */
   static resetRecord(): void {
-    storageService.removeItem(DAILY_LIMIT_KEY);
+    storageService.removeItem(DAILY_LIMIT_STORAGE_KEY);
   }
 
   /**
@@ -179,14 +163,10 @@ export class DailyLimitService {
    */
   static cleanupExpiredRecord(): void {
     const record = this.getRecord();
-    const today = new Date();
-    // 使用本地时间而不是UTC时间，避免时区问题
-    const todayStr = today.getFullYear() + '-' + 
-      String(today.getMonth() + 1).padStart(2, '0') + '-' + 
-      String(today.getDate()).padStart(2, '0');
+    const todayStr = formatLocalDateKey();
     
     if (record.date !== todayStr) {
-      storageService.removeItem(DAILY_LIMIT_KEY);
+      storageService.removeItem(DAILY_LIMIT_STORAGE_KEY);
     }
   }
 

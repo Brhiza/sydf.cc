@@ -28,14 +28,11 @@ export class DataGenerationService {
     signNumber?: number,
     supplementaryInfo?: SupplementaryInfo
   ): Promise<LiuyaoData | MeihuaData | QimenData | TarotData | SsgwData | DailyFortuneData> {
-    const method = supplementaryInfo?.divinationMethod;
-    const number = supplementaryInfo?.divinationNumber;
-
     switch (type) {
       case 'liuyao':
-        return generateLiuyao(undefined, method, number);
+        return generateLiuyao();
       case 'meihua': {
-        const meihuaData = generateMeihua(undefined, method, number);
+        const meihuaData = generateMeihua(undefined, supplementaryInfo?.meihuaSettings);
         // 确保 calculation 属性符合 MeihuaCalculation 接口
         if (meihuaData.calculation) {
           meihuaData.calculation.method = meihuaData.calculation.method || 'unknown';
@@ -43,7 +40,7 @@ export class DataGenerationService {
         return meihuaData;
       }
       case 'qimen': {
-        return generateQimen(undefined, method, number);
+        return generateQimen();
       }
       case 'tarot': {
         const result = drawSpreadCards(spreadType as keyof typeof import('@/utils/tarot').tarotSpreads || 'three');

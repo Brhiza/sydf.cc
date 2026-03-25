@@ -127,10 +127,10 @@ export class HistoryService {
   /**
    * 添加历史记录
    */
-  addRecord(record: Omit<HistoryRecord, 'id' | 'timestamp' | 'summary'>): HistoryRecord {
+  addRecord(record: Omit<HistoryRecord, 'timestamp' | 'summary'>): HistoryRecord {
     const newRecord: HistoryRecord = {
       ...record,
-      id: uuidv4(),
+      id: record.id || uuidv4(),
       timestamp: Date.now(),
       summary: this.generateSummary(record.result),
     };
@@ -159,6 +159,26 @@ export class HistoryService {
       return true;
     }
     return false;
+  }
+
+  /**
+   * 重命名历史记录问题标题
+   */
+  renameRecord(id: string, question: string): boolean {
+    const trimmedQuestion = question.trim();
+    if (!trimmedQuestion) {
+      return false;
+    }
+
+    const record = this.records.find((item) => item.id === id);
+    if (!record) {
+      return false;
+    }
+
+    record.question = trimmedQuestion;
+    this.saveToStorage();
+    eventBus.emit(EVENTS.HISTORY_UPDATED);
+    return true;
   }
 
   /**

@@ -16,6 +16,84 @@ export type DivinationType =
   | 'ssgw'
   | 'daily';
 
+export type MeihuaDivinationMethod = 'time' | 'number' | 'random' | 'external';
+
+export type MeihuaExternalDirection =
+  | '东'
+  | '东南'
+  | '南'
+  | '西南'
+  | '西'
+  | '西北'
+  | '北'
+  | '东北';
+
+export type MeihuaExternalPerson =
+  | '老父'
+  | '老妇'
+  | '长男'
+  | '长女'
+  | '中男'
+  | '中女'
+  | '少男'
+  | '少女';
+
+export type MeihuaExternalAnimal =
+  | '马'
+  | '牛'
+  | '龙'
+  | '鸡'
+  | '猪'
+  | '雉'
+  | '狗'
+  | '羊';
+
+export type MeihuaExternalObject =
+  | '金玉圆器'
+  | '布帛陶器'
+  | '竹木乐器'
+  | '绳索长木'
+  | '水器液体'
+  | '火电文书'
+  | '石块门板'
+  | '刀剪口器';
+
+export type MeihuaExternalSound =
+  | '洪亮金石'
+  | '沉厚低缓'
+  | '雷鸣震动'
+  | '风声呼啸'
+  | '流水滴答'
+  | '爆裂鸣叫'
+  | '闷阻叩击'
+  | '清脆笑语';
+
+export type MeihuaExternalColor =
+  | '金白'
+  | '土黄'
+  | '青碧'
+  | '青绿'
+  | '黑蓝'
+  | '赤紫'
+  | '棕黄'
+  | '银白';
+
+export interface MeihuaExternalOmens {
+  direction?: MeihuaExternalDirection;
+  count?: number;
+  person?: MeihuaExternalPerson;
+  animal?: MeihuaExternalAnimal;
+  object?: MeihuaExternalObject;
+  sound?: MeihuaExternalSound;
+  color?: MeihuaExternalColor;
+}
+
+export interface MeihuaSettings {
+  method?: MeihuaDivinationMethod;
+  number?: number;
+  externalOmens?: MeihuaExternalOmens;
+}
+
 // 基础时间信息
 export interface BaseGanZhi {
   year: string;
@@ -83,6 +161,8 @@ export interface LiuyaoData extends BaseHexagramData {
     wuxing: string;
   };
   yaosDetail: LiuyaoYaoDetail[];
+  specialPattern?: '静卦' | '独静卦' | '全动卦' | '乾卦用九' | '坤卦用六';
+  specialAdvice?: string;
   isChaotic?: boolean; // 新增：是否为乱动卦象
   chaoticReason?: string; // 新增：乱动原因
 }
@@ -92,6 +172,16 @@ export interface MeihuaCalculation {
   method: string;
   numbers?: number[];
   time?: string;
+  number?: number;
+  methodKey?: MeihuaDivinationMethod;
+  externalOmens?: MeihuaExternalOmens;
+  externalSummary?: string;
+  externalMappedOmens?: Array<{
+    source: string;
+    label: string;
+    trigram: string;
+    trigramIndex: number;
+  }>;
   [key: string]: unknown;
 }
 
@@ -107,16 +197,30 @@ export interface MeihuaData extends BaseHexagramData {
     element: string;
     nature: string;
   };
+  changedTiGua?: {
+    name: string;
+    element: string;
+    nature: string;
+  } | null;
+  changedYongGua?: {
+    name: string;
+    element: string;
+    nature: string;
+  } | null;
   movingYao: {
     position: number;
     description: string;
     yaoName: string;
   };
   analysis: {
+    season: '春' | '夏' | '秋' | '冬';
     tiYongRelation: string;
+    tiSeasonState: string;
+    yongSeasonState: string;
     inter1Relation: string;
     inter2Relation: string;
     changedRelation: string;
+    changedTiYongRelation: string;
   };
   mainHexagram: {
     name: string;
@@ -188,6 +292,17 @@ export interface QimenData {
   juShu: number;
   zhiFu: string;
   zhiShi: string;
+  patternTags?: string[];
+  patternDetails?: Array<{
+    tag: string;
+    summary: string;
+  }>;
+  palaceInsights?: Array<{
+    gong: number;
+    name: string;
+    level: '有利' | '风险' | '关注';
+    summary: string;
+  }>;
   timeInfo: QimenTimeInfo;
   specialConditions?: QimenSpecialConditions; // 特殊时辰情况
   timestamp: number;
@@ -336,8 +451,7 @@ export interface SupplementaryInfo {
     heavenlyStem: string; // 天干
     earthlyBranch: string; // 地支
   };
-  divinationMethod?: 'default' | 'random' | 'number'; // 起卦方式
-  divinationNumber?: number; // 数字起卦的数字
+  meihuaSettings?: MeihuaSettings;
   date?: string; // YYYY-MM-DD for daily fortune
 }
 

@@ -161,6 +161,68 @@ export const LiuyaoHelpers = {
  * 梅花易数专用工具函数
  */
 export const MeihuaHelpers = {
+  getExternalOmenSourceLabel(source: string): string {
+    const sourceLabels: Record<string, string> = {
+      direction: '方位',
+      person: '人物',
+      animal: '动物',
+      object: '物件',
+      sound: '声音',
+      color: '颜色',
+    };
+
+    return sourceLabels[source] || '外应';
+  },
+
+  getSeasonByJieQi(jieQi: string): '春' | '夏' | '秋' | '冬' | '未知' {
+    const seasonByJieQi: Record<string, '春' | '夏' | '秋' | '冬'> = {
+      立春: '春',
+      雨水: '春',
+      惊蛰: '春',
+      春分: '春',
+      清明: '春',
+      谷雨: '春',
+      立夏: '夏',
+      小满: '夏',
+      芒种: '夏',
+      夏至: '夏',
+      小暑: '夏',
+      大暑: '夏',
+      立秋: '秋',
+      处暑: '秋',
+      白露: '秋',
+      秋分: '秋',
+      寒露: '秋',
+      霜降: '秋',
+      立冬: '冬',
+      小雪: '冬',
+      大雪: '冬',
+      冬至: '冬',
+      小寒: '冬',
+      大寒: '冬',
+    };
+
+    return seasonByJieQi[jieQi] || '未知';
+  },
+
+  getSeasonByMonth(monthNumber: number): '春' | '夏' | '秋' | '冬' {
+    if (monthNumber >= 1 && monthNumber <= 3) return '春';
+    if (monthNumber >= 4 && monthNumber <= 6) return '夏';
+    if (monthNumber >= 7 && monthNumber <= 9) return '秋';
+    return '冬';
+  },
+
+  getElementSeasonState(element: string, season: '春' | '夏' | '秋' | '冬'): '旺' | '相' | '休' | '囚' | '死' | '未知' {
+    const seasonStates: Record<'春' | '夏' | '秋' | '冬', Record<string, '旺' | '相' | '休' | '囚' | '死'>> = {
+      春: { 木: '旺', 火: '相', 水: '休', 金: '囚', 土: '死' },
+      夏: { 火: '旺', 土: '相', 木: '休', 水: '囚', 金: '死' },
+      秋: { 金: '旺', 水: '相', 土: '休', 火: '囚', 木: '死' },
+      冬: { 水: '旺', 木: '相', 金: '休', 土: '囚', 火: '死' },
+    };
+
+    return seasonStates[season]?.[element] || '未知';
+  },
+
   /**
    * 分析梅花易数卦象特征
    */
@@ -173,8 +235,8 @@ export const MeihuaHelpers = {
       upperTrigramElement: data.mainHexagram?.upper || '',
       lowerTrigramElement: data.mainHexagram?.lower || '',
       elementRelation: this.getElementRelation(
-        data.tiGua?.element || '',
-        data.yongGua?.element || ''
+        data.yongGua?.element || '',
+        data.tiGua?.element || ''
       ),
     };
   },
@@ -195,9 +257,8 @@ export const MeihuaHelpers = {
 
     // 八卦分析
     if (data.mainHexagram?.upper && data.mainHexagram?.lower) {
-      points.push(
-        `上卦${data.mainHexagram.upper}（${data.tiGua.element}），下卦${data.mainHexagram.lower}（${data.yongGua.element}）`
-      );
+      points.push(`上卦${data.mainHexagram.upper}，下卦${data.mainHexagram.lower}`);
+      points.push(`体卦${data.tiGua.name}（${data.tiGua.element}），用卦${data.yongGua.name}（${data.yongGua.element}）`);
     }
 
     // 动爻分析
@@ -217,15 +278,40 @@ export const MeihuaHelpers = {
   /**
    * 获取五行相生相克关系
    */
-  getElementRelation(upper: string, lower: string): string {
-    const relations: Record<string, Record<string, string>> = {
-      金: { 金: '比和', 木: '相克', 水: '相生', 火: '相克', 土: '相生' },
-      木: { 金: '相克', 木: '比和', 水: '相生', 火: '相生', 土: '相克' },
-      水: { 金: '相生', 木: '相生', 水: '比和', 火: '相克', 土: '相克' },
-      火: { 金: '相克', 木: '相生', 水: '相克', 火: '比和', 土: '相生' },
-      土: { 金: '相生', 木: '相克', 水: '相克', 火: '相生', 土: '比和' },
+  getElementRelation(yong: string, ti: string): string {
+    const shengMap: Record<string, string> = {
+      金: '水',
+      水: '木',
+      木: '火',
+      火: '土',
+      土: '金',
+    };
+    const keMap: Record<string, string> = {
+      金: '木',
+      木: '土',
+      土: '水',
+      水: '火',
+      火: '金',
     };
 
-    return relations[upper]?.[lower] || '未知';
+    if (!yong || !ti) {
+      return '未知';
+    }
+    if (yong === ti) {
+      return '体用比和';
+    }
+    if (shengMap[yong] === ti) {
+      return '用生体';
+    }
+    if (shengMap[ti] === yong) {
+      return '体生用';
+    }
+    if (keMap[yong] === ti) {
+      return '用克体';
+    }
+    if (keMap[ti] === yong) {
+      return '体克用';
+    }
+    return '未知';
   },
 };

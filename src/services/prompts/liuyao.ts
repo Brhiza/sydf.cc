@@ -4,21 +4,63 @@
  */
 
 import type { LiuyaoData, SupplementaryInfo } from '@/types';
-import { analyzeQuestion } from './shared/question-analyzer';
-import { buildPrompt } from './shared/prompt-builder';
-import { getFormattedTimeInfo } from './shared/time-utils';
+import { generatePromptWithFormatter, type PromptFormatterContext } from './shared/prompt-generator';
+import type { QuestionType } from './shared/types';
+
+function getLiuyaoYongShenHint(types: QuestionType, supplementaryInfo?: SupplementaryInfo): string {
+  const hints: string[] = [];
+
+  if (types.isFinance) {
+    hints.push('妻财为主用神');
+  }
+  if (types.isCareer) {
+    hints.push('官鬼为主用神');
+  }
+  if (types.isStudy) {
+    hints.push('父母为主用神');
+  }
+  if (types.isHealth) {
+    hints.push('官鬼为病，子孙为药，两者都要参看');
+  }
+
+  const relationshipHint = getRelationshipYongShenHint(types, supplementaryInfo);
+  if (relationshipHint) {
+    hints.push(relationshipHint);
+  }
+
+  return hints.length > 0 ? hints.join('；') : '未命中明确分类，需结合问事对象自行取用神。';
+}
+
+function getRelationshipYongShenHint(types: QuestionType, supplementaryInfo?: SupplementaryInfo): string | '' {
+  if (!types.isRelationship) {
+    return '';
+  }
+
+  if (supplementaryInfo?.gender === '男') {
+    return '感情问事以妻财为主用神';
+  }
+  if (supplementaryInfo?.gender === '女') {
+    return '感情问事以官鬼为主用神';
+  }
+  return '感情问事若未给性别，宜官鬼、妻财并参';
+}
 
 /**
  * 格式化六爻数据为可读的文本
  */
-function formatLiuyaoData(data: LiuyaoData): string {
+function formatLiuyaoData(data: LiuyaoData, context: PromptFormatterContext): string {
+  const { supplementaryInfo, analysis } = context;
   const ganzhi = data.ganzhi ? `干支：${data.ganzhi.year}年 ${data.ganzhi.month}月 ${data.ganzhi.day}日 ${data.ganzhi.hour}时` : '干支信息未知';
+  const yongShenHint = getLiuyaoYongShenHint(analysis.types, supplementaryInfo);
   let prompt = `六爻卦象信息：
 ${ganzhi}
 主卦：${data.originalName}（${data.palace?.name || ''}宫）
 变卦：${data.changedName}
 互卦：${data.interName}
 空亡：${data.voidBranches?.join('、') || '无'}
+特殊卦式：${data.specialPattern || '常规卦'}
+特殊提示：${data.specialAdvice || '无'}
+用神参考：${yongShenHint}
 
 爻象详情：`;
 
@@ -70,22 +112,12 @@ export async function generateLiuyaoPrompt(
   timeInfo?: string,
   supplementaryInfo?: SupplementaryInfo
 ): Promise<string> {
-  // 获取时间信息
-  const currentTimeInfo = timeInfo || await getFormattedTimeInfo();
-  
-  // 分析问题
-  const analysis = analyzeQuestion(question);
-  
-  // 格式化数据
-  const formattedData = formatLiuyaoData(data);
-  
-  // 构建提示词（已包含干支指导）
-  return buildPrompt({
+  return generatePromptWithFormatter({
     divinationType: 'liuyao',
     question,
-    formattedData,
-    timeInfo: currentTimeInfo,
-    analysis,
-    ...(supplementaryInfo && { supplementaryInfo })
+    data,
+    timeInfo,
+    supplementaryInfo,
+    formatData: formatLiuyaoData,
   });
 }

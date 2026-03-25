@@ -4,8 +4,107 @@
  */
 
 import type { PromptBuildConfig, QuestionAnalysis, QuestionType } from './types';
-import { formatSupplementaryInfo, getComplexityDescription, getEmotionToneGuidance, getExperienceGuidance } from './types';
+import {
+  formatSupplementaryInfo,
+  getComplexityDescription,
+  getEmotionToneGuidance,
+  getExperienceGuidance,
+} from './prompt-guidance';
 import { generateQuestionAnalysisText } from './question-analyzer';
+
+type SpecificPromptKey = 'liuyao' | 'meihua' | 'qimen' | 'tarot' | 'ssgw';
+type ExperienceLevel = QuestionAnalysis['userExperience']['level'];
+
+interface SpecificPromptTemplate {
+  title: string;
+  requirements: string[];
+  terminologyByLevel: Record<ExperienceLevel, string>;
+}
+
+const SPECIFIC_PROMPT_TEMPLATES: Record<SpecificPromptKey, SpecificPromptTemplate> = {
+  liuyao: {
+    title: '六爻专业分析要求',
+    requirements: [
+      '**主卦解读**：分析卦宫、六亲、六神的含义和当前状态',
+      '**变卦预示**：分析变卦对主卦的影响和未来发展趋势',
+      '**动爻分析**：重点关注动爻的位置、性质和变化含义',
+      '**世应关系**：分析世爻（求测者）和应爻（对方或所测之事）的关系',
+      '**用神分析**：根据问题确定用神，分析其旺衰、生克、动静状态',
+      '**六神启示**：分析青龙、朱雀、勾陈、螣蛇、白虎、玄武的指引',
+      '**空亡影响**：分析空亡爻对卦象的影响和注意事项',
+      '**特殊卦式优先级**：若数据中标注为静卦，则以本卦卦意、世应和用神静态旺衰为主；若为独静卦，则突出独静爻的指向；若为全动卦，则以本卦与变卦总势为主，不要逐爻做琐碎细断；若为乾卦用九或坤卦用六，则优先按用九、用六的总辞把握大势',
+    ],
+    terminologyByLevel: {
+      beginner: '请用简单语言解释世爻、应爻、用神等概念',
+      intermediate: '可适当使用专业术语并简要解释',
+      advanced: '可使用专业术语进行深度分析',
+    },
+  },
+  meihua: {
+    title: '梅花易数专业分析要求',
+    requirements: [
+      '**体用总论**：明确体卦（代表我/此事）和用卦（代表对方/环境），根据"用生体吉，克体凶"判断吉凶',
+      '**过程分析**：分析互卦代表的事情发展过程，判断过程顺利或艰难',
+      '**结局预示**：分析变卦代表的最终结局，判断结局圆满或不利',
+      '**旺衰权衡**：结合占卜季节分析体卦和用卦的旺相休囚死，权衡生克力量轻重',
+      '**卦象象征**：结合卦象的象征意义进行具体人事解读',
+    ],
+    terminologyByLevel: {
+      beginner: '请用简单语言解释体卦、用卦、五行生克等概念',
+      intermediate: '可适当使用专业术语并简要解释',
+      advanced: '可使用专业术语进行深度分析',
+    },
+  },
+  qimen: {
+    title: '奇门遁甲专业分析要求',
+    requirements: [
+      '**格局概览**：说明当前奇门局的基本特性（如伏吟、反吟等）和核心能量状态',
+      '**用神选取**：根据问题明确核心用神，定位其落宫，分析旺衰状态和吉凶',
+      '**核心矛盾**：分析用神宫位与时干宫位、值符值使宫位的关系',
+      '**九宫分析**：逐一分析九宫的星、门、神、干组合和能量状态',
+      '**吉格凶格**：指出关键吉格（如青龙返首、飞鸟跌穴）或凶格（如白虎猖狂、朱雀投江）',
+      '**时空能量**：分析当前奇门局的时空能量分布和对问题的影响',
+      '**战略态势**：评估利主利客、利内利外态势',
+      '**结构标签**：若数据中已有格局标签（如星伏吟、门反吟、门迫、击刑），需优先解释其对事件推进节奏、阻滞点和风险位的影响',
+    ],
+    terminologyByLevel: {
+      beginner: '请用简单语言解释值符、值使、用神、九宫等概念',
+      intermediate: '可适当使用专业术语并简要解释',
+      advanced: '可使用专业术语进行深度战略分析',
+    },
+  },
+  tarot: {
+    title: '塔罗牌专业分析要求',
+    requirements: [
+      '**牌面解读**：详细解释每张牌的正位/逆位含义和象征意义',
+      '**牌阵分析**：分析牌阵中各牌的位置关系和相互影响',
+      '**元素平衡**：分析火、土、风、水四元素的平衡状态',
+      '**数字意义**：分析牌面数字的 numerology 意义',
+      '**图案符号**：解读牌面图案中的关键符号和隐喻',
+      '**整体能量**：综合分析整个牌阵的能量流向和整体信息',
+    ],
+    terminologyByLevel: {
+      beginner: '请用简单语言解释塔罗牌的基本概念',
+      intermediate: '可适当使用专业术语并简要解释',
+      advanced: '可使用专业术语进行深度分析',
+    },
+  },
+  ssgw: {
+    title: '三式高级占卜分析要求',
+    requirements: [
+      '**综合分析**：结合太乙、奇门、六壬三式的核心理论进行综合判断',
+      '**神煞影响**：分析重要神煞对事态的影响和作用',
+      '**时空配合**：分析天时、地利、人和的配合关系',
+      '**吉凶判断**：基于三式理论体系进行专业的吉凶判断',
+      '**化解建议**：如有不利因素，提供传统的化解方法和建议',
+    ],
+    terminologyByLevel: {
+      beginner: '请用简单语言解释三式占卜的基本概念',
+      intermediate: '可适当使用专业术语并简要解释',
+      advanced: '可使用专业术语进行深度分析',
+    },
+  },
+};
 
 /**
  * 构建问题回答部分
@@ -126,108 +225,81 @@ ${action}
 }
 
 /**
+ * 构建卦种专用分析段落
+ */
+function buildSpecificPromptSection(
+  basePrompt: string,
+  template: SpecificPromptTemplate,
+  experienceLevel: ExperienceLevel
+): string {
+  return `${basePrompt}
+
+## ${template.title}
+${template.requirements.map((requirement) => `- ${requirement}`).join('\n')}
+
+**专业术语解释**：${template.terminologyByLevel[experienceLevel]}`;
+}
+
+/**
+ * 解析卦种专用模板键
+ */
+function resolveSpecificPromptKey(divinationType: string): SpecificPromptKey | null {
+  if (divinationType === 'tarot_single') {
+    return 'tarot';
+  }
+
+  if (divinationType in SPECIFIC_PROMPT_TEMPLATES) {
+    return divinationType as SpecificPromptKey;
+  }
+
+  return null;
+}
+
+/**
+ * 构建配置化卦种提示词
+ */
+function buildConfiguredPrompt(config: PromptBuildConfig, key: SpecificPromptKey): string {
+  const basePrompt = buildBasePromptStructure(config);
+  return buildSpecificPromptSection(
+    basePrompt,
+    SPECIFIC_PROMPT_TEMPLATES[key],
+    config.analysis.userExperience.level
+  );
+}
+
+/**
  * 构建六爻占卜提示词
  */
 export function buildLiuyaoPrompt(config: PromptBuildConfig): string {
-  const basePrompt = buildBasePromptStructure(config);
-  
-  const liuyaoSpecific = `
-
-## 六爻专业分析要求
-- **主卦解读**：分析卦宫、六亲、六神的含义和当前状态
-- **变卦预示**：分析变卦对主卦的影响和未来发展趋势
-- **动爻分析**：重点关注动爻的位置、性质和变化含义
-- **世应关系**：分析世爻（求测者）和应爻（对方或所测之事）的关系
-- **用神分析**：根据问题确定用神，分析其旺衰、生克、动静状态
-- **六神启示**：分析青龙、朱雀、勾陈、螣蛇、白虎、玄武的指引
-- **空亡影响**：分析空亡爻对卦象的影响和注意事项
-
-**专业术语解释**：${config.analysis.userExperience.level === 'beginner' ? '请用简单语言解释世爻、应爻、用神等概念' : config.analysis.userExperience.level === 'intermediate' ? '可适当使用专业术语并简要解释' : '可使用专业术语进行深度分析'}`;
-
-  return basePrompt + liuyaoSpecific;
+  return buildConfiguredPrompt(config, 'liuyao');
 }
 
 /**
  * 构建梅花易数提示词
  */
 export function buildMeihuaPrompt(config: PromptBuildConfig): string {
-  const basePrompt = buildBasePromptStructure(config);
-  
-  const meihuaSpecific = `
-
-## 梅花易数专业分析要求
-- **体用总论**：明确体卦（代表我/此事）和用卦（代表对方/环境），根据"用生体吉，克体凶"判断吉凶
-- **过程分析**：分析互卦代表的事情发展过程，判断过程顺利或艰难
-- **结局预示**：分析变卦代表的最终结局，判断结局圆满或不利
-- **旺衰权衡**：结合占卜季节分析体卦的强弱状态
-- **卦象象征**：结合卦象的象征意义进行具体人事解读
-
-**专业术语解释**：${config.analysis.userExperience.level === 'beginner' ? '请用简单语言解释体卦、用卦、五行生克等概念' : config.analysis.userExperience.level === 'intermediate' ? '可适当使用专业术语并简要解释' : '可使用专业术语进行深度分析'}`;
-
-  return basePrompt + meihuaSpecific;
+  return buildConfiguredPrompt(config, 'meihua');
 }
 
 /**
  * 构建奇门遁甲提示词
  */
 export function buildQimenPrompt(config: PromptBuildConfig): string {
-  const basePrompt = buildBasePromptStructure(config);
-  
-  const qimenSpecific = `
-
-## 奇门遁甲专业分析要求
-- **格局概览**：说明当前奇门局的基本特性（如伏吟、反吟等）和核心能量状态
-- **用神选取**：根据问题明确核心用神，定位其落宫，分析旺衰状态和吉凶
-- **核心矛盾**：分析用神宫位与时干宫位、值符值使宫位的关系
-- **九宫分析**：逐一分析九宫的星、门、神、干组合和能量状态
-- **吉格凶格**：指出关键吉格（如青龙返首、飞鸟跌穴）或凶格（如白虎猖狂、朱雀投江）
-- **时空能量**：分析当前奇门局的时空能量分布和对问题的影响
-- **战略态势**：评估利主利客、利内利外态势
-
-**专业术语解释**：${config.analysis.userExperience.level === 'beginner' ? '请用简单语言解释值符、值使、用神、九宫等概念' : config.analysis.userExperience.level === 'intermediate' ? '可适当使用专业术语并简要解释' : '可使用专业术语进行深度战略分析'}`;
-
-  return basePrompt + qimenSpecific;
+  return buildConfiguredPrompt(config, 'qimen');
 }
 
 /**
  * 构建塔罗牌提示词
  */
 export function buildTarotPrompt(config: PromptBuildConfig): string {
-  const basePrompt = buildBasePromptStructure(config);
-  
-  const tarotSpecific = `
-
-## 塔罗牌专业分析要求
-- **牌面解读**：详细解释每张牌的正位/逆位含义和象征意义
-- **牌阵分析**：分析牌阵中各牌的位置关系和相互影响
-- **元素平衡**：分析火、土、风、水四元素的平衡状态
-- **数字意义**：分析牌面数字的 numerology 意义
-- **图案符号**：解读牌面图案中的关键符号和隐喻
-- **整体能量**：综合分析整个牌阵的能量流向和整体信息
-
-**专业术语解释**：${config.analysis.userExperience.level === 'beginner' ? '请用简单语言解释塔罗牌的基本概念' : config.analysis.userExperience.level === 'intermediate' ? '可适当使用专业术语并简要解释' : '可使用专业术语进行深度分析'}`;
-
-  return basePrompt + tarotSpecific;
+  return buildConfiguredPrompt(config, 'tarot');
 }
 
 /**
  * 构建三式高级占卜提示词
  */
 export function buildSsgwPrompt(config: PromptBuildConfig): string {
-  const basePrompt = buildBasePromptStructure(config);
-  
-  const ssgwSpecific = `
-
-## 三式高级占卜分析要求
-- **综合分析**：结合太乙、奇门、六壬三式的核心理论进行综合判断
-- **神煞影响**：分析重要神煞对事态的影响和作用
-- **时空配合**：分析天时、地利、人和的配合关系
-- **吉凶判断**：基于三式理论体系进行专业的吉凶判断
-- **化解建议**：如有不利因素，提供传统的化解方法和建议
-
-**专业术语解释**：${config.analysis.userExperience.level === 'beginner' ? '请用简单语言解释三式占卜的基本概念' : config.analysis.userExperience.level === 'intermediate' ? '可适当使用专业术语并简要解释' : '可使用专业术语进行深度分析'}`;
-
-  return basePrompt + ssgwSpecific;
+  return buildConfiguredPrompt(config, 'ssgw');
 }
 
 /**
@@ -251,30 +323,12 @@ function addGanzhiGuidance(prompt: string, divinationType: string, timeInfo?: st
  */
 export function buildPrompt(config: PromptBuildConfig): string {
   const { divinationType } = config;
-  
-  let prompt: string;
-  
-  switch (divinationType) {
-    case 'liuyao':
-      prompt = buildLiuyaoPrompt(config);
-      break;
-    case 'meihua':
-      prompt = buildMeihuaPrompt(config);
-      break;
-    case 'qimen':
-      prompt = buildQimenPrompt(config);
-      break;
-    case 'tarot':
-    case 'tarot_single':
-      prompt = buildTarotPrompt(config);
-      break;
-    case 'ssgw':
-      prompt = buildSsgwPrompt(config);
-      break;
-    default:
-      prompt = buildBasePromptStructure(config);
-  }
-  
+
+  const specificPromptKey = resolveSpecificPromptKey(divinationType);
+  const prompt = specificPromptKey
+    ? buildConfiguredPrompt(config, specificPromptKey)
+    : buildBasePromptStructure(config);
+
   // 为需要的占卜类型添加干支指导
   return addGanzhiGuidance(prompt, divinationType, config.timeInfo);
 }

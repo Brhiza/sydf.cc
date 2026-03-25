@@ -9,6 +9,7 @@
     "build": "vite build",
     "oyyy": "vite build --mode oyyy",
     "preview": "vite preview",
+    "test": "vitest run",
     "lint": "eslint . --ext .vue,.js,.ts --fix",
     "format": "prettier --write \"src/**/*.{vue,ts,css,md}\""
   },
@@ -27,11 +28,13 @@
     "@typescript-eslint/eslint-plugin": "^8.45.0",
     "@typescript-eslint/parser": "^8.45.0",
     "@vitejs/plugin-vue": "^6.0.1",
+    "@vue/test-utils": "^2.4.6",
     "@vue/tsconfig": "^0.8.1",
     "eslint": "^9.36.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
     "eslint-plugin-vue": "^10.5.0",
+    "jsdom": "^26.1.0",
     "prettier": "^3.6.2",
     "rollup-plugin-visualizer": "^6.0.3",
     "sharp": "^0.34.4",
@@ -43,6 +46,10 @@
     "vite": "^7.1.7",
     "vite-plugin-compression2": "^2.2.1",
     "vite-plugin-image-optimizer": "^2.0.2",
-    "vite-plugin-pwa": "^1.0.3"
+    "vite-plugin-pwa": "^1.0.3",
+    "vitest": "^4.1.1"
+  },
+  "overrides": {
+    "@rollup/plugin-terser": "^1.0.0"
   }
 }

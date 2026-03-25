@@ -4,8 +4,8 @@
 
 <script setup lang="ts">
 import { ref, watch, onUnmounted } from 'vue';
-import { marked } from 'marked';
 import cacheManager from '@/utils/cacheManager';
+import { escapeHtml, renderSafeMarkdown } from '@/utils/markdown';
 
 interface Props {
   content: string;
@@ -13,12 +13,6 @@ interface Props {
 
 const props = defineProps<Props>();
 const renderedContent = ref('');
-
-// 配置marked
-marked.setOptions({
-  breaks: true, // 将单个换行符转换为 <br>
-  gfm: true, // 启用 GitHub 风格的 markdown
-});
 
 // 生成缓存键
 function generateCacheKey(content: string): string {
@@ -41,20 +35,14 @@ async function processMarkdown(content: string): Promise<string> {
     return cachedResult;
   }
   
-  // 如果内容已经包含HTML标签，则直接渲染，避免二次解析
-  if (content.includes('<details>')) {
-    cacheManager.set('markdown', cacheKey, content, 100);
-    return content;
-  }
-  
   try {
-    const parsed = await marked.parse(content);
+    const parsed = await renderSafeMarkdown(content);
     cacheManager.set('markdown', cacheKey, parsed, 100);
     return parsed;
   } catch (error) {
     console.warn('Markdown 解析失败:', error);
-    // 如果解析失败，返回纯文本（换行符转为<br>）
-    const fallback = content.replace(/\n/g, '<br>');
+    // 如果解析失败，回退为转义后的纯文本
+    const fallback = escapeHtml(content).replace(/\n/g, '<br>');
     cacheManager.set('markdown', cacheKey, fallback, 100);
     return fallback;
   }

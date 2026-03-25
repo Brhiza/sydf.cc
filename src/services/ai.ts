@@ -1,7 +1,7 @@
 /**
  * 统一的AI服务
  */
-import type { ChatMessage, SupplementaryInfo, ToolCall } from '@/types';
+import type { ChatMessage, ToolCall } from '@/types';
 import { useSettingsStore } from '@/stores/settings';
 import {
   getCurrentTimeInfoTool,
@@ -561,8 +561,7 @@ export async function generateTwoStageAIResponseWithSystem<T>(
   data: T,
   systemPrompt: string,
   signal?: AbortSignal,
-  onChunk?: (chunk: string) => void,
-  supplementaryInfo?: SupplementaryInfo
+  onChunk?: (chunk: string) => void
 ): Promise<AIResponse> {
   try {
     // 直接使用原始问题生成最终回答，并添加system prompt

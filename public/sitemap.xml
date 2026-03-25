@@ -55,11 +55,11 @@
   
   <!-- 其他重要页面 -->
   <url>
-    <loc>https://sydf.cc/daily-fortune</loc>
+    <loc>https://sydf.cc/divination/daily</loc>
     <lastmod>2025-10-07</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://sydf.cc/daily-fortune" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://sydf.cc/divination/daily" />
   </url>
   
   <url>

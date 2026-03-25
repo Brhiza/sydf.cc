@@ -1,18 +1,19 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import type { HistoryRecord } from '@/services/history';
-import { historyService } from '@/services/history';
+import { useHistoryActions } from './useHistoryActions';
 
 export function useHistoryManager(initialSelectedId: string | null) {
   const router = useRouter();
   const historyRecords = ref<HistoryRecord[]>([]);
   const selectedRecord = ref<HistoryRecord | null>(null);
+  const { getHistoryRecords, confirmClearAllHistory, confirmDeleteRecord } = useHistoryActions();
 
   /**
    * 加载历史记录
    */
   function loadHistory() {
-    historyRecords.value = historyService.getRecords();
+    historyRecords.value = getHistoryRecords();
     if (initialSelectedId) {
       const record = historyRecords.value.find(r => r.id === initialSelectedId);
       if (record) {
@@ -35,8 +36,7 @@ export function useHistoryManager(initialSelectedId: string | null) {
    * 清空所有历史记录
    */
   function clearAllHistory() {
-    if (confirm('确定要清空所有历史记录吗？此操作不可撤销。')) {
-      historyService.clearRecords();
+    if (confirmClearAllHistory()) {
       historyRecords.value = [];
       selectedRecord.value = null;
     }
@@ -47,8 +47,7 @@ export function useHistoryManager(initialSelectedId: string | null) {
    * @param id - 记录ID
    */
   function deleteHistoryRecord(id: string) {
-    if (confirm('确定要删除这条记录吗？此操作不可撤销。')) {
-      historyService.deleteRecord(id);
+    if (confirmDeleteRecord(id)) {
       goBack();
     }
   }

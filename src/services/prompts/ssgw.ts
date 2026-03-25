@@ -1,6 +1,5 @@
 import type { SsgwData, SupplementaryInfo } from '@/types';
-import { analyzeQuestion } from './shared/question-analyzer';
-import { buildPrompt } from './shared/prompt-builder';
+import { generatePromptWithFormatterSync } from './shared/prompt-generator';
 
 /**
  * 格式化三山国王灵签数据为可读的文本
@@ -21,24 +20,15 @@ export function generateSsgwPrompt(
   timeInfo: string,
   supplementaryInfo?: SupplementaryInfo
 ): string {
-  // 分析问题
-  const analysis = analyzeQuestion(question);
-  
-  // 格式化数据
-  const formattedData = formatSsgwData(data);
-  
-  // 构建基础提示词
-  const basePrompt = buildPrompt({
+  return generatePromptWithFormatterSync({
     divinationType: 'ssgw',
     question,
-    formattedData,
+    data,
     timeInfo,
-    analysis,
-    ...(supplementaryInfo && { supplementaryInfo })
-  });
-  
-  // 添加三山国王灵签专用分析
-  const ssgwSpecific = `
+    supplementaryInfo,
+    formatData: (currentData) => formatSsgwData(currentData),
+    appendPrompt: (basePrompt, context) => {
+      const ssgwSpecific = `
 
 ## 三山国王灵签专业分析要求
 - **签诗解读**：深入分析签诗的字面意思和深层寓意，用简单易懂的语言解释
@@ -48,7 +38,7 @@ export function generateSsgwPrompt(
 - **时空关联**：分析签文与当前时空环境的关联性，以及对具体问题的指导意义
 - **问题关联**：综合分析签诗如何直接回应用户的具体疑问
 
-**专业术语解释**：${analysis.userExperience.level === 'beginner' ? '请用简单语言解释签文、典故等概念' : analysis.userExperience.level === 'intermediate' ? '可适当使用专业术语并简要解释' : '可使用专业术语进行深度灵签分析'}
+**专业术语解释**：${context.analysis.userExperience.level === 'beginner' ? '请用简单语言解释签文、典故等概念' : context.analysis.userExperience.level === 'intermediate' ? '可适当使用专业术语并简要解释' : '可使用专业术语进行深度灵签分析'}
 
 **具体要求**：
 - 给出1-2个具体可行的建议
@@ -56,6 +46,7 @@ export function generateSsgwPrompt(
 - 给出行动时机建议
 - 评估当前行动的成功可能性`;
 
-  // 构建最终提示词（已包含干支指导）
-  return basePrompt + ssgwSpecific;
+      return basePrompt + ssgwSpecific;
+    },
+  });
 }

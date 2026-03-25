@@ -1,4 +1,4 @@
-import { createRouter, createWebHashHistory } from 'vue-router';
+import { createRouter, createWebHistory } from 'vue-router';
 import divinationRoutes from './divination';
 import historyRoutes from './history';
 const isCustomBuild = import.meta.env.VITE_APP_BUILD_TARGET === 'CUSTOM';
@@ -6,7 +6,7 @@ import settingsRoutes from './settings';
 
 // 创建路由实例
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory(),
   routes: [
     {
       path: '/',
@@ -38,8 +38,11 @@ const router = createRouter({
     },
     {
       path: '/daily-fortune',
-      name: 'daily-fortune',
-      component: () => import('../views/DailyFortuneView.vue'),
+      name: 'daily-fortune-legacy',
+      redirect: (to) => ({
+        path: '/divination/daily',
+        query: to.query,
+      }),
     },
     // 404页面
     {

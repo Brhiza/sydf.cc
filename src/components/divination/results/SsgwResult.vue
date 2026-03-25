@@ -1,13 +1,7 @@
 <template>
-  <div v-if="data" class="ssgw-info">
-    <div class="info-item">
-      <span class="label">签号：</span>
-      <span class="value">第{{ data.number }}签</span>
-    </div>
-    <div class="info-item">
-      <span class="label">签名：</span>
-      <span class="value">{{ data.title }}</span>
-    </div>
+  <BaseResultLayout v-if="data" class="ssgw-info">
+    <ResultInfoHeader :items="headerItems" />
+
     <div class="info-item poem">
       <div class="poem-content">{{ data.poem }}</div>
     </div>
@@ -23,15 +17,23 @@
         <div class="detail-value">{{ value }}</div>
       </div>
     </div>
-  </div>
+  </BaseResultLayout>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import type { SsgwData } from '@/types/divination';
+import BaseResultLayout from './BaseResultLayout.vue';
+import ResultInfoHeader from './ResultInfoHeader.vue';
+import { createSsgwHeaderItems } from './ssgw/ssgw-result';
 
-defineProps<{
+const props = defineProps<{
   data: SsgwData | null;
 }>();
+
+const headerItems = computed(() => {
+  return props.data ? createSsgwHeaderItems(props.data) : [];
+});
 </script>
 
 <style scoped>

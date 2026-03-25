@@ -3,9 +3,16 @@ import MeihuaResult from './MeihuaResult.vue';
 import QimenResult from './QimenResult.vue';
 import SsgwResult from './SsgwResult.vue';
 import TarotResult from './TarotResult.vue';
-import DailyResult from './DailyResult.vue';
+import DailyInterpretationResult from './DailyInterpretationResult.vue';
 
-export { LiuyaoResult, MeihuaResult, QimenResult, SsgwResult, TarotResult, DailyResult };
+export {
+  LiuyaoResult,
+  MeihuaResult,
+  QimenResult,
+  SsgwResult,
+  TarotResult,
+  DailyInterpretationResult,
+};
 
 // 导出所有结果组件，用于全局注册
 // 使用 Component 类型断言
@@ -17,5 +24,5 @@ export const resultComponents = [
   QimenResult as Component,
   TarotResult as Component,
   SsgwResult as Component,
-  DailyResult as Component,
+  DailyInterpretationResult as Component,
 ] as const;

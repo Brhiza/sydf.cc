@@ -25,8 +25,6 @@ import {
 import {
   generateYaosByTime,
   getDivinationTime,
-  generateYaosByRandom,
-  generateYaosByNumber,
 } from '../../utils/timeManager.ts';
 
 /**
@@ -105,34 +103,69 @@ function getWorldAndResponseArray(shiYing: { shi: number; ying: number }): strin
     return result;
 }
 
+function getSpecialPattern(changingCount: number, mainHexagramName: string): {
+    specialPattern?: '静卦' | '独静卦' | '全动卦' | '乾卦用九' | '坤卦用六';
+    specialAdvice?: string;
+    isChaotic: boolean;
+    chaoticReason?: string;
+} {
+    if (changingCount === 0) {
+        return {
+            specialPattern: '静卦',
+            specialAdvice: '六爻安静，以本卦卦意和世应用神为主，不取变爻之象。',
+            isChaotic: false,
+        };
+    }
+
+    if (changingCount === 5) {
+        return {
+            specialPattern: '独静卦',
+            specialAdvice: '五爻俱动，一爻独静。常见取法以独静爻为关键，同时兼看变卦所示趋势。',
+            isChaotic: false,
+        };
+    }
+
+    if (changingCount === 6) {
+        if (mainHexagramName === '乾为天') {
+            return {
+                specialPattern: '乾卦用九',
+                specialAdvice: '乾卦六爻皆动，宜以用九“见群龙无首，吉”为主，兼参之卦总势，不按常规逐爻细断。',
+                isChaotic: false,
+            };
+        }
+
+        if (mainHexagramName === '坤为地') {
+            return {
+                specialPattern: '坤卦用六',
+                specialAdvice: '坤卦六爻皆动，宜以用六“利永贞”为主，兼参之卦总势，不按常规逐爻细断。',
+                isChaotic: false,
+            };
+        }
+
+        return {
+            specialPattern: '全动卦',
+            specialAdvice: '六爻全动，宜总观本卦与变卦气势，不宜按常规逐爻细碎分断。',
+            isChaotic: true,
+            chaoticReason: '六爻全动，属于乱动卦。传统上此类卦不宜按常规多爻细断，宜另取用神旺衰总观。',
+        };
+    }
+
+    return {
+        isChaotic: false,
+    };
+}
+
 /**
  * 生成六爻卦盘
  * @param customDate 自定义时间，若不提供则使用当前时间
  * @returns 返回一个完整的六爻卦盘数据对象
  */
 export function generateLiuyao(
-  customDate?: Date,
-  method: 'default' | 'random' | 'number' = 'default',
-  divinationNumber?: number
+  customDate?: Date
 ) {
     // 1. 获取占卜时间的干支信息
     const { ganzhi, timestamp } = getDivinationTime(customDate);
-    let rawYaos: number[];
-
-    switch (method) {
-      case 'random':
-        rawYaos = generateYaosByRandom(6);
-        break;
-      case 'number':
-        if (!divinationNumber) {
-          throw new Error('数字起卦需要提供数字');
-        }
-        rawYaos = generateYaosByNumber(divinationNumber, 6);
-        break;
-      default:
-        rawYaos = generateYaosByTime(timestamp, 6);
-        break;
-    }
+    const rawYaos = generateYaosByTime(timestamp, 6);
 
     const mainYaos = rawYaos.map((yao) => (yao === 7 || yao === 9 ? '阳' : '阴'));
     const changedYaos = rawYaos.map((yao, index) => {
@@ -184,6 +217,11 @@ export function generateLiuyao(
         }))
         .filter((yao) => yao.isChanging);
 
+    const { specialPattern, specialAdvice, isChaotic, chaoticReason } = getSpecialPattern(
+        changingYaosResult.length,
+        mainHexagram.name
+    );
+
     return {
         originalName: mainHexagram.name,
         changedName: changedHexagram.name,
@@ -198,6 +236,10 @@ export function generateLiuyao(
         voidBranches: voids,
         palace,
         ganzhi,
+        specialPattern,
+        specialAdvice,
+        isChaotic,
+        chaoticReason,
         yaosDetail: yaosInfo.map((info, index) => {
             const isChanging = rawYaos[index] === 6 || rawYaos[index] === 9;
             const changedInfo = isChanging ? changedYaosInfo[index] : null;

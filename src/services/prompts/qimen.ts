@@ -4,14 +4,85 @@
  */
 
 import type { QimenData, SupplementaryInfo } from '@/types';
-import { analyzeQuestion } from './shared/question-analyzer';
-import { buildPrompt } from './shared/prompt-builder';
-import { getFormattedTimeInfo } from './shared/time-utils';
+import { generatePromptWithFormatter, type PromptFormatterContext } from './shared/prompt-generator';
+import type { QuestionType } from './shared/types';
+import { createQimenPriorityPalaces, createQimenQuestionHints } from '@/utils/qimen-guidance';
+
+function getQimenYongShenHint(types: QuestionType, data: QimenData, supplementaryInfo?: SupplementaryInfo): string {
+  const hints: string[] = [];
+
+  if (types.isCareer) {
+    hints.push(getDoorHint(data, '开门', '事业问事常取开门为主'));
+    hints.push(getDoorHint(data, '生门', '求发展与机会时兼看生门'));
+  }
+  if (types.isFinance) {
+    hints.push(getDoorHint(data, '生门', '财运问事常取生门为主'));
+    hints.push(getDoorHint(data, '开门', '交易、项目推进可兼看开门'));
+  }
+  if (types.isHealth) {
+    hints.push(getStarHint(data, '天芮', '健康问事常参天芮星'));
+    hints.push(getDoorHint(data, '死门', '病症与压力位可兼看死门'));
+  }
+  if (types.isStudy) {
+    hints.push(getStarHint(data, '天辅', '学业文书常参天辅星'));
+  }
+
+  const relationshipHint = getRelationshipHint(types, data, supplementaryInfo);
+  if (relationshipHint) {
+    hints.push(relationshipHint);
+  }
+
+  const validHints = hints.filter(Boolean);
+  return validHints.length > 0 ? validHints.join('；') : '未命中固定分类，宜结合问事对象另取用神。';
+}
+
+function getRelationshipHint(types: QuestionType, data: QimenData, supplementaryInfo?: SupplementaryInfo): string | '' {
+  if (!types.isRelationship) {
+    return '';
+  }
+
+  const liuheHint = getGodHint(data, '六合', '感情问事常参六合');
+  const yiHint = getStemHint(data, '乙', supplementaryInfo?.gender === '男' ? '男测感情可重点看乙奇' : '乙奇可参');
+  const gengHint = getStemHint(data, '庚', supplementaryInfo?.gender === '女' ? '女测感情可重点看庚金' : '庚金可参');
+
+  return [liuheHint, yiHint, gengHint].filter(Boolean).join('；');
+}
+
+function getDoorHint(data: QimenData, door: string, label: string): string {
+  const gong = data.jiuGongGe.find((item) => item.renPan.door === door);
+  return gong ? `${label}，当前落${gong.name}` : '';
+}
+
+function getGodHint(data: QimenData, god: string, label: string): string {
+  const gong = data.jiuGongGe.find((item) => item.shenPan.god === god);
+  return gong ? `${label}，当前落${gong.name}` : '';
+}
+
+function getStarHint(data: QimenData, star: string, label: string): string {
+  const gong = data.jiuGongGe.find((item) => item.tianPan.star === star);
+  return gong ? `${label}，当前落${gong.name}` : '';
+}
+
+function getStemHint(data: QimenData, stem: string, label: string): string {
+  const tianGong = data.jiuGongGe.find((item) => item.tianPan.stem === stem);
+  const diGong = data.jiuGongGe.find((item) => item.diPan.stem === stem);
+  const parts: string[] = [];
+
+  if (tianGong) {
+    parts.push(`天盘落${tianGong.name}`);
+  }
+  if (diGong) {
+    parts.push(`地盘落${diGong.name}`);
+  }
+
+  return parts.length > 0 ? `${label}，${parts.join('，')}` : '';
+}
 
 /**
  * 格式化奇门遁甲数据为可读的文本
  */
-function formatQimenData(data: QimenData): string {
+function formatQimenData(data: QimenData, context: PromptFormatterContext): string {
+  const { question, supplementaryInfo, analysis } = context;
   // 使用3x3表格呈现九宫格，增强AI对空间方位的理解
   const timeStr = data.timeInfo
     ? `${data.timeInfo.solarTerm} ${data.timeInfo.epoch}`
@@ -20,6 +91,19 @@ function formatQimenData(data: QimenData): string {
   const ganzhiStr = data.ganzhi
     ? `干支：${data.ganzhi.year}年 ${data.ganzhi.month}月 ${data.ganzhi.day}日 ${data.ganzhi.hour}时`
     : '干支信息未知';
+  const yongShenHint = getQimenYongShenHint(analysis.types, data, supplementaryInfo);
+  const patternHint = data.patternDetails?.map((item) => `${item.tag}：${item.summary}`).join('；') || '无';
+  const palaceHint = data.palaceInsights?.map((item) => `${item.name}${item.level}：${item.summary}`).join('；') || '无';
+  const questionHints = createQimenQuestionHints(question, data, supplementaryInfo);
+  const priorityPalaces = createQimenPriorityPalaces(question, data, supplementaryInfo).slice(0, 3);
+  const questionHintText =
+    questionHints.length > 0
+      ? questionHints.map((item) => `- **${item.label}**: ${item.value}`).join('\n')
+      : '- **问事参考**: 未命中固定分类，宜结合具体目标另取用神。';
+  const priorityText =
+    priorityPalaces.length > 0
+      ? priorityPalaces.map((item, index) => `${index + 1}. ${item.name}（评分${item.score}）：${item.reasons.join('；')}`).join('\n')
+      : '无';
 
   let jiugongTable = '| 巽四宫 | 离九宫 | 坤二宫 |\n|---|---|---|\n';
   if (data.jiuGongGe && Array.isArray(data.jiuGongGe)) {
@@ -42,6 +126,16 @@ function formatQimenData(data: QimenData): string {
 - **${ganzhiStr}**
 - **局数**: ${data.isYangDun ? '阳遁' : '阴遁'}${data.juShu}局
 - **核心**: 值符: ${data.zhiFu} | 值使: ${data.zhiShi}
+- **格局标签**: ${data.patternTags?.join('、') || '无明显格局标签'}
+- **格局提示**: ${patternHint}
+- **宫位提示**: ${palaceHint}
+- **用神参考**: ${yongShenHint}
+
+**问事宫位参考**:
+${questionHintText}
+
+**重点宫位排序**:
+${priorityText}
 
 **九宫格详情 (方位图)**:
 ${jiugongTable}`;
@@ -56,22 +150,12 @@ export async function generateQimenPrompt(
   timeInfo?: string,
   supplementaryInfo?: SupplementaryInfo
 ): Promise<string> {
-  // 获取时间信息
-  const currentTimeInfo = timeInfo || await getFormattedTimeInfo();
-  
-  // 分析问题
-  const analysis = analyzeQuestion(question);
-  
-  // 格式化数据
-  const formattedData = formatQimenData(data);
-  
-  // 构建提示词（已包含干支指导）
-  return buildPrompt({
+  return generatePromptWithFormatter({
     divinationType: 'qimen',
     question,
-    formattedData,
-    timeInfo: currentTimeInfo,
-    analysis,
-    ...(supplementaryInfo && { supplementaryInfo })
+    data,
+    timeInfo,
+    supplementaryInfo,
+    formatData: formatQimenData,
   });
 }

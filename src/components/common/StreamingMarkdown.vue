@@ -7,7 +7,7 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
-import { marked } from 'marked';
+import { renderSafeMarkdown } from '@/utils/markdown';
 
 interface Props {
   content: string | { value: string };
@@ -22,11 +22,6 @@ const fullText = computed(() => typeof props.content === 'string' ? props.conten
 const finalContent = ref('');
 const thinkingContent = ref('');
 const isThinking = ref(false);
-
-marked.setOptions({
-  breaks: true,
-  gfm: true,
-});
 
 const thinkingTags = ['think', 'thinking', 'reason', 'analyze', 'reflect'];
 const tagTitles: Record<string, string> = {
@@ -67,7 +62,7 @@ watch(
       } else if (closingTagMatch && thinkingTags.includes(closingTagMatch[1])) {
         if (inThinkingBlock && currentTagType === closingTagMatch[1]) {
           // 正常闭合
-          const thinkingHTML = await marked.parse(currentThinking);
+          const thinkingHTML = await renderSafeMarkdown(currentThinking);
           const detailsTag = newIsComplete
             ? `<details class="thinking-${currentTagType}"><summary>${tagTitles[currentTagType]}</summary><div class="thinking-content">${thinkingHTML}</div></details>`
             : `<details open class="thinking-${currentTagType}"><summary>${tagStatus[currentTagType]}</summary><div class="thinking-content">${thinkingHTML}</div></details>`;
@@ -78,7 +73,7 @@ watch(
           // 处理没有开始标签的结束标签
           currentThinking = processedHTML;
           processedHTML = '';
-          const thinkingHTML = await marked.parse(currentThinking);
+          const thinkingHTML = await renderSafeMarkdown(currentThinking);
           const tagType = closingTagMatch[1];
           const detailsTag = `<details class="thinking-${tagType}"><summary>${tagTitles[tagType] || '查看AI的思考过程'}</summary><div class="thinking-content">${thinkingHTML}</div></details>`;
           processedHTML += detailsTag;
@@ -88,7 +83,7 @@ watch(
         if (inThinkingBlock) {
           currentThinking += part;
         } else {
-          processedHTML += await marked.parse(part);
+          processedHTML += await renderSafeMarkdown(part);
         }
       }
     }
@@ -96,7 +91,7 @@ watch(
     // Update reactive refs
     if (inThinkingBlock) {
       finalContent.value = processedHTML;
-      thinkingContent.value = await marked.parse(currentThinking);
+      thinkingContent.value = await renderSafeMarkdown(currentThinking);
       isThinking.value = true;
     } else {
       finalContent.value = processedHTML;

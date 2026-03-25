@@ -1,57 +1,34 @@
 <template>
-  <div class="result-header">
-    <div v-if="solarTime" class="info-line">
-      <span class="info-label">公历时间：</span>
-      <span class="info-value">{{ solarTime }}</span>
-    </div>
-    <div v-if="ganzhiTime" class="info-line">
-      <span class="info-label">干支：</span>
-      <span class="info-value">{{ ganzhiTime }}</span>
-    </div>
+  <ResultInfoHeader :items="headerItems">
     <slot></slot>
-  </div>
+  </ResultInfoHeader>
 </template>
 
 <script setup lang="ts">
-defineProps<{
+import { computed } from 'vue';
+import ResultInfoHeader from './ResultInfoHeader.vue';
+
+interface ResultHeaderItem {
+  label: string;
+  value: string;
+}
+
+const props = withDefaults(defineProps<{
   solarTime?: string;
   ganzhiTime?: string;
-}>();
+  solarLabel?: string;
+  ganzhiLabel?: string;
+}>(), {
+  solarTime: '',
+  ganzhiTime: '',
+  solarLabel: '起卦时间',
+  ganzhiLabel: '干支信息',
+});
+
+const headerItems = computed<ResultHeaderItem[]>(() => {
+  return [
+    props.solarTime ? { label: props.solarLabel, value: props.solarTime } : null,
+    props.ganzhiTime ? { label: props.ganzhiLabel, value: props.ganzhiTime } : null,
+  ].filter((item): item is ResultHeaderItem => !!item);
+});
 </script>
-
-<style scoped>
-.result-header {
-  margin-bottom: var(--spacing-3);
-}
-
-.info-line {
-  display: flex;
-  align-items: center;
-  margin-bottom: var(--spacing-1);
-  justify-content: space-between;
-  line-height: 1.4;
-}
-
-.info-line:last-child {
-  margin-bottom: 0;
-}
-
-.info-label {
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-secondary);
-  width: 80px;
-  text-align: justify;
-  text-align-last: justify;
-  flex-shrink: 0;
-  font-size: 16px;
-}
-
-.info-value {
-  color: var(--color-text-primary);
-  font-weight: var(--font-weight-medium);
-  flex: 1;
-  text-align: left;
-  margin-left: var(--spacing-2);
-  font-size: 16px;
-}
-</style>

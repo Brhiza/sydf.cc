@@ -8,18 +8,29 @@ import { generateQimen } from '../../../src/services/algorithms/qimen.ts';
 import { SSGW_SIGNS } from '../../../src/utils/ssgw-data.ts';
 import { drawSingleCard, drawSpreadCards, getCardKeywords, tarotSpreads } from '../../../src/utils/tarot.ts';
 import { getDivinationTime, setTimezoneOffsetMinutesOverride } from '../../../src/utils/timeManager.ts';
+import { buildDivinationSystemPrompt } from '../../../src/shared/divination-system-prompt.ts';
+import { proxyAiRequest } from '../../_shared/ai-proxy.js';
 
 type DivinationType = 'daily' | 'liuyao' | 'meihua' | 'qimen' | 'ssgw' | 'tarot' | 'tarot_single';
-
-type DivinationMethod = 'default' | 'random' | 'number';
 
 interface SupplementaryInfo {
   gender?: '男' | '女';
   birthYear?: number;
   interpretationStyle?: '入门' | '专业';
   outputLength?: '精简' | '详细' | '超详细';
-  divinationMethod?: DivinationMethod;
-  divinationNumber?: number;
+  meihuaSettings?: {
+    method?: 'time' | 'number' | 'random' | 'external';
+    number?: number;
+    externalOmens?: {
+      direction?: '东' | '东南' | '南' | '西南' | '西' | '西北' | '北' | '东北';
+      count?: number;
+      person?: '老父' | '老妇' | '长男' | '长女' | '中男' | '中女' | '少男' | '少女';
+      animal?: '马' | '牛' | '龙' | '鸡' | '猪' | '雉' | '狗' | '羊';
+      object?: '金玉圆器' | '布帛陶器' | '竹木乐器' | '绳索长木' | '水器液体' | '火电文书' | '石块门板' | '刀剪口器';
+      sound?: '洪亮金石' | '沉厚低缓' | '雷鸣震动' | '风声呼啸' | '流水滴答' | '爆裂鸣叫' | '闷阻叩击' | '清脆笑语';
+      color?: '金白' | '土黄' | '青碧' | '青绿' | '黑蓝' | '赤紫' | '棕黄' | '银白';
+    };
+  };
   date?: string; // YYYY-MM-DD，仅用于今日运势
 }
 
@@ -29,8 +40,6 @@ interface DivinationRequestBody {
   stream?: boolean;
   debug?: boolean;
   options?: {
-    method?: DivinationMethod;
-    divinationNumber?: number;
     spreadType?: string;
     signNumber?: number;
     date?: string; // YYYY-MM-DD
@@ -38,6 +47,15 @@ interface DivinationRequestBody {
     supplementaryInfo?: SupplementaryInfo;
     temperature?: number;
   };
+}
+
+interface OpenAiProxyResponse {
+  choices?: Array<{
+    message?: {
+      content?: string | null;
+    };
+  }>;
+  usage?: unknown;
 }
 
 const DEV_TZ_OFFSET_MINUTES = 480; // 北京时间 UTC+8
@@ -115,12 +133,6 @@ function sseResponse(stream: ReadableStream<Uint8Array>, origin: string | null):
   return new Response(stream, { headers });
 }
 
-function normalizeMethod(method?: string, fallback?: DivinationMethod): DivinationMethod {
-  const m = (method || fallback || 'default').toLowerCase();
-  if (m === 'random' || m === 'number' || m === 'default') return m;
-  return 'default';
-}
-
 function parseDateOnly(dateStr: string): Date {
   // 按 YYYY-MM-DD 解析，避免 new Date('YYYY-MM-DD') 的UTC歧义
   const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
@@ -153,42 +165,6 @@ function formatTimeInfo(time: ReturnType<typeof getDivinationTime>): string {
     `干支：${ganzhi.year}年 ${ganzhi.month}月 ${ganzhi.day}日 ${ganzhi.hour}时`,
     `节气：${timeInfo.jieQi}`,
   ].join('\n');
-}
-
-function buildSystemPrompt(type: DivinationType, supplementaryInfo?: SupplementaryInfo): string {
-  const length = supplementaryInfo?.outputLength || '详细';
-  const style = supplementaryInfo?.interpretationStyle || '专业';
-
-  const lengthGuidance =
-    length === '精简'
-      ? '尽量精炼，突出结论与可执行建议，避免长篇铺陈。'
-      : length === '超详细'
-        ? '允许更深入、更全面的分析，但仍需结构清晰、避免重复。'
-        : '保持适中篇幅，结论清晰，分析有依据。';
-
-  const typeGuidance: Record<DivinationType, string> = {
-    daily: '你擅长日家奇门的今日运势解读，能把运势拆解到事业/财运/感情/健康，并给出可执行建议。',
-    liuyao: '你精通六爻断卦，重点围绕用神、世应、动爻、变卦、旺衰、生克冲合进行判断。',
-    meihua: '你精通梅花易数，重点围绕体用、生克、互卦与变卦的关系链给出判断与建议。',
-    qimen: '你精通转盘奇门遁甲，能结合值符值使、用神落宫、九宫星门神干配置判断吉凶与方位时机。',
-    ssgw: '你精通三山国王灵签解签，能结合签诗、典故与现实问题给出通俗且有用的指导。',
-    tarot: '你是专业塔罗解读师，能结合牌阵位置、正逆位、关键词做综合解读并给出行动建议。',
-    tarot_single: '你是专业塔罗单牌解读师，解读要直接、聚焦、可操作。',
-  };
-
-  const base = `你是一个专业的占卜AI助手。
-
-硬性要求：
-- 必须且只能使用简体中文回答。
-- 不要编造不存在的占卜数据；只能基于我提供的数据进行解读。
-- 输出结构必须包含：核心结论、详细分析、行动建议、总结要点。
-
-解读风格：${style}
-输出长度：${length}（${lengthGuidance}）
-
-${typeGuidance[type]}`;
-
-  return base;
 }
 
 function buildUserPrompt(args: {
@@ -237,21 +213,15 @@ async function generateDivinationData(type: DivinationType, body: DivinationRequ
   }
 
   if (type === 'liuyao') {
-    const method = normalizeMethod(options.method, supplementaryInfo?.divinationMethod);
-    const divinationNumber = options.divinationNumber ?? supplementaryInfo?.divinationNumber;
-    return generateLiuyao(baseDate, method, divinationNumber);
+    return generateLiuyao(baseDate);
   }
 
   if (type === 'meihua') {
-    const method = normalizeMethod(options.method, supplementaryInfo?.divinationMethod);
-    const divinationNumber = options.divinationNumber ?? supplementaryInfo?.divinationNumber;
-    return generateMeihua(baseDate, method, divinationNumber);
+    return generateMeihua(baseDate, supplementaryInfo?.meihuaSettings);
   }
 
   if (type === 'qimen') {
-    const method = normalizeMethod(options.method, supplementaryInfo?.divinationMethod);
-    const divinationNumber = options.divinationNumber ?? supplementaryInfo?.divinationNumber;
-    return generateQimen(baseDate, method, divinationNumber);
+    return generateQimen(baseDate);
   }
 
   if (type === 'ssgw') {
@@ -423,7 +393,12 @@ export async function onRequest(context: { request: Request; env: Record<string,
   const timeInfoText = formatTimeInfo(getDivinationTime(baseDate));
 
   const supplementaryInfo = body.options?.supplementaryInfo;
-  const systemPrompt = buildSystemPrompt(type, supplementaryInfo);
+  const systemPrompt = buildDivinationSystemPrompt(type, {
+    strictDataOnly: true,
+    requireStructuredSections: true,
+    interpretationStyle: supplementaryInfo?.interpretationStyle,
+    outputLength: supplementaryInfo?.outputLength,
+  });
   const userPrompt = buildUserPrompt({
     type,
     question: body.question,
@@ -436,17 +411,12 @@ export async function onRequest(context: { request: Request; env: Record<string,
   const debug = !!body.debug;
   const temperature = body.options?.temperature;
 
-  const aiUrl = new URL('/api/ai', request.url);
   const aiBody = buildOpenAiBody({ systemPrompt, userPrompt, stream, temperature });
 
   if (!stream) {
     let aiResp: Response;
     try {
-      aiResp = await fetch(aiUrl.toString(), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(aiBody),
-      });
+      aiResp = await proxyAiRequest(env, aiBody);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'AI 请求失败';
       return jsonResponse(
@@ -471,7 +441,7 @@ export async function onRequest(context: { request: Request; env: Record<string,
       );
     }
 
-    let aiJson: any = null;
+    let aiJson: OpenAiProxyResponse | null = null;
     try {
       aiJson = await aiResp.json();
     } catch {
@@ -520,10 +490,7 @@ export async function onRequest(context: { request: Request; env: Record<string,
 
       let aiResp: Response;
       try {
-        aiResp = await fetch(aiUrl.toString(), {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(aiBody),
+        aiResp = await proxyAiRequest(env, aiBody, {
           signal: abortController.signal,
         });
       } catch (error) {

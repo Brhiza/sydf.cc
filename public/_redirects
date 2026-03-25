@@ -1,10 +1,16 @@
-# SPA 路由支持 - 所有非文件路径都重定向到 index.html
-# 只对不存在的文件路径进行重定向
-/api/*    /index.html   200
+# SPA 路由支持 - 所有前端页面入口都回退到 index.html
 /divination/*    /index.html   200
-/daily-fortune    /index.html   200
 /history    /index.html   200
+/history/*    /index.html   200
 /about    /index.html   200
+/rengong    /index.html   200
+/gongdebox    /index.html   200
+/gongdeboard    /index.html   200
+/settings    /index.html   200
+/api-key    /index.html   200
+/api-config    /index.html   200
+/ssgw    /index.html   200
+/daily-fortune    /divination/daily   301
 
 # 旧路径重定向（如果有历史路径需要保持）
 # /old-path    /new-path    301

@@ -33,13 +33,16 @@
 
 ## 4. 依赖的 AI 配置
 
-本 API 内部会调用项目已有的 `POST /api/ai` 代理来生成解读，因此还需要配置：
+本 API 内部会复用项目的 AI 代理配置来生成解读，因此还需要配置：
 
 - `OPENAI_API_KEY`（必需）
 - `OPENAI_API_BASE`（可选，默认 `https://api.openai.com/v1`）
 - `OPENAI_API_MODEL`（可选，默认值由项目配置决定）
 
-说明：`/api/ai` 会强制使用环境变量中的模型配置。
+说明：
+
+- AI 请求会强制使用环境变量中的模型配置。
+- 公开的 `POST /api/ai` 仅供本站前端同源调用，不应作为第三方开放代理依赖。
 
 ## 5. 接口：POST `/api/v1/divination`
 
@@ -70,8 +73,6 @@ Authorization: Bearer <DEV_API_KEY>
   "debug": false,
   "options": {
     "datetime": "2026-03-16T12:00:00+08:00",
-    "method": "default",
-    "divinationNumber": 123,
     "spreadType": "three",
     "signNumber": 8,
     "date": "2026-03-16",
@@ -80,7 +81,15 @@ Authorization: Bearer <DEV_API_KEY>
       "gender": "男",
       "birthYear": 1990,
       "interpretationStyle": "专业",
-      "outputLength": "详细"
+      "outputLength": "详细",
+      "meihuaSettings": {
+        "method": "external",
+        "externalOmens": {
+          "direction": "东",
+          "person": "少女",
+          "count": 5
+        }
+      }
     }
   }
 }
@@ -96,17 +105,35 @@ Authorization: Bearer <DEV_API_KEY>
 `options`：
 
 - `datetime`（可选）：指定起卦/排盘时间（ISO 8601，建议携带时区偏移，例如 `+08:00`）
-- `method`（可选）：`default | random | number`（六爻/梅花/奇门适用）
-- `divinationNumber`（可选）：数字起卦用（`method=number` 时必填）
+- 六爻、奇门固定使用服务端默认起卦/排盘逻辑
+- 梅花易数支持通过 `supplementaryInfo.meihuaSettings` 指定起卦方式
 - `date`（可选）：`daily` 专用，`YYYY-MM-DD`
 - `signNumber`（可选）：`ssgw` 专用，不传则随机抽签
 - `spreadType`（可选）：`tarot` 专用，不传默认 `three`
 - `temperature`（可选）：传给 AI 的 temperature
-- `supplementaryInfo`（可选）：影响解读风格/长度（不会改变既有排盘算法的核心逻辑）
+- `supplementaryInfo`（可选）：影响解读风格/长度；其中 `meihuaSettings` 会参与梅花易数起卦
 
 `tarot.spreadType` 可用值（与项目内置牌阵一致）：
 
 - `single`、`three`、`love`、`career`、`decision`、`celtic`、`chakra`、`year`、`mindBodySpirit`、`horseshoe`
+
+`supplementaryInfo.meihuaSettings` 可用值：
+
+- `method: "time"`：年月日时起卦
+- `method: "number"`：数字起卦，需同时提供 `number`
+- `method: "random"`：随机起卦
+- `method: "external"`：外应起卦，需同时提供 `externalOmens`
+
+`externalOmens` 字段说明：
+
+- `direction`：方位，对应八卦方位
+- `count`：数量，用于定动爻
+- `person`、`animal`、`object`、`sound`、`color`：外应类别，系统会按预设规则映射成八卦
+
+说明：
+
+- 外应起卦至少需要两项可映射的外应
+- 当前实现会按固定优先级取前两项外应成上卦、下卦：`direction -> person -> animal -> object -> sound -> color`
 
 ### 5.3 非流式响应（`stream=false`）
 
@@ -177,7 +204,7 @@ data: [DONE]
 curl -s https://sydf.cc/api/v1/divination \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <DEV_API_KEY>" \
-  -d '{"type":"liuyao","question":"我最近换工作是否顺利？","stream":false,"options":{"method":"default","supplementaryInfo":{"outputLength":"详细"}}}'
+  -d '{"type":"liuyao","question":"我最近换工作是否顺利？","stream":false,"options":{"supplementaryInfo":{"outputLength":"详细"}}}'
 ```
 
 今日运势（指定日期，非流式）：
@@ -187,6 +214,15 @@ curl -s https://sydf.cc/api/v1/divination \
   -H "Content-Type: application/json" \
   -H "X-Api-Key: <DEV_API_KEY>" \
   -d '{"type":"daily","stream":false,"options":{"date":"2026-03-16"}}'
+```
+
+梅花易数（外应起卦，非流式）：
+
+```bash
+curl -s https://sydf.cc/api/v1/divination \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <DEV_API_KEY>" \
+  -d '{"type":"meihua","question":"这件事会怎么发展？","stream":false,"options":{"datetime":"2026-03-16T12:00:00+08:00","supplementaryInfo":{"meihuaSettings":{"method":"external","externalOmens":{"direction":"东","person":"少女","count":5}}}}}'
 ```
 
 塔罗（三牌阵，流式）：

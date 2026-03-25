@@ -12,8 +12,7 @@ import { generateTarotPrompt } from './tarot';
 import { generateDailyFortunePrompt } from './daily';
 import { generateFollowUpPrompt, type FollowUpContext } from './followup';
 import { getFormattedTimeInfo } from './shared/time-utils';
-import { analyzeQuestion } from './shared/question-analyzer';
-import { buildPrompt } from './shared/prompt-builder';
+import { generateGenericPromptSync } from './shared/prompt-generator';
 
 /**
  * 生成追问模式专用提示词
@@ -47,7 +46,12 @@ export async function generatePrompt(
     case 'ssgw':
       return generateSsgwPrompt(question, data as SsgwData, timeInfo, supplementaryInfo);
     case 'daily':
-      return await generateDailyFortunePrompt(data as DailyFortuneData, supplementaryInfo, timeInfo);
+      return await generateDailyFortunePrompt(
+        question,
+        data as DailyFortuneData,
+        timeInfo,
+        supplementaryInfo
+      );
     default:
       // 通用占卜处理
       return await generateGenericPrompt(type, question, data, timeInfo, supplementaryInfo);
@@ -64,62 +68,13 @@ async function generateGenericPrompt(
   timeInfo: string,
   supplementaryInfo?: SupplementaryInfo
 ): Promise<string> {
-  // 分析问题
-  const analysis = analyzeQuestion(question);
-  
-  // 格式化数据（简单处理）
-  const formattedData = formatGenericData(data);
-  
-  // 构建提示词（已包含干支指导）
-  return buildPrompt({
+  return generateGenericPromptSync({
     divinationType: type,
     question,
-    formattedData,
+    data,
     timeInfo,
-    analysis,
-    ...(supplementaryInfo && { supplementaryInfo })
+    supplementaryInfo,
   });
-}
-
-/**
- * 格式化通用数据
- */
-function formatGenericData(data: DivinationData): string {
-  if (!data) {
-    return '暂无详细数据';
-  }
-  
-  // 尝试提取基本信息
-  const infoParts: string[] = [];
-  
-  // 使用类型断言来安全访问属性
-  const dataAny = data as unknown as Record<string, unknown>;
-  
-  if (dataAny.originalName && typeof dataAny.originalName === 'string') {
-    infoParts.push(`主卦：${dataAny.originalName}`);
-  }
-  
-  if (dataAny.changedName && typeof dataAny.changedName === 'string') {
-    infoParts.push(`变卦：${dataAny.changedName}`);
-  }
-  
-  if (dataAny.interName && typeof dataAny.interName === 'string') {
-    infoParts.push(`互卦：${dataAny.interName}`);
-  }
-  
-  if (dataAny.ganzhi && typeof dataAny.ganzhi === 'object' && dataAny.ganzhi !== null) {
-    const ganzhi = dataAny.ganzhi as Record<string, unknown>;
-    const { year, month, day, hour } = ganzhi;
-    if (typeof year === 'string' && typeof month === 'string' && typeof day === 'string' && typeof hour === 'string') {
-      infoParts.push(`干支：${year}年 ${month}月 ${day}日 ${hour}时`);
-    }
-  }
-  
-  if (infoParts.length === 0) {
-    return JSON.stringify(data, null, 2);
-  }
-  
-  return infoParts.join('\n');
 }
 
 // 导出共享模块，供其他地方使用

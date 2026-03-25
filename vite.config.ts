@@ -92,7 +92,8 @@ export default defineConfig((_env) => {
         },
         // 添加对暗色模式的支持
         injectManifest: {
-          globPatterns: ['**/*.{js,css,html,ico,png,jpg,jpeg,json}']
+          // 仅预缓存应用壳和关键静态资源，图片改走运行时缓存，降低首次安装体积
+          globPatterns: ['**/*.{js,css,html,ico,json,webmanifest}']
         },
         devOptions: {
           enabled: true,

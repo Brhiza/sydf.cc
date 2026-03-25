@@ -4,9 +4,10 @@ import { cleanupOutdatedCaches, precacheAndRoute } from 'workbox-precaching'
 import { registerRoute } from 'workbox-routing'
 import { StaleWhileRevalidate, NetworkFirst } from 'workbox-strategies'
 import { ExpirationPlugin } from 'workbox-expiration'
+import { clientsClaim, setCacheNameDetails } from 'workbox-core'
+import { enableImmediateServiceWorkerActivation } from './services/serviceWorkerLifecycle'
 
 // 禁用Workbox调试日志
-import { setCacheNameDetails } from 'workbox-core'
 setCacheNameDetails({
   prefix: 'sydf-app',
   suffix: 'v1',
@@ -24,6 +25,11 @@ if (typeof self !== 'undefined' && self.workbox) {
 }
 
 declare const self: ServiceWorkerGlobalScope
+
+enableImmediateServiceWorkerActivation({
+  skipWaiting: () => self.skipWaiting(),
+  claimClients: () => clientsClaim()
+})
 
 self.addEventListener('message', (event: ExtendableMessageEvent) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {

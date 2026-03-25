@@ -2,9 +2,8 @@
  * 统一的占卜时间管理工具
  * 简化时间相关操作，确保所有占卜基于统一的时间基础
  */
-import { getCurrentTimeInfo, getCurrentGanZhi } from './lunar.ts';
 import type { TimeInfo, GanZhiInfo } from './lunar.ts';
-import { SolarDay } from 'tyme4ts';
+import { SolarTime } from 'tyme4ts';
 
 /**
  * 统一的占卜时间数据
@@ -74,18 +73,10 @@ export class TimeManager {
    * @returns 统一的时间数据
    */
   static getDivinationTime(customTime?: Date): DivinationTime {
-    // 当启用时区覆盖时，不再依赖 LunarUtil.getCurrentTimeInfo() 的运行时本地时区
-    if (!customTime && this.timezoneOffsetMinutesOverride !== null) {
-      const now = new Date();
-      const timeInfo = this.getTimeInfo(now);
-      const ganzhi = this.getGanZhi(now);
-      const timestamp = now.getTime();
-      return { timeInfo, ganzhi, timestamp };
-    }
-
-    const timeInfo = customTime ? this.getTimeInfo(customTime) : getCurrentTimeInfo();
-    const ganzhi = customTime ? this.getGanZhi(customTime) : getCurrentGanZhi();
-    const timestamp = customTime ? customTime.getTime() : Date.now();
+    const targetTime = customTime || new Date();
+    const timeInfo = this.getTimeInfo(targetTime);
+    const ganzhi = this.getGanZhi(targetTime);
+    const timestamp = targetTime.getTime();
     
     return { timeInfo, ganzhi, timestamp };
   }
@@ -115,11 +106,12 @@ export class TimeManager {
   static generateYaosByTime(timestamp: number, count: number = 6): number[] {
     const yaos: number[] = [];
     for (let i = 0; i < count; i++) {
-      // 为每个爻生成不同的种子
-      const yaoSeed = timestamp + i * 1000;
-      // 模拟铜钱投掷：0-3的随机数对应6,7,8,9
-      const coinResult = this.getSeededRandom(yaoSeed, 4);
-      yaos.push([6, 7, 8, 9][coinResult]);
+      // 按三钱法逐币起爻，保持时间起卦的确定性。
+      yaos.push(
+        this.generateYaoByCoinMethod((coinIndex) =>
+          this.getSeededRandom(timestamp + i * 1000 + coinIndex * 97, 2)
+        )
+      );
     }
     return yaos;
   }
@@ -132,31 +124,20 @@ export class TimeManager {
   static generateYaosByRandom(count: number = 6): number[] {
     const yaos: number[] = [];
     for (let i = 0; i < count; i++) {
-      // 使用真随机数
-      const coinResult = Math.floor(Math.random() * 4);
-      yaos.push([6, 7, 8, 9][coinResult]);
+      yaos.push(this.generateYaoByCoinMethod(() => (Math.random() < 0.5 ? 0 : 1)));
     }
     return yaos;
   }
 
   /**
-   * 根据数字生成爻象
-   * @param number 输入的数字
-   * @param count 爻象数量
-   * @returns 爻象数组
+   * 使用三钱法起一爻：正面记 3，反面记 2，三枚铜钱合计得 6/7/8/9。
    */
-  static generateYaosByNumber(number: number, count: number = 6): number[] {
-    const yaos: number[] = [];
-    let currentNumber = number;
-    for (let i = 0; i < count; i++) {
-      // 使用数字的不同位和一些变换来增加多样性
-      const seed = (currentNumber % 100) + i * 10 + (currentNumber / 100);
-      const coinResult = Math.floor(seed) % 4;
-      yaos.push([6, 7, 8, 9][coinResult]);
-      // 变换数字，用于下一个爻的计算
-      currentNumber = (currentNumber * 3 + 7) / 2;
+  private static generateYaoByCoinMethod(getCoinBit: (coinIndex: number) => number): number {
+    let total = 0;
+    for (let coinIndex = 0; coinIndex < 3; coinIndex++) {
+      total += getCoinBit(coinIndex) === 0 ? 2 : 3;
     }
-    return yaos;
+    return total;
   }
 
   /**
@@ -165,21 +146,15 @@ export class TimeManager {
   private static getGanZhi(date: Date): GanZhiInfo {
     const offsetMinutes = this.getTimezoneOffsetMinutes(date);
     const parts = this.getDatePartsInOffset(date, offsetMinutes);
-
-    // 复用现有逻辑，但移除错误处理
-    const solar = SolarDay.fromYmd(parts.year, parts.month, parts.day);
-    const lunar = solar.getLunarDay();
-    
-    const currentHour = parts.hour;
-    const hours = lunar.getHours();
-    const hourIndex = this.calculateHourIndex(currentHour);
-    const currentLunarHour = hours[hourIndex] || hours[0];
+    const solarTime = SolarTime.fromYmdHms(parts.year, parts.month, parts.day, parts.hour, parts.minute, 0);
+    const lunarHour = solarTime.getLunarHour();
+    const lunarDay = lunarHour.getLunarDay();
 
     return {
-      year: lunar.getYearSixtyCycle().toString(),
-      month: lunar.getMonthSixtyCycle().toString(),
-      day: lunar.getSixtyCycle().toString(),
-      hour: currentLunarHour.getSixtyCycle().toString(),
+      year: lunarHour.getYearSixtyCycle().toString(),
+      month: lunarHour.getMonthSixtyCycle().toString(),
+      day: lunarDay.getSixtyCycle().toString(),
+      hour: lunarHour.getSixtyCycle().toString(),
     };
   }
 
@@ -189,70 +164,48 @@ export class TimeManager {
   private static getTimeInfo(date: Date): TimeInfo {
     const offsetMinutes = this.getTimezoneOffsetMinutes(date);
     const parts = this.getDatePartsInOffset(date, offsetMinutes);
-
-    // 复用现有逻辑，但移除错误处理
-    const solar = SolarDay.fromYmd(parts.year, parts.month, parts.day);
-    const lunar = solar.getLunarDay();
-    const jieQi = solar.getTerm();
-
-    const currentHour = parts.hour;
-    const hours = lunar.getHours();
-    const hourIndex = this.calculateHourIndex(currentHour);
-    const currentLunarHour = hours[hourIndex] || hours[0];
+    const solarTime = SolarTime.fromYmdHms(parts.year, parts.month, parts.day, parts.hour, parts.minute, 0);
+    const solarDay = solarTime.getSolarDay();
+    const lunarHour = solarTime.getLunarHour();
+    const lunarDay = lunarHour.getLunarDay();
+    const lunarDayText = lunarDay.toString().replace(/^农历/, '');
+    const lunarHourText = lunarHour.toString().replace(/^农历/, '');
+    const jieQi = solarTime.getTerm();
 
     return {
       solar: {
-        year: solar.getYear(),
-        month: solar.getMonth(),
-        day: solar.getDay(),
+        year: solarDay.getYear(),
+        month: solarDay.getMonth(),
+        day: solarDay.getDay(),
         hour: parts.hour,
         minute: parts.minute,
       },
       lunar: {
-        year: lunar.getYearSixtyCycle().toString(),
-        month: lunar.getMonthSixtyCycle().toString(),
-        day: lunar.getSixtyCycle().toString(),
-        hour: currentLunarHour.getSixtyCycle().toString(),
-        yearInChinese: lunar.toString().split('年')[0] + '年',
-        monthInChinese: lunar.toString().split('年')[1].split('月')[0] + '月',
-        dayInChinese: lunar.toString().split('月')[1],
-        hourInChinese: currentLunarHour.toString().slice(-2) + '时',
-        monthNumber: lunar.getMonth(),
-        dayNumber: lunar.getDay(),
+        year: lunarHour.getYearSixtyCycle().toString(),
+        month: lunarHour.getMonthSixtyCycle().toString(),
+        day: lunarDay.getSixtyCycle().toString(),
+        hour: lunarHour.getSixtyCycle().toString(),
+        yearInChinese: lunarDayText.split('年')[0] + '年',
+        monthInChinese: lunarDayText.split('年')[1].split('月')[0] + '月',
+        dayInChinese: lunarDayText.split('月')[1],
+        hourInChinese: lunarHourText.slice(-2),
+        monthNumber: lunarDay.getMonth(),
+        dayNumber: lunarDay.getDay(),
       },
       ganzhi: {
-        year: lunar.getYearSixtyCycle().toString(),
-        month: lunar.getMonthSixtyCycle().toString(),
-        day: lunar.getSixtyCycle().toString(),
-        hour: currentLunarHour.getSixtyCycle().toString(),
+        year: lunarHour.getYearSixtyCycle().toString(),
+        month: lunarHour.getMonthSixtyCycle().toString(),
+        day: lunarDay.getSixtyCycle().toString(),
+        hour: lunarHour.getSixtyCycle().toString(),
       },
       eightChar: {
-        year: lunar.getYearSixtyCycle().toString(),
-        month: lunar.getMonthSixtyCycle().toString(),
-        day: lunar.getSixtyCycle().toString(),
-        hour: currentLunarHour.getSixtyCycle().toString(),
+        year: lunarHour.getYearSixtyCycle().toString(),
+        month: lunarHour.getMonthSixtyCycle().toString(),
+        day: lunarDay.getSixtyCycle().toString(),
+        hour: lunarHour.getSixtyCycle().toString(),
       },
       jieQi: jieQi.getName(),
     };
-  }
-
-  /**
-   * 计算时辰索引
-   */
-  private static calculateHourIndex(currentHour: number): number {
-    if (currentHour >= 23 || currentHour < 1) return 0; // 子时
-    if (currentHour >= 1 && currentHour < 3) return 1; // 丑时
-    if (currentHour >= 3 && currentHour < 5) return 2; // 寅时
-    if (currentHour >= 5 && currentHour < 7) return 3; // 卯时
-    if (currentHour >= 7 && currentHour < 9) return 4; // 辰时
-    if (currentHour >= 9 && currentHour < 11) return 5; // 巳时
-    if (currentHour >= 11 && currentHour < 13) return 6; // 午时
-    if (currentHour >= 13 && currentHour < 15) return 7; // 未时
-    if (currentHour >= 15 && currentHour < 17) return 8; // 申时
-    if (currentHour >= 17 && currentHour < 19) return 9; // 酉时
-    if (currentHour >= 19 && currentHour < 21) return 10; // 戌时
-    if (currentHour >= 21 && currentHour < 23) return 11; // 亥时
-    return 0; // 默认子时
   }
 }
 
@@ -260,5 +213,4 @@ export class TimeManager {
 export const getDivinationTime = TimeManager.getDivinationTime.bind(TimeManager);
 export const generateYaosByTime = TimeManager.generateYaosByTime.bind(TimeManager);
 export const generateYaosByRandom = TimeManager.generateYaosByRandom.bind(TimeManager);
-export const generateYaosByNumber = TimeManager.generateYaosByNumber.bind(TimeManager);
 export const setTimezoneOffsetMinutesOverride = TimeManager.setTimezoneOffsetMinutesOverride.bind(TimeManager);

@@ -3,20 +3,19 @@
     <!-- 页面标题 -->
     <h1 class="page-title">配置 Key ⚙️</h1>
 
-    <!-- 表单卡片 -->
-    <div class="content-card">
-      <h2 class="section-title">API 配置</h2>
-
-      <div class="form-group">
-        <label class="form-label">
+    <ContentSectionCard title="API 配置">
+      <FormFieldGroup hint="启用后将使用您自己的 API，否则使用内置 AI 服务">
+        <template #label>
           <input v-model="settings.useCustomApi" type="checkbox" class="form-checkbox" />
           启用自定义 API
-        </label>
-        <div class="form-hint">启用后将使用您自己的 API，否则使用内置 AI 服务</div>
-      </div>
+        </template>
+      </FormFieldGroup>
 
-      <div class="form-group" :class="{ 'form-disabled': !settings.useCustomApi }">
-        <label class="form-label">API 密钥</label>
+      <FormFieldGroup
+        label="API 密钥"
+        hint="请输入与 OpenAI 格式兼容的 API 密钥"
+        :disabled="!settings.useCustomApi"
+      >
         <input
           v-model="settings.customApiKey"
           type="text"
@@ -24,11 +23,13 @@
           placeholder="输入您的 API Key"
           :disabled="!settings.useCustomApi"
         />
-        <div class="form-hint">请输入与 OpenAI 格式兼容的 API 密钥</div>
-      </div>
+      </FormFieldGroup>
 
-      <div class="form-group" :class="{ 'form-disabled': !settings.useCustomApi }">
-        <label class="form-label">API 端点</label>
+      <FormFieldGroup
+        label="API 端点"
+        hint="请输入基础API地址，系统会自动添加 /chat/completions 路径"
+        :disabled="!settings.useCustomApi"
+      >
         <input
           v-model="settings.customApiEndpoint"
           type="text"
@@ -36,17 +37,16 @@
           placeholder="https://api.example.com/v1"
           :disabled="!settings.useCustomApi"
         />
-        <div class="form-hint">请输入基础API地址，系统会自动添加 /chat/completions 路径</div>
-      </div>
+      </FormFieldGroup>
 
-      <div class="form-group" :class="{ 'form-disabled': !settings.useCustomApi }">
-        <label class="form-label">选择模型</label>
+      <FormFieldGroup label="选择模型" :disabled="!settings.useCustomApi">
         <div class="model-selection-wrapper">
-          <select v-model="settings.selectedModel" class="form-select" :disabled="!settings.useCustomApi">
-            <option v-for="model in settings.availableModels" :key="model" :value="model">
-              {{ model }}
-            </option>
-          </select>
+          <CustomSelect
+            v-model="settings.selectedModel"
+            :options="availableModelOptions"
+            placeholder="请先获取模型列表"
+            :disabled="!settings.useCustomApi || settings.availableModels.length === 0"
+          />
           <button
             class="btn-primary fetch-models-button"
             :disabled="!settings.useCustomApi || !settings.customApiKey || !settings.customApiEndpoint || isLoadingModels"
@@ -57,22 +57,20 @@
             <span v-else>获取模型列表</span>
           </button>
         </div>
-        <div class="form-hint">
+        <template #hint>
           <span v-if="modelError" class="error-text">{{ modelError }}</span>
           <span v-else-if="debugInfo" class="debug-text">{{ debugInfo }}</span>
           <span v-else>选择要使用的模型，或从您的API提供商获取可用模型列表</span>
-        </div>
-      </div>
+        </template>
+      </FormFieldGroup>
 
       <div class="form-actions">
         <button class="btn-primary" @click="saveSettings">保存设置</button>
         <button class="btn-secondary" @click="resetSettings">重置</button>
       </div>
-    </div>
+    </ContentSectionCard>
 
-    <!-- 使用说明卡片 -->
-    <div class="content-card">
-      <h2 class="section-title">使用说明</h2>
+    <ContentSectionCard title="使用说明">
       <div class="info-content">
         <p>您可以配置所有兼容 OpenAI 格式的 API</p>
         <p>
@@ -85,15 +83,18 @@
           如果获取失败，将使用默认模型列表。
         </p>
       </div>
-    </div>
+    </ContentSectionCard>
   </div>
 </template>
 
 <script setup lang="ts">
+import ContentSectionCard from '@/components/common/ContentSectionCard.vue';
+import CustomSelect from '@/components/common/CustomSelect.vue';
+import FormFieldGroup from '@/components/common/FormFieldGroup.vue';
 import { useSettingsStore } from '@/stores/settings';
 import { storeToRefs } from 'pinia';
+import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { ref } from 'vue';
 
 const router = useRouter();
 const settingsStore = useSettingsStore();
@@ -105,7 +106,12 @@ const { fetchAvailableModels, updateSettings, resetSettings: resetStoreSettings 
 const { settings, isLoadingModels, error: modelError } = storeToRefs(settingsStore);
 
 const debugInfo = ref<string | null>(null);
-
+const availableModelOptions = computed(() =>
+  settings.value.availableModels.map(model => ({
+    name: model,
+    displayName: model,
+  }))
+);
 
 // 获取模型列表
 async function fetchModels() {
@@ -158,7 +164,7 @@ function resetSettings() {
   align-items: flex-start;
 }
 
-.form-select {
+.model-selection-wrapper :deep(.custom-select) {
   flex: 1;
 }
 

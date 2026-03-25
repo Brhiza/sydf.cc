@@ -2,8 +2,16 @@
  * 占卜编排服务
  * 负责协调占卜流程的各个步骤
  */
-import type { DivinationResult, DivinationRequest, LiuyaoData, DivinationType, DivinationData, SupplementaryInfo } from '@/types/divination';
+import type {
+  DivinationResult,
+  DivinationRequest,
+  LiuyaoData,
+  DivinationType,
+  DivinationData,
+  SupplementaryInfo,
+} from '@/types/divination';
 import type { ChatMessage } from '@/types/chat';
+import type { HistoryRecord } from '@/types/common';
 import { v4 as uuidv4 } from 'uuid';
 import { aiService } from './aiService';
 import { dataGenerationService } from './dataGenerationService';
@@ -62,6 +70,7 @@ export class DivinationOrchestrator {
       }
       
       const initialRecord = historyService.addRecord({ 
+        id: initialResult.id,
         type, 
         question: finalQuestion, 
         result: {
@@ -83,6 +92,7 @@ export class DivinationOrchestrator {
         return this.handleChaoticLiuyao(
           data as LiuyaoData,
           initialResult,
+          initialRecord,
           conversationHistory,
           onAIComplete,
           onConversationUpdate
@@ -109,16 +119,14 @@ export class DivinationOrchestrator {
               aiResponse: finalResult.aiResponse || '', // 确保总是保存aiResponse，即使是空字符串
               ...(finalResult.supplementaryInfo && { supplementaryInfo: finalResult.supplementaryInfo })
             },
-            conversationHistory
+            conversationHistory: [...conversationHistory]
           };
           
-          // 修复：使用正确的记录ID（initialRecord.id而不是initialResult.id）
-              historyService.updateRecord(initialRecord.id, updatedRecord);
+          historyService.updateRecord(initialRecord.id, updatedRecord);
           
           // 然后调用原始的完成回调
           onAIComplete(finalResult);
         },
-        onAIError,
         onConversationUpdate,
         initialResult
       );
@@ -181,6 +189,7 @@ export class DivinationOrchestrator {
   private async handleChaoticLiuyao(
     data: LiuyaoData,
     initialResult: DivinationResult,
+    initialRecord: HistoryRecord,
     conversationHistory: ChatMessage[],
     onAIComplete: (finalResult: DivinationResult) => void,
     onConversationUpdate: (history: ChatMessage[]) => void
@@ -189,19 +198,19 @@ export class DivinationOrchestrator {
     initialResult.aiResponse = chaoticReason;
     const assistantMessage = conversationHistory.find(m => m.role === 'assistant');
     if (assistantMessage) assistantMessage.content = chaoticReason;
-    
-      // 保存到历史记录
-      const recordResult: DivinationResult = {
-        ...initialResult,
-        type: 'liuyao'
-      };
-      
-      await historyService.addRecord({ 
-        type: 'liuyao', 
-        question: '卦象检测', 
-        result: recordResult, 
-        conversationHistory 
-      });
+
+    const updatedRecord: HistoryRecord = {
+      ...initialRecord,
+      result: {
+        type: 'liuyao',
+        data: initialResult.data,
+        aiResponse: chaoticReason,
+        ...(initialResult.supplementaryInfo && { supplementaryInfo: initialResult.supplementaryInfo }),
+      },
+      conversationHistory: [...conversationHistory],
+    };
+
+    historyService.updateRecord(initialRecord.id, updatedRecord);
     
     onAIComplete(initialResult);
     onConversationUpdate([...conversationHistory]);
@@ -216,39 +225,31 @@ export class DivinationOrchestrator {
     conversationHistory: ChatMessage[],
     onAIChunk: (chunk: string) => void,
     onAIComplete: (finalResult: DivinationResult) => void,
-    onAIError: (error: string) => void,  // 这个参数在aiService.generateAIResponse中会被使用
     onConversationUpdate: (history: ChatMessage[]) => void,
     initialResult: DivinationResult
   ): Promise<void> {
-    try {
-      const fullAiResponse = await aiService.generateAIResponse(
-        type,
-        question,
-        data,
-        supplementaryInfo,
-        signal,
-        (chunk) => {
-          const assistantMessage = conversationHistory.find(m => m.role === 'assistant');
-          if (assistantMessage) assistantMessage.content += chunk;
-          onAIChunk(chunk);
-          onConversationUpdate([...conversationHistory]);
-        }
-      );
+    const fullAiResponse = await aiService.generateAIResponse(
+      type,
+      question,
+      data,
+      supplementaryInfo,
+      signal,
+      (chunk) => {
+        const assistantMessage = conversationHistory.find(m => m.role === 'assistant');
+        if (assistantMessage) assistantMessage.content += chunk;
+        onAIChunk(chunk);
+        onConversationUpdate([...conversationHistory]);
+      }
+    );
 
-      // AI响应完成
-      initialResult.aiResponse = fullAiResponse;
-      const assistantMessage = conversationHistory.find(m => m.role === 'assistant');
-      if (assistantMessage) assistantMessage.content = fullAiResponse;
+    // AI响应完成
+    initialResult.aiResponse = fullAiResponse;
+    const assistantMessage = conversationHistory.find(m => m.role === 'assistant');
+    if (assistantMessage) assistantMessage.content = fullAiResponse;
 
-      // 通过回调返回最终结果
-      onAIComplete(initialResult);
-      onConversationUpdate([...conversationHistory]);
-    } catch (error) {
-      // 在这里使用onAIError
-      const errorMessage = error instanceof Error ? error.message : 'AI响应生成失败';
-      onAIError(errorMessage);
-      throw error; // 重新抛出错误，让调用者处理
-    }
+    // 通过回调返回最终结果
+    onAIComplete(initialResult);
+    onConversationUpdate([...conversationHistory]);
   }
 
   private handleError(err: unknown, onErrorCallback: (error: string) => void): void {

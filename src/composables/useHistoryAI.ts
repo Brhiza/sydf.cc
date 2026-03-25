@@ -1,10 +1,30 @@
 import { ref } from 'vue';
-import type { HistoryRecord } from '@/services/history';
+import type { HistoryRecord } from '@/types/common';
+import type { ChatMessageRetryTarget } from '@/types/chat';
 import { historyService } from '@/services/history';
-import { aiService } from '@/services/aiService';
+import {
+  buildRegeneratedConversationHistory,
+  buildUpdatedHistoryRecord,
+  generateRegeneratedAI,
+  regenerateConversationMessage,
+} from '@/services/ai-regeneration';
 
-export function useHistoryAI() {
+interface HistoryServiceLike {
+  updateRecord: (id: string, record: HistoryRecord) => boolean;
+}
+
+interface UseHistoryAIOptions {
+  historyService?: HistoryServiceLike;
+  generateRegeneratedAI?: typeof generateRegeneratedAI;
+  regenerateConversationMessage?: typeof regenerateConversationMessage;
+}
+
+export function useHistoryAI(options: UseHistoryAIOptions = {}) {
   const isRetryingAI = ref(false);
+  const currentHistoryService = options.historyService ?? historyService;
+  const currentGenerateRegeneratedAI = options.generateRegeneratedAI ?? generateRegeneratedAI;
+  const currentRegenerateConversationMessage =
+    options.regenerateConversationMessage ?? regenerateConversationMessage;
 
   /**
    * 检测AI响应是否包含错误
@@ -33,35 +53,28 @@ export function useHistoryAI() {
    * 重试AI解读
    * @param record - 历史记录
    */
-  async function handleRetryAI(record: HistoryRecord) {
+  async function handleRetryAI(record: HistoryRecord, target?: ChatMessageRetryTarget) {
     if (isRetryingAI.value) return;
 
     isRetryingAI.value = true;
 
     try {
-      const dataCopy = JSON.parse(JSON.stringify(record.result.data));
-      
-      // 使用 aiService 的 generateAIResponse 方法，它会自动使用正确的系统提示词
-      const aiResponse = await aiService.generateAIResponse(
-        record.type,
-        record.question,
-        dataCopy,
-        undefined, // 没有补充信息
-        undefined, // 没有信号
-        undefined // 没有流式回调
-      );
-
-      if (aiResponse) {
-        record.result.aiResponse = aiResponse;
-        historyService.updateRecord(record.id, record);
-      } else {
-        throw new Error('AI服务返回空响应');
-      }
+      const regenerated = target
+        ? await currentRegenerateConversationMessage(record, target)
+        : await currentGenerateRegeneratedAI(record);
+      const updatedRecord = buildUpdatedHistoryRecord(record, regenerated);
+      Object.assign(record, updatedRecord);
+      currentHistoryService.updateRecord(record.id, updatedRecord);
     } catch (error) {
       console.error('重试AI解读失败:', error);
       const errorMessage = error instanceof Error ? error.message : '重新生成失败，请稍后重试';
-      record.result.aiResponse = errorMessage;
-      historyService.updateRecord(record.id, record);
+      const fallbackConversationHistory = buildRegeneratedConversationHistory(record, errorMessage);
+      const updatedRecord = buildUpdatedHistoryRecord(record, {
+        aiResponse: errorMessage,
+        conversationHistory: fallbackConversationHistory,
+      });
+      Object.assign(record, updatedRecord);
+      currentHistoryService.updateRecord(record.id, updatedRecord);
     } finally {
       isRetryingAI.value = false;
     }
