@@ -1,7 +1,7 @@
 <template>
   <div class="prompt-card">
     <img v-if="divinationType === 'ssgw'" src="/static/ssgw.jpg" alt="三山国王" class="card-image" />
-    <h2 class="card-title">{{ title }}</h2>
+    <h1 class="card-title">{{ title }}</h1>
     <p v-if="!isCustomBuild" class="card-description">{{ description }}</p>
 
     <TarotSpreadSelector

@@ -94,8 +94,10 @@ function goToRandomDivination() {
 
 <template>
   <div class="page-container">
-    <!-- 欢迎标题 -->
-    <h1 class="page-title">欢迎 👋</h1>
+    <h1 class="page-title">时月东方 AI 在线占卜</h1>
+    <p class="page-subtitle">
+      免费体验今日运势、六爻、梅花易数、奇门遁甲、塔罗牌与三山国王灵签。
+    </p>
 
     <InfoCalloutCard
       v-if="!isCustomBuild"
@@ -136,6 +138,12 @@ function goToRandomDivination() {
 </template>
 
 <style scoped>
+.page-subtitle {
+  margin: 0 0 var(--spacing-6);
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+}
+
 html.dark .tool-item:hover {
   background: var(--color-background-elevated);
   border-color: var(--color-primary);

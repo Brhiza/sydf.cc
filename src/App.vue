@@ -66,7 +66,6 @@ watch(
 onMounted(() => {
   if (isCustomBuild.value) {
     document.documentElement.classList.add('oyyy-theme');
-    document.title = '时月东方 oyyy 版';
   }
   // 监听document点击事件，用于移动端关闭sidebar
   document.addEventListener('click', handleDocumentClick);

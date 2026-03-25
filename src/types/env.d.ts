@@ -23,6 +23,8 @@ interface ImportMetaEnv {
   readonly VITE_GIT_BRANCH: string;
   readonly VITE_API_ENDPOINT: string;
   readonly VITE_MODEL: string;
+  readonly VITE_SITE_URL?: string;
+  readonly VITE_APP_BUILD_TARGET?: string;
 }
 
 
@@ -53,6 +55,8 @@ declare global {
       VITE_BUILD_TIME: string;
       VITE_GIT_COMMIT: string;
       VITE_GIT_BRANCH: string;
+      VITE_SITE_URL?: string;
+      VITE_APP_BUILD_TARGET?: string;
     }
   }
 }

@@ -5,6 +5,7 @@ import router from './router';
 // 导入插件
 import { registerPlugins } from './plugins';
 import { initializeServices } from './services';
+import { setupSeo } from './seo';
 
 // 导入 PWA Service Worker 注册函数
 import { registerSW } from 'virtual:pwa-register';
@@ -19,6 +20,9 @@ initializeServices();
 
 // 3. 注册路由
 app.use(router);
+setupSeo(router, {
+  isCustomBuild: import.meta.env.VITE_APP_BUILD_TARGET === 'CUSTOM',
+});
 
 // 4. 注册 Service Worker
 registerSW({ 

@@ -4,6 +4,7 @@
 export async function onRequest(context) {
   const { request, next } = context;
   const url = new URL(request.url);
+  const acceptHeader = request.headers.get('accept') || '';
   
   // 获取响应
   const response = await next();
@@ -13,9 +14,13 @@ export async function onRequest(context) {
   
   // 为不同类型的资源设置缓存头
   const pathname = url.pathname;
+  const isHtmlRequest =
+    pathname === '/' ||
+    pathname.endsWith('.html') ||
+    (acceptHeader.includes('text/html') && !pathname.match(/\.[a-z0-9]+$/i));
   
   // HTML 文件 - 不缓存
-  if (pathname.endsWith('.html') || pathname === '/') {
+  if (isHtmlRequest) {
     newResponse.headers.set('Cache-Control', 'public, max-age=0, must-revalidate');
     newResponse.headers.set('X-Frame-Options', 'DENY');
   }
@@ -38,6 +43,19 @@ export async function onRequest(context) {
   // API 路由 - 不缓存
   if (pathname.startsWith('/api/')) {
     newResponse.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+  }
+
+  // SEO 索引控制
+  if (
+    pathname === '/history' ||
+    pathname.startsWith('/history/') ||
+    pathname === '/settings' ||
+    pathname === '/api-key' ||
+    pathname === '/api-config'
+  ) {
+    newResponse.headers.set('X-Robots-Tag', 'noindex, nofollow');
+  } else if (isHtmlRequest) {
+    newResponse.headers.set('X-Robots-Tag', 'index, follow');
   }
   
   // 添加安全头

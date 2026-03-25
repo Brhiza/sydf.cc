@@ -7,7 +7,6 @@
   Cache-Control: public, max-age=0, must-revalidate
   # SEO 相关头部
   X-Robots-Tag: index, follow
-  Link: <https://sydf.cc/>; rel="canonical"
 
 # HTML 文件 - 不缓存，确保始终获取最新版本
 /*.html
@@ -49,6 +48,22 @@
 # API 路由（如果有）- 不缓存
 /api/*
   Cache-Control: no-cache, no-store, must-revalidate
+
+# 不应被收录的页面
+/history
+  X-Robots-Tag: noindex, nofollow
+
+/history/*
+  X-Robots-Tag: noindex, nofollow
+
+/settings
+  X-Robots-Tag: noindex, nofollow
+
+/api-key
+  X-Robots-Tag: noindex, nofollow
+
+/api-config
+  X-Robots-Tag: noindex, nofollow
 
 # 字体文件 - 长期缓存
 /*.woff
