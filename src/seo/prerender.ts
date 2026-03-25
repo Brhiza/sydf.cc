@@ -121,8 +121,8 @@ function createHomeRoute(isCustomBuild: boolean): PrerenderRoute {
     name: 'home',
     path: '/',
     params: {},
-    contentTitle: '时月东方 AI 在线占卜',
-    lead: '免费体验今日运势、六爻、梅花易数、奇门遁甲、塔罗牌与三山国王灵签。',
+    contentTitle: '欢迎来到时月东方',
+    lead: '这里提供今日运势、六爻、梅花易数、奇门遁甲、塔罗牌与三山国王灵签的在线入口。',
     blocks: [
       {
         title: '主要服务',
@@ -229,62 +229,64 @@ export function getPrerenderRoutes(isCustomBuild: boolean): PrerenderRoute[] {
 
 export function renderPrerenderMarkup(route: PrerenderRoute): string {
   return `
-    <section data-seo-prerender="true" class="seo-prerender-shell">
-      <style>
-        .seo-prerender-shell {
-          max-width: 960px;
-          margin: 0 auto;
-          padding: 32px 20px 48px;
-          color: #1f2937;
-          font: 16px/1.8 "PingFang SC", "Microsoft YaHei", sans-serif;
-        }
-        .seo-prerender-shell h1,
-        .seo-prerender-shell h2 {
-          margin: 0 0 16px;
-          line-height: 1.3;
-        }
-        .seo-prerender-shell h1 {
-          font-size: 32px;
-        }
-        .seo-prerender-shell h2 {
-          margin-top: 28px;
-          font-size: 22px;
-        }
-        .seo-prerender-shell p,
-        .seo-prerender-shell li {
-          margin: 0 0 12px;
-        }
-        .seo-prerender-shell ul {
-          padding-left: 22px;
-          margin: 0;
-        }
-        .seo-prerender-links {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 12px;
-        }
-        .seo-prerender-links a {
-          color: #2563eb;
-          text-decoration: none;
-        }
-      </style>
-      <main>
-        <h1>${escapeHtml(route.contentTitle)}</h1>
-        <p>${escapeHtml(route.lead)}</p>
-        ${route.blocks
-          .map(
-            (block) => `
-              <section>
-                <h2>${escapeHtml(block.title)}</h2>
-                ${renderParagraphs(block.paragraphs)}
-                ${renderItems(block.items)}
-                ${renderLinks(block.links)}
-              </section>
-            `
-          )
-          .join('')}
-      </main>
-    </section>
+    <noscript>
+      <section data-seo-prerender="true" class="seo-prerender-shell">
+        <style>
+          .seo-prerender-shell {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 32px 20px 48px;
+            color: #1f2937;
+            font: 16px/1.8 "PingFang SC", "Microsoft YaHei", sans-serif;
+          }
+          .seo-prerender-shell h1,
+          .seo-prerender-shell h2 {
+            margin: 0 0 16px;
+            line-height: 1.3;
+          }
+          .seo-prerender-shell h1 {
+            font-size: 32px;
+          }
+          .seo-prerender-shell h2 {
+            margin-top: 28px;
+            font-size: 22px;
+          }
+          .seo-prerender-shell p,
+          .seo-prerender-shell li {
+            margin: 0 0 12px;
+          }
+          .seo-prerender-shell ul {
+            padding-left: 22px;
+            margin: 0;
+          }
+          .seo-prerender-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+          }
+          .seo-prerender-links a {
+            color: #2563eb;
+            text-decoration: none;
+          }
+        </style>
+        <main>
+          <h1>${escapeHtml(route.contentTitle)}</h1>
+          <p>${escapeHtml(route.lead)}</p>
+          ${route.blocks
+            .map(
+              (block) => `
+                <section>
+                  <h2>${escapeHtml(block.title)}</h2>
+                  ${renderParagraphs(block.paragraphs)}
+                  ${renderItems(block.items)}
+                  ${renderLinks(block.links)}
+                </section>
+              `
+            )
+            .join('')}
+        </main>
+      </section>
+    </noscript>
   `.trim();
 }
 

@@ -32,12 +32,7 @@ describe('getPrerenderRoutes', () => {
 });
 
 describe('createPrerenderHtml', () => {
-  it('启用 JavaScript 时不应直接显示预渲染正文', () => {
-    expect(baseHtml).toContain("document.documentElement.classList.add('js')");
-    expect(baseHtml).toContain("html.js [data-seo-prerender='true']");
-  });
-
-  it('应生成带有独立标题、canonical 和正文的页面 HTML', () => {
+  it('应生成带有独立标题、canonical 和 noscript 回退正文的页面 HTML', () => {
     const route = getPrerenderRoutes(false).find((item) => item.path === '/divination/liuyao');
 
     expect(route).toBeDefined();
@@ -50,7 +45,7 @@ describe('createPrerenderHtml', () => {
     expect(document.querySelector('link[rel="canonical"]')?.getAttribute('href')).toBe(
       'https://sydf.cc/divination/liuyao'
     );
-    expect(document.querySelector('h1')?.textContent).toBe('六爻占卜');
+    expect(document.querySelector('#app > noscript')?.innerHTML).toContain('六爻占卜');
     expect(document.body.getAttribute('data-prerender-path')).toBe('/divination/liuyao');
     expect(document.querySelector('[data-seo-prerender="true"]')).not.toBeNull();
   });
