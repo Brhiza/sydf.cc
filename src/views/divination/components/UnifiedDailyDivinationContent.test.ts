@@ -30,12 +30,6 @@ vi.mock('@/components/divination/result/DivinationAISection.vue', () => ({
   }),
 }));
 
-vi.mock('@/components/divination/result/DivinationErrorState.vue', () => ({
-  default: defineComponent({
-    template: '<div class="divination-error-state-stub"></div>',
-  }),
-}));
-
 vi.mock('@/components/divination/results/DailyInterpretationResult.vue', () => ({
   default: defineComponent({
     template: '<div class="daily-result-stub"></div>',
@@ -96,5 +90,18 @@ describe('UnifiedDailyDivinationContent', () => {
     expect(wrapper.find('.content-section-card').exists()).toBe(true);
     expect(wrapper.find('.daily-result-stub').exists()).toBe(true);
     expect(wrapper.find('.daily-ai-section-stub').exists()).toBe(false);
+  });
+
+  it('首轮失败时应只显示统一 AI 区块，不再额外渲染独立错误态', () => {
+    useDailyFortuneMock.mockReturnValue(
+      createDailyFortuneState({
+        error: ref('抱歉，AI服务暂时不可用，请稍后重试。'),
+        hasVisibleConversation: computed(() => false),
+      })
+    );
+
+    const wrapper = mount(UnifiedDailyDivinationContent);
+
+    expect(wrapper.find('.daily-ai-section-stub').exists()).toBe(true);
   });
 });

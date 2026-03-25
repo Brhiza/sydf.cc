@@ -18,15 +18,7 @@ export type DivinationType =
 
 export type MeihuaDivinationMethod = 'time' | 'number' | 'random' | 'external';
 
-export type MeihuaExternalDirection =
-  | '东'
-  | '东南'
-  | '南'
-  | '西南'
-  | '西'
-  | '西北'
-  | '北'
-  | '东北';
+export type MeihuaExternalDirection = '东' | '东南' | '南' | '西南' | '西' | '西北' | '北' | '东北';
 
 export type MeihuaExternalPerson =
   | '老父'
@@ -38,15 +30,7 @@ export type MeihuaExternalPerson =
   | '少男'
   | '少女';
 
-export type MeihuaExternalAnimal =
-  | '马'
-  | '牛'
-  | '龙'
-  | '鸡'
-  | '猪'
-  | '雉'
-  | '狗'
-  | '羊';
+export type MeihuaExternalAnimal = '马' | '牛' | '龙' | '鸡' | '猪' | '雉' | '狗' | '羊';
 
 export type MeihuaExternalObject =
   | '金玉圆器'
@@ -173,6 +157,15 @@ export interface MeihuaCalculation {
   numbers?: number[];
   time?: string;
   number?: number;
+  month?: number;
+  day?: number;
+  yearZhi?: string;
+  yearZhiIndex?: number;
+  timeZhi?: string;
+  timeZhiIndex?: number;
+  upperTrigramIndex?: number;
+  lowerTrigramIndex?: number;
+  movingYaoIndex?: number;
   methodKey?: MeihuaDivinationMethod;
   externalOmens?: MeihuaExternalOmens;
   externalSummary?: string;
@@ -270,17 +263,17 @@ export interface QimenJiuGongGe {
 
 // 奇门遁甲特殊时辰情况
 export interface QimenSpecialConditions {
-  isLiuJiaHour: boolean;      // 六甲时辰
-  isLiuGuiHour: boolean;      // 六癸时辰
-  isShiGanRuMu: boolean;      // 时干入墓
-  isWuBuYuShi: boolean;       // 五不遇时
-  description: string;        // 描述信息
+  isLiuJiaHour: boolean; // 六甲时辰
+  isLiuGuiHour: boolean; // 六癸时辰
+  isShiGanRuMu: boolean; // 时干入墓
+  isWuBuYuShi: boolean; // 五不遇时
+  description: string; // 描述信息
 }
 
 // 奇门遁甲时辰信息
 export interface QimenTimeInfo {
   solarTerm: string; // 节气
-  epoch: string;     // 元
+  epoch: string; // 元
   [key: string]: string;
 }
 
@@ -370,11 +363,11 @@ export interface DailyQimenJiuGongGe {
 // 日家奇门时间信息
 export interface DailyQimenTimeInfo {
   solarTerm: string; // 节气
-  epoch: string;     // 元
-  juShu: number;     // 局数
+  epoch: string; // 元
+  juShu: number; // 局数
   dunType: '阳遁' | '阴遁'; // 遁甲类型
-  zhiFu: string;     // 值符
-  zhiShi: string;    // 值使
+  zhiFu: string; // 值符
+  zhiShi: string; // 值使
 }
 
 // 今日运势数据
@@ -420,17 +413,23 @@ export interface DailyFortuneData {
     timeInfo: DailyQimenTimeInfo;
     jiuGongGe: DailyQimenJiuGongGe[];
     analysis: {
-      zhiFuAnalysis: string;    // 值符分析
-      zhiShiAnalysis: string;   // 值使分析
-      palaceAnalysis: string;   // 宫位分析
-      wuxingAnalysis: string;   // 五行分析
-      overallAnalysis: string;  // 综合分析
+      zhiFuAnalysis: string; // 值符分析
+      zhiShiAnalysis: string; // 值使分析
+      palaceAnalysis: string; // 宫位分析
+      wuxingAnalysis: string; // 五行分析
+      overallAnalysis: string; // 综合分析
     };
   };
 }
 
 // 统一的占卜数据类型
-export type DivinationData = LiuyaoData | MeihuaData | QimenData | TarotData | SsgwData | DailyFortuneData;
+export type DivinationData =
+  | LiuyaoData
+  | MeihuaData
+  | QimenData
+  | TarotData
+  | SsgwData
+  | DailyFortuneData;
 
 // 统一的占卜结果
 export interface DivinationResult {

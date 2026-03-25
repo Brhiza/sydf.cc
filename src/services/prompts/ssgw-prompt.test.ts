@@ -14,6 +14,13 @@ describe('generateSsgwPrompt', () => {
           story: '刘备借荆州后多方周旋，终需审时度势。',
           interpretation: '宜守正待时，不可躁进。',
         },
+        timestamp: Date.now(),
+        ganzhi: {
+          year: '丙午',
+          month: '辛卯',
+          day: '癸巳',
+          hour: '壬子',
+        },
       },
       '公历：2026年3月20日 0时0分\n农历：丙午年 二月初二 子时\n干支：丙午年 辛卯月 癸巳日 壬子时'
     );

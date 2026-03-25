@@ -101,8 +101,7 @@ const STATIC_PAGE_SEO: Record<string, PageSeoDefinition> = {
 const DIVINATION_PAGE_SEO: Record<DivinationType, PageSeoDefinition> = {
   daily: {
     pageTitle: '今日运势在线查询',
-    description:
-      '免费查看今日运势，基于日家奇门遁甲思路提供事业、财运、感情与健康方向的 AI 解读。',
+    description: '免费查看今日运势，基于日家奇门遁甲思路提供事业、财运、感情与健康方向的 AI 解读。',
     keywords: ['今日运势', '每日运势', '奇门遁甲', 'AI运势'],
     schemaType: 'WebPage',
   },
@@ -115,15 +114,13 @@ const DIVINATION_PAGE_SEO: Record<DivinationType, PageSeoDefinition> = {
   },
   meihua: {
     pageTitle: '梅花易数在线占卜',
-    description:
-      '免费使用梅花易数在线占卜，通过数字与起卦方式快速获得事件趋势判断与 AI 解读。',
+    description: '免费使用梅花易数在线占卜，通过数字与起卦方式快速获得事件趋势判断与 AI 解读。',
     keywords: ['梅花易数', '梅花易数在线', 'AI起卦', '易经占卜'],
     schemaType: 'WebPage',
   },
   qimen: {
     pageTitle: '奇门遁甲在线占卜',
-    description:
-      '免费体验奇门遁甲在线占卜，适合复杂局势分析、时机判断与行动决策参考。',
+    description: '免费体验奇门遁甲在线占卜，适合复杂局势分析、时机判断与行动决策参考。',
     keywords: ['奇门遁甲', '奇门遁甲在线', 'AI占卜', '决策参考'],
     schemaType: 'WebPage',
   },
@@ -136,15 +133,13 @@ const DIVINATION_PAGE_SEO: Record<DivinationType, PageSeoDefinition> = {
   },
   tarot_single: {
     pageTitle: '塔罗单牌在线占卜',
-    description:
-      '免费体验塔罗单牌在线占卜，快速获得当下问题的方向提示与 AI 解读。',
+    description: '免费体验塔罗单牌在线占卜，快速获得当下问题的方向提示与 AI 解读。',
     keywords: ['塔罗单牌', '单张塔罗', '在线抽牌', 'AI塔罗'],
     schemaType: 'WebPage',
   },
   ssgw: {
     pageTitle: '三山国王灵签在线抽签',
-    description:
-      '免费体验三山国王灵签在线抽签，通过求签与圣杯流程获取问题指引与 AI 解读。',
+    description: '免费体验三山国王灵签在线抽签，通过求签与圣杯流程获取问题指引与 AI 解读。',
     keywords: ['三山国王', '灵签', '在线抽签', '求签'],
     schemaType: 'WebPage',
   },
@@ -183,7 +178,10 @@ function getImageUrl(): string {
   return `${getSiteUrl()}${DEFAULT_IMAGE_PATH}`;
 }
 
-function createBreadcrumbItems(route: RouteLike, pageTitle: string): Array<Record<string, unknown>> {
+function createBreadcrumbItems(
+  route: RouteLike,
+  pageTitle: string
+): Array<Record<string, unknown>> {
   const homeItem = {
     '@type': 'ListItem',
     position: 1,
@@ -281,9 +279,7 @@ function resolveDivinationSeo(route: RouteLike): PageSeoDefinition | null {
 
 export function resolveSeoMeta(route: RouteLike, isCustomBuild: boolean): ResolvedSeoMeta {
   const definition =
-    resolveDivinationSeo(route) ||
-    resolveStaticPageSeo(route) ||
-    STATIC_PAGE_SEO['not-found'];
+    resolveDivinationSeo(route) || resolveStaticPageSeo(route) || STATIC_PAGE_SEO['not-found'];
 
   const title = composeTitle(definition.pageTitle, isCustomBuild);
   const description = definition.description;
@@ -319,8 +315,9 @@ function ensureMetaTag(
   const existingTag = targetDocument.head.querySelector(selector);
 
   if (isTagName(existingTag, 'meta')) {
-    existingTag.setAttribute('data-seo-managed', 'true');
-    return existingTag as HTMLMetaElement;
+    const metaTag = existingTag as HTMLMetaElement;
+    metaTag.setAttribute('data-seo-managed', 'true');
+    return metaTag;
   }
 
   const meta = targetDocument.createElement('meta');
@@ -343,8 +340,9 @@ function ensureCanonicalLink(targetDocument: Document): HTMLLinkElement {
   const existingLink = targetDocument.head.querySelector('link[rel="canonical"]');
 
   if (isTagName(existingLink, 'link')) {
-    existingLink.setAttribute('data-seo-managed', 'true');
-    return existingLink as HTMLLinkElement;
+    const canonicalLink = existingLink as HTMLLinkElement;
+    canonicalLink.setAttribute('data-seo-managed', 'true');
+    return canonicalLink;
   }
 
   const link = targetDocument.createElement('link');

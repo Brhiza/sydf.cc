@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
 import { createQimenPriorityPalaces, createQimenQuestionHints } from './qimen-guidance';
+import type { QimenData } from '@/types/divination';
 
-const sampleData = {
+const sampleData: QimenData = {
   jiuGongGe: [
     {
       gong: 6,
@@ -51,7 +52,7 @@ const sampleData = {
   ],
   timeInfo: { solarTerm: '立秋', epoch: '下元' },
   timestamp: 1092110400000,
-} as const;
+};
 
 describe('createQimenQuestionHints', () => {
   it('财运问题应返回生门与开门参考', () => {
@@ -96,6 +97,8 @@ describe('createQimenQuestionHints', () => {
       gong: 2,
       name: '坤二宫',
     });
-    expect(palaces[2]?.reasons).toEqual(expect.arrayContaining(['风险:死门与天芮同宫，宜防消耗。']));
+    expect(palaces[2]?.reasons).toEqual(
+      expect.arrayContaining(['风险:死门与天芮同宫，宜防消耗。'])
+    );
   });
 });

@@ -60,7 +60,19 @@ defineEmits<{
 }>()
 
 const displayedConversationHistory = computed(() => {
-  return getDisplayedConversationHistory(props.type, props.conversationHistory)
+  const displayedMessages = getDisplayedConversationHistory(props.type, props.conversationHistory)
+
+  if (displayedMessages.length > 0 || !props.error) {
+    return displayedMessages
+  }
+
+  return [
+    {
+      id: 'assistant-error-fallback',
+      role: 'assistant',
+      content: props.error,
+    } satisfies ChatMessage,
+  ]
 })
 
 const lastAssistantMessage = computed(() => {

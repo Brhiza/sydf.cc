@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { nextTick, reactive, ref } from 'vue';
+import type { LocationQueryRaw } from 'vue-router';
+import type { DivinationType } from '@/types';
 import { useUnifiedDivinationPage } from './useUnifiedDivinationPage';
 
 function createDivinationStub() {
@@ -44,8 +46,8 @@ describe('useUnifiedDivinationPage', () => {
   });
 
   it('切换占卜类型时，非历史模式会清理状态并重置滚动', async () => {
-    const props = reactive({ divinationType: 'qimen' as const });
-    const route = reactive({ query: {} as Record<string, unknown> });
+    const props = reactive<{ divinationType: DivinationType }>({ divinationType: 'qimen' });
+    const route = reactive({ query: {} as LocationQueryRaw });
     const divination = createDivinationStub();
     const pageContainerRef = ref<{ scrollTop: number } | null>({ scrollTop: 120 });
 
@@ -70,8 +72,8 @@ describe('useUnifiedDivinationPage', () => {
   });
 
   it('查看历史记录时切换类型不应重置当前状态', async () => {
-    const props = reactive({ divinationType: 'qimen' as const });
-    const route = reactive({ query: {} as Record<string, unknown> });
+    const props = reactive<{ divinationType: DivinationType }>({ divinationType: 'qimen' });
+    const route = reactive({ query: {} as LocationQueryRaw });
     const divination = createDivinationStub();
     divination.viewingHistory.value = true;
 
@@ -93,9 +95,9 @@ describe('useUnifiedDivinationPage', () => {
   });
 
   it('带 historyId 进入页面时会立即加载历史记录', () => {
-    const props = reactive({ divinationType: 'qimen' as const });
+    const props = reactive<{ divinationType: DivinationType }>({ divinationType: 'qimen' });
     const route = reactive({
-      query: { historyId: 'history-1' } as Record<string, unknown>,
+      query: { historyId: 'history-1' } as LocationQueryRaw,
     });
     const divination = createDivinationStub();
 
@@ -112,9 +114,9 @@ describe('useUnifiedDivinationPage', () => {
   });
 
   it('离开历史记录模式时会清空当前结果', async () => {
-    const props = reactive({ divinationType: 'qimen' as const });
+    const props = reactive<{ divinationType: DivinationType }>({ divinationType: 'qimen' });
     const route = reactive({
-      query: { historyId: 'history-1' } as Record<string, unknown>,
+      query: { historyId: 'history-1' } as LocationQueryRaw,
     });
     const divination = createDivinationStub();
 
@@ -135,8 +137,8 @@ describe('useUnifiedDivinationPage', () => {
   });
 
   it('塔罗切换牌阵后提交时会带上 spreadType', () => {
-    const props = reactive({ divinationType: 'tarot' as const });
-    const route = reactive({ query: {} as Record<string, unknown> });
+    const props = reactive<{ divinationType: DivinationType }>({ divinationType: 'tarot' });
+    const route = reactive({ query: {} as LocationQueryRaw });
     const divination = createDivinationStub();
 
     const page = useUnifiedDivinationPage(props, ref(null), {

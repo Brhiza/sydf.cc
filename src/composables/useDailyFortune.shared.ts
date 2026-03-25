@@ -1,6 +1,7 @@
 import type { Ref } from 'vue';
 import { DAILY_LIMIT_STORAGE_KEY } from '@/services/dailyLimitService';
 import { formatLocalDateKey } from '@/utils/date-formatter';
+import { isAIErrorMessage } from '@/utils/ai-error';
 import type { HistoryRecord } from '@/types/common';
 import type { DailyFortuneData, SupplementaryInfo } from '@/types/divination';
 import type { ChatMessage } from '@/types/chat';
@@ -69,17 +70,14 @@ export function isRequestCancelled(controller: AbortController) {
   return controller.signal.aborted;
 }
 
-export function hasVisibleDailyConversation(
-  messages: ChatMessage[],
-  isFollowUpLoading: boolean
-) {
+export function hasVisibleDailyConversation(messages: ChatMessage[], isFollowUpLoading: boolean) {
   const visibleMessages = messages
     .filter((message) => message.role !== 'system')
     .filter((message, index) => {
       if (index === 0 && message.role === 'user') {
         return false;
       }
-      if (index === 1 && message.role === 'assistant') {
+      if (index === 1 && message.role === 'assistant' && !isAIErrorMessage(message.content)) {
         return false;
       }
       return true;

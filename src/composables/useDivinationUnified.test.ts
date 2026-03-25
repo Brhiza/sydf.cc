@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { LocationQueryRaw } from 'vue-router';
 import { useDivinationUnified } from './useDivinationUnified';
 
 describe('useDivinationUnified', () => {
@@ -11,12 +12,13 @@ describe('useDivinationUnified', () => {
   const mockReplace = vi.fn();
   const route = {
     path: '/divination/qimen',
-    query: {} as Record<string, unknown>,
+    query: {} as LocationQueryRaw,
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
     route.query = {};
+    mockGetRecord.mockReturnValue(undefined);
   });
 
   it('切到历史记录后，旧请求回调不应覆盖当前历史内容', async () => {
@@ -83,9 +85,83 @@ describe('useDivinationUnified', () => {
 
     expect(divination.result.value?.id).toBe('history-1');
     expect(divination.aiResponse.value).toBe('历史解读');
-    expect(divination.conversationHistory.value).toEqual([{ role: 'assistant', content: '历史对话' }]);
+    expect(divination.conversationHistory.value).toEqual([
+      { role: 'assistant', content: '历史对话' },
+    ]);
     expect(divination.isLoading.value).toBe(false);
     expect(divination.isAiLoading.value).toBe(false);
+  });
+
+  it('当前页首轮 AI 失败后应把错误写入助手消息，保证可以继续重试', async () => {
+    let capturedCallbacks:
+      | {
+          onInitialResult: (result: { id: string; data: unknown; aiResponse?: string }) => void;
+          onAIChunk: (chunk: string) => void;
+          onAIComplete: (result: { aiResponse?: string }) => void;
+          onAIError: (error: string) => void;
+          onConversationUpdate: (history: { role: string; content: string }[]) => void;
+        }
+      | undefined;
+
+    mockPerformDivination.mockImplementation(async (_request, callbacks) => {
+      capturedCallbacks = callbacks;
+    });
+
+    const mockUpdateRecord = vi.fn();
+
+    const divination = useDivinationUnified(
+      { divinationType: 'qimen' },
+      {
+        route,
+        router: {
+          push: mockPush,
+          replace: mockReplace,
+        },
+        historyService: {
+          getRecord: mockGetRecord,
+          updateRecord: mockUpdateRecord,
+        },
+        divinationService: {
+          sendFollowUp: mockSendFollowUp,
+        },
+        performDivination: mockPerformDivination,
+      }
+    );
+
+    divination.question.value = '这次合作是否顺利？';
+    await divination.startDivination();
+
+    capturedCallbacks?.onInitialResult({
+      id: 'live-1',
+      data: { jiuGongGe: [] },
+      aiResponse: '',
+    });
+    capturedCallbacks?.onConversationUpdate([
+      { role: 'user', content: '这次合作是否顺利？' },
+      { role: 'assistant', content: '' },
+    ]);
+    capturedCallbacks?.onAIError('抱歉，AI服务暂时不可用，请稍后重试。');
+
+    expect(divination.error.value).toBe('抱歉，AI服务暂时不可用，请稍后重试。');
+    expect(divination.conversationHistory.value).toMatchObject([
+      { role: 'user', content: '这次合作是否顺利？' },
+      { role: 'assistant', content: '抱歉，AI服务暂时不可用，请稍后重试。' },
+    ]);
+    expect(mockUpdateRecord).toHaveBeenCalledWith(
+      'live-1',
+      expect.objectContaining({
+        result: expect.objectContaining({
+          aiResponse: '抱歉，AI服务暂时不可用，请稍后重试。',
+        }),
+        conversationHistory: expect.arrayContaining([
+          expect.objectContaining({ role: 'user', content: '这次合作是否顺利？' }),
+          expect.objectContaining({
+            role: 'assistant',
+            content: '抱歉，AI服务暂时不可用，请稍后重试。',
+          }),
+        ]),
+      })
+    );
   });
 
   it('找不到历史记录时会回退到当前占卜路由', () => {

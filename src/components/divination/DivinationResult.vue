@@ -16,15 +16,6 @@
       @retry="(target) => $emit('retry', target)"
     />
 
-    <DivinationErrorState
-      v-if="error"
-      :error="error"
-      :show-retry-button="showErrorRetryButton"
-      @retry="$emit('retry')"
-    >
-      <slot name="error-actions"></slot>
-    </DivinationErrorState>
-
     <!-- 操作按钮 -->
     <div class="result-actions">
       <slot name="actions"></slot>
@@ -33,48 +24,53 @@
 </template>
 
 <script setup lang="ts">
-import type { DivinationType, DivinationResult as DivinationResultType, ChatMessage, ChatMessageRetryTarget } from '@/types';
+import type {
+  DivinationType,
+  DivinationResult as DivinationResultType,
+  ChatMessage,
+  ChatMessageRetryTarget,
+} from '@/types';
 import { computed } from 'vue';
 import DivinationResultBody from './result/DivinationResultBody.vue';
 import DivinationAISection from './result/DivinationAISection.vue';
-import DivinationErrorState from './result/DivinationErrorState.vue';
 import {
   getDisplayedConversationHistory,
-  hasVisibleAssistantContent,
 } from './result/ai/divination-ai-section';
 
-const props = withDefaults(defineProps<{
-  type: DivinationType;
-  result: DivinationResultType;
-  title?: string;
-  isAiLoading?: boolean;
-  error?: string | null;
-  question?: string;
-  conversationHistory?: ChatMessage[];
-  isFollowUpLoading?: boolean;
-}>(), {
-  title: '',
-  isAiLoading: false,
-  error: null,
-  question: '',
-  conversationHistory: () => [],
-  isFollowUpLoading: false,
-});
+const props = withDefaults(
+  defineProps<{
+    type: DivinationType;
+    result: DivinationResultType;
+    title?: string;
+    isAiLoading?: boolean;
+    error?: string | null;
+    question?: string;
+    conversationHistory?: ChatMessage[];
+    isFollowUpLoading?: boolean;
+  }>(),
+  {
+    title: '',
+    isAiLoading: false,
+    error: null,
+    question: '',
+    conversationHistory: () => [],
+    isFollowUpLoading: false,
+  }
+);
 
 const emit = defineEmits<{
   retry: [target?: ChatMessageRetryTarget];
 }>();
-
-const showErrorRetryButton = computed(() => {
-  return !hasVisibleAssistantContent(props.type, props.conversationHistory);
-});
 
 const showAISection = computed(() => {
   if (props.type !== 'daily') {
     return true;
   }
 
-  return getDisplayedConversationHistory(props.type, props.conversationHistory).length > 0;
+  return (
+    getDisplayedConversationHistory(props.type, props.conversationHistory).length > 0 ||
+    !!props.error
+  );
 });
 
 // 计算结果标题

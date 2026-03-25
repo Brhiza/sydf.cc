@@ -52,4 +52,28 @@ describe('DivinationAISection', () => {
 
     expect(wrapper.findAll('button[title="重新生成"]')).toHaveLength(1);
   });
+
+  it('没有可见对话历史但存在错误时，也应回退为带操作按钮的助手消息', () => {
+    const wrapper = mount(DivinationAISection, {
+      props: {
+        type: 'qimen',
+        conversationHistory: [],
+        error: '抱歉，AI服务暂时不可用，请稍后重试。',
+      },
+      global: {
+        stubs: {
+          DivinationAIHeader: true,
+          DivinationAIDisclaimer: true,
+          StreamingMarkdown: {
+            props: ['content'],
+            template: '<div class="streaming-markdown-stub">{{ content }}</div>',
+          },
+        },
+      },
+    });
+
+    expect(wrapper.text()).toContain('抱歉，AI服务暂时不可用，请稍后重试。');
+    expect(wrapper.find('button[title="复制"]').exists()).toBe(true);
+    expect(wrapper.find('button[title="重新生成"]').exists()).toBe(true);
+  });
 });

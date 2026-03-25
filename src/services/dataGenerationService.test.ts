@@ -47,6 +47,7 @@ vi.mock('./algorithms/daily', () => ({
 }));
 
 import { dataGenerationService } from './dataGenerationService';
+import type { SupplementaryInfo } from '@/types/divination';
 
 describe('DataGenerationService', () => {
   beforeEach(() => {
@@ -57,11 +58,11 @@ describe('DataGenerationService', () => {
     await dataGenerationService.generateDivination('liuyao', undefined, undefined, {
       divinationMethod: 'number',
       divinationNumber: 123456,
-    });
+    } as unknown as SupplementaryInfo);
     await dataGenerationService.generateDivination('qimen', undefined, undefined, {
       divinationMethod: 'number',
       divinationNumber: 789,
-    });
+    } as unknown as SupplementaryInfo);
 
     expect(mockGenerateLiuyao).toHaveBeenCalledWith();
     expect(mockGenerateQimen).toHaveBeenCalledWith();
@@ -95,6 +96,6 @@ describe('DataGenerationService', () => {
     });
 
     expect(mockCalculateDailyFortune).toHaveBeenCalledTimes(1);
-    expect(mockCalculateDailyFortune.mock.calls[0][0]).toBeInstanceOf(Date);
+    expect(mockCalculateDailyFortune).toHaveBeenCalledWith(expect.any(Date));
   });
 });

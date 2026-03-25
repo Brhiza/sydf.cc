@@ -3,13 +3,13 @@
  */
 import type { ChatMessage } from '@/types/chat';
 import { generateTwoStageAIResponseWithSystem, getAIInsight } from './ai';
-import type { 
+import type {
   DivinationType,
   DivinationData,
-  LiuyaoData, 
-  MeihuaData, 
-  QimenData, 
-  TarotData, 
+  LiuyaoData,
+  MeihuaData,
+  QimenData,
+  TarotData,
   SsgwData,
   DailyFortuneData,
   SupplementaryInfo,
@@ -94,7 +94,7 @@ export class AIService {
       role: 'assistant',
       content: '',
     };
-    
+
     conversationHistory.push(userMessage, assistantMessage);
     onConversationUpdate([...conversationHistory]);
 
@@ -102,7 +102,7 @@ export class AIService {
       // 生成追问提示词
       const [currentTime, displayTimeData] = await Promise.all([
         getFormattedTimeInfo(),
-        getDisplayTimeData()
+        getDisplayTimeData(),
       ]);
 
       const followUpContext = {
@@ -112,8 +112,8 @@ export class AIService {
         followUpQuestion,
         currentTime,
         timeInfo: displayTimeData,
-        originalData: context?.originalData || null,
-        supplementaryInfo: context?.supplementaryInfo || null
+        originalData: context?.originalData ?? undefined,
+        supplementaryInfo: context?.supplementaryInfo ?? undefined,
       };
 
       const promptForAI = await generateFollowUpPromptWrapper(followUpContext);
@@ -132,7 +132,9 @@ export class AIService {
           onConversationUpdate([...conversationHistory]);
         },
         (error) => {
-          const userFriendlyMessage = getUserFriendlyMessage(handleError(error, '后续问题处理失败'));
+          const userFriendlyMessage = getUserFriendlyMessage(
+            handleError(error, '后续问题处理失败')
+          );
           assistantMessage.content = userFriendlyMessage;
           onError(userFriendlyMessage);
           onConversationUpdate([...conversationHistory]);
@@ -140,7 +142,9 @@ export class AIService {
       );
     } catch (error) {
       const userFriendlyMessage = getUserFriendlyMessage(handleError(error, '后续问题处理失败'));
+      assistantMessage.content = userFriendlyMessage;
       onError(userFriendlyMessage);
+      onConversationUpdate([...conversationHistory]);
     }
   }
 }

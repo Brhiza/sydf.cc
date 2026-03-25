@@ -6,7 +6,10 @@ import { aiService } from './aiService';
 import { generateFollowUpPromptWrapper } from './prompts';
 import { getDisplayTimeData, getFormattedTimeInfo } from './prompts/shared/time-utils';
 
-type AIRegenerationRecord = Pick<HistoryRecord, 'id' | 'type' | 'question' | 'result' | 'conversationHistory'>;
+type AIRegenerationRecord = Pick<
+  HistoryRecord,
+  'id' | 'type' | 'question' | 'result' | 'conversationHistory'
+>;
 type RegeneratedAITargetKind = 'primary' | 'follow_up';
 
 export interface RegeneratedAIResult {
@@ -131,7 +134,10 @@ function resolveTargetAssistantMessage(
   targetIndex: number;
 } {
   const conversationHistory = cloneConversationHistory(record);
-  const displayedConversationHistory = getDisplayedConversationHistory(record.type, conversationHistory);
+  const displayedConversationHistory = getDisplayedConversationHistory(
+    record.type,
+    conversationHistory
+  );
   const targetMessage =
     displayedConversationHistory.find((message, index) => {
       if (index !== target.displayedIndex) {
@@ -152,7 +158,10 @@ function resolveTargetAssistantMessage(
   };
 }
 
-function isPrimaryAssistantMessage(conversationHistory: ChatMessage[], targetIndex: number): boolean {
+function isPrimaryAssistantMessage(
+  conversationHistory: ChatMessage[],
+  targetIndex: number
+): boolean {
   return targetIndex === 1 && conversationHistory[0]?.role === 'user';
 }
 
@@ -207,7 +216,10 @@ export async function regenerateConversationMessage(
   target: ChatMessageRetryTarget,
   options: GenerateRegeneratedAIOptions = {}
 ): Promise<RegeneratedAIResult> {
-  const { conversationHistory, targetMessage, targetIndex } = resolveTargetAssistantMessage(record, target);
+  const { conversationHistory, targetMessage, targetIndex } = resolveTargetAssistantMessage(
+    record,
+    target
+  );
   if (!targetMessage || targetMessage.role !== 'assistant' || targetIndex <= 0) {
     return generateRegeneratedAI(record, options);
   }
@@ -240,11 +252,11 @@ export async function regenerateConversationMessage(
     originalQuestion: record.question,
     originalResponse: record.result.aiResponse || '',
     divinationType: record.type,
-    followUpQuestion: regeneratedUserMessage.content,
+    followUpQuestion: regeneratedUserMessage.content || '',
     currentTime,
     timeInfo,
     originalData: JSON.parse(JSON.stringify(record.result.data)),
-    supplementaryInfo: cloneSupplementaryInfo(record.result.supplementaryInfo) || null,
+    supplementaryInfo: cloneSupplementaryInfo(record.result.supplementaryInfo),
   });
 
   const response = await generatePromptAIResponse(prompt, options.signal, (chunk) => {

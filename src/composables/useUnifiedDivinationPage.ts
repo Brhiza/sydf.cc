@@ -164,6 +164,7 @@ export function useUnifiedDivinationPage(
   );
 
   return {
+    route,
     ...divination,
     adaptedResult,
     config,

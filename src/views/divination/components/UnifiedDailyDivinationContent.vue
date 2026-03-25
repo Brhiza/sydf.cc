@@ -15,10 +15,7 @@
     @update:selected-date="selectedDate = $event"
   />
 
-  <UnifiedResultHeaderActions
-    v-if="result && !route.query.historyId"
-    @back="handleClear"
-  />
+  <UnifiedResultHeaderActions v-if="result && !route.query.historyId" @back="handleClear" />
 
   <ContentSectionCard
     v-if="result"
@@ -27,10 +24,7 @@
     use-header
     header-divider
   >
-    <DailyInterpretationResult
-      :ai-response="aiResponse"
-      :is-loading="isAILoading"
-    />
+    <DailyInterpretationResult :ai-response="aiResponse" :is-loading="isAILoading" />
   </ContentSectionCard>
 
   <div v-if="result && (hasVisibleConversation || error)" class="content-card">
@@ -39,12 +33,6 @@
       :conversation-history="conversationHistory"
       :is-ai-loading="isAILoading"
       :is-follow-up-loading="isFollowUpLoading"
-      :error="error"
-      @retry="handleRetry"
-    />
-
-    <DivinationErrorState
-      v-if="error"
       :error="error"
       @retry="handleRetry"
     />
@@ -63,7 +51,6 @@ import { computed } from 'vue';
 import ContentSectionCard from '@/components/common/ContentSectionCard.vue';
 import DivinationInput from '@/components/divination/DivinationInput.vue';
 import DivinationAISection from '@/components/divination/result/DivinationAISection.vue';
-import DivinationErrorState from '@/components/divination/result/DivinationErrorState.vue';
 import DailyInterpretationResult from '@/components/divination/results/DailyInterpretationResult.vue';
 import { getDivinationConfig } from '@/config/divination';
 import { useDailyFortune } from '@/composables/useDailyFortune';

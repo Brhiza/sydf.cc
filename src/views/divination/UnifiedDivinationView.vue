@@ -77,6 +77,7 @@ const pageContainerRef = ref<HTMLElement | null>(null);
 const isDaily = computed(() => props.divinationType === 'daily');
 
 const {
+  route,
   question,
   isLoading,
   result,

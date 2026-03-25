@@ -19,12 +19,6 @@ vi.mock('./result/DivinationAISection.vue', () => ({
   }),
 }));
 
-vi.mock('./result/DivinationErrorState.vue', () => ({
-  default: defineComponent({
-    template: '<div class="error-state-stub"></div>',
-  }),
-}));
-
 const baseResult = {
   id: 'daily-1',
   type: 'daily',
@@ -63,6 +57,19 @@ describe('DivinationResult', () => {
           { id: 'user-2', role: 'user', content: '那下午适合出门吗？' },
           { id: 'assistant-2', role: 'assistant', content: '下午更适合处理轻量安排。' },
         ] as ChatMessage[],
+      },
+    });
+
+    expect(wrapper.find('.ai-section-stub').exists()).toBe(true);
+  });
+
+  it('今日运势只有错误时也应继续走统一的 AI 区块，不再回退独立错误态', () => {
+    const wrapper = mount(DivinationResult, {
+      props: {
+        type: 'daily',
+        result: baseResult,
+        error: '抱歉，AI服务暂时不可用，请稍后重试。',
+        conversationHistory: [] as ChatMessage[],
       },
     });
 

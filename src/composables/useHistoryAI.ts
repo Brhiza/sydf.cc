@@ -8,6 +8,7 @@ import {
   generateRegeneratedAI,
   regenerateConversationMessage,
 } from '@/services/ai-regeneration';
+import { isAIErrorMessage } from '@/utils/ai-error';
 
 interface HistoryServiceLike {
   updateRecord: (id: string, record: HistoryRecord) => boolean;
@@ -36,17 +37,7 @@ export function useHistoryAI(options: UseHistoryAIOptions = {}) {
       return 'AI解读暂时不可用，请稍后重试';
     }
 
-    const errorKeywords = [
-      '抱歉',
-      '暂时不可用',
-      '请稍后重试',
-      '出小差',
-      '请求过于频繁',
-      '服务器暂时繁忙',
-    ];
-    const hasError = errorKeywords.some(keyword => record.result.aiResponse?.includes(keyword));
-
-    return hasError ? record.result.aiResponse : null;
+    return isAIErrorMessage(record.result.aiResponse) ? record.result.aiResponse : null;
   }
 
   /**
@@ -72,6 +63,7 @@ export function useHistoryAI(options: UseHistoryAIOptions = {}) {
       const updatedRecord = buildUpdatedHistoryRecord(record, {
         aiResponse: errorMessage,
         conversationHistory: fallbackConversationHistory,
+        target: 'primary',
       });
       Object.assign(record, updatedRecord);
       currentHistoryService.updateRecord(record.id, updatedRecord);

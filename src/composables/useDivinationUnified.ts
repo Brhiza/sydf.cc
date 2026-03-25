@@ -2,27 +2,35 @@
  * 统一的占卜组合式函数
  * 作为 Service 和 Vue 组件之间的桥梁
  */
-import type { DivinationType, SupplementaryInfo, DivinationResult, DivinationRequest } from '@/types';
+import type {
+  DivinationType,
+  SupplementaryInfo,
+  DivinationResult,
+  DivinationRequest,
+} from '@/types';
 import type { HistoryRecord } from '@/types/common';
 import type { ChatMessage, ChatMessageRetryTarget } from '@/types/chat';
 import { divinationService, performDivination } from '@/services';
 import {
+  buildRegeneratedConversationHistory,
   buildUpdatedHistoryRecord,
   generateRegeneratedAI,
   regenerateConversationMessage,
 } from '@/services/ai-regeneration';
 import { ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import type { LocationQueryRaw } from 'vue-router';
 import { historyService } from '@/services/history';
+import { isAIErrorMessage } from '@/utils/ai-error';
 
 interface RouteLike {
   path: string;
-  query: Record<string, unknown>;
+  query: LocationQueryRaw;
 }
 
 interface RouterLike {
-  push: (to: string | { path: string; query?: Record<string, unknown> }) => unknown;
-  replace: (to: { path: string; query?: Record<string, unknown> }) => unknown;
+  push: (to: string | { path: string; query?: LocationQueryRaw }) => unknown;
+  replace: (to: { path: string; query?: LocationQueryRaw }) => unknown;
 }
 
 interface HistoryRecordLike {
@@ -89,7 +97,9 @@ export function useDivinationUnified(
 
   // 计算属性
   const hasResult = computed(() => result.value !== null);
-  const hasAiResponse = computed(() => aiResponse.value !== '');
+  const hasAiResponse = computed(
+    () => aiResponse.value !== '' && !isAIErrorMessage(aiResponse.value)
+  );
 
   function invalidateCurrentSession() {
     currentSessionId.value += 1;
@@ -151,7 +161,7 @@ export function useDivinationUnified(
 
     // 注意：不再中止上一次的请求(abortController)，让其在后台继续完成并保存到历史记录
     // 仅更新当前UI引用的 abortController 为新的，以便用户点击"取消"时只取消当前任务
-    
+
     // 重置状态
     isLoading.value = true;
     isAiLoading.value = true;
@@ -162,7 +172,7 @@ export function useDivinationUnified(
     abortController.value = new AbortController();
     // 强制清空对话历史，防止上一次的记录残留
     resetConversationState();
-    
+
     const { supplementaryInfo, ...restOptions } = options;
     const request: DivinationRequest = {
       type: type.value,
@@ -188,6 +198,7 @@ export function useDivinationUnified(
       onAIComplete: (finalResult: DivinationResult) => {
         if (thisSessionId !== currentSessionId.value) return;
         isAiLoading.value = false;
+        aiResponse.value = finalResult.aiResponse || '';
         if (result.value) {
           result.value.aiResponse = finalResult.aiResponse || '';
         }
@@ -195,6 +206,10 @@ export function useDivinationUnified(
       onAIError: (errorMessage: string) => {
         if (thisSessionId !== currentSessionId.value) return;
         error.value = errorMessage;
+        const currentRecord = buildCurrentHistoryRecord();
+        if (currentRecord) {
+          applyAIErrorState(currentRecord, errorMessage);
+        }
         isAiLoading.value = false;
         isLoading.value = false;
       },
@@ -212,7 +227,7 @@ export function useDivinationUnified(
     // 用户显式清除时，可以选择是否中止后台生成。
     // 为了节省资源，显式"返回/清除"操作仍然建议中止当前正在进行的任务
     clearAbortController(true);
-    
+
     // 增加会话ID，确保任何残留的后台回调不会更新UI
     invalidateCurrentSession();
 
@@ -250,12 +265,36 @@ export function useDivinationUnified(
         type: type.value,
         data: JSON.parse(JSON.stringify(result.value.data)),
         aiResponse: aiResponse.value,
-        ...(result.value.supplementaryInfo ? { supplementaryInfo: result.value.supplementaryInfo } : {}),
+        ...(result.value.supplementaryInfo
+          ? { supplementaryInfo: result.value.supplementaryInfo }
+          : {}),
       },
       conversationHistory: [...conversationHistory.value],
       timestamp: Date.now(),
       summary: question.value.trim() || '占卜结果',
     };
+  }
+
+  function applyAIErrorState(record: HistoryRecordLike, errorMessage: string) {
+    const fallbackConversationHistory = buildRegeneratedConversationHistory(
+      record as HistoryRecord,
+      errorMessage
+    );
+
+    conversationHistory.value = fallbackConversationHistory;
+
+    if (result.value) {
+      result.value.aiResponse = errorMessage;
+    }
+
+    currentHistoryService.updateRecord?.(
+      record.id,
+      buildUpdatedHistoryRecord(record as HistoryRecord, {
+        aiResponse: errorMessage,
+        conversationHistory: fallbackConversationHistory,
+        target: 'primary',
+      })
+    );
   }
 
   /**
@@ -280,7 +319,7 @@ export function useDivinationUnified(
       router.push(`/divination/${type.value}`);
     }
   }
-  
+
   /**
    * 重新生成AI解读 (此功能现在由Service层处理，这里仅作调用)
    */
@@ -331,7 +370,10 @@ export function useDivinationUnified(
         result.value.aiResponse = regenerated.aiResponse;
       }
 
-      currentHistoryService.updateRecord?.(record.id, buildUpdatedHistoryRecord(record as HistoryRecord, regenerated));
+      currentHistoryService.updateRecord?.(
+        record.id,
+        buildUpdatedHistoryRecord(record as HistoryRecord, regenerated)
+      );
       isAiLoading.value = false;
       clearAbortController();
     } catch (regenerationError) {
@@ -341,8 +383,12 @@ export function useDivinationUnified(
         isCancelled.value = true;
         error.value = null;
       } else {
-        error.value =
-          regenerationError instanceof Error ? regenerationError.message : '重新生成失败，请稍后重试';
+        const errorMessage =
+          regenerationError instanceof Error
+            ? regenerationError.message
+            : '重新生成失败，请稍后重试';
+        error.value = errorMessage;
+        applyAIErrorState(record, errorMessage);
       }
 
       isAiLoading.value = false;
@@ -368,26 +414,21 @@ export function useDivinationUnified(
       isFollowUpLoading.value = false;
       return;
     }
-    currentDivinationService.sendFollowUp(
-      recordId,
-      currentConversation,
-      originalQuestion,
-      {
-        onChunk: () => {
-          // The conversationHistory is updated via the onConversationUpdate callback
-        },
-        onComplete: () => {
-          isFollowUpLoading.value = false;
-        },
-        onError: (errorMessage) => {
-          error.value = errorMessage;
-          isFollowUpLoading.value = false;
-        },
-        onConversationUpdate: (updatedHistory) => {
-          conversationHistory.value = updatedHistory;
-        },
-      }
-    );
+    currentDivinationService.sendFollowUp(recordId, currentConversation, originalQuestion, {
+      onChunk: () => {
+        // The conversationHistory is updated via the onConversationUpdate callback
+      },
+      onComplete: () => {
+        isFollowUpLoading.value = false;
+      },
+      onError: (errorMessage) => {
+        error.value = errorMessage;
+        isFollowUpLoading.value = false;
+      },
+      onConversationUpdate: (updatedHistory) => {
+        conversationHistory.value = updatedHistory;
+      },
+    });
   }
 
   /**
@@ -405,7 +446,7 @@ export function useDivinationUnified(
    */
   function clearHistoryParam() {
     if (route.query.historyId) {
-      const newQuery = { ...route.query };
+      const newQuery: LocationQueryRaw = { ...route.query };
       delete newQuery.historyId;
       router.replace({ path: route.path, query: newQuery });
     }

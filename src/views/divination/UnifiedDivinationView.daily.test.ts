@@ -50,6 +50,7 @@ describe('UnifiedDivinationView daily', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     useUnifiedDivinationPageMock.mockReturnValue({
+      route: { query: {} },
       question: ref(''),
       isLoading: ref(false),
       result: ref(null),
@@ -85,5 +86,48 @@ describe('UnifiedDivinationView daily', () => {
 
     expect(wrapper.find('.unified-daily-content-stub').exists()).toBe(true);
     expect(wrapper.find('.divination-result-stub').exists()).toBe(false);
+  });
+
+  it('非今日运势进入结果态时不应因缺少 route 绑定而白屏', () => {
+    useUnifiedDivinationPageMock.mockReturnValue({
+      route: { query: {} },
+      question: ref('测试问题'),
+      isLoading: ref(false),
+      result: ref({
+        id: 'result-1',
+        type: 'qimen',
+        data: { jiuGongGe: [] },
+        aiResponse: '测试解读',
+      }),
+      aiResponse: ref('测试解读'),
+      error: ref<string | null>(null),
+      isAiLoading: ref(false),
+      hasResult: computed(() => true),
+      hasAiResponse: computed(() => true),
+      viewingHistory: ref(false),
+      isCancelled: ref(false),
+      clearResult: vi.fn(),
+      conversationHistory: ref([]),
+      followUpQuestion: ref(''),
+      isFollowUpLoading: ref(false),
+      handleSendFollowUp: vi.fn(),
+      adaptedResult: computed(() => ({ data: { jiuGongGe: [] }, aiResponse: '测试解读' })),
+      config: computed(() => null),
+      isCustomBuild: computed(() => false),
+      handleTypeChange: vi.fn(),
+      handleSubmit: vi.fn(),
+      handleClear: vi.fn(),
+      clearError: vi.fn(),
+      handleRetry: vi.fn(),
+    });
+
+    const wrapper = mount(UnifiedDivinationView, {
+      props: {
+        divinationType: 'qimen',
+      },
+    });
+
+    expect(wrapper.find('.divination-result-stub').exists()).toBe(true);
+    expect(wrapper.find('.result-header-actions-stub').exists()).toBe(true);
   });
 });

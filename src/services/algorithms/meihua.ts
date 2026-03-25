@@ -13,7 +13,12 @@
  *    - 用为事之始，互为事之中，变为事之终。
  */
 
-import type { MeihuaExternalOmens, MeihuaSettings } from '@/types/divination';
+import type {
+  MeihuaCalculation,
+  MeihuaData,
+  MeihuaExternalOmens,
+  MeihuaSettings,
+} from '@/types/divination';
 import { hexagramsData, trigramsByIndex } from '../../utils/hexagram-data';
 import { dizhi } from '../../config/divination-data';
 import {
@@ -44,6 +49,13 @@ type MappedExternalOmen = {
   trigramName: string;
 };
 
+interface MeihuaMethodResult {
+  upperTrigramIndex: number;
+  lowerTrigramIndex: number;
+  movingYaoIndex: number;
+  calculation: MeihuaCalculation;
+}
+
 function resolveTiYongByMovingYao<T extends { name: string; element: string; nature: string }>(
   upper: T,
   lower: T,
@@ -62,7 +74,10 @@ function resolveTiYongByMovingYao<T extends { name: string; element: string; nat
   };
 }
 
-function resolveTimeMethod(ganzhi: ReturnType<typeof getDivinationTime>['ganzhi'], lunar: ReturnType<typeof getDivinationTime>['timeInfo']['lunar']) {
+function resolveTimeMethod(
+  ganzhi: ReturnType<typeof getDivinationTime>['ganzhi'],
+  lunar: ReturnType<typeof getDivinationTime>['timeInfo']['lunar']
+): MeihuaMethodResult {
   const yearZhi = ganzhi.year.substring(1, 2);
   const month = lunar.monthNumber;
   const day = lunar.dayNumber;
@@ -93,7 +108,7 @@ function resolveTimeMethod(ganzhi: ReturnType<typeof getDivinationTime>['ganzhi'
   };
 }
 
-function resolveNumberMethod(number: number) {
+function resolveNumberMethod(number: number): MeihuaMethodResult {
   if (!Number.isInteger(number) || number <= 0) {
     throw new Error('数字起卦必须提供正整数');
   }
@@ -117,7 +132,7 @@ function resolveNumberMethod(number: number) {
   };
 }
 
-function resolveRandomMethod() {
+function resolveRandomMethod(): MeihuaMethodResult {
   const upperTrigramIndex = Math.floor(Math.random() * 8) + 1;
   const lowerTrigramIndex = Math.floor(Math.random() * 8) + 1;
   const movingYaoIndex = Math.floor(Math.random() * 6) + 1;
@@ -138,21 +153,41 @@ function resolveRandomMethod() {
 
 function mapExternalOmens(externalOmens: MeihuaExternalOmens): MappedExternalOmen[] {
   const mapped: MappedExternalOmen[] = [];
-  const mappingSources = {
-    direction: meihuaDirectionMap,
-    person: meihuaPersonMap,
-    animal: meihuaAnimalMap,
-    object: meihuaObjectMap,
-    sound: meihuaSoundMap,
-    color: meihuaColorMap,
-  } as const;
 
   for (const source of meihuaOmenPriority) {
     const value = externalOmens[source];
     if (!value) {
       continue;
     }
-    const mappedOmen = mappingSources[source][value as never];
+
+    let mappedOmen:
+      | {
+          trigramIndex: number;
+          trigramName: string;
+        }
+      | undefined;
+
+    switch (source) {
+      case 'direction':
+        mappedOmen = meihuaDirectionMap[value as keyof typeof meihuaDirectionMap];
+        break;
+      case 'person':
+        mappedOmen = meihuaPersonMap[value as keyof typeof meihuaPersonMap];
+        break;
+      case 'animal':
+        mappedOmen = meihuaAnimalMap[value as keyof typeof meihuaAnimalMap];
+        break;
+      case 'object':
+        mappedOmen = meihuaObjectMap[value as keyof typeof meihuaObjectMap];
+        break;
+      case 'sound':
+        mappedOmen = meihuaSoundMap[value as keyof typeof meihuaSoundMap];
+        break;
+      case 'color':
+        mappedOmen = meihuaColorMap[value as keyof typeof meihuaColorMap];
+        break;
+    }
+
     if (!mappedOmen) {
       continue;
     }
@@ -167,7 +202,7 @@ function mapExternalOmens(externalOmens: MeihuaExternalOmens): MappedExternalOme
   return mapped;
 }
 
-function resolveExternalMethod(externalOmens?: MeihuaExternalOmens) {
+function resolveExternalMethod(externalOmens?: MeihuaExternalOmens): MeihuaMethodResult {
   if (!externalOmens) {
     throw new Error('外应起卦必须提供外应信息');
   }
@@ -184,7 +219,10 @@ function resolveExternalMethod(externalOmens?: MeihuaExternalOmens) {
   const lowerTrigramIndex = mappedOmens[1].trigramIndex;
   const movingYaoIndex = externalOmens.count! % 6 || 6;
   const externalSummary = mappedOmens
-    .map((omen) => `${MeihuaHelpers.getExternalOmenSourceLabel(omen.source)}：${omen.label}（${omen.trigramName}）`)
+    .map(
+      (omen) =>
+        `${MeihuaHelpers.getExternalOmenSourceLabel(omen.source)}：${omen.label}（${omen.trigramName}）`
+    )
     .concat(`数量：${externalOmens.count}`)
     .join('；');
 
@@ -220,11 +258,13 @@ function findHexagramByTrigrams(upper: number, lower: number) {
   // 使用模运算确保索引在有效范围内
   const upperIndex = ((upper - 1) % 8) + 1;
   const lowerIndex = ((lower - 1) % 8) + 1;
-  
+
   const upperTrigram = trigramsByIndex[upperIndex];
   const lowerTrigram = trigramsByIndex[lowerIndex];
-  const hexagram = hexagrams.find((h) => h.symbol === `${upperTrigram.symbol}${lowerTrigram.symbol}`);
-  
+  const hexagram = hexagrams.find(
+    (h) => h.symbol === `${upperTrigram.symbol}${lowerTrigram.symbol}`
+  );
+
   return hexagram!;
 }
 
@@ -233,16 +273,13 @@ function findHexagramByTrigrams(upper: number, lower: number) {
  * @param customDate 自定义时间，若不提供则使用当前时间
  * @returns 返回一个完整的梅花易数卦盘数据对象
  */
-export function generateMeihua(
-  customDate?: Date,
-  settings?: MeihuaSettings
-) {
+export function generateMeihua(customDate?: Date, settings?: MeihuaSettings): MeihuaData {
   // 1. 获取占卜时间的农历及干支信息
   const { ganzhi, timeInfo, timestamp } = getDivinationTime(customDate);
   const { lunar } = timeInfo;
   const method = settings?.method || 'time';
 
-  const methodResult = (() => {
+  const methodResult: MeihuaMethodResult = (() => {
     switch (method) {
       case 'number':
         return resolveNumberMethod(settings?.number || 0);
@@ -289,9 +326,10 @@ export function generateMeihua(
   const interLowerResult = findTrigramByLines(interLowerLines);
   const interUpperResult = findTrigramByLines(interUpperLines);
 
-  const interHexagram = interLowerResult && interUpperResult
-    ? findHexagramByTrigrams(interUpperResult.index, interLowerResult.index)
-    : null;
+  const interHexagram =
+    interLowerResult && interUpperResult
+      ? findHexagramByTrigrams(interUpperResult.index, interLowerResult.index)
+      : null;
 
   const changedLines = [...mainLines];
   changedLines[movingYaoIndex - 1] = 1 - changedLines[movingYaoIndex - 1];
@@ -302,9 +340,10 @@ export function generateMeihua(
   const changedLowerResult = findTrigramByLines(changedLowerLines);
   const changedUpperResult = findTrigramByLines(changedUpperLines);
 
-  const changingHexagram = changedLowerResult && changedUpperResult
-    ? findHexagramByTrigrams(changedUpperResult.index, changedLowerResult.index)
-    : null;
+  const changingHexagram =
+    changedLowerResult && changedUpperResult
+      ? findHexagramByTrigrams(changedUpperResult.index, changedLowerResult.index)
+      : null;
 
   //【核心修正：注入“体用”之魂】
   // 梅花易数之精髓，在于体用生克。无体用，则无以论吉凶。
@@ -314,23 +353,29 @@ export function generateMeihua(
   // 动爻在四、五、上爻时，上卦为用、下卦为体；反之则下卦为用、上卦为体。
   const { tiGua, yongGua } = resolveTiYongByMovingYao(upperTrigram, lowerTrigram, movingYaoIndex);
 
-  const changedTiYong = changedUpperResult && changedLowerResult
-    ? resolveTiYongByMovingYao(changedUpperResult.trigram, changedLowerResult.trigram, movingYaoIndex)
-    : null;
+  const changedTiYong =
+    changedUpperResult && changedLowerResult
+      ? resolveTiYongByMovingYao(
+          changedUpperResult.trigram,
+          changedLowerResult.trigram,
+          movingYaoIndex
+        )
+      : null;
 
   const yaosDetail = mainLines.map((line, index) => ({
     position: index + 1,
     yaoType: (line === 1 ? '阳' : '阴') as '阳' | '阴',
     isChanging: index === movingYaoIndex - 1,
     // 标注体用，并进行类型断言
-    tiYong: ((index < 3 ? lowerTrigram.name : upperTrigram.name) === tiGua.name ? '体' : '用') as '体' | '用',
+    tiYong: ((index < 3 ? lowerTrigram.name : upperTrigram.name) === tiGua.name ? '体' : '用') as
+      | '体'
+      | '用',
   }));
 
   // 四时旺衰优先以节气划分；若节气异常缺失，再回退到农历月粗分四季。
   const seasonByJieQi = MeihuaHelpers.getSeasonByJieQi(timeInfo.jieQi);
-  const season = seasonByJieQi !== '未知'
-    ? seasonByJieQi
-    : MeihuaHelpers.getSeasonByMonth(lunar.monthNumber);
+  const season =
+    seasonByJieQi !== '未知' ? seasonByJieQi : MeihuaHelpers.getSeasonByMonth(lunar.monthNumber);
   const tiSeasonState = MeihuaHelpers.getElementSeasonState(tiGua.element, season);
   const yongSeasonState = MeihuaHelpers.getElementSeasonState(yongGua.element, season);
 
@@ -338,17 +383,25 @@ export function generateMeihua(
     originalName: mainHexagram.name,
     changedName: changingHexagram?.name || '',
     interName: interHexagram?.name || '',
-    
+
     // 核心体用关系
     tiGua: { name: tiGua.name, element: tiGua.element, nature: tiGua.nature },
     yongGua: { name: yongGua.name, element: yongGua.element, nature: yongGua.nature },
     changedTiGua: changedTiYong
-      ? { name: changedTiYong.tiGua.name, element: changedTiYong.tiGua.element, nature: changedTiYong.tiGua.nature }
+      ? {
+          name: changedTiYong.tiGua.name,
+          element: changedTiYong.tiGua.element,
+          nature: changedTiYong.tiGua.nature,
+        }
       : null,
     changedYongGua: changedTiYong
-      ? { name: changedTiYong.yongGua.name, element: changedTiYong.yongGua.element, nature: changedTiYong.yongGua.nature }
+      ? {
+          name: changedTiYong.yongGua.name,
+          element: changedTiYong.yongGua.element,
+          nature: changedTiYong.yongGua.nature,
+        }
       : null,
-    
+
     // 卦象详情
     mainHexagram: {
       name: mainHexagram.name,
@@ -357,20 +410,24 @@ export function generateMeihua(
       lower: lowerTrigram.name,
       description: mainHexagram.description,
     },
-    changedHexagram: changingHexagram ? {
-      name: changingHexagram.name,
-      symbol: changingHexagram.symbol,
-      upper: changedUpperResult?.trigram?.name || '',
-      lower: changedLowerResult?.trigram?.name || '',
-      description: changingHexagram.description,
-    } : null,
-    interHexagram: interHexagram ? {
-      name: interHexagram.name,
-      symbol: interHexagram.symbol,
-      upper: interUpperResult?.trigram?.name || '',
-      lower: interLowerResult?.trigram?.name || '',
-      description: interHexagram.description,
-    } : null,
+    changedHexagram: changingHexagram
+      ? {
+          name: changingHexagram.name,
+          symbol: changingHexagram.symbol,
+          upper: changedUpperResult?.trigram?.name || '',
+          lower: changedLowerResult?.trigram?.name || '',
+          description: changingHexagram.description,
+        }
+      : null,
+    interHexagram: interHexagram
+      ? {
+          name: interHexagram.name,
+          symbol: interHexagram.symbol,
+          upper: interUpperResult?.trigram?.name || '',
+          lower: interLowerResult?.trigram?.name || '',
+          description: interHexagram.description,
+        }
+      : null,
 
     // 动爻信息
     movingYao: {
@@ -389,14 +446,24 @@ export function generateMeihua(
       tiSeasonState,
       yongSeasonState,
       // 2. 互卦与体卦关系：代表事情发展的过程。互卦有二，需分别论之。
-      inter1Relation: interLowerResult ? MeihuaHelpers.getElementRelation(interLowerResult.trigram.element, tiGua.element) : '无',
-      inter2Relation: interUpperResult ? MeihuaHelpers.getElementRelation(interUpperResult.trigram.element, tiGua.element) : '无',
+      inter1Relation: interLowerResult
+        ? MeihuaHelpers.getElementRelation(interLowerResult.trigram.element, tiGua.element)
+        : '无',
+      inter2Relation: interUpperResult
+        ? MeihuaHelpers.getElementRelation(interUpperResult.trigram.element, tiGua.element)
+        : '无',
       // 3. 变卦与体卦关系：代表事情的最终结局。
       changedRelation: changedTiYong
-        ? MeihuaHelpers.getElementRelation(changedTiYong.yongGua.element, changedTiYong.tiGua.element)
+        ? MeihuaHelpers.getElementRelation(
+            changedTiYong.yongGua.element,
+            changedTiYong.tiGua.element
+          )
         : '无变卦',
       changedTiYongRelation: changedTiYong
-        ? MeihuaHelpers.getElementRelation(changedTiYong.yongGua.element, changedTiYong.tiGua.element)
+        ? MeihuaHelpers.getElementRelation(
+            changedTiYong.yongGua.element,
+            changedTiYong.tiGua.element
+          )
         : '无变卦',
     },
 

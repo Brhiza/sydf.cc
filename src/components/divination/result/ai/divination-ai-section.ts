@@ -1,4 +1,7 @@
 import type { ChatMessage, DivinationType } from '@/types';
+import { isAIErrorMessage } from '@/utils/ai-error';
+
+export { isAIErrorMessage };
 
 export function getVisibleConversationHistory(messages: ChatMessage[]): ChatMessage[] {
   return messages.filter((message) => message.role !== 'system');
@@ -14,7 +17,7 @@ export function shouldShowAIMessage(
       return false;
     }
 
-    if (index === 1 && message.role === 'assistant') {
+    if (index === 1 && message.role === 'assistant' && !isAIErrorMessage(message.content)) {
       return false;
     }
   }
@@ -31,10 +34,7 @@ export function getDisplayedConversationHistory(
   );
 }
 
-export function hasVisibleAssistantContent(
-  type: DivinationType,
-  messages: ChatMessage[]
-): boolean {
+export function hasVisibleAssistantContent(type: DivinationType, messages: ChatMessage[]): boolean {
   return getDisplayedConversationHistory(type, messages).some(
     (message) => message.role === 'assistant' && !!message.content
   );

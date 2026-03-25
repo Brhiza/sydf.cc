@@ -24,7 +24,9 @@ export function formatChangingYaos(changingYaos?: LiuyaoData['changingYaos']): s
     return '';
   }
 
-  return changingYaos.map((changingYao) => `第${changingYao.position}爻（${changingYao.type}）`).join('、');
+  return changingYaos
+    .map((changingYao) => `第${changingYao.position}爻（${changingYao.type}）`)
+    .join('、');
 }
 
 export function createLiuyaoSummaryItems(data: LiuyaoData): LiuyaoSummaryItem[] {
@@ -35,7 +37,7 @@ export function createLiuyaoSummaryItems(data: LiuyaoData): LiuyaoSummaryItem[] 
     },
     {
       label: '变卦',
-      value: data.changedName,
+      value: data.changedName || '',
     },
   ];
 
@@ -90,7 +92,7 @@ export function createLiuyaoDisplayRows(data: LiuyaoData): LiuyaoDisplayRow[] {
       voidMark: yaoDetail.voidMark,
       worldResponseMark: yaoDetail.worldResponseMark,
       changedYaoType: yaoDetail.changedYaoType,
-      changedYaoInfo: yaoDetail.changedYaoInfo,
+      changedYaoInfo: yaoDetail.changedYaoInfo || '',
     }))
     .reverse();
 }
