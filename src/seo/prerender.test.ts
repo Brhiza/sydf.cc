@@ -32,6 +32,11 @@ describe('getPrerenderRoutes', () => {
 });
 
 describe('createPrerenderHtml', () => {
+  it('启用 JavaScript 时不应直接显示预渲染正文', () => {
+    expect(baseHtml).toContain("document.documentElement.classList.add('js')");
+    expect(baseHtml).toContain("html.js [data-seo-prerender='true']");
+  });
+
   it('应生成带有独立标题、canonical 和正文的页面 HTML', () => {
     const route = getPrerenderRoutes(false).find((item) => item.path === '/divination/liuyao');
 
