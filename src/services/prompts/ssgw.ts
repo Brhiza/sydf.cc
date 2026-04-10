@@ -30,15 +30,14 @@ export function generateSsgwPrompt(
     appendPrompt: (basePrompt, context) => {
       const ssgwSpecific = `
 
-## 三山国王灵签专业分析要求
+## 三山国王灵签补充解读要求
 - **签诗解读**：深入分析签诗的字面意思和深层寓意，用简单易懂的语言解释
 - **核心寓意**：提炼签文的核心启示和指导意义，明确主要想传达的信息
 - **典故分析**：结合签文背后的历史典故，分析典故对当前问题的启示和借鉴意义
 - **签文层次**：从字面层、象征层、哲理层和实践层多层次解读签文
-- **时空关联**：分析签文与当前时空环境的关联性，以及对具体问题的指导意义
 - **问题关联**：综合分析签诗如何直接回应用户的具体疑问
 
-**专业术语解释**：${context.analysis.userExperience.level === 'beginner' ? '请用简单语言解释签文、典故等概念' : context.analysis.userExperience.level === 'intermediate' ? '可适当使用专业术语并简要解释' : '可使用专业术语进行深度灵签分析'}
+**专业术语解释**：${context.analysis.userExperience.level === 'beginner' ? '请用简单语言解释签文、典故等概念' : context.analysis.userExperience.level === 'intermediate' ? '可适当使用解签术语并简要解释' : '可使用较专业的解签表达，但结论必须清晰直白'}
 
 **具体要求**：
 - 给出1-2个具体可行的建议

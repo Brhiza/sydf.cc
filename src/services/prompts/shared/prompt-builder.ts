@@ -90,18 +90,18 @@ const SPECIFIC_PROMPT_TEMPLATES: Record<SpecificPromptKey, SpecificPromptTemplat
     },
   },
   ssgw: {
-    title: '三式高级占卜分析要求',
+    title: '三山国王灵签解读要求',
     requirements: [
-      '**综合分析**：结合太乙、奇门、六壬三式的核心理论进行综合判断',
-      '**神煞影响**：分析重要神煞对事态的影响和作用',
-      '**时空配合**：分析天时、地利、人和的配合关系',
-      '**吉凶判断**：基于三式理论体系进行专业的吉凶判断',
-      '**化解建议**：如有不利因素，提供传统的化解方法和建议',
+      '**签诗原意**：先解释签诗字面意思，避免脱离原文过度发挥',
+      '**核心指向**：提炼签文对当前问题最关键的提醒与结论',
+      '**典故借鉴**：若签文附带典故，说明它对现实处境的参考意义',
+      '**现实落点**：结合用户问题，说明当下宜做什么、不宜做什么',
+      '**趋避提醒**：指出需要等待、规避或重点把握的事项',
     ],
     terminologyByLevel: {
-      beginner: '请用简单语言解释三式占卜的基本概念',
-      intermediate: '可适当使用专业术语并简要解释',
-      advanced: '可使用专业术语进行深度分析',
+      beginner: '请用简单语言解释签诗、典故、寓意等概念',
+      intermediate: '可适当使用解签术语并简要解释',
+      advanced: '可使用较专业的解签表达，但结论必须清晰直白',
     },
   },
 };
@@ -296,7 +296,7 @@ export function buildTarotPrompt(config: PromptBuildConfig): string {
 }
 
 /**
- * 构建三式高级占卜提示词
+ * 构建三山国王灵签提示词
  */
 export function buildSsgwPrompt(config: PromptBuildConfig): string {
   return buildConfiguredPrompt(config, 'ssgw');

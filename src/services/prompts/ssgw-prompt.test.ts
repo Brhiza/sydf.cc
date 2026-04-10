@@ -3,7 +3,9 @@ import { describe, expect, it } from 'vitest';
 import { generateSsgwPrompt } from './ssgw';
 
 describe('generateSsgwPrompt', () => {
-  it('应保留灵签信息和专业分析要求', () => {
+  const legacySsgwPromptLabel = ['三式', '高级占卜'].join('');
+
+  it('应保留灵签信息，并避免误用旧错误话术', () => {
     const prompt = generateSsgwPrompt(
       '这件事是否适合继续推进？',
       {
@@ -29,5 +31,9 @@ describe('generateSsgwPrompt', () => {
     expect(prompt).toContain('第 18 签');
     expect(prompt).toContain('签诗解读');
     expect(prompt).toContain('问题关联');
+    expect(prompt).toContain('三山国王灵签解读要求');
+    expect(prompt).toContain('三山国王灵签补充解读要求');
+    expect(prompt).not.toContain(legacySsgwPromptLabel);
+    expect(prompt).not.toContain('太乙、奇门、六壬');
   });
 });

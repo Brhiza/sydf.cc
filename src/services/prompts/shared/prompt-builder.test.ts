@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildLiuyaoPrompt, buildPrompt, buildQimenPrompt } from './prompt-builder';
+import { buildLiuyaoPrompt, buildPrompt, buildQimenPrompt, buildSsgwPrompt } from './prompt-builder';
 import type { PromptBuildConfig } from './types';
 
 function createPromptConfig(overrides: Partial<PromptBuildConfig> = {}): PromptBuildConfig {
@@ -52,6 +52,8 @@ function createPromptConfig(overrides: Partial<PromptBuildConfig> = {}): PromptB
 }
 
 describe('prompt-builder', () => {
+  const legacySsgwPromptLabel = ['三式', '高级占卜'].join('');
+
   it('会按配置生成六爻专业分析要求', () => {
     const prompt = buildLiuyaoPrompt(createPromptConfig());
 
@@ -88,6 +90,19 @@ describe('prompt-builder', () => {
     );
 
     expect(prompt).toContain('## 塔罗牌专业分析要求');
+  });
+
+  it('三山国王灵签不会再误用旧错误模板', () => {
+    const prompt = buildSsgwPrompt(
+      createPromptConfig({
+        divinationType: 'ssgw',
+      })
+    );
+
+    expect(prompt).toContain('## 三山国王灵签解读要求');
+    expect(prompt).toContain('签诗原意');
+    expect(prompt).not.toContain(legacySsgwPromptLabel);
+    expect(prompt).not.toContain('太乙、奇门、六壬');
   });
 
   it('不支持的类型只保留基础结构', () => {
