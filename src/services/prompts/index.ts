@@ -11,7 +11,7 @@ import { generateSsgwPrompt } from './ssgw';
 import { generateTarotPrompt } from './tarot';
 import { generateDailyFortunePrompt } from './daily';
 import { generateFollowUpPrompt, type FollowUpContext } from './followup';
-import { getFormattedTimeInfo } from './shared/time-utils';
+import { getFormattedTimeInfoForDivination } from './shared/time-utils';
 import { generateGenericPromptSync } from './shared/prompt-generator';
 
 /**
@@ -31,7 +31,7 @@ export async function generatePrompt(
   supplementaryInfo?: SupplementaryInfo
 ): Promise<string> {
   // 获取完整的历法时间信息
-  const timeInfo = await getFormattedTimeInfo();
+  const timeInfo = await getFormattedTimeInfoForDivination(data);
 
   switch (type) {
     case 'liuyao':

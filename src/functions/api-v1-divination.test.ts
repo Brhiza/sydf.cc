@@ -248,6 +248,11 @@ describe('开发者 API 兼容性', () => {
     expect(
       (capturedRequestBody as { response_format?: { type?: string } } | null)?.response_format
     ).toBeUndefined();
+    expect(
+      ((capturedRequestBody as {
+        messages?: Array<{ role?: string; content?: string }>;
+      } | null)?.messages?.find((message) => message.role === 'user')?.content || '')
+    ).toContain('公历：2026年3月24日');
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });

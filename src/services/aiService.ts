@@ -15,7 +15,6 @@ import type {
   SupplementaryInfo,
 } from '@/types/divination';
 import { generatePrompt, generateFollowUpPromptWrapper } from './prompts';
-import { getFormattedTimeInfo, getDisplayTimeData } from './prompts/shared/time-utils';
 import { handleError, logError, getUserFriendlyMessage } from '@/utils/error-handler';
 import { buildDivinationSystemPrompt } from '@/shared/divination-system-prompt';
 
@@ -99,19 +98,11 @@ export class AIService {
     onConversationUpdate([...conversationHistory]);
 
     try {
-      // 生成追问提示词
-      const [currentTime, displayTimeData] = await Promise.all([
-        getFormattedTimeInfo(),
-        getDisplayTimeData(),
-      ]);
-
       const followUpContext = {
         originalQuestion: context?.originalQuestion || '',
         originalResponse: context?.originalResponse || '',
         divinationType: context?.divinationType || 'liuyao',
         followUpQuestion,
-        currentTime,
-        timeInfo: displayTimeData,
         originalData: context?.originalData ?? undefined,
         supplementaryInfo: context?.supplementaryInfo ?? undefined,
       };

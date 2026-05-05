@@ -4,7 +4,6 @@ import type { HistoryRecord } from '@/types/common';
 import { generateAIResponse as generatePromptAIResponse } from './ai';
 import { aiService } from './aiService';
 import { generateFollowUpPromptWrapper } from './prompts';
-import { getDisplayTimeData, getFormattedTimeInfo } from './prompts/shared/time-utils';
 
 type AIRegenerationRecord = Pick<
   HistoryRecord,
@@ -247,14 +246,11 @@ export async function regenerateConversationMessage(
 
   options.onConversationUpdate?.([...regeneratedConversationHistory]);
 
-  const [currentTime, timeInfo] = await Promise.all([getFormattedTimeInfo(), getDisplayTimeData()]);
   const prompt = await generateFollowUpPromptWrapper({
     originalQuestion: record.question,
     originalResponse: record.result.aiResponse || '',
     divinationType: record.type,
     followUpQuestion: regeneratedUserMessage.content || '',
-    currentTime,
-    timeInfo,
     originalData: JSON.parse(JSON.stringify(record.result.data)),
     supplementaryInfo: cloneSupplementaryInfo(record.result.supplementaryInfo),
   });

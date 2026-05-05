@@ -4,9 +4,13 @@
 import type { ChatMessage, ToolCall } from '@/types';
 import { useSettingsStore } from '@/stores/settings';
 import {
+  extractUserIntentText,
   getCurrentTimeInfoTool,
+  getGanZhiForDateTool,
   getGanZhiForMonthTool,
   getGanZhiForYearTool,
+  resolveGanzhiQueryContext,
+  shouldEnableGanzhiTools,
   toolExecutors,
 } from './tools';
 
@@ -32,6 +36,12 @@ interface OpenAIRequestBody {
   stream: boolean;
   tools?: AITool[];
   tool_choice?: 'auto' | 'none' | { type: 'function', function: { name: string } };
+}
+
+interface PreparedRequestContext {
+  messages: ChatMessage[];
+  tools?: AITool[];
+  toolChoice?: OpenAIRequestBody['tool_choice'];
 }
 
 // AI响应接口
@@ -134,9 +144,12 @@ class AIServiceSingleton {
   ): Promise<AIResponse> {
     const availableTools = [
       getCurrentTimeInfoTool,
+      getGanZhiForDateTool,
       getGanZhiForMonthTool,
       getGanZhiForYearTool,
     ];
+    const preparedRequest = this.prepareRequestContext(messages, availableTools);
+    messages = [...preparedRequest.messages];
 
     const maxToolCalls = 3;
     for (let i = 0; i < maxToolCalls; i++) {
@@ -145,9 +158,14 @@ class AIServiceSingleton {
         messages: messages,
         max_tokens: 8192,
         stream: !!onChunk,
-        tools: availableTools,
-        tool_choice: 'auto',
       };
+
+      if (preparedRequest.tools) {
+        body.tools = preparedRequest.tools;
+      }
+      if (preparedRequest.toolChoice) {
+        body.tool_choice = preparedRequest.toolChoice;
+      }
 
       const maxRetries = 3;
       const timeout = 30000;
@@ -259,6 +277,56 @@ class AIServiceSingleton {
     throw new Error('Exceeded maximum tool call limit.');
   }
 
+  private prepareRequestContext(messages: ChatMessage[], availableTools: AITool[]): PreparedRequestContext {
+    const latestUserMessage = [...messages]
+      .reverse()
+      .find((message) => message.role === 'user' && typeof message.content === 'string');
+    const intentText = extractUserIntentText(latestUserMessage?.content);
+    const localGanzhiContext = resolveGanzhiQueryContext(intentText);
+
+    let preparedMessages = [...messages];
+    if (localGanzhiContext) {
+      const supplementalMessage: ChatMessage = {
+        role: 'system',
+        content: [
+          '以下补充时间信息已经由程序精确计算，和用户当前问题直接相关。',
+          '你必须优先使用这些信息作答，不要再次调用任何时间或干支工具。',
+          '',
+          localGanzhiContext.message,
+        ].join('\n'),
+      };
+      preparedMessages = this.insertSystemMessage(preparedMessages, supplementalMessage);
+      return {
+        messages: preparedMessages,
+      };
+    }
+
+    if (shouldEnableGanzhiTools(intentText)) {
+      return {
+        messages: preparedMessages,
+        tools: availableTools,
+        toolChoice: 'auto',
+      };
+    }
+
+    return {
+      messages: preparedMessages,
+    };
+  }
+
+  private insertSystemMessage(messages: ChatMessage[], supplementalMessage: ChatMessage): ChatMessage[] {
+    const insertIndex = messages.findIndex((message) => message.role !== 'system');
+    if (insertIndex === -1) {
+      return [...messages, supplementalMessage];
+    }
+
+    return [
+      ...messages.slice(0, insertIndex),
+      supplementalMessage,
+      ...messages.slice(insertIndex),
+    ];
+  }
+
   private async handleErrorResponse(response: Response): Promise<Error> {
     let errorDetails = '';
     try {
@@ -360,7 +428,6 @@ class AIServiceSingleton {
                   if (toolCallChunk.id) toolCalls[index].id = toolCallChunk.id;
                   if (toolCallChunk.function?.name) {
                     toolCalls[index].function.name = toolCallChunk.function.name;
-                    contentBuffer += `\n调用工具: ${toolCallChunk.function.name}...`;
                   }
                 }
                 if (toolCallChunk.function?.arguments) {

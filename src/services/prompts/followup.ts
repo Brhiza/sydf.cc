@@ -10,13 +10,6 @@ export interface FollowUpContext {
   originalResponse: string;
   divinationType: DivinationType;
   followUpQuestion: string;
-  currentTime: string;
-  timeInfo?: {
-    solar: string;
-    lunar: string;
-    ganzhi: string;
-    jieqi: string;
-  };
   originalData?: DivinationData;
   supplementaryInfo?: {
     gender?: '男' | '女';

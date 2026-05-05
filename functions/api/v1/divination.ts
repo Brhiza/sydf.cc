@@ -155,6 +155,15 @@ function parseDatetime(datetime: string): Date {
   return d;
 }
 
+function resolveDivinationDate(type: DivinationType, body: DivinationRequestBody, baseDate: Date): Date {
+  if (type !== 'daily') {
+    return baseDate;
+  }
+
+  const dateStr = body.options?.date || body.options?.supplementaryInfo?.date;
+  return dateStr ? parseDateOnly(dateStr) : baseDate;
+}
+
 function formatTimeInfo(time: ReturnType<typeof getDivinationTime>): string {
   const { timeInfo, ganzhi } = time;
   const solar = timeInfo.solar;
@@ -207,8 +216,7 @@ async function generateDivinationData(type: DivinationType, body: DivinationRequ
   const supplementaryInfo = options.supplementaryInfo;
 
   if (type === 'daily') {
-    const dateStr = options.date || supplementaryInfo?.date;
-    const targetDate = dateStr ? parseDateOnly(dateStr) : baseDate;
+    const targetDate = resolveDivinationDate(type, body, baseDate);
     return calculateDailyFortune(targetDate);
   }
 
@@ -379,6 +387,7 @@ export async function onRequest(context: { request: Request; env: Record<string,
   })();
 
   let divinationData: unknown;
+  const divinationDate = resolveDivinationDate(type, body, baseDate);
   try {
     divinationData = await generateDivinationData(type, body, baseDate);
   } catch (error) {
@@ -390,7 +399,7 @@ export async function onRequest(context: { request: Request; env: Record<string,
   }
 
   // 时间信息：使用同一时间点生成，便于AI解读（北京时间）
-  const timeInfoText = formatTimeInfo(getDivinationTime(baseDate));
+  const timeInfoText = formatTimeInfo(getDivinationTime(divinationDate));
 
   const supplementaryInfo = body.options?.supplementaryInfo;
   const systemPrompt = buildDivinationSystemPrompt(type, {

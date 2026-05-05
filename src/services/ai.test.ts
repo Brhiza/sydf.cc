@@ -1,0 +1,138 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+vi.mock('@/stores/settings', () => ({
+  useSettingsStore: () => ({
+    settings: {
+      useCustomApi: false,
+      customApiEndpoint: '',
+      customApiKey: '',
+      selectedModel: '',
+    },
+  }),
+}));
+
+describe('AI 时间工具请求策略', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    vi.resetModules();
+  });
+
+  it('普通占卜提示词不应向上游附带干支工具', async () => {
+    const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      const payload = JSON.parse(String(init?.body || '{}'));
+
+      expect(payload.tools).toBeUndefined();
+      expect(payload.tool_choice).toBeUndefined();
+
+      return new Response(
+        JSON.stringify({
+          choices: [
+            {
+              message: {
+                content: '测试解读',
+              },
+            },
+          ],
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { AIService } = await import('./ai');
+    await AIService.generateResponse([
+      {
+        role: 'user',
+        content: `**时间信息**：
+公历：2026年3月20日 12时0分
+农历：丙午年 二月初二 午时
+干支：丙午年 辛卯月 癸巳日 戊午时
+
+**用户问题**：
+"这件事会怎样？"`,
+      },
+    ]);
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('明确日期查询应注入本地干支上下文并避免再次开 tool', async () => {
+    const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      const payload = JSON.parse(String(init?.body || '{}'));
+
+      expect(payload.tools).toBeUndefined();
+      expect(payload.tool_choice).toBeUndefined();
+      expect(payload.messages[0].role).toBe('system');
+      expect(payload.messages[0].content).toContain('已经由程序精确计算');
+      expect(payload.messages[0].content).toContain('2026年3月20日');
+      expect(payload.messages[0].content).toContain('干支：');
+
+      return new Response(
+        JSON.stringify({
+          choices: [
+            {
+              message: {
+                content: '测试解读',
+              },
+            },
+          ],
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { AIService } = await import('./ai');
+    await AIService.generateResponse([
+      {
+        role: 'user',
+        content: '请告诉我 2026年3月20日 的干支信息',
+      },
+    ]);
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('超出本地解析能力的时间范围问题应继续保留工具能力', async () => {
+    const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      const payload = JSON.parse(String(init?.body || '{}'));
+
+      expect(payload.tools).toBeInstanceOf(Array);
+      expect(payload.tools).toHaveLength(4);
+      expect(payload.tool_choice).toBe('auto');
+
+      return new Response(
+        JSON.stringify({
+          choices: [
+            {
+              message: {
+                content: '测试解读',
+              },
+            },
+          ],
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { AIService } = await import('./ai');
+    await AIService.generateResponse([
+      {
+        role: 'user',
+        content: '未来三个月哪几天更适合出行？',
+      },
+    ]);
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+});

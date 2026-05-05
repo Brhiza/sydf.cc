@@ -1,7 +1,7 @@
 import type { DivinationData, DivinationType, SupplementaryInfo } from '@/types';
 import { analyzeQuestion } from './question-analyzer';
 import { buildPrompt } from './prompt-builder';
-import { getFormattedTimeInfo } from './time-utils';
+import { getFormattedTimeInfoForDivination } from './time-utils';
 import type { QuestionAnalysis } from './types';
 
 export interface PromptFormatterContext {
@@ -114,7 +114,8 @@ export function generatePromptWithFormatterSync<TData>(
 export async function generatePromptWithFormatter<TData>(
   options: AsyncPromptGenerationOptions<TData>
 ): Promise<string> {
-  const currentTimeInfo = options.timeInfo || await getFormattedTimeInfo();
+  const currentTimeInfo =
+    options.timeInfo || await getFormattedTimeInfoForDivination(options.data as DivinationData);
 
   return buildPromptWithFormatter({
     ...options,
