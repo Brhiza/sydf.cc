@@ -112,8 +112,7 @@ function createHomeRoute(isCustomBuild: boolean): PrerenderRoute {
   if (!isCustomBuild) {
     links.push(
       { href: '/about', label: '关于本站' },
-      { href: '/gongdebox', label: '功德箱' },
-      { href: '/gongdeboard', label: '功德榜' }
+      { href: 'https://lk.sydf.cc/', label: '功德箱' }
     );
   }
 
@@ -141,25 +140,7 @@ function createHomeRoute(isCustomBuild: boolean): PrerenderRoute {
 }
 
 function createStaticRoutes(isCustomBuild: boolean): PrerenderRoute[] {
-  const routes: PrerenderRoute[] = [
-    {
-      name: 'gongdeboard',
-      path: '/gongdeboard',
-      params: {},
-      contentTitle: '功德榜',
-      lead: '查看公开展示的捐赠统计、捐赠人数与历史捐赠记录。',
-      blocks: [
-        {
-          title: '页面内容',
-          paragraphs: ['该页面用于展示公开捐赠数据、统计信息与远程同步的捐赠记录。'],
-        },
-        {
-          title: '相关入口',
-          links: [{ href: '/gongdebox', label: '查看功德箱' }],
-        },
-      ],
-    },
-  ];
+  const routes: PrerenderRoute[] = [];
 
   if (!isCustomBuild) {
     routes.push(
@@ -175,23 +156,6 @@ function createStaticRoutes(isCustomBuild: boolean): PrerenderRoute[] {
             paragraphs: [
               '该页面介绍项目背景、使用提醒与联系渠道，适合首次访问时快速了解站点定位。',
             ],
-          },
-        ],
-      },
-      {
-        name: 'gongdebox',
-        path: '/gongdebox',
-        params: {},
-        contentTitle: '功德箱',
-        lead: '查看捐赠方式、捐赠证书与相关公益记录。',
-        blocks: [
-          {
-            title: '页面内容',
-            paragraphs: ['该页面提供收款码展示、捐赠证书记录与功德榜入口。'],
-          },
-          {
-            title: '相关入口',
-            links: [{ href: '/gongdeboard', label: '查看功德榜' }],
           },
         ],
       },

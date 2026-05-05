@@ -12,7 +12,7 @@ describe('InfoCalloutCard', () => {
         accentText: '解读术数',
         description: '一个基于 AI 和传统排盘逻辑的免费网站。',
         link: {
-          href: '/gongdebox',
+          href: 'https://lk.sydf.cc/',
           label: '🙏 功德箱',
         },
       },
@@ -21,6 +21,6 @@ describe('InfoCalloutCard', () => {
     expect(wrapper.text()).toContain('探索未来');
     expect(wrapper.text()).toContain('解读术数');
     expect(wrapper.text()).toContain('一个基于 AI 和传统排盘逻辑的免费网站。');
-    expect(wrapper.find('.callout-link a').attributes('href')).toBe('/gongdebox');
+    expect(wrapper.find('.callout-link a').attributes('href')).toBe('https://lk.sydf.cc/');
   });
 });

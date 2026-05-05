@@ -102,7 +102,7 @@ function goToRandomDivination() {
       title="探索未来"
       accent-text="解读术数"
       description="一个基于国产前沿 AI 大模型及算法测试的免费网站，内容由 AI 生成，仅供娱乐参考。中国传统术数文化虽有趣，但现实生活中的相处与沟通更为重要。愿您在人生的路上，既能享受术数的神秘智慧，也能珍惜当下的每一份真挚情感。如果项目对你有帮助，可以将网站分享出去，或者点击下方功德箱跟主播一起助力中国公益事业。"
-      :link="{ href: '/gongdebox', label: '🙏 功德箱' }"
+      :link="{ href: 'https://lk.sydf.cc/', label: '🙏 功德箱' }"
     />
 
     <ContentSectionCard title="工具" use-header>

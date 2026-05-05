@@ -26,16 +26,6 @@ const router = createRouter({
       name: 'about',
       component: () => import('../views/AboutView.vue'),
     }]),
-    ...(isCustomBuild ? [] : [{
-      path: '/gongdebox',
-      name: 'gongdebox',
-      component: () => import('../views/GongdeBoxView.vue'),
-    }]),
-    {
-      path: '/gongdeboard',
-      name: 'gongdeboard',
-      component: () => import('../views/GongdeBoardView.vue'),
-    },
     {
       path: '/daily-fortune',
       name: 'daily-fortune-legacy',

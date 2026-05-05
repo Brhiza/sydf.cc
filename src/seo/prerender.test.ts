@@ -16,7 +16,9 @@ describe('getPrerenderRoutes', () => {
     expect(routePaths).toContain('/');
     expect(routePaths).toContain('/divination/daily');
     expect(routePaths).toContain('/divination/tarot');
-    expect(routePaths).toContain('/gongdeboard');
+    expect(routePaths).toContain('/about');
+    expect(routePaths).not.toContain('/gongdebox');
+    expect(routePaths).not.toContain('/gongdeboard');
     expect(routePaths).not.toContain('/settings');
     expect(routePaths).not.toContain('/history');
   });
@@ -28,6 +30,7 @@ describe('getPrerenderRoutes', () => {
     expect(routePaths).not.toContain('/about');
     expect(routePaths).not.toContain('/rengong');
     expect(routePaths).not.toContain('/gongdebox');
+    expect(routePaths).not.toContain('/gongdeboard');
   });
 });
 

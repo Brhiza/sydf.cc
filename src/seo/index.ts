@@ -64,18 +64,6 @@ const STATIC_PAGE_SEO: Record<string, PageSeoDefinition> = {
     keywords: ['关于时月东方', '使用说明', '免责声明'],
     schemaType: 'AboutPage',
   },
-  gongdebox: {
-    pageTitle: '功德箱与捐赠方式',
-    description: '查看时月东方功德箱、捐赠方式、捐赠证书与公益记录。',
-    keywords: ['功德箱', '捐赠', '公益记录'],
-    schemaType: 'CollectionPage',
-  },
-  gongdeboard: {
-    pageTitle: '功德榜',
-    description: '查看时月东方公开的功德榜、捐赠统计与捐赠记录。',
-    keywords: ['功德榜', '捐赠记录', '公益统计'],
-    schemaType: 'CollectionPage',
-  },
   rengong: {
     pageTitle: '人工咨询',
     description: '查看时月东方的人工咨询联系方式，了解八字、紫微与人工起卦等服务。',

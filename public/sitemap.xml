@@ -71,22 +71,6 @@
   </url>
 
   <url>
-    <loc>https://sydf.cc/gongdebox</loc>
-    <lastmod>2026-03-25</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://sydf.cc/gongdebox" />
-  </url>
-
-  <url>
-    <loc>https://sydf.cc/gongdeboard</loc>
-    <lastmod>2026-03-25</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.4</priority>
-    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://sydf.cc/gongdeboard" />
-  </url>
-
-  <url>
     <loc>https://sydf.cc/rengong</loc>
     <lastmod>2026-03-25</lastmod>
     <changefreq>monthly</changefreq>
