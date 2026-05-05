@@ -208,6 +208,7 @@ const {
     }
   },
   buildTarget: import.meta.env.VITE_APP_BUILD_TARGET,
+  mode: import.meta.env.MODE,
 });
 </script>
 

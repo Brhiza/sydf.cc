@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import ContentSectionCard from '@/components/common/ContentSectionCard.vue';
 import InfoCalloutCard from '@/components/common/InfoCalloutCard.vue';
+import { isCustomBuild } from '@/utils/build-target';
 import { useRouter } from 'vue-router';
-import { onMounted, computed } from 'vue';
+import { onMounted } from 'vue';
 
 const router = useRouter();
 
@@ -10,7 +11,10 @@ onMounted(() => {
   // 组件挂载逻辑
 });
 
-const isCustomBuild = computed(() => import.meta.env.VITE_APP_BUILD_TARGET === 'CUSTOM');
+const customBuildEnabled = isCustomBuild({
+  buildTarget: import.meta.env.VITE_APP_BUILD_TARGET,
+  mode: import.meta.env.MODE,
+});
 
 // 占卜工具数据
 const divinationTools = [
@@ -50,13 +54,13 @@ const divinationTools = [
     description: '灵签指点迷津，解答人生困惑',
     path: '/divination/ssgw',
   },
-  ...(!isCustomBuild.value ? [{
+  ...(!customBuildEnabled ? [{
     id: 'rengong',
     name: '转人工',
     description: '专业人工咨询，深度解答疑惑',
     path: '/rengong',
   }] : []),
-  ...(!isCustomBuild.value ? [{
+  ...(!customBuildEnabled ? [{
     id: 'about',
     name: '关于本站',
     description: '了解网站信息，使用说明指南',
@@ -98,7 +102,7 @@ function goToRandomDivination() {
     <h1 class="page-title">欢迎 👋</h1>
 
     <InfoCalloutCard
-      v-if="!isCustomBuild"
+      v-if="!customBuildEnabled"
       title="探索未来"
       accent-text="解读术数"
       description="一个基于国产前沿 AI 大模型及算法测试的免费网站，内容由 AI 生成，仅供娱乐参考。中国传统术数文化虽有趣，但现实生活中的相处与沟通更为重要。愿您在人生的路上，既能享受术数的神秘智慧，也能珍惜当下的每一份真挚情感。如果项目对你有帮助，可以将网站分享出去，或者点击下方功德箱跟主播一起助力中国公益事业。"
@@ -109,7 +113,7 @@ function goToRandomDivination() {
       <div class="tools-grid">
         <!-- 随机按钮 -->
         <div
-          v-if="!isCustomBuild"
+          v-if="!customBuildEnabled"
           class="tool-item random-button"
           @click="goToRandomDivination"
         >

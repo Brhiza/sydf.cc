@@ -1,6 +1,7 @@
 import { computed, ref, watch } from 'vue';
 import type { DivinationType, SupplementaryInfo } from '@/types/divination';
 import { tarotSpreads } from '@/utils/tarot';
+import { isCustomBuild } from '@/utils/build-target';
 
 interface DivinationInputProps {
   title: string;
@@ -40,6 +41,7 @@ interface UseDivinationInputStateOptions {
   ssgw: SsgwController;
   focusQuestionInput?: () => void;
   buildTarget?: string;
+  mode?: string;
 }
 
 type TarotSpreadKey = keyof typeof tarotSpreads;
@@ -52,7 +54,12 @@ export function useDivinationInputState(
   const localDate = ref(props.selectedDate || '');
   const selectedSpread = ref<TarotSpreadKey>('single');
 
-  const isCustomBuild = computed(() => options.buildTarget === 'CUSTOM');
+  const isCustomBuildEnabled = computed(() =>
+    isCustomBuild({
+      buildTarget: options.buildTarget,
+      mode: options.mode,
+    })
+  );
   const isSsgw = computed(() => props.divinationType === 'ssgw');
   const isDaily = computed(() => props.divinationType === 'daily');
   const isTarot = computed(() => props.divinationType === 'tarot' || props.divinationType === 'tarot_single');
@@ -207,7 +214,7 @@ export function useDivinationInputState(
     question,
     localDate,
     selectedSpread,
-    isCustomBuild,
+    isCustomBuild: isCustomBuildEnabled,
     isTarot,
     computedPlaceholder,
     showQuestionInput,

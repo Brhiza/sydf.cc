@@ -1,12 +1,16 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { createPrerenderHtml, getPrerenderRoutes } from '../src/seo/prerender';
+import { isCustomBuild as detectCustomBuild } from '../src/utils/build-target';
 
 const DIST_DIR = path.resolve(process.cwd(), 'dist');
 const BASE_HTML_PATH = path.join(DIST_DIR, 'index.html');
 
 function isCustomBuild(): boolean {
-  return process.argv.includes('--custom-build') || process.env.VITE_APP_BUILD_TARGET === 'CUSTOM';
+  return detectCustomBuild({
+    buildTarget: process.env.VITE_APP_BUILD_TARGET,
+    customFlag: process.argv.includes('--custom-build'),
+  });
 }
 
 function resolveOutputPath(routePath: string): string {

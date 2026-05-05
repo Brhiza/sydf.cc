@@ -2,6 +2,7 @@ import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { divinationNavItems } from '@/config/divination';
 import { eventBus, EVENTS } from '@/utils/eventBus';
+import { isCustomBuild } from '@/utils/build-target';
 
 interface SidebarPrimaryNavItem {
   path: string;
@@ -21,8 +22,11 @@ export function useSidebarNavigation() {
   const router = useRouter();
   const selectedHistoryId = ref<string | null>(null);
   const isInitialized = ref(false);
-  const isCustomBuild = computed(() => import.meta.env.VITE_APP_BUILD_TARGET === 'CUSTOM');
-  const sidebarTitle = computed(() => (isCustomBuild.value ? '时月东方 oyyy 版' : '时月东方'));
+  const customBuildEnabled = isCustomBuild({
+    buildTarget: import.meta.env.VITE_APP_BUILD_TARGET,
+    mode: import.meta.env.MODE,
+  });
+  const sidebarTitle = computed(() => (customBuildEnabled ? '时月东方 oyyy 版' : '时月东方'));
 
   watch(
     () => route.params.id,
@@ -83,7 +87,7 @@ export function useSidebarNavigation() {
   ]);
 
   const footerNavItems = computed<SidebarFooterLinkItem[]>(() => {
-    if (isCustomBuild.value) {
+    if (customBuildEnabled) {
       return [];
     }
 

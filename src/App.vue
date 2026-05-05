@@ -1,14 +1,18 @@
 <script setup lang="ts">
 import Sidebar from '@/components/layout/Sidebar.vue';
 import TopBar from '@/components/layout/TopBar.vue';
-import { onMounted, onUnmounted, ref, watch, computed } from 'vue';
+import { onMounted, onUnmounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useTheme } from '@/composables/useTheme';
+import { isCustomBuild } from '@/utils/build-target';
 
 // 使用主题管理composable
 useTheme();
 
-const isCustomBuild = computed(() => import.meta.env.VITE_APP_BUILD_TARGET === 'CUSTOM');
+const customBuildEnabled = isCustomBuild({
+  buildTarget: import.meta.env.VITE_APP_BUILD_TARGET,
+  mode: import.meta.env.MODE,
+});
 
 // 移动端适配
 const isMobile = ref(window.innerWidth <= 768);
@@ -64,7 +68,7 @@ watch(
 );
 
 onMounted(() => {
-  if (isCustomBuild.value) {
+  if (customBuildEnabled) {
     document.documentElement.classList.add('oyyy-theme');
   }
   // 监听document点击事件，用于移动端关闭sidebar

@@ -1,8 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import divinationRoutes from './divination';
 import historyRoutes from './history';
-const isCustomBuild = import.meta.env.VITE_APP_BUILD_TARGET === 'CUSTOM';
 import settingsRoutes from './settings';
+import { isCustomBuild } from '@/utils/build-target';
+
+const customBuildEnabled = isCustomBuild({
+  buildTarget: import.meta.env.VITE_APP_BUILD_TARGET,
+  mode: import.meta.env.MODE,
+});
 
 // 创建路由实例
 const router = createRouter({
@@ -15,13 +20,13 @@ const router = createRouter({
     },
     ...divinationRoutes,
     ...historyRoutes,
-    ...(isCustomBuild ? [] : settingsRoutes),
-    ...(isCustomBuild ? [] : [{
+    ...(customBuildEnabled ? [] : settingsRoutes),
+    ...(customBuildEnabled ? [] : [{
       path: '/rengong',
       name: 'rengong',
       component: () => import('../views/RengongView.vue'),
     }]),
-    ...(isCustomBuild ? [] : [{
+    ...(customBuildEnabled ? [] : [{
       path: '/about',
       name: 'about',
       component: () => import('../views/AboutView.vue'),

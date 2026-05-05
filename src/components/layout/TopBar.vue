@@ -12,7 +12,7 @@
       </button>
 
       <div class="top-bar-title">
-        <h1>{{ isCustomBuild ? '时月东方 oyyy 版' : '时月东方' }}</h1>
+        <h1>{{ customBuildEnabled ? '时月东方 oyyy 版' : '时月东方' }}</h1>
       </div>
 
       <div class="top-bar-actions">
@@ -25,8 +25,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-const isCustomBuild = computed(() => import.meta.env.VITE_APP_BUILD_TARGET === 'CUSTOM');
+import { isCustomBuild } from '@/utils/build-target';
+
+const customBuildEnabled = isCustomBuild({
+  buildTarget: import.meta.env.VITE_APP_BUILD_TARGET,
+  mode: import.meta.env.MODE,
+});
 
 interface Props {
   sidebarCollapsed?: boolean;

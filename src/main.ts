@@ -7,6 +7,7 @@ import { registerPlugins } from './plugins';
 import { initializeServices } from './services';
 import { registerAppServiceWorker } from './services/serviceWorkerRegistration';
 import { setupSeo } from './seo';
+import { isCustomBuild } from './utils/build-target';
 
 const app = createApp(App);
 
@@ -19,7 +20,10 @@ initializeServices();
 // 3. 注册路由
 app.use(router);
 setupSeo(router, {
-  isCustomBuild: import.meta.env.VITE_APP_BUILD_TARGET === 'CUSTOM',
+  isCustomBuild: isCustomBuild({
+    buildTarget: import.meta.env.VITE_APP_BUILD_TARGET,
+    mode: import.meta.env.MODE,
+  }),
 });
 
 // 4. 注册 Service Worker

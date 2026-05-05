@@ -5,6 +5,7 @@ import { useDivinationUnified } from '@/composables/useDivinationUnified';
 import type { DivinationType, SupplementaryInfo } from '@/types';
 import { eventBus, EVENTS } from '@/utils/eventBus';
 import type { ChatMessage, ChatMessageRetryTarget, DivinationResult } from '@/types';
+import { isCustomBuild } from '@/utils/build-target';
 
 interface PageProps {
   divinationType: DivinationType;
@@ -48,6 +49,7 @@ interface UseUnifiedDivinationPageOptions {
   emitHistorySelectionReset?: () => void;
   scrollTo?: (x: number, y: number) => void;
   buildTarget?: string;
+  mode?: string;
 }
 
 export function useUnifiedDivinationPage(
@@ -62,10 +64,12 @@ export function useUnifiedDivinationPage(
   const scrollToPosition = options.scrollTo ?? ((x: number, y: number) => window.scrollTo(x, y));
 
   const config = computed(() => currentGetConfig(props.divinationType));
-  const isCustomBuild = computed(() => {
-    const buildTarget = options.buildTarget ?? import.meta.env.VITE_APP_BUILD_TARGET;
-    return buildTarget === 'CUSTOM';
-  });
+  const customBuildEnabled = computed(() =>
+    isCustomBuild({
+      buildTarget: options.buildTarget ?? import.meta.env.VITE_APP_BUILD_TARGET,
+      mode: options.mode ?? import.meta.env.MODE,
+    })
+  );
   const currentSpread = ref('single');
   const divination = options.divination ?? useDivinationUnified(props);
 
@@ -168,7 +172,7 @@ export function useUnifiedDivinationPage(
     ...divination,
     adaptedResult,
     config,
-    isCustomBuild,
+    isCustomBuild: customBuildEnabled,
     handleTypeChange,
     handleSubmit,
     handleClear,

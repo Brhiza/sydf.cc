@@ -28,6 +28,7 @@
 <script setup lang="ts">
 import type { ChatMessage, ChatMessageRetryTarget, DivinationType } from '@/types'
 import { computed } from 'vue'
+import { isCustomBuild } from '@/utils/build-target'
 import DivinationAIDisclaimer from './ai/DivinationAIDisclaimer.vue'
 import DivinationAIHeader from './ai/DivinationAIHeader.vue'
 import DivinationAIMessage from './ai/DivinationAIMessage.vue'
@@ -37,7 +38,10 @@ import {
   getLastAssistantMessage,
 } from './ai/divination-ai-section'
 
-const isCustomBuild = computed(() => import.meta.env.VITE_APP_BUILD_TARGET === 'CUSTOM')
+const customBuildEnabled = isCustomBuild({
+  buildTarget: import.meta.env.VITE_APP_BUILD_TARGET,
+  mode: import.meta.env.MODE,
+})
 
 const props = withDefaults(
   defineProps<{
@@ -108,7 +112,7 @@ const aiSectionTitle = computed(() => {
 })
 
 const showDisclaimer = computed(() => {
-  return !isCustomBuild.value && props.conversationHistory.length > 0 && !props.error
+  return !customBuildEnabled && props.conversationHistory.length > 0 && !props.error
 })
 </script>
 
