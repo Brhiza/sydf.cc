@@ -1,5 +1,6 @@
 import type { ChatMessage, DivinationType } from '@/types';
 import { isAIErrorMessage } from '@/utils/ai-error';
+import { getVisibleDailyConversationHistory } from '@/utils/daily-conversation';
 
 export { isAIErrorMessage };
 
@@ -29,6 +30,10 @@ export function getDisplayedConversationHistory(
   type: DivinationType,
   messages: ChatMessage[]
 ): ChatMessage[] {
+  if (type === 'daily') {
+    return getVisibleDailyConversationHistory(messages);
+  }
+
   return getVisibleConversationHistory(messages).filter((message, index) =>
     shouldShowAIMessage(type, message, index)
   );

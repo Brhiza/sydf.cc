@@ -13,6 +13,7 @@ import {
   getDailyStorageKeys,
   hasVisibleDailyConversation,
 } from './useDailyFortune.shared';
+import { getVisibleDailyConversationHistory } from '@/utils/daily-conversation';
 
 describe('useDailyFortune.shared', () => {
   it('会生成统一的今日运势页面标题和日期标签', () => {
@@ -88,6 +89,8 @@ describe('useDailyFortune.shared', () => {
     expect(hasVisibleDailyConversation(firstRoundMessages, false)).toBe(false);
     expect(hasVisibleDailyConversation(followUpMessages, false)).toBe(true);
     expect(hasVisibleDailyConversation([], true)).toBe(true);
+    expect(getVisibleDailyConversationHistory(firstRoundMessages)).toEqual([]);
+    expect(getVisibleDailyConversationHistory(followUpMessages)).toEqual(followUpMessages.slice(2));
 
     const fallbackRecord = createFallbackDailyHistoryRecord({
       date: '2026-03-25',

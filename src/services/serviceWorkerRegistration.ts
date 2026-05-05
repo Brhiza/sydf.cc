@@ -8,9 +8,8 @@ export function registerAppServiceWorker(
   reloadPage: ReloadPageHandler = () => window.location.reload()
 ) {
   let hasTriggeredRefresh = false;
-  let updateServiceWorker: ((reloadPage?: boolean) => Promise<void>) | undefined;
 
-  updateServiceWorker = register({
+  const updateServiceWorker = register({
     immediate: true,
     onOfflineReady() {
       // 应用已准备好离线使用

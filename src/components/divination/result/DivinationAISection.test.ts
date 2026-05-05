@@ -76,4 +76,30 @@ describe('DivinationAISection', () => {
     expect(wrapper.find('button[title="复制"]').exists()).toBe(true);
     expect(wrapper.find('button[title="重新生成"]').exists()).toBe(true);
   });
+
+  it('失败时即使已有空的 AI 占位消息，也应显示可重新生成的助手错误消息', () => {
+    const wrapper = mount(DivinationAISection, {
+      props: {
+        type: 'qimen',
+        conversationHistory: [
+          { id: 'user-error', role: 'user', content: '看看事业' },
+          { id: 'assistant-empty', role: 'assistant', content: '' },
+        ],
+        error: 'AI响应生成失败',
+      },
+      global: {
+        stubs: {
+          DivinationAIHeader: true,
+          DivinationAIDisclaimer: true,
+          StreamingMarkdown: {
+            props: ['content'],
+            template: '<div class="streaming-markdown-stub">{{ content }}</div>',
+          },
+        },
+      },
+    });
+
+    expect(wrapper.text()).toContain('AI响应生成失败');
+    expect(wrapper.find('button[title="重新生成"]').exists()).toBe(true);
+  });
 });

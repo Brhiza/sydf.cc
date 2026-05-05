@@ -10,7 +10,7 @@ describe('resolveSeoMeta', () => {
         name: 'home',
         path: '/',
         params: {},
-      } as any,
+      },
       false
     );
 
@@ -28,7 +28,7 @@ describe('resolveSeoMeta', () => {
         params: {
           type: 'tarot',
         },
-      } as any,
+      },
       false
     );
 
@@ -45,7 +45,7 @@ describe('resolveSeoMeta', () => {
         params: {
           id: 'demo-id',
         },
-      } as any,
+      },
       false
     );
 
@@ -67,7 +67,7 @@ describe('applySeoMeta', () => {
           name: 'about',
           path: '/about',
           params: {},
-        } as any,
+        },
         false
       )
     );

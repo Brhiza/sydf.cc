@@ -62,11 +62,20 @@ defineEmits<{
 const displayedConversationHistory = computed(() => {
   const displayedMessages = getDisplayedConversationHistory(props.type, props.conversationHistory)
 
-  if (displayedMessages.length > 0 || !props.error) {
+  if (!props.error) {
+    return displayedMessages
+  }
+
+  const hasActionableAssistantMessage = displayedMessages.some(
+    (message) => message.role === 'assistant' && !!message.content
+  )
+
+  if (hasActionableAssistantMessage) {
     return displayedMessages
   }
 
   return [
+    ...displayedMessages.filter((message) => message.content),
     {
       id: 'assistant-error-fallback',
       role: 'assistant',

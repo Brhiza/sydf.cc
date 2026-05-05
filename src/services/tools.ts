@@ -102,7 +102,7 @@ function formatYearContext(year: number): GanzhiQueryContext {
 }
 
 function parseAbsoluteDate(text: string): GanzhiQueryContext | null {
-  const match = text.match(/(?<!\d)(\d{4})[年\/.-](\d{1,2})[月\/.-](\d{1,2})(?:日|号)?(?!\d)/);
+  const match = text.match(/(?<!\d)(\d{4})[年/.-](\d{1,2})[月/.-](\d{1,2})(?:日|号)?(?!\d)/);
   if (!match) {
     return null;
   }
@@ -136,7 +136,7 @@ function parseRelativeDate(text: string, now: Date): GanzhiQueryContext | null {
 }
 
 function parseAbsoluteMonth(text: string): GanzhiQueryContext | null {
-  const match = text.match(/(?<!\d)(\d{4})[年\/.-](\d{1,2})月?(?![\d日号])/);
+  const match = text.match(/(?<!\d)(\d{4})[年/.-](\d{1,2})月?(?![\d日号])/);
   if (!match) {
     return null;
   }

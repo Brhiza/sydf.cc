@@ -2,7 +2,7 @@
   <div class="page-container">
     <ContentSectionCard
       v-if="showDetail && selectedRecord"
-      :title="getDivinationTitle(selectedRecord.type)"
+      title="历史记录详情"
       use-header
       header-divider
     >
@@ -20,6 +20,7 @@
       <DivinationResult
         :type="selectedRecord.type"
         :result="{ ...selectedRecord.result, id: selectedRecord.id }"
+        :show-header="false"
         :question="selectedRecord.question"
         :conversation-history="selectedRecord.conversationHistory || []"
         :error="getAIError(selectedRecord)"
@@ -77,10 +78,8 @@ import DivinationResult from '@/components/divination/DivinationResult.vue';
 import ResultInfoHeader from '@/components/divination/results/ResultInfoHeader.vue';
 import HistoryRecordCard from '@/components/sidebar/history/HistoryRecordCard.vue';
 import HistoryRecordSummary from '@/components/sidebar/history/HistoryRecordSummary.vue';
-import { getDivinationConfig } from '@/config/divination';
 import { useHistoryManager } from '@/composables/useHistoryManager';
 import { useHistoryAI } from '@/composables/useHistoryAI';
-import type { DivinationType } from '@/types';
 import { computed, onMounted, onUnmounted, watch } from 'vue';
 import { eventBus, EVENTS } from '@/utils/eventBus';
 import { createHistoryDetailInfoItems } from './history/history-detail';
@@ -110,12 +109,6 @@ const {
 
 // AI 相关逻辑
 const { getAIError, handleRetryAI } = useHistoryAI();
-
-// 获取占卜标题
-function getDivinationTitle(type: DivinationType): string {
-  const config = getDivinationConfig(type);
-  return config ? config.title : '未知占卜';
-}
 
 const detailInfoItems = computed(() => {
   if (!selectedRecord.value) {

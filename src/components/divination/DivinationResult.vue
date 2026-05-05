@@ -1,6 +1,6 @@
 <template>
   <div class="content-card">
-    <div class="result-header">
+    <div v-if="showHeader" class="result-header">
       <h2 class="section-title">{{ resultTitle }}</h2>
     </div>
 
@@ -42,6 +42,7 @@ const props = withDefaults(
     type: DivinationType;
     result: DivinationResultType;
     title?: string;
+    showHeader?: boolean;
     isAiLoading?: boolean;
     error?: string | null;
     question?: string;
@@ -50,6 +51,7 @@ const props = withDefaults(
   }>(),
   {
     title: '',
+    showHeader: true,
     isAiLoading: false,
     error: null,
     question: '',
