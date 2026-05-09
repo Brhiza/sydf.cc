@@ -371,6 +371,15 @@ class AIServiceSingleton {
     let contentBuffer = '';
     let lastFlushTime = Date.now();
     const FLUSH_INTERVAL = 16; // 16ms刷新间隔（60fps）
+    const flushContentBuffer = () => {
+      if (!contentBuffer) {
+        return;
+      }
+
+      onChunk(contentBuffer);
+      contentBuffer = '';
+      lastFlushTime = Date.now();
+    };
 
     try {
       while (true) {
@@ -399,10 +408,7 @@ class AIServiceSingleton {
             if (delta.content) {
               if (inThinkingState) {
                 inThinkingState = false;
-                if (contentBuffer) {
-                  onChunk(contentBuffer);
-                  contentBuffer = '';
-                }
+                flushContentBuffer();
                 onChunk('');
               }
               contentBuffer += delta.content;
@@ -412,10 +418,7 @@ class AIServiceSingleton {
             if (delta.tool_calls) {
               if (!inThinkingState) {
                 inThinkingState = true;
-                if (contentBuffer) {
-                  onChunk(contentBuffer);
-                  contentBuffer = '';
-                }
+                flushContentBuffer();
                 onChunk('');
               }
               for (const toolCallChunk of delta.tool_calls) {
@@ -441,10 +444,7 @@ class AIServiceSingleton {
             if (reasoningChunk) {
               if (isThinking && !inThinkingState) {
                 inThinkingState = true;
-                if (contentBuffer) {
-                  onChunk(contentBuffer);
-                  contentBuffer = '';
-                }
+                flushContentBuffer();
                 onChunk('');
               }
               contentBuffer += reasoningChunk;
@@ -453,20 +453,19 @@ class AIServiceSingleton {
             // 定期刷新缓冲区，提升响应速度
             const now = Date.now();
             if (now - lastFlushTime > FLUSH_INTERVAL && contentBuffer) {
-              onChunk(contentBuffer);
-              contentBuffer = '';
-              lastFlushTime = now;
+              flushContentBuffer();
             }
           } catch (e) {
             console.debug('跳过非 JSON 数据:', data, e);
           }
         }
+
+        // 每次读到一批网络数据后都刷新一次，避免连接未结束时界面仍等待最终完成。
+        flushContentBuffer();
       }
-      
+
       // 确保剩余缓冲区内容被刷新
-      if (contentBuffer) {
-        onChunk(contentBuffer);
-      }
+      flushContentBuffer();
     } finally {
       reader.releaseLock();
     }

@@ -135,4 +135,53 @@ describe('AI 时间工具请求策略', () => {
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
+
+  it('流式响应读到内容后应在连接结束前立即回调', async () => {
+    let streamController: ReadableStreamDefaultController<Uint8Array> | null = null;
+    const encoder = new TextEncoder();
+    const onChunk = vi.fn();
+
+    const fetchMock = vi.fn(async () => {
+      return new Response(
+        new ReadableStream<Uint8Array>({
+          start(controller) {
+            streamController = controller;
+            controller.enqueue(
+              encoder.encode(
+                [
+                  'data: {"choices":[{"delta":{"content":"第一段"}}]}',
+                  'data: {"choices":[{"delta":{"content":"第二段"}}]}',
+                  '',
+                ].join('\n')
+              )
+            );
+          },
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'text/event-stream' },
+        }
+      );
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { AIService } = await import('./ai');
+    const responsePromise = AIService.generateResponse(
+      [{ role: 'user', content: '请流式输出' }],
+      undefined,
+      onChunk
+    );
+
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(onChunk).toHaveBeenCalledWith('第一段第二段');
+
+    streamController?.enqueue(encoder.encode('data: [DONE]\n\n'));
+    streamController?.close();
+
+    await expect(responsePromise).resolves.toMatchObject({
+      content: '第一段第二段',
+    });
+  });
 });

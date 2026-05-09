@@ -5,6 +5,36 @@ import { nextTick } from 'vue';
 import { useDailyFortune } from './useDailyFortune';
 import { hasVisibleDailyConversation } from './useDailyFortune.shared';
 
+vi.hoisted(() => {
+  const store = new Map<string, string>();
+  const storage: Storage = {
+    get length() {
+      return store.size;
+    },
+    clear() {
+      store.clear();
+    },
+    getItem(key: string) {
+      return store.has(key) ? store.get(key)! : null;
+    },
+    key(index: number) {
+      return Array.from(store.keys())[index] ?? null;
+    },
+    removeItem(key: string) {
+      store.delete(key);
+    },
+    setItem(key: string, value: string) {
+      store.set(key, String(value));
+    },
+  };
+
+  Object.defineProperty(globalThis, 'localStorage', {
+    value: storage,
+    configurable: true,
+    writable: true,
+  });
+});
+
 describe('useDailyFortune', () => {
   const mockStartDivination = vi.fn();
   const mockSendFollowUp = vi.fn();
