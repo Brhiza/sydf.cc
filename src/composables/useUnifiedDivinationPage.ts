@@ -35,6 +35,7 @@ interface DivinationStateLike {
     supplementaryInfo?: SupplementaryInfo | undefined;
   }) => unknown;
   clearResult: () => void;
+  detachResultForBackground: () => void;
   regenerateAI: (target?: ChatMessageRetryTarget) => unknown;
   clearHistoryParam: () => void;
   cancelGeneration: () => void;
@@ -148,7 +149,7 @@ export function useUnifiedDivinationPage(
     () => props.divinationType,
     (newType, oldType) => {
       if (!divination.viewingHistory.value && oldType && newType !== oldType) {
-        divination.clearResult();
+        divination.detachResultForBackground();
         divination.clearHistoryParam();
 
         resetScrollPosition();

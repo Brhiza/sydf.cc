@@ -63,8 +63,25 @@ defineEmits<{
   retry: [target: ChatMessageRetryTarget]
 }>()
 
+const INTERRUPTED_AI_MESSAGE = 'AI 解读已中断，可点击重新生成。'
+
 function snapshotMessages(messages: ChatMessage[]) {
-  return messages.map((message) => ({ ...message }))
+  return messages.map((message) => {
+    if (
+      message.role === 'assistant' &&
+      !message.content &&
+      !props.isAiLoading &&
+      !props.isFollowUpLoading &&
+      !props.error
+    ) {
+      return {
+        ...message,
+        content: INTERRUPTED_AI_MESSAGE,
+      }
+    }
+
+    return { ...message }
+  })
 }
 
 const displayedConversationHistory = computed(() => {

@@ -167,6 +167,42 @@ describe('useDivinationUnified', () => {
     );
   });
 
+  it('脱离当前结果用于后台生成时不应中止正在进行的请求', async () => {
+    let capturedSignal: AbortSignal | undefined;
+
+    mockPerformDivination.mockImplementation(async (request) => {
+      capturedSignal = request.signal;
+    });
+
+    const divination = useDivinationUnified(
+      { divinationType: 'qimen' },
+      {
+        route,
+        router: {
+          push: mockPush,
+          replace: mockReplace,
+        },
+        historyService: {
+          getRecord: mockGetRecord,
+        },
+        divinationService: {
+          sendFollowUp: mockSendFollowUp,
+        },
+        performDivination: mockPerformDivination,
+      }
+    );
+
+    divination.question.value = '切换标签时继续后台生成';
+    await divination.startDivination();
+
+    divination.detachResultForBackground();
+
+    expect(capturedSignal?.aborted).toBe(false);
+    expect(divination.result.value).toBeNull();
+    expect(divination.conversationHistory.value).toEqual([]);
+    expect(divination.isAiLoading.value).toBe(false);
+  });
+
   it('找不到历史记录时会回退到当前占卜路由', () => {
     mockGetRecord.mockReturnValue(undefined);
 

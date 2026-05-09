@@ -21,6 +21,7 @@ function createDivinationStub() {
     hasAiResponse: ref(false),
     startDivination: vi.fn(),
     clearResult: vi.fn(),
+    detachResultForBackground: vi.fn(),
     regenerateAI: vi.fn(),
     clearHistoryParam: vi.fn(),
     cancelGeneration: vi.fn(),
@@ -46,7 +47,7 @@ describe('useUnifiedDivinationPage', () => {
     });
   });
 
-  it('切换占卜类型时，非历史模式会清理状态并重置滚动', async () => {
+  it('切换占卜类型时，非历史模式会脱离当前展示但不中断后台生成', async () => {
     const props = reactive<{ divinationType: DivinationType }>({ divinationType: 'qimen' });
     const route = reactive({ query: {} as LocationQueryRaw });
     const divination = createDivinationStub();
@@ -65,7 +66,8 @@ describe('useUnifiedDivinationPage', () => {
     await nextTick();
     await nextTick();
 
-    expect(divination.clearResult).toHaveBeenCalledTimes(1);
+    expect(divination.detachResultForBackground).toHaveBeenCalledTimes(1);
+    expect(divination.clearResult).not.toHaveBeenCalled();
     expect(divination.clearHistoryParam).toHaveBeenCalledTimes(1);
     expect(pageContainerRef.value?.scrollTop).toBe(0);
     expect(scrollTo).toHaveBeenCalledWith(0, 0);

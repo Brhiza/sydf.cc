@@ -231,6 +231,16 @@ export function useDivinationUnified(
     resetConversationState();
   }
 
+  function detachResultForBackground() {
+    invalidateCurrentSession();
+    clearAbortController();
+    resetLoadingState();
+    resetDisplayedState();
+    question.value = '';
+    viewingHistory.value = false;
+    resetConversationState();
+  }
+
   function detachActiveSession() {
     invalidateCurrentSession();
     clearAbortController();
@@ -517,6 +527,7 @@ export function useDivinationUnified(
     // 方法
     startDivination,
     clearResult,
+    detachResultForBackground,
     loadResultFromHistory,
     refreshHistoryState,
     regenerateAI,

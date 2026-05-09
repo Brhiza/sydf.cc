@@ -75,6 +75,33 @@ describe('DivinationAISection', () => {
     expect(wrapper.text()).toContain('第一段解读');
   });
 
+  it('历史记录里留下空助手消息且已不在加载时，应显示中断提示和重新生成按钮', () => {
+    const wrapper = mount(DivinationAISection, {
+      props: {
+        type: 'qimen',
+        conversationHistory: [
+          { id: 'user-interrupted', role: 'user', content: '我近期的桃花运怎么样？' },
+          { id: 'assistant-interrupted', role: 'assistant', content: '' },
+        ],
+        isAiLoading: false,
+      },
+      global: {
+        stubs: {
+          DivinationAIHeader: true,
+          DivinationAIDisclaimer: true,
+          StreamingMarkdown: {
+            props: ['content'],
+            template: '<div class="streaming-markdown-stub">{{ content }}</div>',
+          },
+        },
+      },
+    });
+
+    expect(wrapper.find('.loading-dots').exists()).toBe(false);
+    expect(wrapper.text()).toContain('AI 解读已中断，可点击重新生成。');
+    expect(wrapper.find('button[title="重新生成"]').exists()).toBe(true);
+  });
+
   it('普通占卜会在每条 AI 回复上显示重新生成按钮，并继续向上抛出 retry 事件', async () => {
     const wrapper = createWrapper('qimen');
 

@@ -21,6 +21,7 @@ import { cloneSerializable } from '@/utils/clone';
 import { getMonthDayFromDateKey } from '@/utils/date-formatter';
 
 const FOLLOW_UP_HISTORY_SAVE_INTERVAL = 1000;
+const PRIMARY_HISTORY_SAVE_INTERVAL = 1000;
 
 export interface DivinationCallbacks {
   onInitialResult: (result: DivinationResult) => void;
@@ -107,31 +108,65 @@ export class DivinationOrchestrator {
       }
 
       // 7. 生成AI解读
-      await this.generateAIInterpretation(
-        type,
-        question,
-        data,
-        supplementaryInfo,
-        signal,
-        conversationHistory,
-        onAIChunk,
-        (finalResult) => {
-          // 8. AI完成后更新历史记录（而不是添加新记录）
-          // 更新已保存的记录，添加AI响应
-          const updatedRecord = this.buildHistoryRecordSnapshot(
-            initialRecord,
-            finalResult,
-            conversationHistory
-          );
-          
-          historyService.updateRecord(initialRecord.id, updatedRecord);
-          
-          // 然后调用原始的完成回调
-          onAIComplete(finalResult);
-        },
-        onConversationUpdate,
-        initialResult
-      );
+      let primarySaveTimer: ReturnType<typeof setTimeout> | null = null;
+      const savePrimaryHistory = () => {
+        historyService.updateRecord(
+          initialRecord.id,
+          this.buildHistoryRecordSnapshot(initialRecord, initialResult, conversationHistory)
+        );
+      };
+      const schedulePrimaryHistorySave = () => {
+        if (primarySaveTimer) {
+          return;
+        }
+
+        primarySaveTimer = setTimeout(() => {
+          primarySaveTimer = null;
+          savePrimaryHistory();
+        }, PRIMARY_HISTORY_SAVE_INTERVAL);
+      };
+      const flushPrimaryHistorySave = () => {
+        if (primarySaveTimer) {
+          clearTimeout(primarySaveTimer);
+          primarySaveTimer = null;
+        }
+
+        savePrimaryHistory();
+      };
+
+      try {
+        await this.generateAIInterpretation(
+          type,
+          question,
+          data,
+          supplementaryInfo,
+          signal,
+          conversationHistory,
+          onAIChunk,
+          (finalResult) => {
+            // 8. AI完成后更新历史记录（而不是添加新记录）
+            // 更新已保存的记录，添加AI响应
+            const updatedRecord = this.buildHistoryRecordSnapshot(
+              initialRecord,
+              finalResult,
+              conversationHistory
+            );
+
+            historyService.updateRecord(initialRecord.id, updatedRecord);
+
+            // 然后调用原始的完成回调
+            onAIComplete(finalResult);
+          },
+          onConversationUpdate,
+          initialResult,
+          schedulePrimaryHistorySave
+        );
+
+        flushPrimaryHistorySave();
+      } catch (error) {
+        flushPrimaryHistorySave();
+        throw error;
+      }
 
     } catch (err) {
       this.handleError(err, onAIError);
@@ -270,7 +305,8 @@ export class DivinationOrchestrator {
     onAIChunk: (chunk: string) => void,
     onAIComplete: (finalResult: DivinationResult) => void,
     onConversationUpdate: (history: ChatMessage[]) => void,
-    initialResult: DivinationResult
+    initialResult: DivinationResult,
+    onPartialHistoryUpdate?: () => void
   ): Promise<void> {
     const fullAiResponse = await aiService.generateAIResponse(
       type,
@@ -281,8 +317,10 @@ export class DivinationOrchestrator {
       (chunk) => {
         const assistantMessage = conversationHistory.find(m => m.role === 'assistant');
         if (assistantMessage) assistantMessage.content += chunk;
+        initialResult.aiResponse = assistantMessage?.content || initialResult.aiResponse;
         onAIChunk(chunk);
         onConversationUpdate([...conversationHistory]);
+        onPartialHistoryUpdate?.();
       }
     );
 

@@ -199,6 +199,74 @@ describe('DivinationOrchestrator', () => {
     expect(onAIError).toHaveBeenCalledWith('AI 服务异常')
   })
 
+  it('首轮 AI 流式更新期间应保存已生成的部分内容，避免刷新后历史记录空白', async () => {
+    vi.useFakeTimers()
+
+    mockGenerateDivination.mockResolvedValue({
+      originalName: '测试卦',
+      changedName: '测试变卦',
+      interName: '互卦',
+      yaoArray: [7, 7, 7, 7, 7, 7],
+      changingYaos: [],
+      sixGods: [],
+      sixRelatives: [],
+      najiaDizhi: [],
+      wuxing: [],
+      worldAndResponse: [],
+      voidBranches: [],
+      palace: { name: '离宫', wuxing: '火' },
+      ganzhi: { year: '甲子', month: '乙丑', day: '丙寅', hour: '丁卯' },
+      yaosDetail: [],
+      timestamp: 1711111111111,
+    })
+
+    let resolveAI: ((value: string) => void) | undefined
+    mockGenerateAIResponse.mockImplementation(async (_type, _question, _data, _info, _signal, onChunk) => {
+      onChunk?.('第一段')
+      onChunk?.('第二段')
+
+      return new Promise((resolve) => {
+        resolveAI = resolve
+      })
+    })
+
+    const orchestrator = new DivinationOrchestrator()
+    const executePromise = orchestrator.executeDivination(
+      {
+        type: 'liuyao',
+        question: '我近期的桃花运怎么样？',
+      },
+      {
+        onInitialResult: vi.fn(),
+        onAIChunk: vi.fn(),
+        onAIComplete: vi.fn(),
+        onAIError: vi.fn(),
+        onConversationUpdate: vi.fn(),
+      }
+    )
+
+    await vi.advanceTimersByTimeAsync(1000)
+
+    expect(mockUpdateRecord).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        result: expect.objectContaining({
+          aiResponse: '第一段第二段',
+        }),
+        conversationHistory: expect.arrayContaining([
+          expect.objectContaining({
+            role: 'assistant',
+            content: '第一段第二段',
+          }),
+        ]),
+      })
+    )
+
+    resolveAI?.('第一段第二段最终完成')
+    await executePromise
+    vi.useRealTimers()
+  })
+
   it('今日运势保存历史标题时应直接使用日期键，不受 Date 字符串解析换日影响', async () => {
     const RealDate = Date
 
