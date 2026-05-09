@@ -63,11 +63,15 @@ defineEmits<{
   retry: [target: ChatMessageRetryTarget]
 }>()
 
+function snapshotMessages(messages: ChatMessage[]) {
+  return messages.map((message) => ({ ...message }))
+}
+
 const displayedConversationHistory = computed(() => {
   const displayedMessages = getDisplayedConversationHistory(props.type, props.conversationHistory)
 
   if (!props.error) {
-    return displayedMessages
+    return snapshotMessages(displayedMessages)
   }
 
   const hasActionableAssistantMessage = displayedMessages.some(
@@ -75,11 +79,11 @@ const displayedConversationHistory = computed(() => {
   )
 
   if (hasActionableAssistantMessage) {
-    return displayedMessages
+    return snapshotMessages(displayedMessages)
   }
 
   return [
-    ...displayedMessages.filter((message) => message.content),
+    ...snapshotMessages(displayedMessages.filter((message) => message.content)),
     {
       id: 'assistant-error-fallback',
       role: 'assistant',

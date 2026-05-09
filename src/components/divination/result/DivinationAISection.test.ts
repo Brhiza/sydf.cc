@@ -32,6 +32,49 @@ function createWrapper(type: 'qimen' | 'daily') {
 }
 
 describe('DivinationAISection', () => {
+  it('流式更新复用同一个助手消息对象时，也应立即从加载点切换为内容', async () => {
+    const userMessage: ChatMessage = {
+      id: 'user-streaming',
+      role: 'user',
+      content: '看看接下来的趋势',
+    };
+    const assistantMessage: ChatMessage = {
+      id: 'assistant-streaming',
+      role: 'assistant',
+      content: '',
+    };
+    const streamingHistory = [userMessage, assistantMessage];
+
+    const wrapper = mount(DivinationAISection, {
+      props: {
+        type: 'qimen',
+        conversationHistory: [...streamingHistory],
+        isAiLoading: true,
+      },
+      global: {
+        stubs: {
+          DivinationAIHeader: true,
+          DivinationAIDisclaimer: true,
+          StreamingMarkdown: {
+            props: ['content'],
+            template: '<div class="streaming-markdown-stub">{{ content }}</div>',
+          },
+        },
+      },
+    });
+
+    expect(wrapper.find('.loading-dots').exists()).toBe(true);
+
+    assistantMessage.content = '第一段解读';
+    await wrapper.setProps({
+      conversationHistory: [...streamingHistory],
+      isAiLoading: true,
+    });
+
+    expect(wrapper.find('.loading-dots').exists()).toBe(false);
+    expect(wrapper.text()).toContain('第一段解读');
+  });
+
   it('普通占卜会在每条 AI 回复上显示重新生成按钮，并继续向上抛出 retry 事件', async () => {
     const wrapper = createWrapper('qimen');
 
