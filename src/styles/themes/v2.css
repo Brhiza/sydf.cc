@@ -1,0 +1,101 @@
+html.theme-v2 {
+  --color-primary: #0f766e;
+  --color-primary-light: #14b8a6;
+  --color-primary-dark: #115e59;
+  --color-primary-muted: rgba(20, 184, 166, 0.12);
+  --color-primary-disabled: #9dd9d2;
+
+  --color-secondary: #334155;
+  --color-secondary-light: #64748b;
+  --color-secondary-dark: #1e293b;
+
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #475569;
+  --color-text-muted: #64748b;
+  --color-text-inverse: #ffffff;
+
+  --color-background: #f8fafc;
+  --color-background-soft: #eef2ff;
+  --color-background-secondary: #f1f5f9;
+  --color-background-muted: #e2e8f0;
+  --color-background-elevated: #ffffff;
+
+  --color-border: #cbd5e1;
+  --color-border-light: #e2e8f0;
+  --color-border-dark: #94a3b8;
+
+  --color-success: #059669;
+  --color-success-dark: #047857;
+  --color-warning: #d97706;
+  --color-warning-dark: #b45309;
+  --color-danger: #dc2626;
+  --color-danger-dark: #b91c1c;
+  --color-info: #0284c7;
+  --color-info-dark: #0369a1;
+
+  --color-sidebar-background: #f8fafc;
+
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --shadow-base: 0 1px 3px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 8px 20px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 16px 28px rgba(15, 23, 42, 0.1);
+  --shadow-xl: 0 24px 48px rgba(15, 23, 42, 0.12);
+}
+
+html.theme-v2 body {
+  background:
+    radial-gradient(circle at top left, rgba(20, 184, 166, 0.08), transparent 30%),
+    linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+}
+
+html.theme-v2 .sidebar,
+html.theme-v2 .top-bar,
+html.theme-v2 .main-content,
+html.theme-v2 .card,
+html.theme-v2 .content-card {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(14px);
+}
+
+html.theme-v2 .sidebar {
+  border-right: 1px solid rgba(203, 213, 225, 0.85);
+}
+
+html.theme-v2 .top-bar {
+  border-bottom: 1px solid rgba(203, 213, 225, 0.85);
+}
+
+html.theme-v2 .content-card,
+html.theme-v2 .card {
+  border-color: rgba(203, 213, 225, 0.85);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+}
+
+html.theme-v2 .tool-item,
+html.theme-v2 .btn,
+html.theme-v2 .form-input,
+html.theme-v2 .form-select,
+html.theme-v2 .form-textarea {
+  border-radius: 12px;
+}
+
+html.theme-v2 .tool-item:hover,
+html.theme-v2 .btn:hover:not(:disabled) {
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+}
+
+html.theme-v2 .menu-toggle,
+html.theme-v2 .theme-toggle-compact {
+  background: rgba(15, 23, 42, 0.04);
+}
+
+html.theme-v2 .menu-toggle:hover,
+html.theme-v2 .theme-toggle-compact:hover,
+html.theme-v2 .tool-item:hover {
+  background: rgba(20, 184, 166, 0.08);
+}
+
+html.theme-v2 .content-wrapper {
+  scrollbar-color: rgba(100, 116, 139, 0.5) transparent;
+}

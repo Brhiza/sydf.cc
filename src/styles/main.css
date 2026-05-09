@@ -12,6 +12,7 @@
 /* 导入布局样式 */
 @import './layout/main.css';
 @import './layout/scroll.css';
+@import './themes/v2.css';
 
 /* 导入组件样式 */
 @import './components/base.css';

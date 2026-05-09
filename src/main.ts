@@ -7,6 +7,13 @@ import { registerPlugins } from './plugins';
 import { registerAppServiceWorker } from './services/serviceWorkerRegistration';
 import { setupSeo } from './seo';
 import { isCustomBuild } from './utils/build-target';
+import { bootstrapFrontendTheme } from './composables/useFrontendTheme';
+
+bootstrapFrontendTheme({
+  search: window.location.search,
+  storedTheme: localStorage.getItem('frontend-theme'),
+  envTheme: import.meta.env.VITE_APP_FRONTEND_THEME,
+});
 
 const app = createApp(App);
 
