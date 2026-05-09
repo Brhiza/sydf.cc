@@ -41,8 +41,6 @@ declare global {
 
     // 塔罗牌函数
     tarotCards: TarotCard[];
-    drawSingleCard: () => { card: TarotCard; isReversed: boolean; position: string; timestamp: number };
-    drawThreeCards: () => { cards: { card: TarotCard; isReversed: boolean; position: string }[]; timestamp: number };
     getCardDisplayName: (card: TarotCard, isReversed: boolean) => string;
 
     // 历史记录函数

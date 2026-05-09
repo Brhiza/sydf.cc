@@ -7,6 +7,10 @@ function pad2(value: number | string): string {
   return String(value).padStart(2, '0');
 }
 
+function isDateKey(value: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value);
+}
+
 function formatDateParts(
   year: number | string,
   month: number | string,
@@ -19,6 +23,63 @@ function formatDateParts(
 
 export function formatLocalDateKey(date: Date = new Date()): string {
   return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
+}
+
+export function createAnchoredDateFromDateKey(value: string): Date | null {
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) {
+    return null;
+  }
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const anchoredDate = new Date(year, month - 1, day, 12, 0, 0, 0);
+
+  if (
+    anchoredDate.getFullYear() !== year ||
+    anchoredDate.getMonth() !== month - 1 ||
+    anchoredDate.getDate() !== day
+  ) {
+    return null;
+  }
+
+  return anchoredDate;
+}
+
+export function normalizeDateKey(value: string | Date): string {
+  if (value instanceof Date) {
+    return formatLocalDateKey(value);
+  }
+
+  if (isDateKey(value)) {
+    return value;
+  }
+
+  const parsedDate = new Date(value);
+  if (!Number.isNaN(parsedDate.getTime())) {
+    return formatLocalDateKey(parsedDate);
+  }
+
+  return value;
+}
+
+export function getMonthDayFromDateKey(value: string | Date): { month: number; day: number } {
+  const dateKey = normalizeDateKey(value);
+  const match = dateKey.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+
+  if (match) {
+    return {
+      month: Number(match[2]),
+      day: Number(match[3]),
+    };
+  }
+
+  const fallbackDate = value instanceof Date ? value : new Date(value);
+  return {
+    month: fallbackDate.getMonth() + 1,
+    day: fallbackDate.getDate(),
+  };
 }
 
 export function getStartOfTomorrow(date: Date = new Date()): Date {

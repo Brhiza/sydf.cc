@@ -42,7 +42,7 @@
 </template>
 
 <script setup lang="ts">
-import { getSpreadDefaultQuestions, tarotSpreads } from '@/utils/tarot';
+import { getSpreadDefaultQuestions, tarotSpreads } from '@/utils/tarot-spreads';
 import { computed, ref, watch } from 'vue';
 import InspirationQuestionSection from './inspiration/InspirationQuestionSection.vue';
 import {

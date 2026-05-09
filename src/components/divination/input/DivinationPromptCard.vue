@@ -18,7 +18,7 @@
         :placeholder="placeholder"
         :disabled="loading"
         class="question-input"
-        @input="$emit('update:question', ($event.target as HTMLInputElement).value)"
+        @input="handleQuestionInput"
         @keyup.enter="$emit('submit')"
       />
       <div class="input-focus-border"></div>
@@ -60,11 +60,20 @@ defineProps<{
   disableSubmit: boolean
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   (e: 'update:question', value: string): void
   (e: 'update:selected-spread', value: string): void
   (e: 'submit'): void
 }>()
+
+function handleQuestionInput(event: Event) {
+  const target = event.target
+  if (!(target instanceof HTMLInputElement)) {
+    return
+  }
+
+  emit('update:question', target.value)
+}
 </script>
 
 <style scoped>

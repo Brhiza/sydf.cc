@@ -79,8 +79,9 @@ describe('DivinationOrchestrator', () => {
 
     await orchestrator.executeDivination(
       {
-        type: 'tarot_single',
+        type: 'tarot',
         question: '现在该怎么做？',
+        spreadType: 'single',
       },
       {
         onInitialResult,
@@ -93,15 +94,28 @@ describe('DivinationOrchestrator', () => {
 
     const initialResult = onInitialResult.mock.calls[0][0] as { id: string }
 
+    expect(onInitialResult).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'tarot',
+      })
+    )
+
     expect(mockAddRecord).toHaveBeenCalledWith(
       expect.objectContaining({
         id: initialResult.id,
+        type: 'tarot',
+        result: expect.objectContaining({
+          type: 'tarot',
+        }),
       })
     )
     expect(mockUpdateRecord).toHaveBeenCalledWith(
       initialResult.id,
       expect.objectContaining({
         id: initialResult.id,
+        result: expect.objectContaining({
+          type: 'tarot',
+        }),
       })
     )
   })
@@ -168,8 +182,9 @@ describe('DivinationOrchestrator', () => {
 
     await orchestrator.executeDivination(
       {
-        type: 'tarot_single',
+        type: 'tarot',
         question: '接下来会怎样？',
+        spreadType: 'single',
       },
       {
         onInitialResult: vi.fn(),
@@ -182,5 +197,164 @@ describe('DivinationOrchestrator', () => {
 
     expect(onAIError).toHaveBeenCalledTimes(1)
     expect(onAIError).toHaveBeenCalledWith('AI 服务异常')
+  })
+
+  it('今日运势保存历史标题时应直接使用日期键，不受 Date 字符串解析换日影响', async () => {
+    const RealDate = Date
+
+    class ShiftedDate extends RealDate {
+      constructor(...args: any[]) {
+        if (args.length === 1 && args[0] === '2026-03-16') {
+          super('2026-03-15T16:00:00.000Z')
+          return
+        }
+
+        super(...args)
+      }
+
+      static now() {
+        return RealDate.now()
+      }
+
+      static parse(dateString: string) {
+        return RealDate.parse(dateString)
+      }
+
+      static UTC(...args: Parameters<DateConstructor['UTC']>) {
+        return RealDate.UTC(...args)
+      }
+    }
+
+    vi.stubGlobal('Date', ShiftedDate as unknown as DateConstructor)
+
+    mockGenerateDivination.mockResolvedValue({
+      date: '2026-03-16',
+      timestamp: 1711111111111,
+    })
+    mockGenerateAIResponse.mockResolvedValue('AI 解读完成')
+
+    try {
+      const orchestrator = new DivinationOrchestrator()
+
+      await orchestrator.executeDivination(
+        {
+          type: 'daily',
+          question: '请为我分析 2026-03-16 的运势',
+          supplementaryInfo: {
+            date: '2026-03-16',
+          },
+        },
+        {
+          onInitialResult: vi.fn(),
+          onAIChunk: vi.fn(),
+          onAIComplete: vi.fn(),
+          onAIError: vi.fn(),
+          onConversationUpdate: vi.fn(),
+        }
+      )
+
+      expect(mockAddRecord).toHaveBeenCalledWith(
+        expect.objectContaining({
+          question: '3 月 16 日运势',
+        })
+      )
+    } finally {
+      vi.unstubAllGlobals()
+    }
+  })
+
+  it('追问流式更新期间应节流保存历史记录，并在完成时保存最终内容', async () => {
+    vi.useFakeTimers()
+
+    const record = {
+      id: 'history-record-1',
+      type: 'tarot',
+      question: '现在该怎么做？',
+      result: {
+        type: 'tarot',
+        data: {
+          spreadType: 'single',
+          spreadName: '单牌指引',
+          cards: [],
+          timestamp: 1711111111111,
+        },
+        aiResponse: '初始解读',
+      },
+      conversationHistory: [],
+      timestamp: 1711111111111,
+      summary: '测试摘要',
+    }
+    mockGetRecord.mockReturnValue(record)
+    mockHandleFollowUp.mockImplementation(async (_history, _question, callbacks) => {
+      callbacks.onConversationUpdate([{ role: 'assistant', content: '第一段' }])
+      callbacks.onConversationUpdate([{ role: 'assistant', content: '第二段' }])
+      callbacks.onConversationUpdate([{ role: 'assistant', content: '最终内容' }])
+      callbacks.onComplete()
+    })
+
+    const orchestrator = new DivinationOrchestrator()
+
+    await orchestrator.sendFollowUp('history-record-1', [], '继续说说', {
+      onChunk: vi.fn(),
+      onComplete: vi.fn(),
+      onError: vi.fn(),
+      onConversationUpdate: vi.fn(),
+    })
+
+    expect(mockUpdateRecord).toHaveBeenCalledTimes(1)
+    expect(mockUpdateRecord).toHaveBeenCalledWith(
+      'history-record-1',
+      expect.objectContaining({
+        conversationHistory: [{ role: 'assistant', content: '最终内容' }],
+      })
+    )
+
+    vi.useRealTimers()
+  })
+
+  it('追问保存历史时不应直接改写 getRecord 返回的原对象', async () => {
+    const originalConversationHistory = [{ role: 'assistant', content: '旧内容' }]
+    const record = {
+      id: 'history-record-2',
+      type: 'tarot',
+      question: '下一步怎么做？',
+      result: {
+        type: 'tarot',
+        data: {
+          spreadType: 'single',
+          spreadName: '单牌指引',
+          cards: [],
+          timestamp: 1711111111111,
+        },
+        aiResponse: '原始解读',
+      },
+      conversationHistory: originalConversationHistory,
+      timestamp: 1711111111111,
+      summary: '测试摘要',
+    }
+
+    mockGetRecord.mockReturnValue(record)
+    mockHandleFollowUp.mockImplementation(async (_history, _question, callbacks) => {
+      callbacks.onConversationUpdate([{ role: 'assistant', content: '新的追问内容' }])
+      callbacks.onComplete()
+    })
+
+    const orchestrator = new DivinationOrchestrator()
+
+    await orchestrator.sendFollowUp('history-record-2', [], '继续展开', {
+      onChunk: vi.fn(),
+      onComplete: vi.fn(),
+      onError: vi.fn(),
+      onConversationUpdate: vi.fn(),
+    })
+
+    expect(record.conversationHistory).toBe(originalConversationHistory)
+    expect(record.conversationHistory).toEqual([{ role: 'assistant', content: '旧内容' }])
+    expect(mockUpdateRecord).toHaveBeenCalledWith(
+      'history-record-2',
+      expect.objectContaining({
+        conversationHistory: [{ role: 'assistant', content: '新的追问内容' }],
+      })
+    )
   })
 })

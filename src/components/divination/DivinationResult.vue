@@ -4,7 +4,12 @@
       <h2 class="section-title">{{ resultTitle }}</h2>
     </div>
 
-    <DivinationResultBody :type="type" :result="result" :question="question" />
+    <DivinationResultBody
+      :type="type"
+      :result="result"
+      :question="question"
+      :is-ai-loading="isAiLoading"
+    />
 
     <DivinationAISection
       v-if="showAISection"
@@ -82,7 +87,7 @@ const resultTitle = computed(() => {
   const { type, result } = props;
 
   // 对于塔罗牌，根据实际牌阵类型显示标题
-  if (type === 'tarot' || type === 'tarot_single') {
+  if (type === 'tarot') {
     // TypeScript 现在知道 result.data 是 TarotData 类型
     const data = result.data as import('@/types').TarotData;
     const spreadName = data.spreadName;
@@ -109,7 +114,7 @@ const resultTitle = computed(() => {
     daily: '今日运势',
   } as const;
 
-  return type in typeMap ? typeMap[type as keyof typeof typeMap] : '占卜结果';
+  return typeMap[type];
 });
 </script>
 

@@ -7,7 +7,6 @@
 export { AIService, generateAIResponse, getAIInsight } from './ai';
 export { divinationService, performDivination } from './divination';
 export { historyService } from './history';
-export { getSignByNumber } from './algorithms/ssgw';
 export { pwa } from './pwa';
 export { aiService } from './aiService';
 export { dataGenerationService } from './dataGenerationService';

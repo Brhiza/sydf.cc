@@ -244,10 +244,6 @@ ${template.requirements.map((requirement) => `- ${requirement}`).join('\n')}
  * 解析卦种专用模板键
  */
 function resolveSpecificPromptKey(divinationType: string): SpecificPromptKey | null {
-  if (divinationType === 'tarot_single') {
-    return 'tarot';
-  }
-
   if (divinationType in SPECIFIC_PROMPT_TEMPLATES) {
     return divinationType as SpecificPromptKey;
   }

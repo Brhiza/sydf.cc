@@ -75,29 +75,6 @@ registerRoute(
         maxEntries: 100,
         maxAgeSeconds: 7 * 24 * 60 * 60, // 7天
       }),
-      // 确保图片在后台更新
-      {
-        cacheKeyWillBeUsed: async ({ request }) => {
-          return request.url;
-        },
-        cachedResponseWillBeUsed: async ({ cacheName, request, cachedResponse }) => {
-          // 如果有缓存的响应，在后台更新
-          if (cachedResponse) {
-            fetch(request)
-              .then((response) => {
-                if (response.ok) {
-                  caches.open(cacheName).then((cache) => {
-                    cache.put(request, response.clone());
-                  });
-                }
-              })
-              .catch(() => {
-                // 忽略网络错误
-              });
-          }
-          return cachedResponse;
-        },
-      },
     ],
   })
 );

@@ -37,18 +37,48 @@ describe('resolveSeoMeta', () => {
     expect(meta.canonicalUrl).toBe('https://sydf.cc/divination/tarot');
   });
 
-  it('应为历史详情页返回 noindex', () => {
+  it('应为历史记录页返回 noindex', () => {
     const meta = resolveSeoMeta(
       {
-        name: 'history-detail',
-        path: '/history/demo-id',
+        name: 'history',
+        path: '/history',
+        params: {},
+      },
+      false
+    );
+
+    expect(meta.robots).toBe('noindex, nofollow');
+  });
+
+  it('未知占卜路由参数应回落到未找到页面，避免错误断言进入 SEO 主链路', () => {
+    const meta = resolveSeoMeta(
+      {
+        name: 'divination',
+        path: '/divination/unknown',
         params: {
-          id: 'demo-id',
+          type: 'unknown',
         },
       },
       false
     );
 
+    expect(meta.title).toContain('页面不存在');
+    expect(meta.robots).toBe('noindex, nofollow');
+  });
+
+  it('旧单牌塔罗路由不应再被 SEO 当作正式页面收录', () => {
+    const meta = resolveSeoMeta(
+      {
+        name: 'divination',
+        path: '/divination/tarot_single',
+        params: {
+          type: 'tarot_single',
+        },
+      },
+      false
+    );
+
+    expect(meta.title).toContain('页面不存在');
     expect(meta.robots).toBe('noindex, nofollow');
   });
 });

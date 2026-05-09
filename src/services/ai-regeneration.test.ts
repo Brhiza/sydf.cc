@@ -221,4 +221,56 @@ describe('ai-regeneration', () => {
       { id: 'assistant-1', role: 'assistant', content: '新的追问解读一' },
     ]);
   });
+
+  it('存在系统消息时，首轮助手重试仍应回退到首轮重新生成', async () => {
+    const { regenerateConversationMessage } = await import('./ai-regeneration');
+
+    const record: HistoryRecord = {
+      id: 'qimen-2',
+      type: 'qimen',
+      question: '接下来会怎样？',
+      result: {
+        type: 'qimen',
+        data: {
+          jiuGongGe: [],
+          ganzhi: { year: '甲子', month: '乙丑', day: '丙寅', hour: '丁卯' },
+          isYangDun: true,
+          juShu: 1,
+          zhiFu: '天心',
+          zhiShi: '开门',
+          timeInfo: { solarTerm: '春分', epoch: '上元' },
+          timestamp: Date.now(),
+        },
+        aiResponse: '主解读',
+      },
+      conversationHistory: [
+        { id: 'system-0', role: 'system', content: '系统提示' },
+        { id: 'user-0', role: 'user', content: '接下来会怎样？' },
+        { id: 'assistant-0', role: 'assistant', content: '主解读' },
+        { id: 'user-1', role: 'user', content: '还有什么要注意？' },
+        { id: 'assistant-1', role: 'assistant', content: '旧追问解读' },
+      ],
+      timestamp: Date.now(),
+      summary: '奇门',
+    };
+
+    mockGenerateAIResponse.mockResolvedValue('新的首轮解读');
+
+    const regenerated = await regenerateConversationMessage(record, {
+      displayedIndex: 1,
+      messageId: 'assistant-0',
+    });
+
+    expect(mockGenerateFollowUpPromptWrapper).not.toHaveBeenCalled();
+    expect(mockGenerateAIResponse).toHaveBeenCalledWith(
+      'qimen',
+      '接下来会怎样？',
+      expect.any(Object),
+      undefined,
+      undefined,
+      expect.any(Function)
+    );
+    expect(regenerated.target).toBe('primary');
+    expect(regenerated.aiResponse).toBe('新的首轮解读');
+  });
 });

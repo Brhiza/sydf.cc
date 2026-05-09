@@ -4,6 +4,10 @@
       <img
         :src="`/static/tarot/${card.id}.jpg`"
         :alt="card.name"
+        width="540"
+        height="720"
+        loading="lazy"
+        decoding="async"
         :class="{ reversed: card.reversed }"
         @error="handleImageError"
       />
@@ -29,7 +33,11 @@ defineProps<{
 }>()
 
 function handleImageError(event: Event) {
-  const img = event.target as HTMLImageElement
+  const img = event.currentTarget
+  if (!(img instanceof HTMLImageElement)) {
+    return
+  }
+
   img.src = '/static/tarot/card-back.jpg'
 }
 </script>

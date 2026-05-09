@@ -4,7 +4,6 @@ const {
   mockGenerateLiuyao,
   mockGenerateMeihua,
   mockGenerateQimen,
-  mockDrawSingleCard,
   mockDrawSpreadCards,
   mockGetCardKeywords,
   mockGetSignByNumber,
@@ -13,7 +12,6 @@ const {
   mockGenerateLiuyao: vi.fn(() => ({ type: 'liuyao-result' })),
   mockGenerateMeihua: vi.fn(() => ({ calculation: { method: '年月日时起卦法' } })),
   mockGenerateQimen: vi.fn(() => ({ type: 'qimen-result' })),
-  mockDrawSingleCard: vi.fn(),
   mockDrawSpreadCards: vi.fn(),
   mockGetCardKeywords: vi.fn(() => '关键词'),
   mockGetSignByNumber: vi.fn(),
@@ -33,7 +31,6 @@ vi.mock('./algorithms/qimen', () => ({
 }));
 
 vi.mock('@/utils/tarot', () => ({
-  drawSingleCard: mockDrawSingleCard,
   drawSpreadCards: mockDrawSpreadCards,
   getCardKeywords: mockGetCardKeywords,
 }));
@@ -96,6 +93,43 @@ describe('DataGenerationService', () => {
     });
 
     expect(mockCalculateDailyFortune).toHaveBeenCalledTimes(1);
-    expect(mockCalculateDailyFortune).toHaveBeenCalledWith(expect.any(Date));
+    const calledDate = mockCalculateDailyFortune.mock.calls[0]?.[0] as Date;
+    expect(calledDate).toBeInstanceOf(Date);
+    expect(calledDate.getFullYear()).toBe(2026);
+    expect(calledDate.getMonth()).toBe(2);
+    expect(calledDate.getDate()).toBe(16);
+    expect(calledDate.getHours()).toBe(12);
+  });
+
+  it('塔罗应直接按传入牌阵走统一生成链路', async () => {
+    mockDrawSpreadCards.mockReturnValue({
+      spreadType: 'single',
+      spreadName: '单牌指引',
+      cards: [
+        {
+          card: { number: 1, name: '愚者' },
+          isReversed: false,
+          position: '当前指引',
+        },
+      ],
+      timestamp: 1711111111111,
+    });
+
+    const result = await dataGenerationService.generateDivination('tarot', 'single');
+
+    expect(mockDrawSpreadCards).toHaveBeenCalledWith('single');
+    expect(result).toMatchObject({
+      spreadType: 'single',
+      spreadName: '单牌指引',
+      cards: [
+        {
+          id: 1,
+          name: '愚者',
+          reversed: false,
+          position: '当前指引',
+          keywords: ['关键词'],
+        },
+      ],
+    });
   });
 });

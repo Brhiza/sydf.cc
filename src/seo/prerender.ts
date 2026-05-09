@@ -1,4 +1,4 @@
-import { DIVINATION_CONFIGS, divinationNavItems } from '../config/divination';
+import { divinationNavItems, getDivinationConfig } from '../config/divination';
 import type { DivinationType } from '../types';
 import { JSDOM } from 'jsdom';
 import { applySeoMetaToDocument, resolveSeoMeta, type RouteLike } from './index';
@@ -57,7 +57,10 @@ function renderLinks(links: PrerenderLink[] | undefined): string {
 }
 
 function createDivinationRoute(type: DivinationType): PrerenderRoute {
-  const config = DIVINATION_CONFIGS[type];
+  const config = getDivinationConfig(type);
+  if (!config) {
+    throw new Error(`未找到占卜配置: ${type}`);
+  }
   const examples = config.examples.map((example) => example.text);
   const relatedLinks = divinationNavItems
     .filter((item) => item.type !== type)

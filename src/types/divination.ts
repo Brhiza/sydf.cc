@@ -6,15 +6,10 @@
 // 六神类型
 export type SixGod = '青龙' | '朱雀' | '勾陈' | '腾蛇' | '白虎' | '玄武';
 
+export const DIVINATION_TYPES = ['liuyao', 'meihua', 'qimen', 'tarot', 'ssgw', 'daily'] as const;
+
 // 占卜类型枚举
-export type DivinationType =
-  | 'liuyao'
-  | 'meihua'
-  | 'qimen'
-  | 'tarot'
-  | 'tarot_single'
-  | 'ssgw'
-  | 'daily';
+export type DivinationType = (typeof DIVINATION_TYPES)[number];
 
 export type MeihuaDivinationMethod = 'time' | 'number' | 'random' | 'external';
 

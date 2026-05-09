@@ -1,20 +1,8 @@
 import type { ChatMessage } from '@/types/chat';
-import { isAIErrorMessage } from './ai-error';
+import { getDisplayedConversationHistory } from './conversation-history';
 
 export function getVisibleDailyConversationHistory(messages: ChatMessage[]): ChatMessage[] {
-  const visibleMessages = messages.filter((message) => message.role !== 'system');
-
-  return visibleMessages.filter((message, index) => {
-    if (index === 0 && message.role === 'user') {
-      return false;
-    }
-
-    if (index === 1 && message.role === 'assistant' && !isAIErrorMessage(message.content)) {
-      return false;
-    }
-
-    return true;
-  });
+  return getDisplayedConversationHistory('daily', messages);
 }
 
 export function hasVisibleDailyConversation(messages: ChatMessage[], isFollowUpLoading: boolean) {

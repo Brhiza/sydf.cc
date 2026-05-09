@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 
 import { mount } from '@vue/test-utils';
+import { nextTick } from 'vue';
 import { describe, expect, it } from 'vitest';
 import CustomSelect from './CustomSelect.vue';
 
@@ -65,5 +66,19 @@ describe('CustomSelect', () => {
     });
 
     expect(wrapper.classes()).toContain('custom-select-compact');
+  });
+
+  it('点击 document 本身时应关闭面板且不报错', async () => {
+    const wrapper = createWrapper();
+
+    await wrapper.get('.selected').trigger('click');
+    expect(wrapper.find('.items').classes()).not.toContain('selectHide');
+
+    expect(() => {
+      document.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    }).not.toThrow();
+    await nextTick();
+
+    expect(wrapper.find('.items').classes()).toContain('selectHide');
   });
 });

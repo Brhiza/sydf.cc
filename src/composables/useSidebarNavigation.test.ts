@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { reactive } from 'vue';
+import { nextTick, reactive } from 'vue';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const useRouteMock = vi.fn();
@@ -45,5 +45,40 @@ describe('useSidebarNavigation', () => {
     const dailyItem = navigation.primaryNavItems.value.find((item) => item.title === '今日运势');
 
     expect(dailyItem?.path).toBe('/divination/daily');
+  });
+
+  it('带 historyId 直达历史详情时应同步高亮当前历史记录', async () => {
+    const route = reactive({
+      path: '/divination/qimen',
+      name: 'divination',
+      params: { type: 'qimen' },
+      query: { historyId: 'history-1' },
+    });
+    useRouteMock.mockReturnValue(route);
+
+    const { useSidebarNavigation } = await import('./useSidebarNavigation');
+    const navigation = useSidebarNavigation();
+
+    expect(navigation.selectedHistoryId.value).toBe('history-1');
+  });
+
+  it('退出历史详情后应清空当前历史高亮', async () => {
+    const route = reactive({
+      path: '/divination/qimen',
+      name: 'divination',
+      params: { type: 'qimen' },
+      query: { historyId: 'history-1' as string | undefined },
+    });
+    useRouteMock.mockReturnValue(route);
+
+    const { useSidebarNavigation } = await import('./useSidebarNavigation');
+    const navigation = useSidebarNavigation();
+
+    expect(navigation.selectedHistoryId.value).toBe('history-1');
+
+    route.query.historyId = undefined;
+    await nextTick();
+
+    expect(navigation.selectedHistoryId.value).toBeNull();
   });
 });

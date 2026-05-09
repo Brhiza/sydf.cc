@@ -22,7 +22,6 @@ import TarotSpreadHeader from './tarot/TarotSpreadHeader.vue';
 
 const props = defineProps<{
   cards: TarotCardData[];
-  type?: 'tarot' | 'tarot_single';
   spreadType?: string;
   spreadName?: string;
   timestamp?: number;

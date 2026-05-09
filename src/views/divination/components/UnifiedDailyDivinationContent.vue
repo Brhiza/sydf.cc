@@ -47,13 +47,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, onMounted, onUnmounted } from 'vue';
 import ContentSectionCard from '@/components/common/ContentSectionCard.vue';
 import DivinationInput from '@/components/divination/DivinationInput.vue';
 import DivinationAISection from '@/components/divination/result/DivinationAISection.vue';
 import DailyInterpretationResult from '@/components/divination/results/DailyInterpretationResult.vue';
 import { getDivinationConfig } from '@/config/divination';
 import { useDailyFortune } from '@/composables/useDailyFortune';
+import { eventBus, EVENTS } from '@/utils/eventBus';
 import UnifiedFollowUpComposer from './UnifiedFollowUpComposer.vue';
 import UnifiedResultHeaderActions from './UnifiedResultHeaderActions.vue';
 
@@ -78,11 +79,32 @@ const {
   handleClear,
   handleRetry,
   handleSendFollowUp,
+  refreshHistoryState,
 } = useDailyFortune();
 
 function handleSubmit() {
   void startDailyFortune();
 }
+
+function handleHistoryUpdated() {
+  if (!result.value && !(typeof route.query.historyId === 'string' && route.query.historyId)) {
+    return;
+  }
+
+  if (isLoading.value || isAILoading.value || isFollowUpLoading.value) {
+    return;
+  }
+
+  refreshHistoryState();
+}
+
+onMounted(() => {
+  eventBus.on(EVENTS.HISTORY_UPDATED, handleHistoryUpdated);
+});
+
+onUnmounted(() => {
+  eventBus.off(EVENTS.HISTORY_UPDATED, handleHistoryUpdated);
+});
 </script>
 
 <style scoped>

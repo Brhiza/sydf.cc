@@ -1,6 +1,11 @@
 import type { ChatMessage, ChatMessageRetryTarget } from '@/types/chat';
 import type { LiuyaoData, SupplementaryInfo } from '@/types/divination';
 import type { HistoryRecord } from '@/types/common';
+import {
+  isPrimaryConversationRetryTarget,
+  resolveDisplayedConversationTarget,
+} from '@/utils/conversation-history';
+import { cloneSerializable } from '@/utils/clone';
 import { generateAIResponse as generatePromptAIResponse } from './ai';
 import { aiService } from './aiService';
 import { generateFollowUpPromptWrapper } from './prompts';
@@ -82,38 +87,7 @@ function cloneSupplementaryInfo(supplementaryInfo?: SupplementaryInfo) {
     return undefined;
   }
 
-  return JSON.parse(JSON.stringify(supplementaryInfo)) as SupplementaryInfo;
-}
-
-function getVisibleConversationHistory(messages: ChatMessage[]): ChatMessage[] {
-  return messages.filter((message) => message.role !== 'system');
-}
-
-function shouldShowAIMessage(
-  type: AIRegenerationRecord['type'],
-  message: ChatMessage,
-  index: number
-): boolean {
-  if (type === 'daily') {
-    if (index === 0 && message.role === 'user') {
-      return false;
-    }
-
-    if (index === 1 && message.role === 'assistant') {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-function getDisplayedConversationHistory(
-  type: AIRegenerationRecord['type'],
-  messages: ChatMessage[]
-): ChatMessage[] {
-  return getVisibleConversationHistory(messages).filter((message, index) =>
-    shouldShowAIMessage(type, message, index)
-  );
+  return cloneSerializable(supplementaryInfo);
 }
 
 function cloneConversationHistory(record: AIRegenerationRecord): ChatMessage[] {
@@ -121,7 +95,7 @@ function cloneConversationHistory(record: AIRegenerationRecord): ChatMessage[] {
     return buildRegeneratedConversationHistory(record, record.result.aiResponse || '');
   }
 
-  return JSON.parse(JSON.stringify(record.conversationHistory)) as ChatMessage[];
+  return cloneSerializable(record.conversationHistory);
 }
 
 function resolveTargetAssistantMessage(
@@ -130,38 +104,18 @@ function resolveTargetAssistantMessage(
 ): {
   conversationHistory: ChatMessage[];
   targetMessage: ChatMessage | null;
+  isPrimaryTarget: boolean;
   targetIndex: number;
 } {
   const conversationHistory = cloneConversationHistory(record);
-  const displayedConversationHistory = getDisplayedConversationHistory(
-    record.type,
-    conversationHistory
-  );
-  const targetMessage =
-    displayedConversationHistory.find((message, index) => {
-      if (index !== target.displayedIndex) {
-        return false;
-      }
-
-      if (target.messageId && message.id) {
-        return message.id === target.messageId;
-      }
-
-      return true;
-    }) || null;
+  const targetEntry = resolveDisplayedConversationTarget(record.type, conversationHistory, target);
 
   return {
     conversationHistory,
-    targetMessage,
-    targetIndex: targetMessage ? conversationHistory.indexOf(targetMessage) : -1,
+    targetMessage: targetEntry?.message || null,
+    isPrimaryTarget: isPrimaryConversationRetryTarget(record.type, conversationHistory, target),
+    targetIndex: targetEntry?.originalIndex ?? -1,
   };
-}
-
-function isPrimaryAssistantMessage(
-  conversationHistory: ChatMessage[],
-  targetIndex: number
-): boolean {
-  return targetIndex === 1 && conversationHistory[0]?.role === 'user';
 }
 
 export async function generateRegeneratedAI(
@@ -183,7 +137,7 @@ export async function generateRegeneratedAI(
     };
   }
 
-  const clonedData = JSON.parse(JSON.stringify(record.result.data));
+  const clonedData = cloneSerializable(record.result.data);
   const supplementaryInfo = cloneSupplementaryInfo(record.result.supplementaryInfo);
   const question = getRegenerationQuestion(record);
 
@@ -215,7 +169,7 @@ export async function regenerateConversationMessage(
   target: ChatMessageRetryTarget,
   options: GenerateRegeneratedAIOptions = {}
 ): Promise<RegeneratedAIResult> {
-  const { conversationHistory, targetMessage, targetIndex } = resolveTargetAssistantMessage(
+  const { conversationHistory, targetMessage, targetIndex, isPrimaryTarget } = resolveTargetAssistantMessage(
     record,
     target
   );
@@ -223,7 +177,7 @@ export async function regenerateConversationMessage(
     return generateRegeneratedAI(record, options);
   }
 
-  if (isPrimaryAssistantMessage(conversationHistory, targetIndex)) {
+  if (isPrimaryTarget) {
     return generateRegeneratedAI(record, options);
   }
 
@@ -251,7 +205,7 @@ export async function regenerateConversationMessage(
     originalResponse: record.result.aiResponse || '',
     divinationType: record.type,
     followUpQuestion: regeneratedUserMessage.content || '',
-    originalData: JSON.parse(JSON.stringify(record.result.data)),
+    originalData: cloneSerializable(record.result.data),
     supplementaryInfo: cloneSupplementaryInfo(record.result.supplementaryInfo),
   });
 

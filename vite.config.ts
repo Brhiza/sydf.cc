@@ -141,8 +141,8 @@ export default defineConfig((_env) => {
             vendor: ['vue', 'vue-router', 'pinia'],
             // 将markdown相关库分离
             markdown: ['marked'],
-            // 将工具库分离
-            utils: ['uuid', 'tyme4ts', '@vueuse/core']
+            // 将传统历法库分离
+            calendar: ['tyme4ts']
             // 移除空的ui chunk，因为项目中没有使用@vueuse/components
           },
           // 为文件名添加内容哈希，确保缓存更新
@@ -170,7 +170,7 @@ export default defineConfig((_env) => {
     },
     // 优化依赖预构建
     optimizeDeps: {
-      include: ['vue', 'vue-router', 'pinia', 'marked', 'uuid', 'tyme4ts']
+      include: ['vue', 'vue-router', 'pinia', 'marked', 'tyme4ts']
     }
   }
 })

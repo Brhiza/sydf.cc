@@ -1,12 +1,14 @@
 import type { DivinationType } from '@/types';
 
+export type DivinationConfigType = DivinationType;
+
 export interface ExampleQuestion {
   text: string;
   category: string;
 }
 
 export interface DivinationConfig {
-  type: DivinationType;
+  type: DivinationConfigType;
   title: string;
   icon: string;
   description: string;
@@ -24,7 +26,7 @@ export const QUESTION_CATEGORIES = {
   GROWTH: 'growth',
 };
 
-export const DIVINATION_CONFIGS: Record<DivinationType, DivinationConfig> = {
+export const DIVINATION_CONFIGS: Record<DivinationConfigType, DivinationConfig> = {
   liuyao: {
     type: 'liuyao',
     title: '六爻占卜',
@@ -106,25 +108,6 @@ export const DIVINATION_CONFIGS: Record<DivinationType, DivinationConfig> = {
       { text: '我该如何处理当前的人际关系？', category: QUESTION_CATEGORIES.RELATION },
     ],
   },
-  tarot_single: {
-    type: 'tarot_single',
-    title: '塔罗牌·单牌',
-    icon: '🔮',
-    description:
-      '在需要快速得到答案或建议时非常实用，例如紧急决策和日运，想知道大致的方向，抽取单牌能迅速给出一个直观的指引',
-    placeholder: '请输入您的问题',
-    maxLength: 200,
-    buttonText: '询问塔罗大师',
-    examples: [
-      { text: '今天的运势如何？', category: QUESTION_CATEGORIES.GROWTH },
-      { text: '这个决定是否正确？', category: QUESTION_CATEGORIES.GROWTH },
-      { text: '我应该相信直觉吗？', category: QUESTION_CATEGORIES.GROWTH },
-      { text: '现在适合行动吗？', category: QUESTION_CATEGORIES.CAREER },
-      { text: '我们的感情会有进展吗？', category: QUESTION_CATEGORIES.EMOTION },
-      { text: '这笔投资值得吗？', category: QUESTION_CATEGORIES.WEALTH },
-      { text: '如何处理当前的人际冲突？', category: QUESTION_CATEGORIES.RELATION },
-    ],
-  },
   daily: {
     type: 'daily',
     title: '今日运势',
@@ -137,9 +120,7 @@ export const DIVINATION_CONFIGS: Record<DivinationType, DivinationConfig> = {
   },
 };
 
-export const divinationNavItems = Object.values(DIVINATION_CONFIGS).filter(
-  (config) => !config.type.includes('_')
-);
+export const divinationNavItems = Object.values(DIVINATION_CONFIGS);
 
 export function getDivinationConfig(type: DivinationType): DivinationConfig | null {
   return DIVINATION_CONFIGS[type] || null;

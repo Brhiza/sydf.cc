@@ -15,19 +15,19 @@
         :divination-type="divinationType"
         :hide-after-submit="false"
         @submit="handleSubmit"
-        @type-change="handleTypeChange"
+        @spread-change="handleSpreadChange"
         @clear="clearResult"
       />
 
       <UnifiedResultHeaderActions
-        v-if="hasResult && !route.query.historyId"
+        v-if="displayResult && !route.query.historyId"
         @back="handleClear"
       />
 
       <DivinationResult
-        v-if="hasResult"
+        v-if="displayResult"
         :type="divinationType"
-        :result="adaptedResult as any"
+        :result="displayResult"
         :is-ai-loading="isAiLoading || isFollowUpLoading"
         :error="error"
         :question="question"
@@ -63,7 +63,8 @@ import DivinationInput from '@/components/divination/DivinationInput.vue';
 import DivinationResult from '@/components/divination/DivinationResult.vue';
 import { useUnifiedDivinationPage } from '@/composables/useUnifiedDivinationPage';
 import type { DivinationType } from '@/types';
-import { computed, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { eventBus, EVENTS } from '@/utils/eventBus';
 import UnifiedFollowUpComposer from './components/UnifiedFollowUpComposer.vue';
 import UnifiedDailyDivinationContent from './components/UnifiedDailyDivinationContent.vue';
 import UnifiedResultHeaderActions from './components/UnifiedResultHeaderActions.vue';
@@ -93,13 +94,38 @@ const {
   followUpQuestion,
   isFollowUpLoading,
   handleSendFollowUp,
-  adaptedResult,
+  displayResult,
   config,
   isCustomBuild,
-  handleTypeChange,
+  handleSpreadChange,
   handleSubmit,
   handleClear,
   clearError,
   handleRetry,
+  refreshHistoryState,
 } = useUnifiedDivinationPage(props, pageContainerRef);
+
+function handleHistoryUpdated() {
+  if (isDaily.value) {
+    return;
+  }
+
+  if (typeof route.query.historyId !== 'string' || !route.query.historyId) {
+    return;
+  }
+
+  if (isLoading.value || isAiLoading.value || isFollowUpLoading.value) {
+    return;
+  }
+
+  refreshHistoryState();
+}
+
+onMounted(() => {
+  eventBus.on(EVENTS.HISTORY_UPDATED, handleHistoryUpdated);
+});
+
+onUnmounted(() => {
+  eventBus.off(EVENTS.HISTORY_UPDATED, handleHistoryUpdated);
+});
 </script>

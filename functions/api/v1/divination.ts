@@ -5,13 +5,18 @@ import { calculateDailyFortune } from '../../../src/services/algorithms/daily.ts
 import { generateLiuyao } from '../../../src/services/algorithms/liuyao.ts';
 import { generateMeihua } from '../../../src/services/algorithms/meihua.ts';
 import { generateQimen } from '../../../src/services/algorithms/qimen.ts';
+import { type DivinationType } from '../../../src/types/divination.ts';
 import { SSGW_SIGNS } from '../../../src/utils/ssgw-data.ts';
-import { drawSingleCard, drawSpreadCards, getCardKeywords, tarotSpreads } from '../../../src/utils/tarot.ts';
+import { drawSpreadCards, getCardKeywords, tarotSpreads } from '../../../src/utils/tarot.ts';
+import {
+  COMPATIBLE_DIVINATION_TYPES,
+  isCompatibleDivinationType,
+  normalizeDivinationType,
+  resolveTarotSpreadType,
+} from '../../../src/utils/divination-type.ts';
 import { getDivinationTime, setTimezoneOffsetMinutesOverride } from '../../../src/utils/timeManager.ts';
 import { buildDivinationSystemPrompt } from '../../../src/shared/divination-system-prompt.ts';
 import { proxyAiRequest } from '../../_shared/ai-proxy.js';
-
-type DivinationType = 'daily' | 'liuyao' | 'meihua' | 'qimen' | 'ssgw' | 'tarot' | 'tarot_single';
 
 interface SupplementaryInfo {
   gender?: '男' | '女';
@@ -35,7 +40,7 @@ interface SupplementaryInfo {
 }
 
 interface DivinationRequestBody {
-  type: DivinationType;
+  type?: string;
   question?: string;
   stream?: boolean;
   debug?: boolean;
@@ -155,7 +160,11 @@ function parseDatetime(datetime: string): Date {
   return d;
 }
 
-function resolveDivinationDate(type: DivinationType, body: DivinationRequestBody, baseDate: Date): Date {
+function resolveDivinationDate(
+  type: DivinationType,
+  body: DivinationRequestBody,
+  baseDate: Date
+): Date {
   if (type !== 'daily') {
     return baseDate;
   }
@@ -194,7 +203,7 @@ function buildUserPrompt(args: {
   const questionLine =
     typeof question === 'string' && question.trim()
       ? `【问题】${question.trim()}`
-      : type === 'daily'
+        : type === 'daily'
         ? '【问题】今日运势（通用解读）'
         : '【问题】（未提供，按通用解读处理）';
 
@@ -211,7 +220,15 @@ function buildUserPrompt(args: {
     .join('\n\n');
 }
 
-async function generateDivinationData(type: DivinationType, body: DivinationRequestBody, baseDate: Date) {
+async function generateDivinationData(
+  args: {
+    type: DivinationType;
+    isLegacyTarotSingle: boolean;
+    body: DivinationRequestBody;
+    baseDate: Date;
+  }
+) {
+  const { type, isLegacyTarotSingle, body, baseDate } = args;
   const options = body.options || {};
   const supplementaryInfo = options.supplementaryInfo;
 
@@ -260,7 +277,9 @@ async function generateDivinationData(type: DivinationType, body: DivinationRequ
   }
 
   if (type === 'tarot') {
-    const spreadType = (body.options?.spreadType || 'three') as keyof typeof tarotSpreads;
+    const spreadType = (
+      isLegacyTarotSingle ? 'single' : resolveTarotSpreadType('tarot', body.options?.spreadType)
+    ) as keyof typeof tarotSpreads;
     const result = drawSpreadCards(spreadType);
     const cards = result.cards.map((c) => ({
       id: c.card.number,
@@ -270,23 +289,6 @@ async function generateDivinationData(type: DivinationType, body: DivinationRequ
       keywords: getCardKeywords(c.card.name).split(','),
     }));
     return { ...result, cards };
-  }
-
-  if (type === 'tarot_single') {
-    const single = drawSingleCard();
-    const card = {
-      id: single.card.number,
-      name: single.card.name,
-      position: single.position,
-      reversed: single.isReversed,
-      keywords: getCardKeywords(single.card.name).split(','),
-    };
-    return {
-      spreadType: 'single',
-      spreadName: '单牌指引',
-      cards: [card],
-      timestamp: single.timestamp,
-    };
   }
 
   // 理论上不会走到这里
@@ -359,17 +361,21 @@ export async function onRequest(context: { request: Request; env: Record<string,
   }
 
   const type = body?.type;
-  const supportedTypes: DivinationType[] = ['daily', 'liuyao', 'meihua', 'qimen', 'ssgw', 'tarot', 'tarot_single'];
-  if (!type || !supportedTypes.includes(type)) {
+  if (!type || !isCompatibleDivinationType(type)) {
     return jsonResponse(
       {
         ok: false,
         requestId,
-        error: { code: 'BAD_REQUEST', message: `type 不合法，必须为：${supportedTypes.join(' | ')}` },
+        error: {
+          code: 'BAD_REQUEST',
+          message: `type 不合法，必须为：${COMPATIBLE_DIVINATION_TYPES.join(' | ')}`,
+        },
       },
       { status: 400, origin }
     );
   }
+  const normalizedType = normalizeDivinationType(type);
+  const isLegacyTarotSingle = type === 'tarot_single';
 
   if (type !== 'daily') {
     if (typeof body.question !== 'string' || !body.question.trim()) {
@@ -387,9 +393,14 @@ export async function onRequest(context: { request: Request; env: Record<string,
   })();
 
   let divinationData: unknown;
-  const divinationDate = resolveDivinationDate(type, body, baseDate);
+  const divinationDate = resolveDivinationDate(normalizedType, body, baseDate);
   try {
-    divinationData = await generateDivinationData(type, body, baseDate);
+    divinationData = await generateDivinationData({
+      type: normalizedType,
+      isLegacyTarotSingle,
+      body,
+      baseDate,
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : '生成占卜数据失败';
     return jsonResponse(
@@ -402,14 +413,14 @@ export async function onRequest(context: { request: Request; env: Record<string,
   const timeInfoText = formatTimeInfo(getDivinationTime(divinationDate));
 
   const supplementaryInfo = body.options?.supplementaryInfo;
-  const systemPrompt = buildDivinationSystemPrompt(type, {
+  const systemPrompt = buildDivinationSystemPrompt(normalizedType, {
     strictDataOnly: true,
     requireStructuredSections: true,
     interpretationStyle: supplementaryInfo?.interpretationStyle,
     outputLength: supplementaryInfo?.outputLength,
   });
   const userPrompt = buildUserPrompt({
-    type,
+    type: normalizedType,
     question: body.question,
     timeInfoText,
     divinationData,
@@ -468,7 +479,7 @@ export async function onRequest(context: { request: Request; env: Record<string,
       {
         ok: true,
         requestId,
-        type,
+        type: normalizedType,
         divination: divinationData,
         interpretation: content,
         ...(usage ? { usage } : {}),
@@ -492,7 +503,7 @@ export async function onRequest(context: { request: Request; env: Record<string,
 
       writeEvent('meta', {
         requestId,
-        type,
+        type: normalizedType,
         divination: divinationData,
         ...(debug ? { debug: { prompt: { system: systemPrompt, user: userPrompt } } } : {}),
       });

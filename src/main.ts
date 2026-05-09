@@ -4,7 +4,6 @@ import router from './router';
 
 // 导入插件
 import { registerPlugins } from './plugins';
-import { initializeServices } from './services';
 import { registerAppServiceWorker } from './services/serviceWorkerRegistration';
 import { setupSeo } from './seo';
 import { isCustomBuild } from './utils/build-target';
@@ -14,10 +13,7 @@ const app = createApp(App);
 // 1. 注册插件 (包括 Pinia)
 registerPlugins(app);
 
-// 2. 初始化服务 (包括 historyService，它会自动加载历史)
-initializeServices();
-
-// 3. 注册路由
+// 2. 注册路由
 app.use(router);
 setupSeo(router, {
   isCustomBuild: isCustomBuild({
@@ -26,10 +22,10 @@ setupSeo(router, {
   }),
 });
 
-// 4. 注册 Service Worker
+// 3. 注册 Service Worker
 registerAppServiceWorker();
 
-// 5. PWA 安装提示处理
+// 4. PWA 安装提示处理
 import { pwa } from './services/pwa';
 
 interface BeforeInstallPromptEvent extends Event {

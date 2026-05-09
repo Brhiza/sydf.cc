@@ -2,12 +2,14 @@
  * 统一的历史记录服务
  * 整合所有历史记录相关功能
  */
-import type { DivinationType, DailyFortuneData } from '@/types';
+import type { DailyFortuneData, DivinationType } from '@/types';
 import type { HistoryRecord } from '@/types/common';
-import { v4 as uuidv4 } from 'uuid';
 import { storageService } from './storageService';
 import { handleError, logError } from '@/utils/error-handler';
 import { eventBus, EVENTS } from '@/utils/eventBus';
+import { createId } from '@/utils/id';
+import { formatLocalDateKey, getMonthDayFromDateKey, normalizeDateKey } from '@/utils/date-formatter';
+import { normalizeDivinationType } from '@/utils/divination-type';
 
 // 存储键名
 const HISTORY_KEY = 'sydf-history';
@@ -30,6 +32,15 @@ const DEFAULT_SETTINGS: AppSettings = {
   theme: 'light',
   useCustomApi: false,
 };
+
+type LegacyPersistedTarotSingleRecord = Omit<HistoryRecord, 'type' | 'result'> & {
+  type: 'tarot_single';
+  result: Omit<HistoryRecord['result'], 'type'> & {
+    type: 'tarot_single';
+  };
+};
+
+type PersistedHistoryRecord = HistoryRecord | LegacyPersistedTarotSingleRecord;
 
 /**
  * 历史记录服务类
@@ -124,15 +135,50 @@ export class HistoryService {
     return this.records.find((record) => record.id === id);
   }
 
+  private normalizePersistedRecord(record: PersistedHistoryRecord | HistoryRecord): HistoryRecord {
+    const normalizedType = normalizeDivinationType(record.type);
+    const normalizedResultType = normalizeDivinationType(record.result.type);
+
+    if (normalizedType === record.type && normalizedResultType === record.result.type) {
+      return record;
+    }
+
+    return {
+      ...record,
+      type: normalizedType,
+      result: {
+        ...record.result,
+        type: normalizedResultType,
+      },
+    };
+  }
+
+  private normalizeRecords(
+    records: Array<PersistedHistoryRecord | HistoryRecord>
+  ): { records: HistoryRecord[]; changed: boolean } {
+    let changed = false;
+
+    const normalizedRecords = records.map((record) => {
+      const normalizedRecord = this.normalizePersistedRecord(record);
+      if (normalizedRecord !== record) {
+        changed = true;
+      }
+      return normalizedRecord;
+    });
+
+    return { records: normalizedRecords, changed };
+  }
+
   /**
    * 添加历史记录
    */
   addRecord(record: Omit<HistoryRecord, 'timestamp' | 'summary'>): HistoryRecord {
+    const normalizedRecord = this.normalizePersistedRecord(record);
     const newRecord: HistoryRecord = {
-      ...record,
-      id: record.id || uuidv4(),
+      ...normalizedRecord,
+      id: normalizedRecord.id || createId(),
       timestamp: Date.now(),
-      summary: this.generateSummary(record.result),
+      summary: this.generateSummary(normalizedRecord.result),
     };
 
     this.records.unshift(newRecord);
@@ -153,7 +199,7 @@ export class HistoryService {
   updateRecord(id: string, updatedRecord: HistoryRecord): boolean {
     const index = this.records.findIndex((record) => record.id === id);
     if (index !== -1) {
-      this.records[index] = updatedRecord;
+      this.records[index] = this.normalizePersistedRecord(updatedRecord);
       this.saveToStorage();
       eventBus.emit(EVENTS.HISTORY_UPDATED);
       return true;
@@ -230,45 +276,14 @@ export class HistoryService {
    * 查找今日运势记录
    */
   findTodayDailyFortune(): HistoryRecord | undefined {
-    const today = new Date();
-    // 使用本地时间而不是UTC时间，避免时区问题
-    const todayStr = today.getFullYear() + '-' + 
-      String(today.getMonth() + 1).padStart(2, '0') + '-' + 
-      String(today.getDate()).padStart(2, '0'); // YYYY-MM-DD 格式（本地时间）
-    
-    // 查找所有今日运势记录
-    const todayRecords = this.records.filter((record) => {
-      if (record.type !== 'daily') return false;
-      
-      // 检查记录的日期是否为今天
-      const recordData = record.result.data as DailyFortuneData;
-      if (recordData && recordData.date) {
-        // 直接比较日期字符串，避免时区转换问题
-        const recordDateStr = recordData.date;
-        return recordDateStr === todayStr;
-      }
-      
-      return false;
-    });
-
-    // 如果有多个今日运势记录，返回最新的一个（按时间戳）
-    if (todayRecords.length > 0) {
-      const sortedRecords = todayRecords.sort((a, b) => b.timestamp - a.timestamp);
-      return sortedRecords[0];
-    }
-
-    return undefined;
+    return this.getDailyFortuneForDate(formatLocalDateKey());
   }
 
   /**
    * 检查指定日期是否有运势记录
    */
   hasDailyFortuneForDate(date: string): boolean {
-    // 使用本地时间格式化，避免时区问题
-    const targetDate = new Date(date);
-    const targetDateStr = targetDate.getFullYear() + '-' + 
-      String(targetDate.getMonth() + 1).padStart(2, '0') + '-' + 
-      String(targetDate.getDate()).padStart(2, '0');
+    const targetDateStr = normalizeDateKey(date);
     
     return this.records.some((record) => {
       if (record.type !== 'daily') return false;
@@ -287,23 +302,25 @@ export class HistoryService {
    * 获取指定日期的运势记录
    */
   getDailyFortuneForDate(date: string): HistoryRecord | undefined {
-    // 使用本地时间格式化，避免时区问题
-    const targetDate = new Date(date);
-    const targetDateStr = targetDate.getFullYear() + '-' + 
-      String(targetDate.getMonth() + 1).padStart(2, '0') + '-' + 
-      String(targetDate.getDate()).padStart(2, '0');
-    
-    return this.records.find((record) => {
+    const targetDateStr = normalizeDateKey(date);
+
+    const matchedRecords = this.records.filter((record) => {
       if (record.type !== 'daily') return false;
-      
+
       const recordData = record.result.data as DailyFortuneData;
       if (recordData && recordData.date) {
         // 直接比较日期字符串，避免时区转换问题
         return recordData.date === targetDateStr;
       }
-      
+
       return false;
     });
+
+    if (matchedRecords.length === 0) {
+      return undefined;
+    }
+
+    return matchedRecords.sort((a, b) => b.timestamp - a.timestamp)[0];
   }
 
   /**
@@ -347,13 +364,19 @@ export class HistoryService {
 
       // 合并记录并去重
       const existingIds = new Set(this.records.map((r) => r.id));
-      const newRecords = importData.records.filter((r: HistoryRecord) => !existingIds.has(r.id));
+      const { records: normalizedImportedRecords } = this.normalizeRecords(
+        importData.records as PersistedHistoryRecord[]
+      );
+      const newRecords = normalizedImportedRecords.filter((r) => !existingIds.has(r.id));
 
       this.records = [...newRecords, ...this.records]
         .sort((a, b) => b.timestamp - a.timestamp)
         .slice(0, this.settings.maxHistoryItems);
 
       this.saveToStorage();
+      if (newRecords.length > 0) {
+        eventBus.emit(EVENTS.HISTORY_UPDATED);
+      }
 
       return {
         success: true,
@@ -371,9 +394,15 @@ export class HistoryService {
   private loadFromStorage(): void {
     try {
       // 加载历史记录
-      const historyData = storageService.getItem<HistoryRecord[]>(HISTORY_KEY);
+      const historyData = storageService.getItem<Array<PersistedHistoryRecord | HistoryRecord>>(
+        HISTORY_KEY
+      );
       if (historyData) {
-        this.records = historyData;
+        const { records, changed } = this.normalizeRecords(historyData);
+        this.records = records;
+        if (changed) {
+          this.saveToStorage();
+        }
       }
 
       // 加载设置
@@ -441,7 +470,6 @@ export class HistoryService {
           }
           return '奇门遁甲: 未知局';
         case 'tarot':
-        case 'tarot_single':
           // 确保 data 是 TarotData 类型
           if ('cards' in data && Array.isArray(data.cards)) {
             return `塔罗牌: ${data.cards.map((c) => c.name).join(', ')}`;
@@ -456,10 +484,7 @@ export class HistoryService {
         case 'daily':
           // 确保 data 是 DailyFortuneData 类型
           if ('date' in data) {
-            // 格式化日期为 "X 月 Y 日运势"
-            const date = new Date(data.date);
-            const month = date.getMonth() + 1;
-            const day = date.getDate();
+            const { month, day } = getMonthDayFromDateKey(data.date);
             return `${month} 月 ${day} 日运势`;
           }
           return '今日运势';

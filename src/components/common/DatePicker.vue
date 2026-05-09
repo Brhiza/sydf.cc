@@ -24,7 +24,11 @@ defineProps<Props>();
 const emit = defineEmits<Emits>();
 
 const updateDate = (event: Event) => {
-  const target = event.target as HTMLInputElement;
+  const target = event.target;
+  if (!(target instanceof HTMLInputElement)) {
+    return;
+  }
+
   emit('update:modelValue', target.value);
 };
 </script>

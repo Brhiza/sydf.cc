@@ -33,7 +33,6 @@ export type ResultRenderer =
       kind: 'tarot';
       props: {
         cards: TarotData['cards'];
-        type: 'tarot' | 'tarot_single';
         spreadType?: string;
         spreadName?: string;
         timestamp?: number;
@@ -50,13 +49,15 @@ export type ResultRenderer =
       kind: 'daily';
       props: {
         aiResponse: string;
+        isLoading: boolean;
       };
     };
 
 export function resolveResultRenderer(
   type: DivinationType,
   result: DivinationResult,
-  question?: string
+  question?: string,
+  isAiLoading: boolean = false
 ): ResultRenderer | null {
   if (!result.data) {
     return null;
@@ -86,15 +87,13 @@ export function resolveResultRenderer(
           supplementaryInfo: result.supplementaryInfo,
         },
       };
-    case 'tarot':
-    case 'tarot_single': {
+    case 'tarot': {
       const tarotData = result.data as TarotData;
 
       return {
         kind: 'tarot',
         props: {
           cards: tarotData.cards || [],
-          type,
           spreadType: tarotData.spreadType,
           spreadName: tarotData.spreadName,
           timestamp: tarotData.timestamp,
@@ -114,6 +113,7 @@ export function resolveResultRenderer(
         kind: 'daily',
         props: {
           aiResponse: result.aiResponse || '',
+          isLoading: isAiLoading,
         },
       };
     default:

@@ -28,7 +28,11 @@ const emit = defineEmits<{
 }>();
 
 function handleInput(event: Event) {
-  const target = event.target as HTMLTextAreaElement;
+  const target = event.target;
+  if (!(target instanceof HTMLTextAreaElement)) {
+    return;
+  }
+
   emit('update:modelValue', target.value);
 }
 </script>

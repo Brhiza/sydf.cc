@@ -21,6 +21,7 @@ const props = defineProps<{
   type: DivinationType
   result: DivinationResultType
   question?: string
+  isAiLoading?: boolean
 }>()
 
 const componentMap = {
@@ -32,7 +33,9 @@ const componentMap = {
   daily: DailyInterpretationResult,
 } as const;
 
-const renderer = computed(() => resolveResultRenderer(props.type, props.result, props.question))
+const renderer = computed(() =>
+  resolveResultRenderer(props.type, props.result, props.question, props.isAiLoading ?? false)
+)
 
 const rendererComponent = computed(() => {
   if (!renderer.value) {

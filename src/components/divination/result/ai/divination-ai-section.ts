@@ -1,11 +1,15 @@
 import type { ChatMessage, DivinationType } from '@/types';
 import { isAIErrorMessage } from '@/utils/ai-error';
-import { getVisibleDailyConversationHistory } from '@/utils/daily-conversation';
+import {
+  getDisplayedConversationHistory as getSharedDisplayedConversationHistory,
+  getVisibleConversationHistory as getSharedVisibleConversationHistory,
+  shouldShowConversationMessage,
+} from '@/utils/conversation-history';
 
 export { isAIErrorMessage };
 
 export function getVisibleConversationHistory(messages: ChatMessage[]): ChatMessage[] {
-  return messages.filter((message) => message.role !== 'system');
+  return getSharedVisibleConversationHistory(messages);
 }
 
 export function shouldShowAIMessage(
@@ -13,30 +17,14 @@ export function shouldShowAIMessage(
   message: ChatMessage,
   index: number
 ): boolean {
-  if (type === 'daily') {
-    if (index === 0 && message.role === 'user') {
-      return false;
-    }
-
-    if (index === 1 && message.role === 'assistant' && !isAIErrorMessage(message.content)) {
-      return false;
-    }
-  }
-
-  return true;
+  return shouldShowConversationMessage(type, message, index);
 }
 
 export function getDisplayedConversationHistory(
   type: DivinationType,
   messages: ChatMessage[]
 ): ChatMessage[] {
-  if (type === 'daily') {
-    return getVisibleDailyConversationHistory(messages);
-  }
-
-  return getVisibleConversationHistory(messages).filter((message, index) =>
-    shouldShowAIMessage(type, message, index)
-  );
+  return getSharedDisplayedConversationHistory(type, messages);
 }
 
 export function hasVisibleAssistantContent(type: DivinationType, messages: ChatMessage[]): boolean {

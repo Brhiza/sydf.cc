@@ -2,8 +2,9 @@
 /* eslint-disable vue/one-component-per-file */
 
 import { mount } from '@vue/test-utils';
-import { computed, defineComponent, ref } from 'vue';
+import { computed, defineComponent, nextTick, ref } from 'vue';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { eventBus, EVENTS } from '@/utils/eventBus';
 import UnifiedDailyDivinationContent from './UnifiedDailyDivinationContent.vue';
 
 const useDailyFortuneMock = vi.fn();
@@ -68,6 +69,7 @@ function createDailyFortuneState(overrides: Record<string, unknown> = {}) {
     handleClear: vi.fn(),
     handleRetry: vi.fn(),
     handleSendFollowUp: vi.fn(),
+    refreshHistoryState: vi.fn(),
     ...overrides,
   };
 }
@@ -103,5 +105,23 @@ describe('UnifiedDailyDivinationContent', () => {
     const wrapper = mount(UnifiedDailyDivinationContent);
 
     expect(wrapper.find('.daily-ai-section-stub').exists()).toBe(true);
+  });
+
+  it('查看今日运势历史时收到历史更新事件应刷新当前内容', async () => {
+    const refreshHistoryState = vi.fn();
+
+    useDailyFortuneMock.mockReturnValue(
+      createDailyFortuneState({
+        route: { query: { historyId: 'history-daily-1' } },
+        refreshHistoryState,
+      })
+    );
+
+    mount(UnifiedDailyDivinationContent);
+
+    eventBus.emit(EVENTS.HISTORY_UPDATED);
+    await nextTick();
+
+    expect(refreshHistoryState).toHaveBeenCalledTimes(1);
   });
 });

@@ -5,6 +5,7 @@
 
 import type { DivinationData } from '@/types/divination';
 import { LunarUtil } from '@/utils/lunar';
+import { createAnchoredDateFromDateKey, normalizeDateKey } from '@/utils/date-formatter';
 
 function formatTimeInfoBlock(timeInfoData: ReturnType<typeof LunarUtil.getCurrentTimeInfo>): string {
   const timeDisplay = LunarUtil.formatTimeDisplay(timeInfoData);
@@ -14,27 +15,6 @@ ${timeDisplay.solar}
 ${timeDisplay.lunar}
 ${timeDisplay.ganzhi}
 节气：${timeInfoData.jieQi}`;
-}
-
-function createAnchoredDateFromDateString(date: string): Date | null {
-  const match = date.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (!match) {
-    return null;
-  }
-
-  const year = Number(match[1]);
-  const month = Number(match[2]);
-  const day = Number(match[3]);
-  const parsed = new Date(year, month - 1, day, 12, 0, 0, 0);
-  if (
-    parsed.getFullYear() !== year ||
-    parsed.getMonth() !== month - 1 ||
-    parsed.getDate() !== day
-  ) {
-    return null;
-  }
-
-  return parsed;
 }
 
 function extractDivinationDate(data?: DivinationData): Date | null {
@@ -47,7 +27,7 @@ function extractDivinationDate(data?: DivinationData): Date | null {
   }
 
   if ('date' in data && typeof data.date === 'string') {
-    return createAnchoredDateFromDateString(data.date);
+    return createAnchoredDateFromDateKey(normalizeDateKey(data.date));
   }
 
   return null;

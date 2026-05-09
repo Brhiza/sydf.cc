@@ -1,4 +1,4 @@
-import { tarotSpreads } from '@/utils/tarot'
+import { tarotSpreads } from '@/utils/tarot-spreads'
 
 export type TarotSpreadKey = keyof typeof tarotSpreads
 

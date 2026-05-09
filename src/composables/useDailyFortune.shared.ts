@@ -1,17 +1,17 @@
 import type { Ref } from 'vue';
-import { DAILY_LIMIT_STORAGE_KEY } from '@/services/dailyLimitService';
-import { formatLocalDateKey } from '@/utils/date-formatter';
+import { formatLocalDateKey, getMonthDayFromDateKey } from '@/utils/date-formatter';
 import type { HistoryRecord } from '@/types/common';
 import type { DailyFortuneData, SupplementaryInfo } from '@/types/divination';
 import type { ChatMessage } from '@/types/chat';
+import { cloneSerializable } from '@/utils/clone';
 export { hasVisibleDailyConversation } from '@/utils/daily-conversation';
 
 export interface DailyFortuneRecordLike {
   id: string;
-  type: 'daily' | string;
+  type: 'daily';
   question: string;
   result: {
-    type: 'daily' | string;
+    type: 'daily';
     data: DailyFortuneData;
     aiResponse?: string;
     supplementaryInfo?: SupplementaryInfo;
@@ -35,8 +35,8 @@ export function getTodayDateString() {
 }
 
 export function getDailyHistoryTitle(date: string): string {
-  const targetDate = new Date(date);
-  return `${targetDate.getMonth() + 1} 月 ${targetDate.getDate()} 日运势`;
+  const { month, day } = getMonthDayFromDateKey(date);
+  return `${month} 月 ${day} 日运势`;
 }
 
 export function getDailyDateLabel(date: string, todayDate = getTodayDateString()) {
@@ -44,8 +44,8 @@ export function getDailyDateLabel(date: string, todayDate = getTodayDateString()
     return '今日';
   }
 
-  const targetDate = new Date(date);
-  return `${targetDate.getMonth() + 1}月${targetDate.getDate()}日`;
+  const { month, day } = getMonthDayFromDateKey(date);
+  return `${month}月${day}日`;
 }
 
 export function getDailyPageTitle(date: string, todayDate = getTodayDateString()) {
@@ -53,13 +53,12 @@ export function getDailyPageTitle(date: string, todayDate = getTodayDateString()
     return '今日运势';
   }
 
-  const targetDate = new Date(date);
-  return `${targetDate.getMonth() + 1}月${targetDate.getDate()}日运势`;
+  const { month, day } = getMonthDayFromDateKey(date);
+  return `${month}月${day}日运势`;
 }
 
 export function getDailyStorageKeys(date: string) {
   return [
-    DAILY_LIMIT_STORAGE_KEY,
     'divination:daily:cache',
     'divination:daily:result',
     `divination:daily:${date}:cache`,
@@ -74,9 +73,9 @@ export function applyDailyRecordToState(
   record: DailyFortuneRecordLike,
   state: DailyFortuneStateRefs
 ) {
-  state.result.value = record.result.data;
+  state.result.value = cloneSerializable(record.result.data);
   state.aiResponse.value = record.result.aiResponse || '';
-  state.conversationHistory.value = record.conversationHistory || [];
+  state.conversationHistory.value = cloneSerializable(record.conversationHistory || []);
   state.isFromCache.value = true;
   state.error.value = null;
   state.isCancelled.value = false;
@@ -103,11 +102,11 @@ export function createFallbackDailyHistoryRecord(args: {
     question: title,
     result: {
       type: 'daily',
-      data: args.result,
+      data: cloneSerializable(args.result),
       aiResponse: args.aiResponse,
       supplementaryInfo: { date: args.date },
     },
-    conversationHistory: [...args.conversationHistory],
+    conversationHistory: cloneSerializable(args.conversationHistory),
     timestamp: Date.now(),
     summary: title,
   };

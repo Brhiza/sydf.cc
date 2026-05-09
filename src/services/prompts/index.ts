@@ -3,7 +3,17 @@
  * 重构版本 - 使用共享逻辑和统一架构
  */
 
-import type { DivinationData, DivinationType, LiuyaoData, MeihuaData, QimenData, SsgwData, SupplementaryInfo, TarotData, DailyFortuneData } from '@/types';
+import type {
+  DailyFortuneData,
+  DivinationData,
+  DivinationType,
+  LiuyaoData,
+  MeihuaData,
+  QimenData,
+  SsgwData,
+  SupplementaryInfo,
+  TarotData,
+} from '@/types';
 import { generateLiuyaoPrompt } from './liuyao';
 import { generateMeihuaPrompt } from './meihua';
 import { generateQimenPrompt } from './qimen';
@@ -41,7 +51,6 @@ export async function generatePrompt(
     case 'qimen':
       return generateQimenPrompt(question, data as QimenData, timeInfo, supplementaryInfo);
     case 'tarot':
-    case 'tarot_single':
       return generateTarotPrompt(question, data as TarotData, timeInfo, supplementaryInfo);
     case 'ssgw':
       return generateSsgwPrompt(question, data as SsgwData, timeInfo, supplementaryInfo);

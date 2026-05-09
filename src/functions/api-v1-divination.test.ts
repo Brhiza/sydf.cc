@@ -255,4 +255,63 @@ describe('开发者 API 兼容性', () => {
     ).toContain('公历：2026年3月24日');
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
+
+  it('旧版单牌塔罗接口应统一走普通塔罗单牌牌阵数据结构', async () => {
+    let capturedRequestBody: Record<string, unknown> | null = null;
+    const fetchMock = vi.fn(async (request: Request) => {
+      capturedRequestBody = JSON.parse(await request.clone().text());
+
+      return new Response(
+        JSON.stringify({
+          choices: [
+            {
+              message: {
+                content: '单牌提示：先稳住节奏，再做决定。',
+              },
+            },
+          ],
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const request = new Request('https://sydf.cc/api/v1/divination', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer test-dev-key',
+      },
+      body: JSON.stringify({
+        type: 'tarot_single',
+        question: '我现在该怎么做？',
+        stream: false,
+      }),
+    });
+
+    const response = await onRequest({
+      request,
+      env: {
+        DEV_API_KEY: 'test-dev-key',
+        OPENAI_API_KEY: 'test-openai-key',
+      },
+    });
+
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.ok).toBe(true);
+    expect(data.type).toBe('tarot');
+    expect(data.divination.spreadType).toBe('single');
+    expect(data.divination.spreadName).toBe('单牌指引');
+    expect(data.divination.cards).toHaveLength(1);
+    expect(
+      ((capturedRequestBody as {
+        messages?: Array<{ role?: string; content?: string }>;
+      } | null)?.messages?.find((message) => message.role === 'user')?.content || '')
+    ).toContain('【类型】tarot');
+  });
 });

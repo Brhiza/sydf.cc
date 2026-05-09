@@ -82,10 +82,10 @@ describe('prompt-builder', () => {
     expect(prompt).toContain('可使用专业术语进行深度战略分析');
   });
 
-  it('塔罗单牌会复用塔罗专业分析模板', () => {
+  it('塔罗会使用统一的专业分析模板', () => {
     const prompt = buildPrompt(
       createPromptConfig({
-        divinationType: 'tarot_single',
+        divinationType: 'tarot',
       })
     );
 

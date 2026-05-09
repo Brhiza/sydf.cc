@@ -42,7 +42,6 @@ describe('divination-result-body', () => {
       kind: 'tarot',
       props: {
         cards: (result.data as TarotData).cards,
-        type: 'tarot',
         spreadType: 'single',
         spreadName: '单牌指引',
         timestamp: 123,
@@ -65,6 +64,26 @@ describe('divination-result-body', () => {
       kind: 'daily',
       props: {
         aiResponse: '今日整体平稳',
+        isLoading: false,
+      },
+    });
+  });
+
+  it('历史页重试今日运势时会把加载态继续透传给结果组件', () => {
+    const result = {
+      id: 'daily-1',
+      type: 'daily',
+      data: {
+        date: '2026-03-24',
+      },
+      aiResponse: '',
+    } as DivinationResult;
+
+    expect(resolveResultRenderer('daily', result, undefined, true)).toEqual({
+      kind: 'daily',
+      props: {
+        aiResponse: '',
+        isLoading: true,
       },
     });
   });

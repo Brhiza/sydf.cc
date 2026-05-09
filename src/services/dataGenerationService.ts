@@ -11,12 +11,7 @@ import type {
   DailyFortuneData,
   SupplementaryInfo
 } from '@/types/divination';
-import { drawSingleCard, drawSpreadCards, getCardKeywords } from '@/utils/tarot';
-import { generateLiuyao } from './algorithms/liuyao';
-import { generateMeihua } from './algorithms/meihua';
-import { generateQimen } from './algorithms/qimen';
-import { getSignByNumber } from './algorithms/ssgw';
-import { calculateDailyFortune } from './algorithms/daily';
+import { createAnchoredDateFromDateKey, normalizeDateKey } from '@/utils/date-formatter';
 
 export class DataGenerationService {
   /**
@@ -29,9 +24,12 @@ export class DataGenerationService {
     supplementaryInfo?: SupplementaryInfo
   ): Promise<LiuyaoData | MeihuaData | QimenData | TarotData | SsgwData | DailyFortuneData> {
     switch (type) {
-      case 'liuyao':
+      case 'liuyao': {
+        const { generateLiuyao } = await import('./algorithms/liuyao');
         return generateLiuyao();
+      }
       case 'meihua': {
+        const { generateMeihua } = await import('./algorithms/meihua');
         const meihuaData = generateMeihua(undefined, supplementaryInfo?.meihuaSettings);
         // 确保 calculation 属性符合 MeihuaCalculation 接口
         if (meihuaData.calculation) {
@@ -40,10 +38,14 @@ export class DataGenerationService {
         return meihuaData;
       }
       case 'qimen': {
+        const { generateQimen } = await import('./algorithms/qimen');
         return generateQimen();
       }
       case 'tarot': {
-        const result = drawSpreadCards(spreadType as keyof typeof import('@/utils/tarot').tarotSpreads || 'three');
+        const { drawSpreadCards, getCardKeywords } = await import('@/utils/tarot');
+        const result = drawSpreadCards(
+          (spreadType || 'three') as Parameters<typeof drawSpreadCards>[0]
+        );
         const cards = result.cards.map(c => ({
           id: c.card.number,
           name: c.card.name,
@@ -53,30 +55,21 @@ export class DataGenerationService {
         }));
         return { ...result, cards };
       }
-      case 'tarot_single': {
-        const singleResult = drawSingleCard();
-        const card = {
-          id: singleResult.card.number,
-          name: singleResult.card.name,
-          reversed: singleResult.isReversed,
-          position: singleResult.position,
-          keywords: getCardKeywords(singleResult.card.name).split(','),
-        };
-        return {
-          spreadType: 'single',
-          spreadName: '单牌指引',
-          cards: [card],
-          timestamp: singleResult.timestamp,
-        };
-      }
       case 'ssgw': {
         if (!signNumber) throw new Error('求取三山国王灵签时必须提供签号');
+        const { getSignByNumber } = await import('./algorithms/ssgw');
         const sign = getSignByNumber(signNumber);
         if (!sign) throw new Error(`未找到签号为 ${signNumber} 的灵签`);
         return sign;
       }
       case 'daily': {
-        const date = supplementaryInfo?.date ? new Date(supplementaryInfo.date) : undefined;
+        const { calculateDailyFortune } = await import('./algorithms/daily');
+        const normalizedDate = supplementaryInfo?.date
+          ? normalizeDateKey(supplementaryInfo.date)
+          : undefined;
+        const date = normalizedDate
+          ? createAnchoredDateFromDateKey(normalizedDate) || new Date(normalizedDate)
+          : undefined;
         return calculateDailyFortune(date);
       }
       default:

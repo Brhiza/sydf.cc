@@ -39,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-import { tarotSpreads } from '@/utils/tarot';
+import { tarotSpreads } from '@/utils/tarot-spreads';
 import { onMounted, onUnmounted, ref } from 'vue';
 import TarotSpreadBubble from './tarot-selector/TarotSpreadBubble.vue';
 import TarotSpreadPanelItem from './tarot-selector/TarotSpreadPanelItem.vue';
@@ -83,7 +83,13 @@ function closeAllSpreads() {
 }
 
 function handleClickOutside(event: MouseEvent) {
-  if (selectorRef.value && !selectorRef.value.contains(event.target as Node)) {
+  const target = event.target;
+  if (!(target instanceof Node)) {
+    closeAllSpreads();
+    return;
+  }
+
+  if (selectorRef.value && !selectorRef.value.contains(target)) {
     closeAllSpreads();
   }
 }

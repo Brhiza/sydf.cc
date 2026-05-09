@@ -1,6 +1,6 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { divinationNavItems } from '@/config/divination'
-import type { HistoryRecord } from '@/services'
+import type { HistoryRecord } from '@/services/history'
 import { eventBus, EVENTS } from '@/utils/eventBus'
 import { useHistoryActions } from './useHistoryActions'
 
@@ -33,6 +33,10 @@ export function useSimpleHistoryList() {
     allRecords.value = getHistoryRecords()
   }
 
+  function findRecordById(recordId: string) {
+    return allRecords.value.find((record) => record.id === recordId)
+  }
+
   function handlePin(recordId: string) {
     if (togglePin(recordId)) {
       loadHistory()
@@ -49,14 +53,20 @@ export function useSimpleHistoryList() {
   function handleDelete(recordId: string) {
     if (confirmDeleteRecord(recordId)) {
       loadHistory()
+      return true
     }
+
+    return false
   }
 
   function clearAllHistory() {
     if (confirmClearAllHistory()) {
       loadHistory()
       showMainMenu.value = false
+      return true
     }
+
+    return false
   }
 
   function toggleSearch() {
@@ -79,7 +89,12 @@ export function useSimpleHistoryList() {
   }
 
   function handleClickOutside(event: MouseEvent) {
-    const target = event.target as HTMLElement
+    const target = event.target
+
+    if (!(target instanceof Element)) {
+      showMainMenu.value = false
+      return
+    }
 
     if (showMainMenu.value && !target.closest('.menu-container')) {
       showMainMenu.value = false
@@ -117,5 +132,6 @@ export function useSimpleHistoryList() {
     handleDelete,
     clearAllHistory,
     getEmptyMessage,
+    findRecordById,
   }
 }

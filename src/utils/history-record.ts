@@ -6,7 +6,6 @@ const HISTORY_TYPE_LABELS: Record<DivinationType, string> = {
   meihua: '梅花',
   qimen: '奇门',
   tarot: '塔罗',
-  tarot_single: '塔罗',
   ssgw: '灵签',
   daily: '运势',
 }

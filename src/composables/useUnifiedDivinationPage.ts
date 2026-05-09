@@ -40,6 +40,7 @@ interface DivinationStateLike {
   cancelGeneration: () => void;
   handleSendFollowUp: () => void;
   handleHistoryParam: () => void;
+  refreshHistoryState: () => void;
 }
 
 interface UseUnifiedDivinationPageOptions {
@@ -73,21 +74,23 @@ export function useUnifiedDivinationPage(
   const currentSpread = ref('single');
   const divination = options.divination ?? useDivinationUnified(props);
 
-  const adaptedResult = computed(() => {
+  const displayResult = computed<DivinationResult | null>(() => {
     if (!divination.result.value) {
-      return { data: {}, aiResponse: '' };
+      return null;
     }
 
     return {
-      data: divination.result.value.data,
+      ...divination.result.value,
       aiResponse: divination.aiResponse.value,
     };
   });
 
-  function handleTypeChange(type: string) {
-    if (type.startsWith('tarot_')) {
-      currentSpread.value = type.replace('tarot_', '');
+  function handleSpreadChange(spread: string) {
+    if (!spread) {
+      return;
     }
+
+    currentSpread.value = spread.startsWith('tarot_') ? spread.replace('tarot_', '') : spread;
   }
 
   function handleSubmit(payload: {
@@ -170,10 +173,10 @@ export function useUnifiedDivinationPage(
   return {
     route,
     ...divination,
-    adaptedResult,
+    displayResult,
     config,
     isCustomBuild: customBuildEnabled,
-    handleTypeChange,
+    handleSpreadChange,
     handleSubmit,
     handleClear,
     clearError,

@@ -29,10 +29,10 @@ export function useSidebarNavigation() {
   const sidebarTitle = computed(() => (customBuildEnabled ? '时月东方 oyyy 版' : '时月东方'));
 
   watch(
-    () => route.params.id,
-    (newId) => {
-      if (newId && typeof newId === 'string') {
-        selectedHistoryId.value = newId;
+    () => route.query.historyId,
+    (historyId) => {
+      if (typeof historyId === 'string' && historyId.trim()) {
+        selectedHistoryId.value = historyId;
       } else {
         selectedHistoryId.value = null;
       }

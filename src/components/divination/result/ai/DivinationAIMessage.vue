@@ -138,7 +138,11 @@ function handleCopy() {
   const contentContainer = messageRef.value?.querySelector('.markdown-container');
   if (!contentContainer) return;
 
-  const contentClone = contentContainer.cloneNode(true) as HTMLElement;
+  const contentClone = contentContainer.cloneNode(true);
+  if (!(contentClone instanceof Element)) {
+    return;
+  }
+
   contentClone.querySelectorAll('details').forEach((detailsElement) => detailsElement.remove());
   const textToCopy = (contentClone.textContent || '').trim();
 

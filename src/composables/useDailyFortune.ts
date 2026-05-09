@@ -1,5 +1,5 @@
-import { computed, ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { computed, getCurrentInstance, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { DAILY_LIMIT_STORAGE_KEY, DailyLimitService } from '@/services/dailyLimitService';
 import { divinationService } from '@/services/divination';
 import { historyService } from '@/services/history';
@@ -26,9 +26,15 @@ import {
   type DailyFortuneRecordLike,
 } from './useDailyFortune.shared';
 import { isAIErrorMessage } from '@/utils/ai-error';
+import { isPrimaryConversationRetryTarget } from '@/utils/conversation-history';
 
 interface RouteLike {
+  path?: string;
   query: Record<string, unknown>;
+}
+
+interface RouterLike {
+  replace: (to: { path: string; query?: Record<string, unknown> }) => unknown;
 }
 
 interface DailyLimitServiceLike {
@@ -39,39 +45,9 @@ interface DailyLimitServiceLike {
 }
 
 interface HistoryServiceLike {
-  getRecord?: (id: string) =>
-    | {
-        id: string;
-        type: 'daily' | string;
-        question: string;
-        result: {
-          type: 'daily' | string;
-          data: DailyFortuneData;
-          aiResponse?: string;
-          supplementaryInfo?: SupplementaryInfo;
-        };
-        conversationHistory?: ChatMessage[];
-        timestamp: number;
-        summary: string;
-      }
-    | undefined;
-  getDailyFortuneForDate: (date: string) =>
-    | {
-        id: string;
-        type: 'daily';
-        question: string;
-        result: {
-          type: 'daily';
-          data: DailyFortuneData;
-          aiResponse?: string;
-          supplementaryInfo?: SupplementaryInfo;
-        };
-        conversationHistory?: ChatMessage[];
-        timestamp: number;
-        summary: string;
-      }
-    | undefined;
-  updateRecord: (id: string, record: unknown) => boolean;
+  getRecord?: (id: string) => DailyFortuneRecordLike | undefined;
+  getDailyFortuneForDate: (date: string) => DailyFortuneRecordLike | undefined;
+  updateRecord: (id: string, record: HistoryRecord) => boolean;
   deleteRecord: (id: string) => boolean;
   findTodayDailyFortune: () => { id: string } | undefined;
 }
@@ -83,6 +59,7 @@ interface DivinationServiceLike {
 
 interface UseDailyFortuneOptions {
   route?: RouteLike;
+  router?: RouterLike;
   historyService?: HistoryServiceLike;
   divinationService?: DivinationServiceLike;
   dailyLimitService?: DailyLimitServiceLike;
@@ -93,6 +70,7 @@ interface UseDailyFortuneOptions {
 
 export function useDailyFortune(options: UseDailyFortuneOptions = {}) {
   const route = options.route ?? useRoute();
+  const router = options.router ?? (getCurrentInstance() ? useRouter() : null);
   const currentHistoryService = options.historyService ?? historyService;
   const currentDivinationService = options.divinationService ?? divinationService;
   const currentDailyLimitService = options.dailyLimitService ?? DailyLimitService;
@@ -149,7 +127,7 @@ export function useDailyFortune(options: UseDailyFortuneOptions = {}) {
   function checkFortuneForDate(date: string) {
     const record = currentHistoryService.getDailyFortuneForDate(date);
     if (record) {
-      applyDailyRecordToState(record as DailyFortuneRecordLike, {
+      applyDailyRecordToState(record, {
         result,
         aiResponse,
         conversationHistory,
@@ -175,11 +153,11 @@ export function useDailyFortune(options: UseDailyFortuneOptions = {}) {
 
   function loadHistoryRecord(historyId: string) {
     const record = currentHistoryService.getRecord?.(historyId);
-    if (!record || record.type !== 'daily') {
+    if (!record) {
       return;
     }
 
-    applyDailyRecordToState(record as DailyFortuneRecordLike, {
+    applyDailyRecordToState(record, {
       result,
       aiResponse,
       conversationHistory,
@@ -188,6 +166,68 @@ export function useDailyFortune(options: UseDailyFortuneOptions = {}) {
       isCancelled,
     });
     selectedDate.value = (record.result.data as DailyFortuneData).date || selectedDate.value;
+  }
+
+  function getRouteHistoryId(): string | null {
+    const historyId = route.query.historyId;
+    if (typeof historyId !== 'string') {
+      return null;
+    }
+
+    const trimmedHistoryId = historyId.trim();
+    return trimmedHistoryId ? trimmedHistoryId : null;
+  }
+
+  function clearHistoryParam() {
+    const historyId = getRouteHistoryId();
+    if (!historyId || !router) {
+      return;
+    }
+
+    const newQuery = { ...route.query };
+    delete newQuery.historyId;
+    router.replace({
+      path: route.path || '/divination/daily',
+      query: newQuery,
+    });
+  }
+
+  function refreshHistoryState() {
+    const historyId = getRouteHistoryId();
+    if (historyId) {
+      const record = currentHistoryService.getRecord?.(historyId);
+      if (record) {
+        applyDailyRecordToState(record, {
+          result,
+          aiResponse,
+          conversationHistory,
+          isFromCache,
+          error,
+          isCancelled,
+        });
+        selectedDate.value = (record.result.data as DailyFortuneData).date || selectedDate.value;
+        return;
+      }
+
+      handleClear();
+      clearHistoryParam();
+    }
+
+    if (selectedDate.value) {
+      checkFortuneForDate(selectedDate.value);
+    }
+  }
+
+  function resolveCurrentDailyRecord(date: string): HistoryRecord | undefined {
+    const historyId = getRouteHistoryId();
+    if (historyId) {
+      const historyRecord = currentHistoryService.getRecord?.(historyId);
+      if (historyRecord) {
+        return historyRecord;
+      }
+    }
+
+    return currentHistoryService.getDailyFortuneForDate(date);
   }
 
   function applyAIErrorState(record: HistoryRecord, errorMessage: string) {
@@ -214,7 +254,7 @@ export function useDailyFortune(options: UseDailyFortuneOptions = {}) {
     isCancelled.value = false;
 
     if (record) {
-      applyDailyRecordToState(record as DailyFortuneRecordLike, {
+      applyDailyRecordToState(record, {
         result,
         aiResponse,
         conversationHistory,
@@ -273,13 +313,13 @@ export function useDailyFortune(options: UseDailyFortuneOptions = {}) {
           isLoading.value = false;
           error.value = errorMessage;
           const record =
-            currentHistoryService.getDailyFortuneForDate(date) ||
-            (createFallbackDailyHistoryRecord({
+            resolveCurrentDailyRecord(date) ||
+            createFallbackDailyHistoryRecord({
               date,
               result: result.value as DailyFortuneData,
               aiResponse: aiResponse.value,
               conversationHistory: conversationHistory.value,
-            }) as HistoryRecord);
+            });
           applyAIErrorState(record, errorMessage);
           resetAbortController();
         },
@@ -299,12 +339,12 @@ export function useDailyFortune(options: UseDailyFortuneOptions = {}) {
     }
 
     try {
-      const record = currentHistoryService.getDailyFortuneForDate(date);
+      const record = resolveCurrentDailyRecord(date);
       if (record) {
         currentHistoryService.deleteRecord(record.id);
       }
 
-      const keysToRemove = ['sydf-history', ...getDailyStorageKeys(date)];
+      const keysToRemove = getDailyStorageKeys(date);
 
       if (date === getTodayDateString()) {
         keysToRemove.push(DAILY_LIMIT_STORAGE_KEY);
@@ -313,13 +353,6 @@ export function useDailyFortune(options: UseDailyFortuneOptions = {}) {
       keysToRemove.forEach((key) => {
         localStorage.removeItem(key);
       });
-
-      for (let i = localStorage.length - 1; i >= 0; i--) {
-        const key = localStorage.key(i);
-        if (key && (key.includes('fortune') || key.includes('daily') || key.includes('cache'))) {
-          localStorage.removeItem(key);
-        }
-      }
 
       handleClear();
 
@@ -377,41 +410,38 @@ export function useDailyFortune(options: UseDailyFortuneOptions = {}) {
     }
 
     const record =
-      currentHistoryService.getDailyFortuneForDate(selectedDate.value) ||
-      (createFallbackDailyHistoryRecord({
+      resolveCurrentDailyRecord(selectedDate.value) ||
+      createFallbackDailyHistoryRecord({
         date: selectedDate.value,
         result: result.value,
         aiResponse: aiResponse.value,
         conversationHistory: conversationHistory.value,
-      }) as HistoryRecord);
+      });
+    const shouldSyncPrimaryResponse =
+      !target || isPrimaryConversationRetryTarget(record.type, record.conversationHistory || [], target);
 
     const requestController = createRequestController();
     isAILoading.value = true;
     isLoading.value = false;
-    if (!target) {
+    if (shouldSyncPrimaryResponse) {
       aiResponse.value = '';
     }
     conversationHistory.value = [];
+    const regenerationOptions = {
+      signal: requestController.signal,
+      onChunk: (chunk: string) => {
+        if (isRequestCancelled(requestController) || !shouldSyncPrimaryResponse) return;
+        aiResponse.value += chunk;
+      },
+      onConversationUpdate: (updatedHistory: ChatMessage[]) => {
+        if (isRequestCancelled(requestController)) return;
+        conversationHistory.value = updatedHistory;
+      },
+    };
 
     const regenerationTask = target
-      ? currentRegenerateConversationMessage(record, target, {
-          signal: requestController.signal,
-          onConversationUpdate: (updatedHistory) => {
-            if (isRequestCancelled(requestController)) return;
-            conversationHistory.value = updatedHistory;
-          },
-        })
-      : currentGenerateRegeneratedAI(record, {
-          signal: requestController.signal,
-          onChunk: (chunk) => {
-            if (isRequestCancelled(requestController)) return;
-            aiResponse.value += chunk;
-          },
-          onConversationUpdate: (updatedHistory) => {
-            if (isRequestCancelled(requestController)) return;
-            conversationHistory.value = updatedHistory;
-          },
-        });
+      ? currentRegenerateConversationMessage(record, target, regenerationOptions)
+      : currentGenerateRegeneratedAI(record, regenerationOptions);
 
     void regenerationTask
       .then((regenerated) => {
@@ -448,7 +478,7 @@ export function useDailyFortune(options: UseDailyFortuneOptions = {}) {
     const originalQuestion = followUpQuestion.value.trim();
     followUpQuestion.value = '';
 
-    const record = currentHistoryService.getDailyFortuneForDate(selectedDate.value);
+    const record = resolveCurrentDailyRecord(selectedDate.value);
     const recordId = record?.id || '';
 
     if (!recordId) {
@@ -478,7 +508,7 @@ export function useDailyFortune(options: UseDailyFortuneOptions = {}) {
     () => route.query.historyId,
     (historyId, oldHistoryId) => {
       if (typeof historyId === 'string' && historyId) {
-        loadHistoryRecord(historyId);
+        refreshHistoryState();
         return;
       }
 
@@ -530,5 +560,6 @@ export function useDailyFortune(options: UseDailyFortuneOptions = {}) {
     cancelGeneration,
     handleRetry,
     handleSendFollowUp,
+    refreshHistoryState,
   };
 }

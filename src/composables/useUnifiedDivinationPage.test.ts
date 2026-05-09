@@ -26,6 +26,7 @@ function createDivinationStub() {
     cancelGeneration: vi.fn(),
     handleSendFollowUp: vi.fn(),
     handleHistoryParam: vi.fn(),
+    refreshHistoryState: vi.fn(),
   };
 }
 
@@ -150,7 +151,7 @@ describe('useUnifiedDivinationPage', () => {
       buildTarget: 'DEFAULT',
     });
 
-    page.handleTypeChange('tarot_celtic');
+    page.handleSpreadChange('celtic');
     page.handleSubmit({
       question: '接下来会怎样？',
     });
@@ -158,6 +159,35 @@ describe('useUnifiedDivinationPage', () => {
     expect(divination.question.value).toBe('接下来会怎样？');
     expect(divination.startDivination).toHaveBeenCalledWith({
       spreadType: 'celtic',
+    });
+  });
+
+  it('展示结果应保留原始结果结构并合并最新 AI 文本', () => {
+    const props = reactive<{ divinationType: DivinationType }>({ divinationType: 'qimen' });
+    const route = reactive({ query: {} as LocationQueryRaw });
+    const divination = createDivinationStub();
+    divination.result.value = {
+      id: 'result-1',
+      type: 'qimen',
+      data: { jiuGongGe: [] } as never,
+      aiResponse: '',
+    };
+    divination.aiResponse.value = '新的 AI 解读';
+
+    const page = useUnifiedDivinationPage(props, ref(null), {
+      route,
+      divination,
+      getConfig: mockGetConfig,
+      emitHistorySelectionReset,
+      scrollTo,
+      buildTarget: 'DEFAULT',
+    });
+
+    expect(page.displayResult.value).toEqual({
+      id: 'result-1',
+      type: 'qimen',
+      data: { jiuGongGe: [] },
+      aiResponse: '新的 AI 解读',
     });
   });
 });

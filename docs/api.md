@@ -1,6 +1,6 @@
 # 开发者 API（v1）
 
-本文档描述本项目对外开放的开发者 API，用于生成占卜数据并由 AI 输出解读（支持 SSE 流式）。4
+本文档描述本项目对外开放的开发者 API，用于生成占卜数据并由 AI 输出解读（支持 SSE 流式）。
 
 ## 1. 基础信息
 
@@ -54,7 +54,7 @@
 - `qimen`：奇门遁甲（转盘法）
 - `ssgw`：三山国王灵签
 - `tarot`：塔罗（多牌阵）
-- `tarot_single`：塔罗（单牌）
+- `tarot_single`：旧版单牌塔罗兼容输入（已废弃，建议改用 `tarot` + `options.spreadType: "single"`）
 
 ### 5.1 请求头
 
@@ -116,6 +116,12 @@ Authorization: Bearer <DEV_API_KEY>
 `tarot.spreadType` 可用值（与项目内置牌阵一致）：
 
 - `single`、`three`、`love`、`career`、`decision`、`celtic`、`chakra`、`year`、`mindBodySpirit`、`horseshoe`
+
+兼容说明：
+
+- 若请求传入 `type: "tarot_single"`，服务端仍会受理
+- 但响应体中的 `type` 会统一返回 `tarot`
+- 同时会强制按 `single` 单牌牌阵生成占卜数据
 
 `supplementaryInfo.meihuaSettings` 可用值：
 

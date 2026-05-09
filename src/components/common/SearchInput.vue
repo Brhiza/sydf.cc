@@ -51,7 +51,12 @@ const sizeClass = computed(() => `search-input-${props.size}`);
 const showClearButton = computed(() => props.clearable && !props.disabled && props.modelValue.length > 0);
 
 function handleInput(event: Event) {
-  emit('update:modelValue', (event.target as HTMLInputElement).value);
+  const target = event.target;
+  if (!(target instanceof HTMLInputElement)) {
+    return;
+  }
+
+  emit('update:modelValue', target.value);
 }
 
 function clearValue() {

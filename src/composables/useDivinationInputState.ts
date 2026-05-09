@@ -1,6 +1,6 @@
 import { computed, ref, watch } from 'vue';
 import type { DivinationType, SupplementaryInfo } from '@/types/divination';
-import { tarotSpreads } from '@/utils/tarot';
+import { tarotSpreads } from '@/utils/tarot-spreads';
 import { isCustomBuild } from '@/utils/build-target';
 
 interface DivinationInputProps {
@@ -23,7 +23,7 @@ interface DivinationInputEmitters {
     supplementaryInfo?: SupplementaryInfo | undefined;
     date?: string;
   }) => void;
-  typeChange: (type: string) => void;
+  spreadChange: (spread: string) => void;
   clear: () => void;
 }
 
@@ -62,7 +62,7 @@ export function useDivinationInputState(
   );
   const isSsgw = computed(() => props.divinationType === 'ssgw');
   const isDaily = computed(() => props.divinationType === 'daily');
-  const isTarot = computed(() => props.divinationType === 'tarot' || props.divinationType === 'tarot_single');
+  const isTarot = computed(() => props.divinationType === 'tarot');
 
   const computedPlaceholder = computed(() => {
     if (isSsgw.value) {
@@ -106,7 +106,7 @@ export function useDivinationInputState(
 
   function selectSpread(spreadKey: string) {
     selectedSpread.value = spreadKey as TarotSpreadKey;
-    options.emit.typeChange(`tarot_${spreadKey}`);
+    options.emit.spreadChange(spreadKey);
     question.value = '';
   }
 
@@ -203,8 +203,8 @@ export function useDivinationInputState(
         resetQuestion();
       }
 
-      if (newType === 'tarot' || newType === 'tarot_single') {
-        options.emit.typeChange(`tarot_${selectedSpread.value}`);
+      if (newType === 'tarot') {
+        options.emit.spreadChange(selectedSpread.value);
       }
     },
     { immediate: true }

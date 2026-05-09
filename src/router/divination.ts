@@ -1,16 +1,14 @@
 import type { RouteRecordRaw } from 'vue-router';
-import { divinationNavItems } from '@/config/divination';
-
-const divinationTypes = divinationNavItems.map((item) => item.type) as string[];
+import { isDivinationType } from '@/utils/divination-type';
 
 const divinationRoutes: RouteRecordRaw[] = [
   {
     path: '/divination/:type',
     name: 'divination',
     component: () => import('../views/divination/UnifiedDivinationView.vue'),
-    props: (route) => ({ divinationType: route.params.type }),
+    props: (route) => ({ divinationType: String(route.params.type || '') }),
     beforeEnter: (to, _from, next) => {
-      if (divinationTypes.includes(to.params.type as string)) {
+      if (isDivinationType(String(to.params.type || ''))) {
         next();
       } else {
         next({ name: 'not-found' });

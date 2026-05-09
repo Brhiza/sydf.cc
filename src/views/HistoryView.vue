@@ -1,41 +1,6 @@
 <template>
   <div class="page-container">
-    <ContentSectionCard
-      v-if="showDetail && selectedRecord"
-      title="历史记录详情"
-      use-header
-      header-divider
-    >
-      <template #header-actions>
-        <div class="header-actions">
-          <button class="btn-secondary" @click="goBack">
-            <span class="back-icon">←</span>
-            <span class="back-text">返回</span>
-          </button>
-        </div>
-      </template>
-
-      <ResultInfoHeader :items="detailInfoItems" />
-
-      <DivinationResult
-        :type="selectedRecord.type"
-        :result="{ ...selectedRecord.result, id: selectedRecord.id }"
-        :show-header="false"
-        :question="selectedRecord.question"
-        :conversation-history="selectedRecord.conversationHistory || []"
-        :error="getAIError(selectedRecord)"
-        @retry="(target) => handleRetryAI(selectedRecord, target)"
-      />
-
-      <template #actions>
-        <button class="btn-danger" @click="deleteHistoryRecord(selectedRecord.id)">
-          <span class="delete-icon">🗑️</span>
-          <span class="delete-text">删除记录</span>
-        </button>
-      </template>
-    </ContentSectionCard>
-
-    <ContentSectionCard v-else title="历史记录">
+    <ContentSectionCard title="历史记录">
       <p class="content-text history-intro">这里保存了您最近的占卜记录，仅保存在本地哦。</p>
 
       <div class="history-content">
@@ -74,74 +39,24 @@
 <script setup lang="ts">
 import ContentSectionCard from '@/components/common/ContentSectionCard.vue';
 import EmptyState from '@/components/common/EmptyState.vue';
-import DivinationResult from '@/components/divination/DivinationResult.vue';
-import ResultInfoHeader from '@/components/divination/results/ResultInfoHeader.vue';
 import HistoryRecordCard from '@/components/sidebar/history/HistoryRecordCard.vue';
 import HistoryRecordSummary from '@/components/sidebar/history/HistoryRecordSummary.vue';
 import { useHistoryManager } from '@/composables/useHistoryManager';
-import { useHistoryAI } from '@/composables/useHistoryAI';
-import { computed, onMounted, onUnmounted, watch } from 'vue';
+import { onMounted, onUnmounted } from 'vue';
 import { eventBus, EVENTS } from '@/utils/eventBus';
-import { createHistoryDetailInfoItems } from './history/history-detail';
 
-// 接收父组件传递的属性
-const props = defineProps({
-  selectedRecordId: {
-    type: String,
-    default: null,
-  },
-  showDetail: {
-    type: Boolean,
-    default: false,
-  },
-});
-
-// 历史记录管理
 const {
   historyRecords,
-  selectedRecord,
   loadHistory,
   viewHistoryDetail,
   clearAllHistory,
-  deleteHistoryRecord,
-  goBack,
-} = useHistoryManager(props.selectedRecordId);
+} = useHistoryManager();
 
-// AI 相关逻辑
-const { getAIError, handleRetryAI } = useHistoryAI();
-
-const detailInfoItems = computed(() => {
-  if (!selectedRecord.value) {
-    return [];
-  }
-
-  return createHistoryDetailInfoItems(selectedRecord.value);
-});
-
-// 监听props变化
-watch(
-  () => props.selectedRecordId,
-  (newId) => {
-    if (newId) {
-      const record = historyRecords.value.find((r) => r.id === newId);
-      if (record) {
-        selectedRecord.value = record;
-      }
-    } else {
-      selectedRecord.value = null;
-    }
-  }
-);
-
-// 组件挂载时加载数据
 onMounted(() => {
   loadHistory();
-  
-  // 监听历史记录更新事件
   eventBus.on(EVENTS.HISTORY_UPDATED, loadHistory);
 });
 
-// 组件卸载时移除事件监听
 onUnmounted(() => {
   eventBus.off(EVENTS.HISTORY_UPDATED, loadHistory);
 });

@@ -22,4 +22,10 @@ describe('buildDivinationSystemPrompt', () => {
     expect(prompt).toContain('解读风格：入门')
     expect(prompt).toContain('输出长度：精简')
   })
+
+  it('塔罗类型应使用统一的系统提示词', () => {
+    const prompt = buildDivinationSystemPrompt('tarot')
+
+    expect(prompt).toContain('你是一位智慧与慈悲并存的塔罗解读师')
+  })
 })

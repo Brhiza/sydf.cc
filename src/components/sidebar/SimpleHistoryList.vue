@@ -5,7 +5,7 @@
       @toggle-search="toggleSearch"
       @toggle-filter="toggleFilter"
       @toggle-menu="toggleMainMenu"
-      @clear-all="clearAllHistory"
+      @clear-all="handleClearAll"
     />
 
     <HistoryListFilters
@@ -36,7 +36,7 @@
           @click="handleRecordClick"
           @pin="handlePin"
           @edit="handleEdit"
-          @delete="handleDelete"
+          @delete="handleRecordDelete"
         />
       </div>
     </div>
@@ -45,8 +45,9 @@
 
 <script setup lang="ts">
 import EmptyState from '@/components/common/EmptyState.vue';
-import type { HistoryRecord } from '@/services';
+import type { HistoryRecord } from '@/services/history';
 import { useSimpleHistoryList } from '@/composables/useSimpleHistoryList';
+import { buildHistoryResultPath } from '@/utils/history-navigation';
 import SimpleHistoryItem from './SimpleHistoryItem.vue';
 import HistoryListToolbar from './history/HistoryListToolbar.vue';
 import HistoryListFilters from './history/HistoryListFilters.vue';
@@ -76,12 +77,40 @@ const {
   handleDelete,
   clearAllHistory,
   getEmptyMessage,
+  findRecordById,
 } = useSimpleHistoryList();
 
 // 处理记录点击
 function handleRecordClick(record: HistoryRecord) {
   emit('update:selectedHistoryId', record.id);
-  emit('navigate', `/divination/${record.type}?historyId=${record.id}`);
+  emit('navigate', buildHistoryResultPath(record.type, record.id));
+}
+
+function exitSelectedHistoryContext(record?: Pick<HistoryRecord, 'type'> | null) {
+  emit('update:selectedHistoryId', null);
+  emit('navigate', record ? buildHistoryResultPath(record.type) : '/');
+}
+
+function handleRecordDelete(recordId: string) {
+  const targetRecord = findRecordById(recordId);
+  if (!handleDelete(recordId)) {
+    return;
+  }
+
+  if (selectedHistoryId === recordId) {
+    exitSelectedHistoryContext(targetRecord);
+  }
+}
+
+function handleClearAll() {
+  const selectedRecord = selectedHistoryId ? findRecordById(selectedHistoryId) : null;
+  if (!clearAllHistory()) {
+    return;
+  }
+
+  if (selectedHistoryId) {
+    exitSelectedHistoryContext(selectedRecord);
+  }
 }
 </script>
 

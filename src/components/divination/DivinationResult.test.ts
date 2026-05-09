@@ -75,4 +75,25 @@ describe('DivinationResult', () => {
 
     expect(wrapper.find('.ai-section-stub').exists()).toBe(true);
   });
+
+  it('塔罗结果标题应直接按正式塔罗牌阵名称展示', () => {
+    const wrapper = mount(DivinationResult, {
+      props: {
+        type: 'tarot',
+        result: {
+          id: 'tarot-1',
+          type: 'tarot',
+          data: {
+            cards: [{ id: 1, name: '愚者', position: '现状', reversed: false, keywords: ['开始'] }],
+            spreadType: 'single',
+            spreadName: '单牌指引',
+            timestamp: 1,
+          },
+          aiResponse: '测试解读',
+        } as DivinationResultType,
+      },
+    });
+
+    expect(wrapper.find('.section-title').text()).toBe('塔罗牌·单牌指引结果');
+  });
 });

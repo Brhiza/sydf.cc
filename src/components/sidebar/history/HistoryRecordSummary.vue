@@ -13,7 +13,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { HistoryRecord } from '@/services'
+import type { HistoryRecord } from '@/services/history'
 import { formatHistoryRecordTime, getHistoryTypeLabel } from '@/utils/history-record'
 
 const props = defineProps<{

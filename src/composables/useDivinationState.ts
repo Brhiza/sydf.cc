@@ -3,7 +3,7 @@
  * 负责管理占卜相关的所有状态
  */
 import type { DivinationType } from '@/types';
-import type { DivinationResult } from '@/services';
+import type { DivinationResult } from '@/services/divination';
 import type { ChatMessage } from '@/types/chat';
 import { ref, computed } from 'vue';
 

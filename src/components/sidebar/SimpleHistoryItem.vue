@@ -17,7 +17,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
-import type { HistoryRecord } from '@/services';
+import type { HistoryRecord } from '@/services/history';
 import HistoryRecordCard from './history/HistoryRecordCard.vue';
 import HistoryRecordSummary from './history/HistoryRecordSummary.vue';
 import HistoryRecordActionsMenu from './history/HistoryRecordActionsMenu.vue';
@@ -66,7 +66,12 @@ function handleDelete() {
 
 // 点击外部关闭菜单
 function handleClickOutside(event: MouseEvent) {
-  const target = event.target as HTMLElement;
+  const target = event.target;
+  if (!(target instanceof Element)) {
+    showMenu.value = false;
+    return;
+  }
+
   const isInside = target.closest('.history-item');
   
   if (!isInside) {

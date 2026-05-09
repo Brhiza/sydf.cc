@@ -41,7 +41,12 @@ function handleDocumentClick(event: Event) {
     return;
   }
 
-  const target = event.target as Element;
+  const target = event.target;
+  if (!(target instanceof Node)) {
+    closeSidebar();
+    return;
+  }
+
   const sidebar = document.querySelector('.sidebar');
   const topBarToggle = document.querySelector('.menu-toggle');
 

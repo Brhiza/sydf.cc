@@ -3,8 +3,8 @@
  * 负责协调占卜流程的各个步骤
  */
 import type {
-  DivinationResult,
   DivinationRequest,
+  DivinationResult,
   LiuyaoData,
   DivinationType,
   DivinationData,
@@ -12,11 +12,15 @@ import type {
 } from '@/types/divination';
 import type { ChatMessage } from '@/types/chat';
 import type { HistoryRecord } from '@/types/common';
-import { v4 as uuidv4 } from 'uuid';
 import { aiService } from './aiService';
 import { dataGenerationService } from './dataGenerationService';
 import { historyService } from './history';
 import { handleError, logError, getUserFriendlyMessage } from '@/utils/error-handler';
+import { createId } from '@/utils/id';
+import { cloneSerializable } from '@/utils/clone';
+import { getMonthDayFromDateKey } from '@/utils/date-formatter';
+
+const FOLLOW_UP_HISTORY_SAVE_INTERVAL = 1000;
 
 export interface DivinationCallbacks {
   onInitialResult: (result: DivinationResult) => void;
@@ -37,17 +41,26 @@ export class DivinationOrchestrator {
   /**
    * 执行占卜流程
    */
-  async executeDivination(request: DivinationRequest, callbacks: DivinationCallbacks): Promise<void> {
+  async executeDivination(
+    request: DivinationRequest,
+    callbacks: DivinationCallbacks
+  ): Promise<void> {
     const { type, question, spreadType, signNumber, supplementaryInfo, signal } = request;
     const { onInitialResult, onAIChunk, onAIComplete, onAIError, onConversationUpdate } = callbacks;
+    const normalizedSpreadType = type === 'tarot' ? spreadType || 'three' : spreadType;
 
     try {
       // 1. 生成占卜数据
-      const data = await dataGenerationService.generateDivination(type, spreadType, signNumber, supplementaryInfo);
+      const data = await dataGenerationService.generateDivination(
+        type,
+        normalizedSpreadType,
+        signNumber,
+        supplementaryInfo
+      );
 
       // 2. 创建初始结果对象
       const initialResult: DivinationResult = {
-        id: uuidv4(),
+        id: createId(),
         type,
         data,
         aiResponse: '',
@@ -63,9 +76,8 @@ export class DivinationOrchestrator {
       // 5. 立即保存初始记录到历史，确保追问时能找到
       let finalQuestion = question;
       if (type === 'daily') {
-        const date = supplementaryInfo?.date ? new Date(supplementaryInfo.date) : new Date();
-        const month = date.getMonth() + 1;
-        const day = date.getDate();
+        const targetDate = supplementaryInfo?.date || new Date();
+        const { month, day } = getMonthDayFromDateKey(targetDate);
         finalQuestion = `${month} 月 ${day} 日运势`;
       }
       
@@ -73,13 +85,8 @@ export class DivinationOrchestrator {
         id: initialResult.id,
         type, 
         question: finalQuestion, 
-        result: {
-          type: initialResult.type,
-          data: initialResult.data,
-          aiResponse: '', // 初始时AI响应为空
-          ...(initialResult.supplementaryInfo && { supplementaryInfo: initialResult.supplementaryInfo })
-        }, 
-        conversationHistory 
+        result: this.buildHistoryResultSnapshot(initialResult),
+        conversationHistory: cloneSerializable(conversationHistory),
       });
 
       // 6. 立即通过回调返回初始结果，以便UI可以渲染
@@ -111,16 +118,11 @@ export class DivinationOrchestrator {
         (finalResult) => {
           // 8. AI完成后更新历史记录（而不是添加新记录）
           // 更新已保存的记录，添加AI响应
-          const updatedRecord = {
-            ...initialRecord,
-            result: {
-              type: finalResult.type,
-              data: finalResult.data,
-              aiResponse: finalResult.aiResponse || '', // 确保总是保存aiResponse，即使是空字符串
-              ...(finalResult.supplementaryInfo && { supplementaryInfo: finalResult.supplementaryInfo })
-            },
-            conversationHistory: [...conversationHistory]
-          };
+          const updatedRecord = this.buildHistoryRecordSnapshot(
+            initialRecord,
+            finalResult,
+            conversationHistory
+          );
           
           historyService.updateRecord(initialRecord.id, updatedRecord);
           
@@ -148,6 +150,47 @@ export class DivinationOrchestrator {
     try {
       // 获取历史记录以获取上下文信息
       const record = historyService.getRecord(resultId);
+      let latestConversationHistory: ChatMessage[] | null = null;
+      let saveTimer: ReturnType<typeof setTimeout> | null = null;
+
+      const saveConversationHistory = () => {
+        if (!record || !latestConversationHistory) {
+          return;
+        }
+
+        historyService.updateRecord(
+          resultId,
+          this.buildHistoryRecordSnapshot(
+            record,
+            {
+              type: record.result.type,
+              data: record.result.data,
+              aiResponse: record.result.aiResponse || '',
+              supplementaryInfo: record.result.supplementaryInfo,
+            },
+            latestConversationHistory
+          )
+        );
+      };
+
+      const scheduleConversationHistorySave = () => {
+        if (!record || saveTimer) {
+          return;
+        }
+
+        saveTimer = setTimeout(() => {
+          saveTimer = null;
+          saveConversationHistory();
+        }, FOLLOW_UP_HISTORY_SAVE_INTERVAL);
+      };
+
+      const flushConversationHistorySave = () => {
+        if (saveTimer) {
+          clearTimeout(saveTimer);
+          saveTimer = null;
+        }
+        saveConversationHistory();
+      };
       
       // 创建回调的包装器，在对话历史更新时同步保存到历史记录
       const wrappedCallbacks = {
@@ -156,12 +199,18 @@ export class DivinationOrchestrator {
           // 先调用原始回调更新UI
           callbacks.onConversationUpdate(updatedHistory);
           
-          // 然后立即更新历史记录
-          if (record) {
-            record.conversationHistory = updatedHistory;
-            historyService.updateRecord(resultId, record);
-          }
-        }
+          // 流式输出会高频触发更新，本地持久化节流执行，避免频繁 JSON 序列化阻塞界面。
+          latestConversationHistory = cloneSerializable(updatedHistory);
+          scheduleConversationHistorySave();
+        },
+        onComplete: () => {
+          flushConversationHistorySave();
+          callbacks.onComplete();
+        },
+        onError: (error: string) => {
+          flushConversationHistorySave();
+          callbacks.onError(error);
+        },
       };
 
       // 准备完整的上下文信息 - 包含所有必要的占卜数据
@@ -199,16 +248,11 @@ export class DivinationOrchestrator {
     const assistantMessage = conversationHistory.find(m => m.role === 'assistant');
     if (assistantMessage) assistantMessage.content = chaoticReason;
 
-    const updatedRecord: HistoryRecord = {
-      ...initialRecord,
-      result: {
-        type: 'liuyao',
-        data: initialResult.data,
-        aiResponse: chaoticReason,
-        ...(initialResult.supplementaryInfo && { supplementaryInfo: initialResult.supplementaryInfo }),
-      },
-      conversationHistory: [...conversationHistory],
-    };
+    const updatedRecord = this.buildHistoryRecordSnapshot(
+      initialRecord,
+      initialResult,
+      conversationHistory
+    );
 
     historyService.updateRecord(initialRecord.id, updatedRecord);
     
@@ -258,5 +302,32 @@ export class DivinationOrchestrator {
     const userFriendlyMessage = getUserFriendlyMessage(appError);
     console.error('占卜流程失败:', err);
     onErrorCallback(userFriendlyMessage);
+  }
+
+  private buildHistoryResultSnapshot(
+    result: Pick<DivinationResult, 'type' | 'data' | 'aiResponse' | 'supplementaryInfo'>
+  ): HistoryRecord['result'] {
+    return {
+      type: result.type,
+      data: cloneSerializable(result.data),
+      aiResponse: result.aiResponse || '',
+      ...(result.supplementaryInfo
+        ? {
+            supplementaryInfo: cloneSerializable(result.supplementaryInfo),
+          }
+        : {}),
+    };
+  }
+
+  private buildHistoryRecordSnapshot(
+    baseRecord: HistoryRecord,
+    result: Pick<DivinationResult, 'type' | 'data' | 'aiResponse' | 'supplementaryInfo'>,
+    conversationHistory: ChatMessage[]
+  ): HistoryRecord {
+    return {
+      ...baseRecord,
+      result: this.buildHistoryResultSnapshot(result),
+      conversationHistory: cloneSerializable(conversationHistory),
+    };
   }
 }

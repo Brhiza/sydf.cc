@@ -219,7 +219,13 @@ function handleKeydown(event: KeyboardEvent) {
 }
 
 function handleDocumentClick(event: MouseEvent) {
-  if (!rootRef.value?.contains(event.target as Node)) {
+  const target = event.target;
+  if (!(target instanceof Node)) {
+    closeMenu();
+    return;
+  }
+
+  if (!rootRef.value?.contains(target)) {
     closeMenu();
   }
 }

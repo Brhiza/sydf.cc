@@ -1,5 +1,6 @@
 import { getDivinationConfig } from '../config/divination';
 import type { DivinationType } from '../types';
+import { isDivinationType } from '@/utils/divination-type';
 import type { RouteLocationNormalizedLoaded, Router } from 'vue-router';
 
 const DEFAULT_SITE_URL = 'https://sydf.cc';
@@ -51,13 +52,6 @@ const STATIC_PAGE_SEO: Record<string, PageSeoDefinition> = {
     robots: 'noindex, nofollow',
     schemaType: 'CollectionPage',
   },
-  'history-detail': {
-    pageTitle: '历史记录详情',
-    description: '查看本地保存的占卜历史详情。',
-    keywords: ['历史记录详情', '占卜详情', '本地记录'],
-    robots: 'noindex, nofollow',
-    schemaType: 'WebPage',
-  },
   about: {
     pageTitle: '关于本站与使用说明',
     description: '了解时月东方的项目背景、免责声明、联系方式与使用说明。',
@@ -86,7 +80,7 @@ const STATIC_PAGE_SEO: Record<string, PageSeoDefinition> = {
   },
 };
 
-const DIVINATION_PAGE_SEO: Record<DivinationType, PageSeoDefinition> = {
+const DIVINATION_PAGE_SEO: Partial<Record<DivinationType, PageSeoDefinition>> = {
   daily: {
     pageTitle: '今日运势在线查询',
     description: '免费查看今日运势，基于日家奇门遁甲思路提供事业、财运、感情与健康方向的 AI 解读。',
@@ -117,12 +111,6 @@ const DIVINATION_PAGE_SEO: Record<DivinationType, PageSeoDefinition> = {
     description:
       '免费体验塔罗牌在线占卜，支持多种牌阵与 AI 解读，适合感情、事业、关系与自我探索问题。',
     keywords: ['塔罗牌', '塔罗占卜', '在线抽牌', 'AI塔罗'],
-    schemaType: 'WebPage',
-  },
-  tarot_single: {
-    pageTitle: '塔罗单牌在线占卜',
-    description: '免费体验塔罗单牌在线占卜，快速获得当下问题的方向提示与 AI 解读。',
-    keywords: ['塔罗单牌', '单张塔罗', '在线抽牌', 'AI塔罗'],
     schemaType: 'WebPage',
   },
   ssgw: {
@@ -245,7 +233,10 @@ function resolveDivinationSeo(route: RouteLike): PageSeoDefinition | null {
     return null;
   }
 
-  const divinationType = String(route.params.type || '') as DivinationType;
+  const divinationType = String(route.params.type || '');
+  if (!isDivinationType(divinationType)) {
+    return null;
+  }
   const pageSeo = DIVINATION_PAGE_SEO[divinationType];
 
   if (pageSeo) {

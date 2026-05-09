@@ -10,7 +10,7 @@ import type {
 } from '@/types';
 import type { HistoryRecord } from '@/types/common';
 import type { ChatMessage, ChatMessageRetryTarget } from '@/types/chat';
-import { divinationService, performDivination } from '@/services';
+import { divinationService, performDivination } from '@/services/divination';
 import {
   buildRegeneratedConversationHistory,
   buildUpdatedHistoryRecord,
@@ -22,6 +22,9 @@ import { useRoute, useRouter } from 'vue-router';
 import type { LocationQueryRaw } from 'vue-router';
 import { historyService } from '@/services/history';
 import { isAIErrorMessage } from '@/utils/ai-error';
+import { cloneSerializable } from '@/utils/clone';
+import { isPrimaryConversationRetryTarget } from '@/utils/conversation-history';
+import { isHistoryRouteCompatible } from '@/utils/history-navigation';
 
 interface RouteLike {
   path: string;
@@ -33,19 +36,9 @@ interface RouterLike {
   replace: (to: { path: string; query?: LocationQueryRaw }) => unknown;
 }
 
-interface HistoryRecordLike {
-  id: string;
-  type: DivinationType;
-  question: string;
-  result: HistoryRecord['result'];
-  conversationHistory?: ChatMessage[];
-  timestamp: number;
-  summary: string;
-}
-
 interface HistoryServiceLike {
-  getRecord: (id: string) => HistoryRecordLike | undefined;
-  updateRecord?: (id: string, record: HistoryRecordLike) => boolean;
+  getRecord: (id: string) => HistoryRecord | undefined;
+  updateRecord?: (id: string, record: HistoryRecord) => boolean;
 }
 
 interface DivinationServiceLike {
@@ -246,15 +239,31 @@ export function useDivinationUnified(
     isCancelled.value = false;
   }
 
-  function buildCurrentHistoryRecord(): HistoryRecordLike | null {
+  function cloneHistoryRecord(record: HistoryRecord): HistoryRecord {
+    return {
+      ...record,
+      result: {
+        ...record.result,
+        data: cloneSerializable(record.result.data),
+        ...(record.result.supplementaryInfo
+          ? {
+              supplementaryInfo: cloneSerializable(record.result.supplementaryInfo),
+            }
+          : {}),
+      },
+      conversationHistory: record.conversationHistory ? cloneSerializable(record.conversationHistory) : [],
+    };
+  }
+
+  function buildCurrentHistoryRecord(): HistoryRecord | null {
     if (!result.value) {
       return null;
     }
 
-    const recordId = result.value.id || (route.query.historyId as string) || '';
+    const recordId = result.value.id || getRouteHistoryId() || '';
     const historyRecord = recordId ? currentHistoryService.getRecord(recordId) : undefined;
     if (historyRecord) {
-      return JSON.parse(JSON.stringify(historyRecord)) as HistoryRecordLike;
+      return cloneHistoryRecord(historyRecord);
     }
 
     return {
@@ -263,23 +272,42 @@ export function useDivinationUnified(
       question: question.value.trim(),
       result: {
         type: type.value,
-        data: JSON.parse(JSON.stringify(result.value.data)),
+        data: cloneSerializable(result.value.data),
         aiResponse: aiResponse.value,
         ...(result.value.supplementaryInfo
-          ? { supplementaryInfo: result.value.supplementaryInfo }
+          ? { supplementaryInfo: cloneSerializable(result.value.supplementaryInfo) }
           : {}),
       },
-      conversationHistory: [...conversationHistory.value],
+      conversationHistory: cloneSerializable(conversationHistory.value),
       timestamp: Date.now(),
       summary: question.value.trim() || '占卜结果',
     };
   }
 
-  function applyAIErrorState(record: HistoryRecordLike, errorMessage: string) {
-    const fallbackConversationHistory = buildRegeneratedConversationHistory(
-      record as HistoryRecord,
-      errorMessage
-    );
+  function getRouteHistoryId(): string | null {
+    const historyId = route.query.historyId;
+    if (typeof historyId !== 'string') {
+      return null;
+    }
+
+    const trimmedHistoryId = historyId.trim();
+    return trimmedHistoryId ? trimmedHistoryId : null;
+  }
+
+  function applyHistoryRecord(record: HistoryRecord) {
+    question.value = record.question;
+    result.value = {
+      id: record.id,
+      ...cloneSerializable(record.result),
+    };
+    aiResponse.value = record.result.aiResponse || '';
+    conversationHistory.value = cloneSerializable(record.conversationHistory || []);
+    error.value = null;
+    isCancelled.value = false;
+  }
+
+  function applyAIErrorState(record: HistoryRecord, errorMessage: string) {
+    const fallbackConversationHistory = buildRegeneratedConversationHistory(record, errorMessage);
 
     conversationHistory.value = fallbackConversationHistory;
 
@@ -289,7 +317,7 @@ export function useDivinationUnified(
 
     currentHistoryService.updateRecord?.(
       record.id,
-      buildUpdatedHistoryRecord(record as HistoryRecord, {
+      buildUpdatedHistoryRecord(record, {
         aiResponse: errorMessage,
         conversationHistory: fallbackConversationHistory,
         target: 'primary',
@@ -305,19 +333,30 @@ export function useDivinationUnified(
     detachActiveSession();
     const record = currentHistoryService.getRecord(historyId);
 
-    if (record) {
-      question.value = record.question;
-      result.value = {
-        id: record.id,
-        ...JSON.parse(JSON.stringify(record.result)),
-      };
-      aiResponse.value = record.result.aiResponse || '';
-      conversationHistory.value = record.conversationHistory || [];
+    if (record && isHistoryRouteCompatible(type.value, record.type)) {
+      applyHistoryRecord(record);
     } else {
       viewingHistory.value = false;
       console.error('未找到历史记录:', historyId);
       router.push(`/divination/${type.value}`);
     }
+  }
+
+  function refreshHistoryState() {
+    const historyId = getRouteHistoryId();
+    if (!historyId) {
+      return;
+    }
+
+    const record = currentHistoryService.getRecord(historyId);
+    if (!record || !isHistoryRouteCompatible(type.value, record.type)) {
+      clearResult();
+      clearHistoryParam();
+      return;
+    }
+
+    viewingHistory.value = true;
+    applyHistoryRecord(record);
   }
 
   /**
@@ -328,6 +367,8 @@ export function useDivinationUnified(
 
     const record = buildCurrentHistoryRecord();
     if (!record) return;
+    const shouldSyncPrimaryResponse =
+      !target || isPrimaryConversationRetryTarget(record.type, record.conversationHistory || [], target);
 
     clearAbortController(true);
     invalidateCurrentSession();
@@ -337,30 +378,33 @@ export function useDivinationUnified(
     isCancelled.value = false;
     isLoading.value = false;
     isAiLoading.value = true;
-    aiResponse.value = '';
+    if (shouldSyncPrimaryResponse) {
+      aiResponse.value = '';
+      if (result.value) {
+        result.value.aiResponse = '';
+      }
+    }
     resetConversationState();
     abortController.value = new AbortController();
+    const regenerationOptions = {
+      signal: abortController.value.signal,
+      onChunk: (chunk: string) => {
+        if (thisSessionId !== currentSessionId.value || !shouldSyncPrimaryResponse) return;
+        aiResponse.value += chunk;
+        if (result.value) {
+          result.value.aiResponse = aiResponse.value;
+        }
+      },
+      onConversationUpdate: (history: ChatMessage[]) => {
+        if (thisSessionId !== currentSessionId.value) return;
+        conversationHistory.value = history;
+      },
+    };
 
     try {
       const regenerated = target
-        ? await currentRegenerateConversationMessage(record, target, {
-            signal: abortController.value.signal,
-            onConversationUpdate: (history) => {
-              if (thisSessionId !== currentSessionId.value) return;
-              conversationHistory.value = history;
-            },
-          })
-        : await currentGenerateRegeneratedAI(record, {
-            signal: abortController.value.signal,
-            onChunk: (chunk) => {
-              if (thisSessionId !== currentSessionId.value) return;
-              aiResponse.value += chunk;
-            },
-            onConversationUpdate: (history) => {
-              if (thisSessionId !== currentSessionId.value) return;
-              conversationHistory.value = history;
-            },
-          });
+        ? await currentRegenerateConversationMessage(record, target, regenerationOptions)
+        : await currentGenerateRegeneratedAI(record, regenerationOptions);
 
       if (thisSessionId !== currentSessionId.value) return;
 
@@ -372,7 +416,7 @@ export function useDivinationUnified(
 
       currentHistoryService.updateRecord?.(
         record.id,
-        buildUpdatedHistoryRecord(record as HistoryRecord, regenerated)
+        buildUpdatedHistoryRecord(record, regenerated)
       );
       isAiLoading.value = false;
       clearAbortController();
@@ -407,7 +451,7 @@ export function useDivinationUnified(
     const originalQuestion = followUpQuestion.value.trim();
     followUpQuestion.value = ''; // Clear input immediately
 
-    const recordId = result.value.id || (route.query.historyId as string) || '';
+    const recordId = result.value.id || getRouteHistoryId() || '';
 
     if (!recordId) {
       error.value = '无法找到占卜记录，请重新占卜后再试';
@@ -435,7 +479,7 @@ export function useDivinationUnified(
    * 处理历史记录参数
    */
   function handleHistoryParam() {
-    const historyId = route.query.historyId as string;
+    const historyId = getRouteHistoryId();
     if (historyId) {
       loadResultFromHistory(historyId);
     }
@@ -474,6 +518,7 @@ export function useDivinationUnified(
     startDivination,
     clearResult,
     loadResultFromHistory,
+    refreshHistoryState,
     regenerateAI,
     clearHistoryParam,
     cancelGeneration,

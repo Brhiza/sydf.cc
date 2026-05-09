@@ -106,7 +106,7 @@ interface Emits {
   (e: 'update:modelValue', value: string): void;
   (e: 'update:selectedDate', value: string): void;
   (e: 'submit', payload: { question: string; signNumber?: number; supplementaryInfo?: SupplementaryInfo | undefined; date?: string }): void;
-  (e: 'typeChange', type: string): void;
+  (e: 'spreadChange', spread: string): void;
   (e: 'clear'): void;
 }
 
@@ -192,7 +192,7 @@ const {
     updateModelValue: (value) => emit('update:modelValue', value),
     updateSelectedDate: (value) => emit('update:selectedDate', value),
     submit: (payload) => emit('submit', payload),
-    typeChange: (type) => emit('typeChange', type),
+    spreadChange: (spread) => emit('spreadChange', spread),
     clear: () => emit('clear'),
   },
   supplementaryInfo: {

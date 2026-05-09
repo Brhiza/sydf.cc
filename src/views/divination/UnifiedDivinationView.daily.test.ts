@@ -2,8 +2,9 @@
 /* eslint-disable vue/one-component-per-file */
 
 import { mount } from '@vue/test-utils';
-import { computed, defineComponent, ref } from 'vue';
+import { computed, defineComponent, nextTick, ref } from 'vue';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { eventBus, EVENTS } from '@/utils/eventBus';
 import UnifiedDivinationView from './UnifiedDivinationView.vue';
 
 const useUnifiedDivinationPageMock = vi.fn();
@@ -66,10 +67,11 @@ describe('UnifiedDivinationView daily', () => {
       followUpQuestion: ref(''),
       isFollowUpLoading: ref(false),
       handleSendFollowUp: vi.fn(),
-      adaptedResult: computed(() => ({ data: {}, aiResponse: '' })),
+      refreshHistoryState: vi.fn(),
+      displayResult: computed(() => null),
       config: computed(() => null),
       isCustomBuild: computed(() => false),
-      handleTypeChange: vi.fn(),
+      handleSpreadChange: vi.fn(),
       handleSubmit: vi.fn(),
       handleClear: vi.fn(),
       clearError: vi.fn(),
@@ -111,10 +113,16 @@ describe('UnifiedDivinationView daily', () => {
       followUpQuestion: ref(''),
       isFollowUpLoading: ref(false),
       handleSendFollowUp: vi.fn(),
-      adaptedResult: computed(() => ({ data: { jiuGongGe: [] }, aiResponse: '测试解读' })),
+      refreshHistoryState: vi.fn(),
+      displayResult: computed(() => ({
+        id: 'result-1',
+        type: 'qimen',
+        data: { jiuGongGe: [] },
+        aiResponse: '测试解读',
+      })),
       config: computed(() => null),
       isCustomBuild: computed(() => false),
-      handleTypeChange: vi.fn(),
+      handleSpreadChange: vi.fn(),
       handleSubmit: vi.fn(),
       handleClear: vi.fn(),
       clearError: vi.fn(),
@@ -129,5 +137,58 @@ describe('UnifiedDivinationView daily', () => {
 
     expect(wrapper.find('.divination-result-stub').exists()).toBe(true);
     expect(wrapper.find('.result-header-actions-stub').exists()).toBe(true);
+  });
+
+  it('查看历史详情时收到历史更新事件应刷新当前结果', async () => {
+    const refreshHistoryState = vi.fn();
+
+    useUnifiedDivinationPageMock.mockReturnValue({
+      route: { query: { historyId: 'history-1' } },
+      question: ref('测试问题'),
+      isLoading: ref(false),
+      result: ref({
+        id: 'history-1',
+        type: 'qimen',
+        data: { jiuGongGe: [] },
+        aiResponse: '测试解读',
+      }),
+      aiResponse: ref('测试解读'),
+      error: ref<string | null>(null),
+      isAiLoading: ref(false),
+      hasResult: computed(() => true),
+      hasAiResponse: computed(() => true),
+      viewingHistory: ref(true),
+      isCancelled: ref(false),
+      clearResult: vi.fn(),
+      conversationHistory: ref([]),
+      followUpQuestion: ref(''),
+      isFollowUpLoading: ref(false),
+      handleSendFollowUp: vi.fn(),
+      refreshHistoryState,
+      displayResult: computed(() => ({
+        id: 'history-1',
+        type: 'qimen',
+        data: { jiuGongGe: [] },
+        aiResponse: '测试解读',
+      })),
+      config: computed(() => null),
+      isCustomBuild: computed(() => false),
+      handleSpreadChange: vi.fn(),
+      handleSubmit: vi.fn(),
+      handleClear: vi.fn(),
+      clearError: vi.fn(),
+      handleRetry: vi.fn(),
+    });
+
+    mount(UnifiedDivinationView, {
+      props: {
+        divinationType: 'qimen',
+      },
+    });
+
+    eventBus.emit(EVENTS.HISTORY_UPDATED);
+    await nextTick();
+
+    expect(refreshHistoryState).toHaveBeenCalledTimes(1);
   });
 });

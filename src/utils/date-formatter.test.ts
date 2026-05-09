@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { formatDateOnly, formatDateTime, formatGanZhi, formatTimestamp } from './date-formatter';
+import {
+  createAnchoredDateFromDateKey,
+  formatDateOnly,
+  formatDateTime,
+  formatGanZhi,
+  formatTimestamp,
+  getMonthDayFromDateKey,
+  normalizeDateKey,
+} from './date-formatter';
 
 describe('date-formatter', () => {
   it('会按统一格式格式化完整 timeInfo', () => {
@@ -50,5 +58,21 @@ describe('date-formatter', () => {
         formatted: '甲子年 乙丑月 丙寅日 丁卯时',
       })
     ).toBe('甲子年 乙丑月 丙寅日 丁卯时');
+  });
+
+  it('normalizeDateKey 会保持 YYYY-MM-DD 字符串稳定，不受时区换日影响', () => {
+    expect(normalizeDateKey('2026-03-25')).toBe('2026-03-25');
+    expect(getMonthDayFromDateKey('2026-03-25')).toEqual({ month: 3, day: 25 });
+  });
+
+  it('createAnchoredDateFromDateKey 会把日期锚定到本地中午，避免跨时区跨日', () => {
+    const anchoredDate = createAnchoredDateFromDateKey('2026-03-25');
+
+    expect(anchoredDate).not.toBeNull();
+    expect(anchoredDate?.getFullYear()).toBe(2026);
+    expect(anchoredDate?.getMonth()).toBe(2);
+    expect(anchoredDate?.getDate()).toBe(25);
+    expect(anchoredDate?.getHours()).toBe(12);
+    expect(createAnchoredDateFromDateKey('2026-02-30')).toBeNull();
   });
 });

@@ -7,7 +7,7 @@ describe('useDivinationInputState', () => {
     updateModelValue: vi.fn(),
     updateSelectedDate: vi.fn(),
     submit: vi.fn(),
-    typeChange: vi.fn(),
+    spreadChange: vi.fn(),
     clear: vi.fn(),
   };
 
@@ -66,7 +66,16 @@ describe('useDivinationInputState', () => {
   it('塔罗类型初始化时会立即同步默认牌阵', () => {
     createState({ divinationType: 'tarot' });
 
-    expect(emit.typeChange).toHaveBeenCalledWith('tarot_single');
+    expect(emit.spreadChange).toHaveBeenCalledWith('single');
+  });
+
+  it('切换塔罗牌阵时应只同步牌阵键，不再抛出独立业务类型', () => {
+    const { state } = createState({ divinationType: 'tarot' });
+
+    state.selectSpread('celtic');
+
+    expect(emit.spreadChange).toHaveBeenLastCalledWith('celtic');
+    expect(state.question.value).toBe('');
   });
 
   it('三山国王灵签空问题提交时会使用默认问题并先清空结果', () => {
