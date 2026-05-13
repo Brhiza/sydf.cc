@@ -70,10 +70,10 @@ export function isRequestCancelled(controller: AbortController) {
 }
 
 export function applyDailyRecordToState(
-  record: DailyFortuneRecordLike,
+  record: DailyFortuneRecordLike | HistoryRecord,
   state: DailyFortuneStateRefs
 ) {
-  state.result.value = cloneSerializable(record.result.data);
+  state.result.value = cloneSerializable(record.result.data as DailyFortuneData);
   state.aiResponse.value = record.result.aiResponse || '';
   state.conversationHistory.value = cloneSerializable(record.conversationHistory || []);
   state.isFromCache.value = true;

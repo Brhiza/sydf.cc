@@ -21,8 +21,8 @@ vi.mock('./aiService', () => ({
   },
 }));
 
-vi.mock('./ai', () => ({
-  generateAIResponse: mockGeneratePromptAIResponse,
+vi.mock('./ai-client', () => ({
+  generatePromptAIResponse: mockGeneratePromptAIResponse,
 }));
 
 vi.mock('./prompts', () => ({

@@ -2,35 +2,31 @@ import { describe, expect, it } from 'vitest';
 import {
   getTarotCardClass,
   getTarotCardStyle,
-  getTarotLayoutClass,
-  getTarotLayoutConfig,
-  getTarotLayoutModeClass,
-  getTarotLayoutStyleVars,
+  resolveTarotLayout,
 } from './tarot-layout';
 
 describe('tarot-layout', () => {
   it('会按牌阵类型返回固定布局类名', () => {
-    expect(getTarotLayoutClass(5, 'love')).toBe('layout-love');
-    expect(getTarotLayoutClass(10, 'celtic')).toBe('layout-celtic');
+    expect(resolveTarotLayout(5, 'love').className).toBe('layout-love');
+    expect(resolveTarotLayout(10, 'celtic').className).toBe('layout-celtic');
   });
 
   it('未显式指定牌阵时会按牌数回退布局', () => {
-    expect(getTarotLayoutClass(1)).toBe('layout-single');
-    expect(getTarotLayoutClass(3)).toBe('layout-three');
-    expect(getTarotLayoutClass(5)).toBe('layout-grid');
-    expect(getTarotLayoutClass(9)).toBe('layout-complex');
-    expect(getTarotLayoutClass(12)).toBe('layout-large-complex');
+    expect(resolveTarotLayout(1).className).toBe('layout-single');
+    expect(resolveTarotLayout(3).className).toBe('layout-three');
+    expect(resolveTarotLayout(5).className).toBe('layout-grid');
+    expect(resolveTarotLayout(9).className).toBe('layout-complex');
+    expect(resolveTarotLayout(12).className).toBe('layout-large-complex');
   });
 
   it('布局模式和样式变量来自统一配置', () => {
-    expect(getTarotLayoutModeClass(10, 'celtic')).toBe('layout-mode-grid');
-    expect(getTarotLayoutConfig(7, 'chakra')).toMatchObject({
+    expect(resolveTarotLayout(10, 'celtic').modeClass).toBe('layout-mode-grid');
+    expect(resolveTarotLayout(7, 'chakra')).toMatchObject({
       className: 'layout-chakra',
-      mode: 'flex',
-      flexDirection: 'column',
+      modeClass: 'layout-mode-flex',
     });
 
-    expect(getTarotLayoutStyleVars(3, 'three')).toMatchObject({
+    expect(resolveTarotLayout(3, 'three').styleVars).toMatchObject({
       '--tarot-layout-gap': 'var(--spacing-4)',
       '--tarot-layout-compact-flex-direction': 'column',
       '--tarot-layout-compact-align-items': 'center',
@@ -38,7 +34,7 @@ describe('tarot-layout', () => {
   });
 
   it('复杂牌阵会保留响应式尺寸配置', () => {
-    expect(getTarotLayoutStyleVars(12)).toMatchObject({
+    expect(resolveTarotLayout(12).styleVars).toMatchObject({
       '--tarot-layout-max-width': 'min(95vw, 1200px)',
       '--tarot-layout-mobile-gap': 'var(--spacing-1)',
       '--tarot-layout-compact-max-width': '100%',

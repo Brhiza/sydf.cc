@@ -15,7 +15,7 @@ const {
   mockDrawSpreadCards: vi.fn(),
   mockGetCardKeywords: vi.fn(() => '关键词'),
   mockGetSignByNumber: vi.fn(),
-  mockCalculateDailyFortune: vi.fn(() => ({ type: 'daily-result' })),
+  mockCalculateDailyFortune: vi.fn((_date?: Date) => ({ type: 'daily-result' })),
 }));
 
 vi.mock('./algorithms/liuyao', () => ({

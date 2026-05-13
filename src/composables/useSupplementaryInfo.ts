@@ -1,4 +1,4 @@
-import { ref, watch, onMounted, computed } from 'vue';
+import { ref, computed } from 'vue';
 import {
   meihuaAnimalOptions,
   meihuaColorOptions,
@@ -8,7 +8,8 @@ import {
   meihuaSoundOptions,
 } from '@/config/meihua-omens';
 import type { MeihuaDivinationMethod, SupplementaryInfo } from '@/types/divination';
-import { storageService } from '@/services/storageService';
+import { earthlyBranches, heavenlyStems } from './useSupplementaryInfo.constants';
+import { setupSupplementaryInfoPersistence } from './useSupplementaryInfo.persistence';
 
 export function useSupplementaryInfo() {
   const showSupplementaryInfo = ref(false);
@@ -27,37 +28,6 @@ export function useSupplementaryInfo() {
   const meihuaExternalObject = ref<typeof meihuaObjectOptions[number]['name'] | undefined>();
   const meihuaExternalSound = ref<typeof meihuaSoundOptions[number]['name'] | undefined>();
   const meihuaExternalColor = ref<typeof meihuaColorOptions[number]['name'] | undefined>();
-
-  // 天干选项
-  const heavenlyStems = [
-    { name: '甲', remark: '' },
-    { name: '乙', remark: '' },
-    { name: '丙', remark: '' },
-    { name: '丁', remark: '' },
-    { name: '戊', remark: '' },
-    { name: '己', remark: '' },
-    { name: '庚', remark: '' },
-    { name: '辛', remark: '' },
-    { name: '壬', remark: '' },
-    { name: '癸', remark: '' },
-  ];
-
-  // 地支选项
-  const earthlyBranches = [
-    { name: '子', remark: '' },
-    { name: '丑', remark: '' },
-    { name: '寅', remark: '' },
-    { name: '卯', remark: '' },
-    { name: '辰', remark: '' },
-    { name: '巳', remark: '' },
-    { name: '午', remark: '' },
-    { name: '未', remark: '' },
-    { name: '申', remark: '' },
-    { name: '酉', remark: '' },
-    { name: '戌', remark: '' },
-    { name: '亥', remark: '' },
-  ];
-
 
   const hasMeihuaCustomSettings = computed(() => {
     if (meihuaMethod.value !== 'time') {
@@ -149,120 +119,23 @@ export function useSupplementaryInfo() {
     meihuaExternalColor.value = undefined;
   };
 
-  onMounted(() => {
-    const savedInfo = storageService.getItem<Record<string, unknown>>('supplementaryInfo');
-    if (savedInfo) {
-      const { 
-        gender: savedGender,
-        birthYear: savedBirthYear,
-        interpretationStyle: savedInterpretationStyle,
-        outputLength: savedOutputLength,
-        dayPillar: savedDayPillar,
-        meihuaSettings: savedMeihuaSettings,
-      } = savedInfo;
-      gender.value = savedGender as '男' | '女' | undefined;
-      birthYear.value = savedBirthYear as number | undefined;
-      interpretationStyle.value = savedInterpretationStyle as '入门' | '专业' | undefined;
-      outputLength.value = savedOutputLength as '精简' | '详细' | '超详细' | undefined;
-      // 自动恢复干支信息
-      if (savedDayPillar && typeof savedDayPillar === 'object' && savedDayPillar !== null) {
-        const dayPillar = savedDayPillar as { heavenlyStem?: string; earthlyBranch?: string };
-        dayPillarHeavenlyStem.value = dayPillar.heavenlyStem || '';
-        dayPillarEarthlyBranch.value = dayPillar.earthlyBranch || '';
-      } else {
-        dayPillarHeavenlyStem.value = '';
-        dayPillarEarthlyBranch.value = '';
-      }
-      if (savedMeihuaSettings && typeof savedMeihuaSettings === 'object' && savedMeihuaSettings !== null) {
-        const meihuaSettings = savedMeihuaSettings as SupplementaryInfo['meihuaSettings'];
-        meihuaMethod.value = meihuaSettings?.method || 'time';
-        meihuaNumber.value = meihuaSettings?.number;
-        meihuaExternalDirection.value = meihuaSettings?.externalOmens?.direction;
-        meihuaExternalCount.value = meihuaSettings?.externalOmens?.count;
-        meihuaExternalPerson.value = meihuaSettings?.externalOmens?.person;
-        meihuaExternalAnimal.value = meihuaSettings?.externalOmens?.animal;
-        meihuaExternalObject.value = meihuaSettings?.externalOmens?.object;
-        meihuaExternalSound.value = meihuaSettings?.externalOmens?.sound;
-        meihuaExternalColor.value = meihuaSettings?.externalOmens?.color;
-      } else {
-        meihuaMethod.value = 'time';
-      }
-    }
+  setupSupplementaryInfoPersistence({
+    gender,
+    birthYear,
+    interpretationStyle,
+    outputLength,
+    dayPillarHeavenlyStem,
+    dayPillarEarthlyBranch,
+    meihuaMethod,
+    meihuaNumber,
+    meihuaExternalDirection,
+    meihuaExternalCount,
+    meihuaExternalPerson,
+    meihuaExternalAnimal,
+    meihuaExternalObject,
+    meihuaExternalSound,
+    meihuaExternalColor,
   });
-
-  watch(
-    [
-      gender,
-      birthYear,
-      interpretationStyle,
-      outputLength,
-      dayPillarHeavenlyStem,
-      dayPillarEarthlyBranch,
-      meihuaMethod,
-      meihuaNumber,
-      meihuaExternalDirection,
-      meihuaExternalCount,
-      meihuaExternalPerson,
-      meihuaExternalAnimal,
-      meihuaExternalObject,
-      meihuaExternalSound,
-      meihuaExternalColor,
-    ],
-    ([
-      newGender,
-      newBirthYear,
-      newInterpretationStyle,
-      newOutputLength,
-      newHeavenlyStem,
-      newEarthlyBranch,
-      newMeihuaMethod,
-      newMeihuaNumber,
-      newMeihuaExternalDirection,
-      newMeihuaExternalCount,
-      newMeihuaExternalPerson,
-      newMeihuaExternalAnimal,
-      newMeihuaExternalObject,
-      newMeihuaExternalSound,
-      newMeihuaExternalColor,
-    ]) => {
-      const infoToSave = {
-        gender: newGender,
-        birthYear: newBirthYear,
-        interpretationStyle: newInterpretationStyle,
-        outputLength: newOutputLength,
-        dayPillar:
-          newHeavenlyStem && newEarthlyBranch
-            ? {
-                heavenlyStem: newHeavenlyStem,
-                earthlyBranch: newEarthlyBranch,
-              }
-            : undefined,
-        meihuaSettings:
-          newMeihuaMethod && newMeihuaMethod !== 'time'
-            ? {
-                method: newMeihuaMethod,
-                ...(newMeihuaMethod === 'number' && typeof newMeihuaNumber === 'number'
-                  ? { number: newMeihuaNumber }
-                  : {}),
-                ...(newMeihuaMethod === 'external'
-                  ? {
-                      externalOmens: {
-                        ...(newMeihuaExternalDirection ? { direction: newMeihuaExternalDirection } : {}),
-                        ...(typeof newMeihuaExternalCount === 'number' ? { count: newMeihuaExternalCount } : {}),
-                        ...(newMeihuaExternalPerson ? { person: newMeihuaExternalPerson } : {}),
-                        ...(newMeihuaExternalAnimal ? { animal: newMeihuaExternalAnimal } : {}),
-                        ...(newMeihuaExternalObject ? { object: newMeihuaExternalObject } : {}),
-                        ...(newMeihuaExternalSound ? { sound: newMeihuaExternalSound } : {}),
-                        ...(newMeihuaExternalColor ? { color: newMeihuaExternalColor } : {}),
-                      },
-                    }
-                  : {}),
-              }
-            : undefined,
-      };
-      storageService.setItem('supplementaryInfo', infoToSave);
-    }
-  );
 
   return {
     showSupplementaryInfo,

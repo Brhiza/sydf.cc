@@ -3,6 +3,7 @@
 import { ref } from 'vue';
 import { describe, expect, it } from 'vitest';
 import type { ChatMessage } from '@/types/chat';
+import type { DailyFortuneData } from '@/types/divination';
 import { DAILY_LIMIT_STORAGE_KEY } from '@/services/dailyLimitService';
 import {
   applyDailyRecordToState,
@@ -41,7 +42,7 @@ describe('useDailyFortune.shared', () => {
       question: '3 月 25 日运势',
       result: {
         type: 'daily' as const,
-        data: { date: '2026-03-25' } as never,
+        data: { date: '2026-03-25' } as DailyFortuneData,
         aiResponse: '历史中的今日运势',
       },
       conversationHistory: [{ id: 'assistant-1', role: 'assistant' as const, content: '历史中的今日运势' }],
@@ -50,7 +51,7 @@ describe('useDailyFortune.shared', () => {
     };
 
     const state = {
-      result: ref(null),
+      result: ref<DailyFortuneData | null>(null),
       aiResponse: ref(''),
       conversationHistory: ref<ChatMessage[]>([]),
       isFromCache: ref(false),
@@ -102,7 +103,7 @@ describe('useDailyFortune.shared', () => {
 
     const fallbackRecord = createFallbackDailyHistoryRecord({
       date: '2026-03-25',
-      result: { date: '2026-03-25' } as never,
+      result: { date: '2026-03-25' } as DailyFortuneData,
       aiResponse: '整体判断：今日宜稳中求进。',
       conversationHistory: followUpMessages,
     });
@@ -113,7 +114,7 @@ describe('useDailyFortune.shared', () => {
     expect(fallbackRecord.conversationHistory).toHaveLength(4);
 
     followUpMessages[3]!.content = '被外部改写';
-    fallbackRecord.result.data.date = '2026-03-26';
+    (fallbackRecord.result.data as DailyFortuneData).date = '2026-03-26';
 
     expect(fallbackRecord.conversationHistory?.[3]?.content).toBe('下午适合处理轻量安排。');
     expect(followUpMessages[3]!.content).toBe('被外部改写');

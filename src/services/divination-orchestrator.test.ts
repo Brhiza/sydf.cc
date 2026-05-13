@@ -277,7 +277,7 @@ describe('DivinationOrchestrator', () => {
           return
         }
 
-        super(...args)
+        super(...(args as ConstructorParameters<DateConstructor>))
       }
 
       static now() {

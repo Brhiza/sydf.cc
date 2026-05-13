@@ -69,7 +69,7 @@ describe('DivinationAISection', () => {
     await wrapper.setProps({
       conversationHistory: [...streamingHistory],
       isAiLoading: true,
-    });
+    } as Record<string, unknown>);
 
     expect(wrapper.find('.loading-dots').exists()).toBe(false);
     expect(wrapper.text()).toContain('第一段解读');

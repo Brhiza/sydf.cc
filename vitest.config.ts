@@ -22,6 +22,7 @@ export default mergeConfig(
       clearMocks: true,
       restoreMocks: true,
       include: ['src/**/*.test.ts'],
+      execArgv: ['--no-webstorage'],
     },
   })
 )

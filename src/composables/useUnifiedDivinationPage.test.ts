@@ -1,14 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { nextTick, reactive, ref } from 'vue';
 import type { LocationQueryRaw } from 'vue-router';
-import type { DivinationType } from '@/types';
+import type { DivinationResult, DivinationType } from '@/types';
 import { useUnifiedDivinationPage } from './useUnifiedDivinationPage';
 
 function createDivinationStub() {
   return {
     question: ref(''),
     isLoading: ref(false),
-    result: ref(null),
+    result: ref<DivinationResult | null>(null),
     aiResponse: ref(''),
     error: ref<string | null>(null),
     isAiLoading: ref(false),
@@ -173,7 +173,7 @@ describe('useUnifiedDivinationPage', () => {
       type: 'qimen',
       data: { jiuGongGe: [] } as never,
       aiResponse: '',
-    };
+    } as DivinationResult;
     divination.aiResponse.value = '新的 AI 解读';
 
     const page = useUnifiedDivinationPage(props, ref(null), {

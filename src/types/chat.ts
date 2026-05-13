@@ -22,6 +22,8 @@ export interface ChatMessage {
   content: string | null; // 内容可以为null，当有工具调用时
   tool_calls?: ToolCall[];
   tool_call_id?: string;
+  // 标记此条助手消息是错误兜底内容，而非真实模型回复
+  isError?: boolean;
 }
 
 export interface ChatMessageRetryTarget {

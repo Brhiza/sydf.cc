@@ -498,7 +498,12 @@ describe('useDailyFortune', () => {
       },
       conversationHistory: [
         { id: 'user-1', role: 'user', content: '请为我分析2026-03-25的运势' },
-        { id: 'assistant-1', role: 'assistant', content: '抱歉，AI服务暂时不可用，请稍后重试。' },
+        {
+          id: 'assistant-1',
+          role: 'assistant',
+          content: '抱歉，AI服务暂时不可用，请稍后重试。',
+          isError: true,
+        },
       ],
       timestamp: 1,
       summary: '3 月 25 日运势',

@@ -4,7 +4,7 @@
  */
 
 // 服务实例
-export { AIService, generateAIResponse, getAIInsight } from './ai';
+export { AIService, generatePromptAIResponse, getAIInsight } from './ai-client';
 export { divinationService, performDivination } from './divination';
 export { historyService } from './history';
 export { pwa } from './pwa';
@@ -12,7 +12,7 @@ export { aiService } from './aiService';
 export { dataGenerationService } from './dataGenerationService';
 
 // 类型定义
-export type { AIResponse } from './ai';
+export type { AIResponse } from './ai-client';
 export type { DivinationResult, DivinationRequest } from './divination';
 export type { HistoryRecord, AppSettings } from './history';
 

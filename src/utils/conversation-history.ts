@@ -1,6 +1,5 @@
 import type { DivinationType } from '@/types';
 import type { ChatMessage, ChatMessageRetryTarget } from '@/types/chat';
-import { isAIErrorMessage } from './ai-error';
 
 export interface VisibleConversationEntry {
   message: ChatMessage;
@@ -47,7 +46,7 @@ export function shouldShowConversationMessage(
     return false;
   }
 
-  if (visibleIndex === 1 && message.role === 'assistant' && !isAIErrorMessage(message.content)) {
+  if (visibleIndex === 1 && message.role === 'assistant' && !message.isError) {
     return false;
   }
 

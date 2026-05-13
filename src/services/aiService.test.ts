@@ -13,7 +13,7 @@ const {
   mockGetDisplayTimeData: vi.fn(),
 }));
 
-vi.mock('./ai', () => ({
+vi.mock('./ai-client', () => ({
   getAIInsight: mockGetAIInsight,
   generateTwoStageAIResponseWithSystem: vi.fn(),
 }));

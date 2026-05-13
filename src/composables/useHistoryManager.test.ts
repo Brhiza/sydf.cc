@@ -33,7 +33,7 @@ function createHistoryRecord(id: string, question: string): HistoryRecord {
     },
     timestamp: 1,
     summary: question,
-  } as HistoryRecord;
+  } as unknown as HistoryRecord;
 }
 
 describe('useHistoryManager', () => {
@@ -79,7 +79,7 @@ describe('useHistoryManager', () => {
         },
         aiResponse: '测试解读',
       },
-    } as HistoryRecord);
+    } as unknown as HistoryRecord);
 
     expect(mockPush).toHaveBeenCalledWith('/divination/tarot?historyId=history-tarot');
   });

@@ -5,7 +5,6 @@ import {
   getDisplayedConversationHistory,
   getLastAssistantMessage,
   getVisibleConversationHistory,
-  isAIErrorMessage,
   shouldShowAIMessage,
 } from './divination-ai-section';
 
@@ -37,10 +36,13 @@ describe('divination-ai-section', () => {
   it('今日运势首轮助手消息是错误时也应显示在下方 AI 区块', () => {
     const dailyErrorMessages: ChatMessage[] = [
       { role: 'user', content: '今天怎么样？' },
-      { role: 'assistant', content: '抱歉，AI服务暂时不可用，请稍后重试。' },
+      {
+        role: 'assistant',
+        content: '抱歉，AI服务暂时不可用，请稍后重试。',
+        isError: true,
+      },
     ];
 
-    expect(isAIErrorMessage(dailyErrorMessages[1].content)).toBe(true);
     expect(shouldShowAIMessage('daily', dailyErrorMessages[1], 1)).toBe(true);
     expect(getDisplayedConversationHistory('daily', dailyErrorMessages)).toEqual([
       dailyErrorMessages[1],

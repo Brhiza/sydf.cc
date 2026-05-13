@@ -42,7 +42,12 @@ describe('conversation-history', () => {
     ];
     const errorMessages: ChatMessage[] = [
       { id: 'user-1', role: 'user', content: '请为我分析今日运势' },
-      { id: 'assistant-1', role: 'assistant', content: '抱歉，AI服务暂时不可用，请稍后重试。' },
+      {
+        id: 'assistant-1',
+        role: 'assistant',
+        content: '抱歉，AI服务暂时不可用，请稍后重试。',
+        isError: true,
+      },
     ];
 
     expect(getDisplayedConversationHistory('daily', messages)).toEqual(messages.slice(2));

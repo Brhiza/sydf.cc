@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import type { NavigationGuardWithThis } from 'vue-router';
 import divinationRoutes from './divination';
 
 describe('divination router', () => {
@@ -6,8 +7,13 @@ describe('divination router', () => {
     const mainRoute = divinationRoutes.find((route) => route.name === 'divination');
     expect(mainRoute?.beforeEnter).toBeTypeOf('function');
 
+    const beforeEnter = mainRoute?.beforeEnter as
+      | NavigationGuardWithThis<undefined>
+      | undefined;
+
     const nextForTarot = vi.fn();
-    mainRoute?.beforeEnter?.(
+    beforeEnter?.call(
+      undefined,
       { params: { type: 'tarot' } } as never,
       {} as never,
       nextForTarot
@@ -15,7 +21,8 @@ describe('divination router', () => {
     expect(nextForTarot).toHaveBeenCalledWith();
 
     const nextForLegacyTarot = vi.fn();
-    mainRoute?.beforeEnter?.(
+    beforeEnter?.call(
+      undefined,
       { params: { type: 'tarot_single' } } as never,
       {} as never,
       nextForLegacyTarot

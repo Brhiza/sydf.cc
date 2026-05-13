@@ -1,12 +1,9 @@
 import type { ChatMessage, DivinationType } from '@/types';
-import { isAIErrorMessage } from '@/utils/ai-error';
 import {
   getDisplayedConversationHistory as getSharedDisplayedConversationHistory,
   getVisibleConversationHistory as getSharedVisibleConversationHistory,
   shouldShowConversationMessage,
 } from '@/utils/conversation-history';
-
-export { isAIErrorMessage };
 
 export function getVisibleConversationHistory(messages: ChatMessage[]): ChatMessage[] {
   return getSharedVisibleConversationHistory(messages);

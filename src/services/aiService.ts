@@ -2,7 +2,7 @@
  * AI服务 - 专门处理AI相关的功能
  */
 import type { ChatMessage } from '@/types/chat';
-import { generateTwoStageAIResponseWithSystem, getAIInsight } from './ai';
+import { generateTwoStageAIResponseWithSystem, getAIInsight } from './ai-client';
 import type {
   DivinationType,
   DivinationData,
@@ -18,12 +18,7 @@ import { generatePrompt, generateFollowUpPromptWrapper } from './prompts';
 import { handleError, logError, getUserFriendlyMessage } from '@/utils/error-handler';
 import { buildDivinationSystemPrompt } from '@/shared/divination-system-prompt';
 
-export interface AIServiceCallbacks {
-  onAIChunk?: (chunk: string) => void;
-  onAIError?: (error: string) => void;
-}
-
-export class AIService {
+class AIService {
   /**
    * 生成AI响应
    */
@@ -127,6 +122,7 @@ export class AIService {
             handleError(error, '后续问题处理失败')
           );
           assistantMessage.content = userFriendlyMessage;
+          assistantMessage.isError = true;
           onError(userFriendlyMessage);
           onConversationUpdate([...conversationHistory]);
         }
@@ -134,6 +130,7 @@ export class AIService {
     } catch (error) {
       const userFriendlyMessage = getUserFriendlyMessage(handleError(error, '后续问题处理失败'));
       assistantMessage.content = userFriendlyMessage;
+      assistantMessage.isError = true;
       onError(userFriendlyMessage);
       onConversationUpdate([...conversationHistory]);
     }

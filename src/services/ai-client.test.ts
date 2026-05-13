@@ -42,7 +42,7 @@ describe('AI 时间工具请求策略', () => {
     });
     vi.stubGlobal('fetch', fetchMock);
 
-    const { AIService } = await import('./ai');
+    const { AIService } = await import('./ai-client');
     await AIService.generateResponse([
       {
         role: 'user',
@@ -88,7 +88,7 @@ describe('AI 时间工具请求策略', () => {
     });
     vi.stubGlobal('fetch', fetchMock);
 
-    const { AIService } = await import('./ai');
+    const { AIService } = await import('./ai-client');
     await AIService.generateResponse([
       {
         role: 'user',
@@ -125,7 +125,7 @@ describe('AI 时间工具请求策略', () => {
     });
     vi.stubGlobal('fetch', fetchMock);
 
-    const { AIService } = await import('./ai');
+    const { AIService } = await import('./ai-client');
     await AIService.generateResponse([
       {
         role: 'user',
@@ -165,7 +165,7 @@ describe('AI 时间工具请求策略', () => {
     });
     vi.stubGlobal('fetch', fetchMock);
 
-    const { AIService } = await import('./ai');
+    const { AIService } = await import('./ai-client');
     const responsePromise = AIService.generateResponse(
       [{ role: 'user', content: '请流式输出' }],
       undefined,
@@ -177,8 +177,8 @@ describe('AI 时间工具请求策略', () => {
 
     expect(onChunk).toHaveBeenCalledWith('第一段第二段');
 
-    streamController?.enqueue(encoder.encode('data: [DONE]\n\n'));
-    streamController?.close();
+    streamController!.enqueue(encoder.encode('data: [DONE]\n\n'));
+    streamController!.close();
 
     await expect(responsePromise).resolves.toMatchObject({
       content: '第一段第二段',

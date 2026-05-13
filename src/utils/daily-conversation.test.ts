@@ -18,7 +18,11 @@ describe('daily-conversation', () => {
   it('首轮助手错误消息应保留在可见对话中', () => {
     const messages: ChatMessage[] = [
       { role: 'user', content: '请为我分析今日运势' },
-      { role: 'assistant', content: '抱歉，AI服务暂时不可用，请稍后重试。' },
+      {
+        role: 'assistant',
+        content: '抱歉，AI服务暂时不可用，请稍后重试。',
+        isError: true,
+      },
     ];
 
     expect(getVisibleDailyConversationHistory(messages)).toEqual([messages[1]]);

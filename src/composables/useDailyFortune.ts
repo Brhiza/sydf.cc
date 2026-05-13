@@ -1,72 +1,24 @@
 import { computed, getCurrentInstance, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { DAILY_LIMIT_STORAGE_KEY, DailyLimitService } from '@/services/dailyLimitService';
+import { DailyLimitService } from '@/services/dailyLimitService';
 import { divinationService } from '@/services/divination';
 import { historyService } from '@/services/history';
 import {
-  buildRegeneratedConversationHistory,
-  buildUpdatedHistoryRecord,
   generateRegeneratedAI,
   regenerateConversationMessage,
 } from '@/services/ai-regeneration';
 import type { DailyFortuneData } from '@/types/divination';
-import type { ChatMessage, ChatMessageRetryTarget } from '@/types/chat';
-import type { DivinationResult, SupplementaryInfo } from '@/types/divination';
-import type { HistoryRecord } from '@/types/common';
+import type { ChatMessage } from '@/types/chat';
 import {
-  applyDailyRecordToState,
-  clearDailyRecordFromState,
-  createFallbackDailyHistoryRecord,
-  getDailyDateLabel,
   getDailyPageTitle,
-  getDailyStorageKeys,
   getTodayDateString,
   hasVisibleDailyConversation,
-  isRequestCancelled,
-  type DailyFortuneRecordLike,
 } from './useDailyFortune.shared';
-import { isAIErrorMessage } from '@/utils/ai-error';
-import { isPrimaryConversationRetryTarget } from '@/utils/conversation-history';
-
-interface RouteLike {
-  path?: string;
-  query: Record<string, unknown>;
-}
-
-interface RouterLike {
-  replace: (to: { path: string; query?: Record<string, unknown> }) => unknown;
-}
-
-interface DailyLimitServiceLike {
-  hasUsedToday: () => boolean;
-  markAsUsed: () => void;
-  resetRecord: () => void;
-  cleanupExpiredRecord: () => void;
-}
-
-interface HistoryServiceLike {
-  getRecord?: (id: string) => DailyFortuneRecordLike | undefined;
-  getDailyFortuneForDate: (date: string) => DailyFortuneRecordLike | undefined;
-  updateRecord: (id: string, record: HistoryRecord) => boolean;
-  deleteRecord: (id: string) => boolean;
-  findTodayDailyFortune: () => { id: string } | undefined;
-}
-
-interface DivinationServiceLike {
-  startDivination: typeof divinationService.startDivination;
-  sendFollowUp: typeof divinationService.sendFollowUp;
-}
-
-interface UseDailyFortuneOptions {
-  route?: RouteLike;
-  router?: RouterLike;
-  historyService?: HistoryServiceLike;
-  divinationService?: DivinationServiceLike;
-  dailyLimitService?: DailyLimitServiceLike;
-  isDevMode?: boolean;
-  generateRegeneratedAI?: typeof generateRegeneratedAI;
-  regenerateConversationMessage?: typeof regenerateConversationMessage;
-}
+import { useDivinationConversation } from './useDivinationConversation';
+import { useAbortableSession } from './useAbortableSession';
+import { useRouteHistoryParam } from './useRouteHistoryParam';
+import { createDailyFortuneFlows } from './useDailyFortune.flows';
+import type { UseDailyFortuneOptions } from './useDailyFortune.types';
 
 export function useDailyFortune(options: UseDailyFortuneOptions = {}) {
   const route = options.route ?? useRoute();
@@ -89,7 +41,50 @@ export function useDailyFortune(options: UseDailyFortuneOptions = {}) {
   const followUpQuestion = ref('');
   const isFollowUpLoading = ref(false);
   const isCancelled = ref(false);
-  const abortController = ref<AbortController | null>(null);
+
+  const {
+    createController,
+    clearController,
+    cancel: cancelAbortSession,
+  } = useAbortableSession({ isCancelled });
+  const { getRouteHistoryId, clearHistoryParam } = useRouteHistoryParam({
+    route,
+    router,
+    fallbackPath: '/divination/daily',
+  });
+
+  const flows = createDailyFortuneFlows({
+    state: { result, aiResponse, conversationHistory, isFromCache, error, isCancelled },
+    selectedDate,
+    followUpQuestion,
+    isLoading,
+    isAILoading,
+    isFollowUpLoading,
+    result,
+    aiResponse,
+    conversationHistory,
+    historyService: currentHistoryService,
+    divinationService: currentDivinationService,
+    dailyLimitService: currentDailyLimitService,
+    generateRegeneratedAI: currentGenerateRegeneratedAI,
+    regenerateConversationMessage: currentRegenerateConversationMessage,
+    createController,
+    clearController,
+    cancelAbortSession,
+    getRouteHistoryId,
+    clearHistoryParam,
+  });
+
+  const { hasAiResponse, handleSendFollowUp } = useDivinationConversation({
+    conversationHistory,
+    followUpQuestion,
+    isFollowUpLoading,
+    aiResponse,
+    error,
+    hasResult: () => result.value !== null,
+    resolveRecordId: () => flows.resolveCurrentDailyRecord(selectedDate.value)?.id ?? '',
+    divinationService: currentDivinationService,
+  });
 
   const loadingTips = [
     '正在解析天机，请稍候...',
@@ -99,9 +94,6 @@ export function useDailyFortune(options: UseDailyFortuneOptions = {}) {
     '正在计算幸运元素...',
   ];
 
-  const hasAiResponse = computed(
-    () => aiResponse.value !== '' && !isAIErrorMessage(aiResponse.value)
-  );
   const pageTitle = computed(() => getDailyPageTitle(selectedDate.value));
   const loadingTip = computed(() => {
     const randomIndex = Math.floor(Math.random() * loadingTips.length);
@@ -114,406 +106,16 @@ export function useDailyFortune(options: UseDailyFortuneOptions = {}) {
 
   currentDailyLimitService.cleanupExpiredRecord();
 
-  function resetAbortController() {
-    abortController.value = null;
-  }
-
-  function createRequestController() {
-    const controller = new AbortController();
-    abortController.value = controller;
-    return controller;
-  }
-
-  function checkFortuneForDate(date: string) {
-    const record = currentHistoryService.getDailyFortuneForDate(date);
-    if (record) {
-      applyDailyRecordToState(record, {
-        result,
-        aiResponse,
-        conversationHistory,
-        isFromCache,
-        error,
-        isCancelled,
-      });
-
-      if (date === getTodayDateString() && !currentDailyLimitService.hasUsedToday()) {
-        currentDailyLimitService.markAsUsed();
-      }
-    } else {
-      clearDailyRecordFromState({
-        result,
-        aiResponse,
-        conversationHistory,
-        isFromCache,
-        error,
-        isCancelled,
-      });
-    }
-  }
-
-  function loadHistoryRecord(historyId: string) {
-    const record = currentHistoryService.getRecord?.(historyId);
-    if (!record) {
-      return;
-    }
-
-    applyDailyRecordToState(record, {
-      result,
-      aiResponse,
-      conversationHistory,
-      isFromCache,
-      error,
-      isCancelled,
-    });
-    selectedDate.value = (record.result.data as DailyFortuneData).date || selectedDate.value;
-  }
-
-  function getRouteHistoryId(): string | null {
-    const historyId = route.query.historyId;
-    if (typeof historyId !== 'string') {
-      return null;
-    }
-
-    const trimmedHistoryId = historyId.trim();
-    return trimmedHistoryId ? trimmedHistoryId : null;
-  }
-
-  function clearHistoryParam() {
-    const historyId = getRouteHistoryId();
-    if (!historyId || !router) {
-      return;
-    }
-
-    const newQuery = { ...route.query };
-    delete newQuery.historyId;
-    router.replace({
-      path: route.path || '/divination/daily',
-      query: newQuery,
-    });
-  }
-
-  function refreshHistoryState() {
-    const historyId = getRouteHistoryId();
-    if (historyId) {
-      const record = currentHistoryService.getRecord?.(historyId);
-      if (record) {
-        applyDailyRecordToState(record, {
-          result,
-          aiResponse,
-          conversationHistory,
-          isFromCache,
-          error,
-          isCancelled,
-        });
-        selectedDate.value = (record.result.data as DailyFortuneData).date || selectedDate.value;
-        return;
-      }
-
-      handleClear();
-      clearHistoryParam();
-    }
-
-    if (selectedDate.value) {
-      checkFortuneForDate(selectedDate.value);
-    }
-  }
-
-  function resolveCurrentDailyRecord(date: string): HistoryRecord | undefined {
-    const historyId = getRouteHistoryId();
-    if (historyId) {
-      const historyRecord = currentHistoryService.getRecord?.(historyId);
-      if (historyRecord) {
-        return historyRecord;
-      }
-    }
-
-    return currentHistoryService.getDailyFortuneForDate(date);
-  }
-
-  function applyAIErrorState(record: HistoryRecord, errorMessage: string) {
-    const fallbackConversationHistory = buildRegeneratedConversationHistory(record, errorMessage);
-    conversationHistory.value = fallbackConversationHistory;
-
-    currentHistoryService.updateRecord(
-      record.id,
-      buildUpdatedHistoryRecord(record, {
-        aiResponse: errorMessage,
-        conversationHistory: fallbackConversationHistory,
-        target: 'primary',
-      })
-    );
-  }
-
-  async function startDailyFortune() {
-    if (isLoading.value || isAILoading.value) return;
-
-    const date = selectedDate.value;
-    const record = currentHistoryService.getDailyFortuneForDate(date);
-
-    error.value = null;
-    isCancelled.value = false;
-
-    if (record) {
-      applyDailyRecordToState(record, {
-        result,
-        aiResponse,
-        conversationHistory,
-        isFromCache,
-        error,
-        isCancelled,
-      });
-
-      if (date === getTodayDateString() && !currentDailyLimitService.hasUsedToday()) {
-        currentDailyLimitService.markAsUsed();
-      }
-
-      return;
-    }
-
-    const requestController = createRequestController();
-
-    isLoading.value = true;
-    isAILoading.value = false;
-    isFromCache.value = false;
-    aiResponse.value = '';
-    conversationHistory.value = [];
-
-    await currentDivinationService.startDivination(
-      {
-        type: 'daily',
-        question: `请为我分析${date}的运势`,
-        supplementaryInfo: { date },
-        signal: requestController.signal,
-      },
-      {
-        onInitialResult: (divinationResult: DivinationResult) => {
-          if (isRequestCancelled(requestController)) return;
-          result.value = divinationResult.data as DailyFortuneData;
-          isLoading.value = false;
-          isAILoading.value = true;
-        },
-        onAIChunk: (chunk) => {
-          if (isRequestCancelled(requestController)) return;
-          aiResponse.value += chunk;
-        },
-        onAIComplete: (finalResult) => {
-          if (isRequestCancelled(requestController)) return;
-          aiResponse.value = finalResult.aiResponse || '';
-          isAILoading.value = false;
-          isLoading.value = false;
-          resetAbortController();
-
-          if (date === getTodayDateString()) {
-            currentDailyLimitService.markAsUsed();
-          }
-        },
-        onAIError: (errorMessage) => {
-          if (isRequestCancelled(requestController)) return;
-          isAILoading.value = false;
-          isLoading.value = false;
-          error.value = errorMessage;
-          const record =
-            resolveCurrentDailyRecord(date) ||
-            createFallbackDailyHistoryRecord({
-              date,
-              result: result.value as DailyFortuneData,
-              aiResponse: aiResponse.value,
-              conversationHistory: conversationHistory.value,
-            });
-          applyAIErrorState(record, errorMessage);
-          resetAbortController();
-        },
-        onConversationUpdate: (updatedHistory) => {
-          if (isRequestCancelled(requestController)) return;
-          conversationHistory.value = updatedHistory;
-        },
-      }
-    );
-  }
-
-  async function deleteTodayFortune() {
-    const date = selectedDate.value;
-    const dateLabel = getDailyDateLabel(date);
-    if (!confirm(`确定要删除${dateLabel}运势吗？此操作将清除所有相关数据，不可撤销。`)) {
-      return;
-    }
-
-    try {
-      const record = resolveCurrentDailyRecord(date);
-      if (record) {
-        currentHistoryService.deleteRecord(record.id);
-      }
-
-      const keysToRemove = getDailyStorageKeys(date);
-
-      if (date === getTodayDateString()) {
-        keysToRemove.push(DAILY_LIMIT_STORAGE_KEY);
-      }
-
-      keysToRemove.forEach((key) => {
-        localStorage.removeItem(key);
-      });
-
-      handleClear();
-
-      if (date === getTodayDateString()) {
-        currentDailyLimitService.resetRecord();
-      }
-
-      checkFortuneForDate(date);
-
-      alert(`${dateLabel}运势已彻底删除，页面已重置`);
-    } catch {
-      alert('删除失败，请稍后重试');
-    }
-  }
-
-  function handleClear() {
-    if (abortController.value) {
-      abortController.value.abort();
-      resetAbortController();
-    }
-
-    clearDailyRecordFromState({
-      result,
-      aiResponse,
-      conversationHistory,
-      isFromCache,
-      error,
-      isCancelled,
-    });
-    isLoading.value = false;
-    isAILoading.value = false;
-    isCancelled.value = false;
-    error.value = null;
-    followUpQuestion.value = '';
-  }
-
-  function cancelGeneration() {
-    if (abortController.value) {
-      abortController.value.abort();
-      resetAbortController();
-      isCancelled.value = true;
-      isAILoading.value = false;
-      isLoading.value = false;
-      isFollowUpLoading.value = false;
-    }
-  }
-
-  function handleRetry(target?: ChatMessageRetryTarget) {
-    error.value = null;
-    isCancelled.value = false;
-
-    if (!result.value) {
-      void startDailyFortune();
-      return;
-    }
-
-    const record =
-      resolveCurrentDailyRecord(selectedDate.value) ||
-      createFallbackDailyHistoryRecord({
-        date: selectedDate.value,
-        result: result.value,
-        aiResponse: aiResponse.value,
-        conversationHistory: conversationHistory.value,
-      });
-    const shouldSyncPrimaryResponse =
-      !target || isPrimaryConversationRetryTarget(record.type, record.conversationHistory || [], target);
-
-    const requestController = createRequestController();
-    isAILoading.value = true;
-    isLoading.value = false;
-    if (shouldSyncPrimaryResponse) {
-      aiResponse.value = '';
-    }
-    conversationHistory.value = [];
-    const regenerationOptions = {
-      signal: requestController.signal,
-      onChunk: (chunk: string) => {
-        if (isRequestCancelled(requestController) || !shouldSyncPrimaryResponse) return;
-        aiResponse.value += chunk;
-      },
-      onConversationUpdate: (updatedHistory: ChatMessage[]) => {
-        if (isRequestCancelled(requestController)) return;
-        conversationHistory.value = updatedHistory;
-      },
-    };
-
-    const regenerationTask = target
-      ? currentRegenerateConversationMessage(record, target, regenerationOptions)
-      : currentGenerateRegeneratedAI(record, regenerationOptions);
-
-    void regenerationTask
-      .then((regenerated) => {
-        if (isRequestCancelled(requestController)) return;
-        aiResponse.value = regenerated.aiResponse;
-        conversationHistory.value = regenerated.conversationHistory;
-        isAILoading.value = false;
-        isLoading.value = false;
-        resetAbortController();
-        currentHistoryService.updateRecord(
-          record.id,
-          buildUpdatedHistoryRecord(record, regenerated)
-        );
-      })
-      .catch((regenerationError) => {
-        if (isRequestCancelled(requestController)) return;
-        isAILoading.value = false;
-        isLoading.value = false;
-        const errorMessage =
-          regenerationError instanceof Error
-            ? regenerationError.message
-            : '重新生成失败，请稍后重试';
-        error.value = errorMessage;
-        applyAIErrorState(record, errorMessage);
-        resetAbortController();
-      });
-  }
-
-  function handleSendFollowUp() {
-    if (!followUpQuestion.value.trim() || isFollowUpLoading.value || !result.value) return;
-
-    isFollowUpLoading.value = true;
-    const currentConversation = [...conversationHistory.value];
-    const originalQuestion = followUpQuestion.value.trim();
-    followUpQuestion.value = '';
-
-    const record = resolveCurrentDailyRecord(selectedDate.value);
-    const recordId = record?.id || '';
-
-    if (!recordId) {
-      error.value = '占卜记录尚未保存完成，请稍后再试';
-      isFollowUpLoading.value = false;
-      return;
-    }
-
-    currentDivinationService.sendFollowUp(recordId, currentConversation, originalQuestion, {
-      onChunk: () => {
-        // 对话历史通过 onConversationUpdate 更新
-      },
-      onComplete: () => {
-        isFollowUpLoading.value = false;
-      },
-      onError: (errorMessage) => {
-        error.value = errorMessage;
-        isFollowUpLoading.value = false;
-      },
-      onConversationUpdate: (updatedHistory) => {
-        conversationHistory.value = updatedHistory;
-      },
-    });
-  }
-
   watch(
     () => route.query.historyId,
     (historyId, oldHistoryId) => {
       if (typeof historyId === 'string' && historyId) {
-        refreshHistoryState();
+        flows.refreshHistoryState();
         return;
       }
 
       if (oldHistoryId && selectedDate.value) {
-        checkFortuneForDate(selectedDate.value);
+        flows.checkFortuneForDate(selectedDate.value);
       }
     },
     { immediate: true }
@@ -527,10 +129,10 @@ export function useDailyFortune(options: UseDailyFortuneOptions = {}) {
       }
 
       if (oldDate && oldDate !== date && (isLoading.value || isAILoading.value)) {
-        cancelGeneration();
+        flows.cancelGeneration();
       }
       if (date) {
-        checkFortuneForDate(date);
+        flows.checkFortuneForDate(date);
       }
     },
     { immediate: true }
@@ -554,12 +156,12 @@ export function useDailyFortune(options: UseDailyFortuneOptions = {}) {
     loadingTip,
     isDevMode,
     hasVisibleConversation,
-    startDailyFortune,
-    deleteTodayFortune,
-    handleClear,
-    cancelGeneration,
-    handleRetry,
+    startDailyFortune: flows.startDailyFortune,
+    deleteTodayFortune: flows.deleteTodayFortune,
+    handleClear: flows.handleClear,
+    cancelGeneration: flows.cancelGeneration,
+    handleRetry: flows.handleRetry,
     handleSendFollowUp,
-    refreshHistoryState,
+    refreshHistoryState: flows.refreshHistoryState,
   };
 }

@@ -1,5 +1,5 @@
 <template>
-  <div class="cards-layout" :class="[layoutClass, layoutModeClass]" :style="layoutStyleVars">
+  <div class="cards-layout" :class="[tarotLayout.className, tarotLayout.modeClass]" :style="tarotLayout.styleVars">
     <TarotCardItem
       v-for="(card, index) in cards"
       :key="index"
@@ -12,13 +12,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import {
-  getTarotCardClass,
-  getTarotCardStyle,
-  getTarotLayoutClass,
-  getTarotLayoutModeClass,
-  getTarotLayoutStyleVars,
-} from './tarot-layout';
+import { getTarotCardClass, getTarotCardStyle, resolveTarotLayout } from './tarot-layout';
 import type { TarotCardData } from './tarot-result';
 import TarotCardItem from './TarotCardItem.vue';
 
@@ -29,9 +23,7 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const layoutClass = computed(() => getTarotLayoutClass(props.cards.length, props.spreadType));
-const layoutModeClass = computed(() => getTarotLayoutModeClass(props.cards.length, props.spreadType));
-const layoutStyleVars = computed(() => getTarotLayoutStyleVars(props.cards.length, props.spreadType));
+const tarotLayout = computed(() => resolveTarotLayout(props.cards.length, props.spreadType));
 </script>
 
 <style scoped>
