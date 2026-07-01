@@ -15,6 +15,7 @@ import { createAnchoredDateFromDateKey, normalizeDateKey } from '@/utils/date-fo
 import { generateLiuyao } from 'mingyu-core/divination/liuyao';
 import { generateMeihua } from 'mingyu-core/divination/meihua';
 import { generateQimen } from 'mingyu-core/divination/qimen';
+import { DEFAULT_TAROT_SPREAD_KEY } from '@/shared/tarot-spreads';
 
 export class DataGenerationService {
   /**
@@ -40,7 +41,7 @@ export class DataGenerationService {
       case 'tarot': {
         const { drawSpreadCards, getCardKeywords } = await import('mingyu-core/divination/tarot');
         const result = drawSpreadCards(
-          (spreadType || 'three') as Parameters<typeof drawSpreadCards>[0]
+          (spreadType || DEFAULT_TAROT_SPREAD_KEY) as Parameters<typeof drawSpreadCards>[0]
         );
         const cards = result.cards.map(c => ({
           id: c.card.number,

@@ -2,6 +2,7 @@ import { computed, ref, watch } from 'vue';
 import type { DivinationType, SupplementaryInfo } from '@/types/divination';
 import { tarotSpreads } from 'mingyu-core/divination/tarot-data';
 import { isCustomBuild } from '@/utils/build-target';
+import { DEFAULT_TAROT_SPREAD_KEY, type TarotSpreadKey } from '@/shared/tarot-spreads';
 
 interface DivinationInputProps {
   title: string;
@@ -43,15 +44,13 @@ interface UseDivinationInputStateOptions {
   mode?: string;
 }
 
-type TarotSpreadKey = keyof typeof tarotSpreads;
-
 export function useDivinationInputState(
   props: DivinationInputProps,
   options: UseDivinationInputStateOptions
 ) {
   const question = ref(props.modelValue || '');
   const localDate = ref(props.selectedDate || '');
-  const selectedSpread = ref<TarotSpreadKey>('single');
+  const selectedSpread = ref<TarotSpreadKey>(DEFAULT_TAROT_SPREAD_KEY);
 
   const isCustomBuildEnabled = computed(() =>
     isCustomBuild({
