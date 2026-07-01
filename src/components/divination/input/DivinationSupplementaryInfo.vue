@@ -20,34 +20,6 @@
           </button>
         </div>
 
-        <template v-if="showQimenMethodSelector">
-          <div class="method-switcher">
-            <button
-              v-for="option in qimenScopeOptions"
-              :key="option.value"
-              type="button"
-              class="method-chip"
-              :class="{ active: qimenScope === option.value }"
-              @click="qimenScope = option.value"
-            >
-              {{ option.label }}
-            </button>
-          </div>
-
-          <div class="method-switcher">
-            <button
-              v-for="option in qimenMethodOptions"
-              :key="option.value"
-              type="button"
-              class="method-chip"
-              :class="{ active: qimenMethod === option.value }"
-              @click="qimenMethod = option.value"
-            >
-              {{ option.label }}
-            </button>
-          </div>
-        </template>
-
         <DatePicker v-if="divinationType === 'daily'" v-model="localDate" />
       </div>
     </div>
@@ -75,6 +47,40 @@
       <div v-if="showSupplementaryInfo" class="info-form">
         <div class="info-notice">
           <p class="notice-text">💡 以下所有选项均非必选，填写后可获得更精准的个性化解读</p>
+        </div>
+
+        <div v-if="showQimenMethodSelector" class="qimen-settings">
+          <div class="qimen-settings-row">
+            <span class="qimen-settings-label">奇门级别</span>
+            <div class="method-switcher compact">
+              <button
+                v-for="option in qimenScopeOptions"
+                :key="option.value"
+                type="button"
+                class="method-chip"
+                :class="{ active: qimenScope === option.value }"
+                @click="qimenScope = option.value"
+              >
+                {{ option.label }}
+              </button>
+            </div>
+          </div>
+
+          <div class="qimen-settings-row">
+            <span class="qimen-settings-label">排盘方法</span>
+            <div class="method-switcher compact">
+              <button
+                v-for="option in qimenMethodOptions"
+                :key="option.value"
+                type="button"
+                class="method-chip"
+                :class="{ active: qimenMethod === option.value }"
+                @click="qimenMethod = option.value"
+              >
+                {{ option.label }}
+              </button>
+            </div>
+          </div>
         </div>
 
         <BasicSupplementaryFields
@@ -265,6 +271,31 @@ const qimenMethodOptions = [
   color: #fff;
 }
 
+.method-switcher.compact {
+  border-radius: 12px;
+}
+
+.qimen-settings {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.qimen-settings-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.qimen-settings-label {
+  width: 70px;
+  flex-shrink: 0;
+  color: var(--color-text-primary);
+  font-size: 14px;
+}
+
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s ease;
@@ -290,6 +321,17 @@ const qimenMethodOptions = [
     flex-wrap: wrap;
     width: 100%;
     border-radius: 16px;
+  }
+
+  .qimen-settings-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .qimen-settings-label {
+    width: auto;
+    font-size: 13px;
   }
 }
 </style>
