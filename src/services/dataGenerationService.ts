@@ -17,6 +17,7 @@ import { generateMeihua } from 'mingyu-core/divination/meihua';
 import { generateQimen } from 'mingyu-core/divination/qimen';
 import { DEFAULT_TAROT_SPREAD_KEY } from '@/shared/tarot-spreads';
 import { mapMingyuTarotResult } from '@/shared/tarot-result';
+import { resolveQimenSettings } from '@/shared/qimen-settings';
 
 export class DataGenerationService {
   /**
@@ -36,8 +37,8 @@ export class DataGenerationService {
         return meihuaData as MeihuaData;
       }
       case 'qimen': {
-        const settings = supplementaryInfo?.qimenSettings;
-        return generateQimen(undefined, settings?.method, settings?.scope);
+        const settings = resolveQimenSettings(supplementaryInfo?.qimenSettings);
+        return generateQimen(undefined, settings.method, settings.scope);
       }
       case 'tarot': {
         const { drawSpreadCards, getCardKeywords } = await import('mingyu-core/divination/tarot');

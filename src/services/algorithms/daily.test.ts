@@ -4,6 +4,7 @@ import { TimeManager } from '../../utils/timeManager';
 import { TimeManager as McTimeManager } from 'mingyu-core/calendar';
 import { generateQimen } from 'mingyu-core/divination/qimen';
 import { calculateDailyFortune } from './daily';
+import { DEFAULT_QIMEN_METHOD } from '@/shared/qimen-settings';
 
 function setBothTimezones(offset: number) {
   TimeManager.setTimezoneOffsetMinutesOverride(offset);
@@ -20,7 +21,7 @@ describe('今日运势算法', () => {
     setBothTimezones(480);
 
     const targetDate = new Date('2025-01-03T10:00:00+08:00');
-    const coreQimen = generateQimen(targetDate, 'zhuanpan', 'day');
+    const coreQimen = generateQimen(targetDate, DEFAULT_QIMEN_METHOD, 'day');
     const fortune = calculateDailyFortune(targetDate);
 
     expect(fortune.qimen.jiuGongGe).toEqual(coreQimen.jiuGongGe);

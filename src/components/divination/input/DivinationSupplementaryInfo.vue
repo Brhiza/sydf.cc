@@ -106,6 +106,7 @@ import type {
   QimenMethod,
   QimenScope,
 } from '@/types/divination';
+import { DEFAULT_QIMEN_METHOD, DEFAULT_QIMEN_SCOPE } from '@/shared/qimen-settings';
 import DatePicker from '@/components/common/DatePicker.vue';
 import BasicSupplementaryFields from './BasicSupplementaryFields.vue';
 import MeihuaMethodFields from './MeihuaMethodFields.vue';
@@ -151,8 +152,8 @@ const meihuaExternalAnimal = defineModel<string | undefined>('meihuaExternalAnim
 const meihuaExternalObject = defineModel<string | undefined>('meihuaExternalObject');
 const meihuaExternalSound = defineModel<string | undefined>('meihuaExternalSound');
 const meihuaExternalColor = defineModel<string | undefined>('meihuaExternalColor');
-const qimenMethod = defineModel<QimenMethod>('qimenMethod', { default: 'zhuanpan' });
-const qimenScope = defineModel<QimenScope>('qimenScope', { default: 'hour' });
+const qimenMethod = defineModel<QimenMethod>('qimenMethod', { default: DEFAULT_QIMEN_METHOD });
+const qimenScope = defineModel<QimenScope>('qimenScope', { default: DEFAULT_QIMEN_SCOPE });
 
 const methodOptions = [
   { label: '时间', value: 'time' },

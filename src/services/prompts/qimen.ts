@@ -7,6 +7,7 @@ import type { QimenData, SupplementaryInfo } from '@/types';
 import { generatePromptWithFormatter, type PromptFormatterContext } from './shared/prompt-generator';
 import type { QuestionType } from './shared/types';
 import { createQimenPriorityPalaces, createQimenQuestionHints } from '@/utils/qimen-guidance';
+import { DEFAULT_QIMEN_SCOPE } from '@/shared/qimen-settings';
 
 function getQimenYongShenHint(types: QuestionType, data: QimenData, supplementaryInfo?: SupplementaryInfo): string {
   const hints: string[] = [];
@@ -139,7 +140,7 @@ function formatQimenData(data: QimenData, context: PromptFormatterContext): stri
 - **${ganzhiStr}**
 - **局数**: ${data.isYangDun ? '阳遁' : '阴遁'}${data.juShu}局
 - **核心**: 值符: ${data.zhiFu} | 值使: ${data.zhiShi}
-- **排盘级别**: ${data.scope || 'hour'}
+- **排盘级别**: ${data.scope || DEFAULT_QIMEN_SCOPE}
 - **空亡驿马**: 空亡${voidHint}；驿马${horseHint}
 - **格局标签**: ${data.patternTags?.join('、') || '无明显格局标签'}
 - **格局提示**: ${patternHint}
