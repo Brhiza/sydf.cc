@@ -6,6 +6,11 @@ const TOTAL_SIGNS = 92;
 
 type EmitFunction = (event: 'submit', payload: { question: string; signNumber?: number; supplementaryInfo?: SupplementaryInfo | undefined }) => void;
 
+export interface SsgwTossMessage {
+  title?: string;
+  detail: string;
+}
+
 /** 投掷圣杯：一平一凸=圣杯，两平=笑杯，两凸=阴杯 */
 function tossHolyCup(): {
   result: '圣杯' | '笑杯' | '阴杯';
@@ -32,7 +37,7 @@ export function useSsgw(emit: EmitFunction) {
   const showTossResult = ref(false);
   const currentQian = ref(0);
   const beiResults = ref<string[]>([]);
-  const tossResult = ref('');
+  const tossResult = ref<SsgwTossMessage[]>([]);
   const tossCount = ref(0);
   const isApproved = ref(false);
   
@@ -61,7 +66,7 @@ export function useSsgw(emit: EmitFunction) {
             tossCount.value = 0;
             isApproved.value = false;
             beiResults.value = [];
-            tossResult.value = '';
+            tossResult.value = [];
           }, 1000);
         }
       }, 400);
@@ -74,7 +79,7 @@ export function useSsgw(emit: EmitFunction) {
 
     isTossing.value = true;
     beiResults.value = [];
-    tossResult.value = '';
+    tossResult.value = [];
 
     const holyGrailResult = tossHolyCup();
 
@@ -84,9 +89,12 @@ export function useSsgw(emit: EmitFunction) {
 
       if (result === '圣杯') {
         isApproved.value = true;
-        tossResult.value = '<strong>圣杯</strong> (一平一凸) - 神明同意此签。';
+        tossResult.value = [{ title: '圣杯', detail: '(一平一凸) - 神明同意此签。' }];
         setTimeout(() => {
-          tossResult.value += '<p>正在为您解读签文...</p>';
+          tossResult.value = [
+            ...tossResult.value,
+            { detail: '正在为您解读签文...' },
+          ];
           setTimeout(() => {
             emit('submit', {
               question: currentQuestion,
@@ -98,18 +106,24 @@ export function useSsgw(emit: EmitFunction) {
       } else {
         tossCount.value++;
         tossResult.value = result === '笑杯'
-          ? '<strong>笑杯</strong> (两平) - 神明笑而不语，可能问题不明或时机未到。'
-          : '<strong>阴杯</strong> (两凸) - 神明不同意此签。';
+          ? [{ title: '笑杯', detail: '(两平) - 神明笑而不语，可能问题不明或时机未到。' }]
+          : [{ title: '阴杯', detail: '(两凸) - 神明不同意此签。' }];
 
         if (tossCount.value >= 3) {
-          tossResult.value += '<p>您已连续三次未能获得圣杯，看来今日不宜再问此事，请改日再来。</p>';
+          tossResult.value = [
+            ...tossResult.value,
+            { detail: '您已连续三次未能获得圣杯，看来今日不宜再问此事，请改日再来。' },
+          ];
           isTossing.value = false;
         } else {
-          tossResult.value += '<p>请重新为您摇签...</p>';
+          tossResult.value = [
+            ...tossResult.value,
+            { detail: '请重新为您摇签...' },
+          ];
           setTimeout(() => {
             showTossResult.value = false;
             beiResults.value = [];
-            tossResult.value = '';
+            tossResult.value = [];
             startShaking(currentQuestion, currentSupplementaryInfo);
           }, 2000);
         }
