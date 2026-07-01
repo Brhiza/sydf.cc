@@ -140,7 +140,6 @@ export function createDivinationUnifiedFlows(ctx: DivinationUnifiedFlowsContext)
 
   async function startDivination(
     options: {
-      signNumber?: number;
       spreadType?: string;
       supplementaryInfo?: SupplementaryInfo | undefined;
     } = {}

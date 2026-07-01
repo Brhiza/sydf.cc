@@ -51,7 +51,6 @@ interface DivinationRequestBody {
   debug?: boolean;
   options?: {
     spreadType?: string;
-    signNumber?: number;
     date?: string; // YYYY-MM-DD
     datetime?: string; // ISO 8601（建议携带时区偏移，如 +08:00）
     supplementaryInfo?: SupplementaryInfo;

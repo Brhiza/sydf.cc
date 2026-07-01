@@ -30,7 +30,6 @@ interface DivinationStateLike {
   hasResult: Ref<boolean>;
   hasAiResponse: Ref<boolean>;
   startDivination: (options?: {
-    signNumber?: number;
     spreadType?: string;
     supplementaryInfo?: SupplementaryInfo | undefined;
   }) => unknown;
@@ -96,7 +95,6 @@ export function useUnifiedDivinationPage(
 
   function handleSubmit(payload: {
     question: string;
-    signNumber?: number;
     supplementaryInfo?: SupplementaryInfo | undefined;
   }) {
     if (payload.question) {
@@ -104,15 +102,12 @@ export function useUnifiedDivinationPage(
     }
 
     const options: {
-      signNumber?: number;
       spreadType?: string;
       supplementaryInfo?: SupplementaryInfo | undefined;
     } = {};
 
     if (props.divinationType === 'tarot') {
       options.spreadType = currentSpread.value;
-    } else if (props.divinationType === 'ssgw' && payload.signNumber !== undefined) {
-      options.signNumber = payload.signNumber;
     }
 
     if (payload.supplementaryInfo) {

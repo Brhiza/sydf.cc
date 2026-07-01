@@ -46,7 +46,7 @@ describe('DataGenerationService', () => {
   });
 
   it('六爻应始终走默认算法入口', async () => {
-    await dataGenerationService.generateDivination('liuyao', undefined, undefined, {
+    await dataGenerationService.generateDivination('liuyao', undefined, {
       divinationMethod: 'number',
       divinationNumber: 123456,
     } as unknown as SupplementaryInfo);
@@ -55,7 +55,7 @@ describe('DataGenerationService', () => {
   });
 
   it('奇门未指定设置时应继续走默认时家转盘', async () => {
-    await dataGenerationService.generateDivination('qimen', undefined, undefined, {
+    await dataGenerationService.generateDivination('qimen', undefined, {
       divinationMethod: 'number',
       divinationNumber: 789,
     } as unknown as SupplementaryInfo);
@@ -64,7 +64,7 @@ describe('DataGenerationService', () => {
   });
 
   it('奇门应透传原生排盘设置', async () => {
-    await dataGenerationService.generateDivination('qimen', undefined, undefined, {
+    await dataGenerationService.generateDivination('qimen', undefined, {
       qimenSettings: {
         method: 'feipan',
         scope: 'day',
@@ -75,7 +75,7 @@ describe('DataGenerationService', () => {
   });
 
   it('梅花应透传自定义起卦设置', async () => {
-    await dataGenerationService.generateDivination('meihua', undefined, undefined, {
+    await dataGenerationService.generateDivination('meihua', undefined, {
       meihuaSettings: {
         method: 'external',
         externalOmens: {
@@ -97,7 +97,7 @@ describe('DataGenerationService', () => {
   });
 
   it('今日运势仍应继续读取 supplementaryInfo.date', async () => {
-    await dataGenerationService.generateDivination('daily', undefined, undefined, {
+    await dataGenerationService.generateDivination('daily', undefined, {
       date: '2026-03-16',
     });
 

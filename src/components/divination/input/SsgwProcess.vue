@@ -17,7 +17,7 @@
     <div v-if="isTossing || showTossResult" class="tossing-section">
       <div class="result-section">
         <p>
-          求得第 <strong>{{ currentQian }}</strong> 签。
+          已完成摇签。
         </p>
         <p>请投掷圣杯，询问三山国王是否同意此签...</p>
       </div>
@@ -58,7 +58,6 @@ defineProps<{
   shakingProgress: number
   isTossing: boolean
   showTossResult: boolean
-  currentQian: number
   beiResults: string[]
   tossResult: SsgwTossMessage[]
   tossCount: number

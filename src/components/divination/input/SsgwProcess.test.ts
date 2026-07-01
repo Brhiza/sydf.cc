@@ -10,7 +10,6 @@ const baseProps = {
   shakingProgress: 0,
   isTossing: false,
   showTossResult: true,
-  currentQian: 18,
   beiResults: [],
   tossCount: 1,
   isApproved: false,
@@ -31,5 +30,17 @@ describe('SsgwProcess', () => {
     expect(wrapper.text()).toContain('<script>alert(1)</script>');
     expect(wrapper.find('img[src="x"]').exists()).toBe(false);
     expect(wrapper.find('script').exists()).toBe(false);
+  });
+
+  it('摇签阶段不再展示本地预生成签号', () => {
+    const wrapper = mount(SsgwProcess, {
+      props: {
+        ...baseProps,
+        tossResult: [],
+      },
+    });
+
+    expect(wrapper.text()).toContain('已完成摇签');
+    expect(wrapper.text()).not.toContain('求得第');
   });
 });

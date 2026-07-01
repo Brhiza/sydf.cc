@@ -61,7 +61,6 @@
       :shaking-progress="shakingProgress"
       :is-tossing="isTossing"
       :show-toss-result="showTossResult"
-      :current-qian="currentQian"
       :bei-results="beiResults"
       :toss-result="tossResult"
       :toss-count="tossCount"
@@ -108,7 +107,7 @@ interface Props {
 interface Emits {
   (e: 'update:modelValue', value: string): void;
   (e: 'update:selectedDate', value: string): void;
-  (e: 'submit', payload: { question: string; signNumber?: number; supplementaryInfo?: SupplementaryInfo | undefined; date?: string }): void;
+  (e: 'submit', payload: { question: string; supplementaryInfo?: SupplementaryInfo | undefined; date?: string }): void;
   (e: 'spreadChange', spread: string): void;
   (e: 'clear'): void;
 }
@@ -168,7 +167,6 @@ const {
   shakingProgress,
   isTossing,
   showTossResult,
-  currentQian,
   beiResults,
   tossResult,
   tossCount,

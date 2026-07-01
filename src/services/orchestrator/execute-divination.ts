@@ -47,7 +47,7 @@ export async function executeDivination(
   request: DivinationRequest,
   callbacks: DivinationCallbacks
 ): Promise<void> {
-  const { type, question, spreadType, signNumber, supplementaryInfo, signal } = request;
+  const { type, question, spreadType, supplementaryInfo, signal } = request;
   const { onInitialResult, onAIChunk, onAIComplete, onAIError, onConversationUpdate } = callbacks;
   const normalizedSpreadType = type === 'tarot' ? spreadType || 'three' : spreadType;
 
@@ -55,7 +55,6 @@ export async function executeDivination(
     const data = await dataGenerationService.generateDivination(
       type,
       normalizedSpreadType,
-      signNumber,
       supplementaryInfo
     );
 

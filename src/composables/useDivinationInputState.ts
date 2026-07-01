@@ -19,7 +19,6 @@ interface DivinationInputEmitters {
   updateSelectedDate: (value: string) => void;
   submit: (payload: {
     question: string;
-    signNumber?: number;
     supplementaryInfo?: SupplementaryInfo | undefined;
     date?: string;
   }) => void;
