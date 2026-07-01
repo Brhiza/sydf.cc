@@ -51,7 +51,7 @@
 - `daily`：今日运势（日家奇门）
 - `liuyao`：六爻
 - `meihua`：梅花易数
-- `qimen`：奇门遁甲（默认时家转盘法，可选飞盘法及日/月/年家）
+- `qimen`：奇门遁甲（默认直接按时家转盘法排盘；飞盘法及日/月/年家属于可选高级参数）
 - `ssgw`：三山国王灵签
 - `tarot`：塔罗（多牌阵）
 - `tarot_single`：旧版单牌塔罗兼容输入（已废弃，建议改用 `tarot` + `options.spreadType: "single"`）
@@ -110,8 +110,8 @@ Authorization: Bearer <DEV_API_KEY>
 
 - `datetime`（可选）：指定起卦/排盘时间（ISO 8601，建议携带时区偏移，例如 `+08:00`）
 - 六爻固定使用服务端默认起卦逻辑
-- 奇门默认使用时家转盘法；可通过 `supplementaryInfo.qimenSettings` 指定排盘方式
-- 梅花易数支持通过 `supplementaryInfo.meihuaSettings` 指定起卦方式
+- 奇门不传高级参数即可直接使用默认排盘；需要指定时才通过 `supplementaryInfo.qimenSettings` 传入排盘方式
+- 梅花易数不传高级参数即可按时间起卦；需要指定时才通过 `supplementaryInfo.meihuaSettings` 传入起卦方式
 - `date`（可选）：`daily` 专用，`YYYY-MM-DD`
 - `signNumber`（可选）：`ssgw` 专用，不传则随机抽签
 - `spreadType`（可选）：`tarot` 专用，不传默认 `three`
@@ -147,6 +147,8 @@ Authorization: Bearer <DEV_API_KEY>
 - 当前实现会按固定优先级取前两项外应成上卦、下卦：`direction -> person -> animal -> object -> sound -> color`
 
 `supplementaryInfo.qimenSettings` 可用值：
+
+说明：该字段不是必填。普通调用建议不传，让服务端使用默认排盘，避免调用方额外判断。
 
 - `method: "zhuanpan"`：转盘法，默认值
 - `method: "feipan"`：飞盘法
