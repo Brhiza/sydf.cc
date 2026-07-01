@@ -15,6 +15,11 @@ import type {
 } from '@/types/divination';
 import { earthlyBranches, heavenlyStems } from './useSupplementaryInfo.constants';
 import { setupSupplementaryInfoPersistence } from './useSupplementaryInfo.persistence';
+import {
+  DEFAULT_QIMEN_METHOD,
+  DEFAULT_QIMEN_SCOPE,
+  isDefaultQimenSettings,
+} from '@/shared/qimen-settings';
 
 export function useSupplementaryInfo() {
   const showSupplementaryInfo = ref(false);
@@ -33,8 +38,8 @@ export function useSupplementaryInfo() {
   const meihuaExternalObject = ref<typeof meihuaObjectOptions[number]['name'] | undefined>();
   const meihuaExternalSound = ref<typeof meihuaSoundOptions[number]['name'] | undefined>();
   const meihuaExternalColor = ref<typeof meihuaColorOptions[number]['name'] | undefined>();
-  const qimenMethod = ref<QimenMethod>('zhuanpan');
-  const qimenScope = ref<QimenScope>('hour');
+  const qimenMethod = ref<QimenMethod>(DEFAULT_QIMEN_METHOD);
+  const qimenScope = ref<QimenScope>(DEFAULT_QIMEN_SCOPE);
 
   const hasMeihuaCustomSettings = computed(() => {
     if (meihuaMethod.value !== 'time') {
@@ -61,8 +66,7 @@ export function useSupplementaryInfo() {
       dayPillarHeavenlyStem.value ||
       dayPillarEarthlyBranch.value ||
       hasMeihuaCustomSettings.value ||
-      qimenMethod.value !== 'zhuanpan' ||
-      qimenScope.value !== 'hour'
+      !isDefaultQimenSettings({ method: qimenMethod.value, scope: qimenScope.value })
     ) {
       return '已补充信息';
     }
@@ -104,7 +108,7 @@ export function useSupplementaryInfo() {
         },
       };
     }
-    if (qimenMethod.value !== 'zhuanpan' || qimenScope.value !== 'hour') {
+    if (!isDefaultQimenSettings({ method: qimenMethod.value, scope: qimenScope.value })) {
       info.qimenSettings = {
         method: qimenMethod.value,
         scope: qimenScope.value,
@@ -132,8 +136,8 @@ export function useSupplementaryInfo() {
     meihuaExternalObject.value = undefined;
     meihuaExternalSound.value = undefined;
     meihuaExternalColor.value = undefined;
-    qimenMethod.value = 'zhuanpan';
-    qimenScope.value = 'hour';
+    qimenMethod.value = DEFAULT_QIMEN_METHOD;
+    qimenScope.value = DEFAULT_QIMEN_SCOPE;
   };
 
   setupSupplementaryInfoPersistence({

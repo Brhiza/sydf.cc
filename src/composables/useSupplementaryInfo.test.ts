@@ -4,6 +4,7 @@ import { mount } from '@vue/test-utils';
 import { nextTick, defineComponent } from 'vue';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { useSupplementaryInfo } from './useSupplementaryInfo';
+import { DEFAULT_QIMEN_METHOD, DEFAULT_QIMEN_SCOPE } from '@/shared/qimen-settings';
 
 function mountSupplementaryInfo() {
   let state!: ReturnType<typeof useSupplementaryInfo>;
@@ -43,7 +44,7 @@ describe('useSupplementaryInfo', () => {
 
     expect(state.getSupplementaryInfo()).toEqual({
       qimenSettings: {
-        method: 'zhuanpan',
+        method: DEFAULT_QIMEN_METHOD,
         scope: 'day',
       },
     });
@@ -63,8 +64,8 @@ describe('useSupplementaryInfo', () => {
     state.resetSupplementaryInfo();
     await nextTick();
 
-    expect(state.qimenMethod.value).toBe('zhuanpan');
-    expect(state.qimenScope.value).toBe('hour');
+    expect(state.qimenMethod.value).toBe(DEFAULT_QIMEN_METHOD);
+    expect(state.qimenScope.value).toBe(DEFAULT_QIMEN_SCOPE);
     expect(state.meihuaMethod.value).toBe('time');
     expect(state.getSupplementaryInfo()).toBeUndefined();
 

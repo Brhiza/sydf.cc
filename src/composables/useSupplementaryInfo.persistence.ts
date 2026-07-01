@@ -14,6 +14,11 @@ import type {
   SupplementaryInfo,
 } from '@/types/divination';
 import { storageService } from '@/services/storageService';
+import {
+  DEFAULT_QIMEN_METHOD,
+  DEFAULT_QIMEN_SCOPE,
+  isDefaultQimenSettings,
+} from '@/shared/qimen-settings';
 
 const STORAGE_KEY = 'supplementaryInfo';
 
@@ -82,11 +87,11 @@ function restoreFromStorage(refs: SupplementaryInfoRefs) {
 
   if (savedQimenSettings && typeof savedQimenSettings === 'object' && savedQimenSettings !== null) {
     const qimenSettings = savedQimenSettings as SupplementaryInfo['qimenSettings'];
-    refs.qimenMethod.value = qimenSettings?.method || 'zhuanpan';
-    refs.qimenScope.value = qimenSettings?.scope || 'hour';
+    refs.qimenMethod.value = qimenSettings?.method || DEFAULT_QIMEN_METHOD;
+    refs.qimenScope.value = qimenSettings?.scope || DEFAULT_QIMEN_SCOPE;
   } else {
-    refs.qimenMethod.value = 'zhuanpan';
-    refs.qimenScope.value = 'hour';
+    refs.qimenMethod.value = DEFAULT_QIMEN_METHOD;
+    refs.qimenScope.value = DEFAULT_QIMEN_SCOPE;
   }
 }
 
@@ -158,7 +163,7 @@ function buildPersistedSnapshot(values: {
           }
         : undefined,
     qimenSettings:
-      values.qimenMethod !== 'zhuanpan' || values.qimenScope !== 'hour'
+      !isDefaultQimenSettings({ method: values.qimenMethod, scope: values.qimenScope })
         ? {
             method: values.qimenMethod,
             scope: values.qimenScope,

@@ -39,6 +39,7 @@ vi.mock('./algorithms/daily', () => ({
 
 import { dataGenerationService } from './dataGenerationService';
 import type { SupplementaryInfo } from '@/types/divination';
+import { DEFAULT_QIMEN_METHOD, DEFAULT_QIMEN_SCOPE } from '@/shared/qimen-settings';
 
 describe('DataGenerationService', () => {
   beforeEach(() => {
@@ -60,7 +61,11 @@ describe('DataGenerationService', () => {
       divinationNumber: 789,
     } as unknown as SupplementaryInfo);
 
-    expect(mockGenerateQimen).toHaveBeenCalledWith(undefined, undefined, undefined);
+    expect(mockGenerateQimen).toHaveBeenCalledWith(
+      undefined,
+      DEFAULT_QIMEN_METHOD,
+      DEFAULT_QIMEN_SCOPE
+    );
   });
 
   it('奇门应透传原生排盘设置', async () => {
