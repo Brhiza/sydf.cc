@@ -22,8 +22,12 @@
         <p>请投掷圣杯，询问三山国王是否同意此签...</p>
       </div>
 
-      <div v-if="tossResult" class="result-section">
-        <p v-html="tossResult"></p>
+      <div v-if="tossResult.length > 0" class="result-section">
+        <p v-for="(message, index) in tossResult" :key="index">
+          <strong v-if="message.title">{{ message.title }}</strong>
+          <template v-if="message.title"> </template>
+          <span>{{ message.detail }}</span>
+        </p>
       </div>
 
       <div v-if="beiResults.length > 0" class="bei-container">
@@ -46,6 +50,8 @@
 </template>
 
 <script setup lang="ts">
+import type { SsgwTossMessage } from '@/composables/useSsgw';
+
 defineProps<{
   isShaking: boolean
   shakingMessage: string
@@ -54,7 +60,7 @@ defineProps<{
   showTossResult: boolean
   currentQian: number
   beiResults: string[]
-  tossResult: string
+  tossResult: SsgwTossMessage[]
   tossCount: number
   isApproved: boolean
 }>()
