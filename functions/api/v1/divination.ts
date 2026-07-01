@@ -15,6 +15,7 @@ import {
   resolveTarotSpreadType,
 } from '../../../src/utils/divination-type.ts';
 import { type TarotSpreadKey } from '../../../src/shared/tarot-spreads.ts';
+import { mapMingyuTarotResult } from '../../../src/shared/tarot-result.ts';
 import { getDivinationTime, setTimezoneOffsetMinutesOverride } from '../../../src/utils/timeManager.ts';
 import { buildDivinationSystemPrompt } from '../../../src/shared/divination-system-prompt.ts';
 import { formatQimenSettingsLabel } from '../../../src/shared/qimen-settings.ts';
@@ -268,14 +269,7 @@ async function generateDivinationData(
       resolveTarotSpreadType(compatibleTarotType, body.options?.spreadType)
     ) as TarotSpreadKey;
     const result = drawSpreadCards(spreadType);
-    const cards = result.cards.map((c) => ({
-      id: c.card.number,
-      name: c.card.name,
-      position: c.position,
-      reversed: c.isReversed,
-      keywords: getCardKeywords(c.card.name).split(','),
-    }));
-    return { ...result, cards };
+    return mapMingyuTarotResult(result, getCardKeywords);
   }
 
   // 理论上不会走到这里

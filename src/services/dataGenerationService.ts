@@ -16,6 +16,7 @@ import { generateLiuyao } from 'mingyu-core/divination/liuyao';
 import { generateMeihua } from 'mingyu-core/divination/meihua';
 import { generateQimen } from 'mingyu-core/divination/qimen';
 import { DEFAULT_TAROT_SPREAD_KEY } from '@/shared/tarot-spreads';
+import { mapMingyuTarotResult } from '@/shared/tarot-result';
 
 export class DataGenerationService {
   /**
@@ -43,14 +44,7 @@ export class DataGenerationService {
         const result = drawSpreadCards(
           (spreadType || DEFAULT_TAROT_SPREAD_KEY) as Parameters<typeof drawSpreadCards>[0]
         );
-        const cards = result.cards.map(c => ({
-          id: c.card.number,
-          name: c.card.name,
-          reversed: c.isReversed,
-          position: c.position,
-          keywords: getCardKeywords(c.card.name).split(','),
-        }));
-        return { ...result, cards };
+        return mapMingyuTarotResult(result, getCardKeywords);
       }
       case 'ssgw': {
         const { drawRandomSign } = await import('mingyu-core/divination/ssgw');
