@@ -34,4 +34,14 @@ describe('今日运势算法', () => {
     });
     expect(fortune.qimen.jiuGongGe).toHaveLength(9);
   });
+
+  it('同一日期重复生成今日运势时分项分数应保持一致', () => {
+    setBothTimezones(480);
+
+    const targetDate = new Date('2025-01-03T10:00:00+08:00');
+    const first = calculateDailyFortune(targetDate);
+    const second = calculateDailyFortune(targetDate);
+
+    expect(second.aspects).toEqual(first.aspects);
+  });
 });

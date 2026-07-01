@@ -23,6 +23,19 @@ const ASPECT_CONFIG = {
 
 type AspectKey = keyof typeof ASPECT_CONFIG;
 
+function getDeterministicVariance(seedSource: string, key: AspectKey, variance: number): number {
+  const seed = `${seedSource}:${key}`;
+  let hash = 2166136261;
+
+  for (let i = 0; i < seed.length; i++) {
+    hash ^= seed.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+
+  const normalized = (hash >>> 0) / 0xffffffff;
+  return (normalized - 0.5) * variance;
+}
+
 export function calculateWuxingEnergy(ganzhi: BaseGanZhi): Record<string, number> {
   const energy: Record<string, number> = { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 };
 
@@ -92,7 +105,8 @@ function getQimenBonus(key: AspectKey, jiuGong: DailyQimenJiuGongGe[]): number {
 
 export function calculateAspectScores(
   jiuGong: DailyQimenJiuGongGe[],
-  wuxingEnergy: Record<string, number>
+  wuxingEnergy: Record<string, number>,
+  seedSource: string
 ): AspectScores {
   const result = {} as Record<AspectKey, AspectScore>;
 
@@ -100,8 +114,8 @@ export function calculateAspectScores(
     const elementEnergy = wuxingEnergy[config.element] || 0;
     const baseScore = config.base + (elementEnergy - 1) * 10;
     const qimenBonus = getQimenBonus(key, jiuGong);
-    const randomVariance = (Math.random() - 0.5) * config.variance;
-    const score = Math.max(20, Math.min(95, Math.round(baseScore + qimenBonus + randomVariance)));
+    const deterministicVariance = getDeterministicVariance(seedSource, key, config.variance);
+    const score = Math.max(20, Math.min(95, Math.round(baseScore + qimenBonus + deterministicVariance)));
 
     result[key] = { score, description: '', advice: '' };
   });
