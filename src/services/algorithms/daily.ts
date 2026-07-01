@@ -3,13 +3,9 @@
  * @description 日家奇门以日干支为核心，一日一局，主要用于预测一日之内的运势变化。
  * 起局方法与时家奇门有显著区别，更注重整体趋势。
  */
-import type { DailyFortuneData, DailyQimenTimeInfo } from '../../types/divination.ts';
+import { generateQimen } from 'mingyu-core/divination/qimen';
+import type { DailyFortuneData, DailyQimenJiuGongGe, DailyQimenTimeInfo } from '../../types/divination.ts';
 import { getDivinationTime } from '../../utils/timeManager.ts';
-import {
-  arrangeDailyQimenJiuGong,
-  getDailyQimenJuShu,
-  getDailyZhiFuZhiShi,
-} from './daily/arrange.ts';
 import { analyzeDailyQimenPattern } from './daily/pattern-analysis.ts';
 import {
   calculateAspectScores,
@@ -29,6 +25,19 @@ function formatLocalDate(date: Date): string {
   );
 }
 
+function mapDailyQimenJiuGong(jiuGongGe: DailyQimenJiuGongGe[]): DailyQimenJiuGongGe[] {
+  return jiuGongGe.map((gong) => ({
+    gong: gong.gong,
+    name: gong.name,
+    direction: gong.direction,
+    element: gong.element,
+    tianPan: { ...gong.tianPan },
+    diPan: { ...gong.diPan },
+    renPan: { ...gong.renPan },
+    shenPan: { ...gong.shenPan },
+  }));
+}
+
 /**
  * 日家奇门今日运势计算
  * @param date 可选日期，默认为当前日期
@@ -39,16 +48,16 @@ export function calculateDailyFortune(date?: Date): DailyFortuneData {
   const dateStr = formatLocalDate(targetDate);
   const { timeInfo, ganzhi, timestamp } = getDivinationTime(targetDate);
 
-  const { isYangDun, juShu, yuan } = getDailyQimenJuShu(timeInfo);
-  const { zhiFu, zhiShi } = getDailyZhiFuZhiShi(ganzhi.day);
-  const jiuGongGe = arrangeDailyQimenJiuGong(isYangDun, juShu, zhiFu, zhiShi, { day: ganzhi.day });
+  const qimenData = generateQimen(targetDate, 'zhuanpan', 'day');
+  const { isYangDun, juShu, zhiFu, zhiShi } = qimenData;
+  const jiuGongGe = mapDailyQimenJiuGong(qimenData.jiuGongGe);
 
   const qimenAnalysis = analyzeDailyQimenPattern(jiuGongGe, zhiFu, zhiShi);
   const wuxingEnergy = calculateWuxingEnergy(ganzhi);
 
   const dailyQimenTimeInfo: DailyQimenTimeInfo = {
-    solarTerm: timeInfo.jieQi,
-    epoch: yuan,
+    solarTerm: qimenData.timeInfo.solarTerm || timeInfo.jieQi,
+    epoch: qimenData.timeInfo.epoch,
     juShu,
     dunType: isYangDun ? '阳遁' : '阴遁',
     zhiFu,
