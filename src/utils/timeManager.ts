@@ -82,65 +82,6 @@ export class TimeManager {
   }
 
   /**
-   * 基于时间戳生成确定性随机数
-   * @param timestamp 时间戳
-   * @param range 范围
-   * @returns 确定性随机数
-   */
-  static getSeededRandom(timestamp: number, range: number = 1): number {
-    // 使用简单但确定性的伪随机算法
-    const seed = timestamp % 2147483647;
-    const a = 1664525;
-    const c = 1013904223;
-    const m = 2147483647;
-    const result = (a * seed + c) % m;
-    return (result % range + range) % range;
-  }
-
-  /**
-   * 基于时间生成爻象
-   * @param timestamp 时间戳
-   * @param count 爻象数量
-   * @returns 爻象数组
-   */
-  static generateYaosByTime(timestamp: number, count: number = 6): number[] {
-    const yaos: number[] = [];
-    for (let i = 0; i < count; i++) {
-      // 按三钱法逐币起爻，保持时间起卦的确定性。
-      yaos.push(
-        this.generateYaoByCoinMethod((coinIndex) =>
-          this.getSeededRandom(timestamp + i * 1000 + coinIndex * 97, 2)
-        )
-      );
-    }
-    return yaos;
-  }
-
-  /**
-   * 随机生成爻象
-   * @param count 爻象数量
-   * @returns 爻象数组
-   */
-  static generateYaosByRandom(count: number = 6): number[] {
-    const yaos: number[] = [];
-    for (let i = 0; i < count; i++) {
-      yaos.push(this.generateYaoByCoinMethod(() => (Math.random() < 0.5 ? 0 : 1)));
-    }
-    return yaos;
-  }
-
-  /**
-   * 使用三钱法起一爻：正面记 3，反面记 2，三枚铜钱合计得 6/7/8/9。
-   */
-  private static generateYaoByCoinMethod(getCoinBit: (coinIndex: number) => number): number {
-    let total = 0;
-    for (let coinIndex = 0; coinIndex < 3; coinIndex++) {
-      total += getCoinBit(coinIndex) === 0 ? 2 : 3;
-    }
-    return total;
-  }
-
-  /**
    * 获取指定时间的干支信息
    */
   private static getGanZhi(date: Date): GanZhiInfo {
@@ -211,6 +152,4 @@ export class TimeManager {
 
 // 导出便捷函数
 export const getDivinationTime = TimeManager.getDivinationTime.bind(TimeManager);
-export const generateYaosByTime = TimeManager.generateYaosByTime.bind(TimeManager);
-export const generateYaosByRandom = TimeManager.generateYaosByRandom.bind(TimeManager);
 export const setTimezoneOffsetMinutesOverride = TimeManager.setTimezoneOffsetMinutesOverride.bind(TimeManager);
