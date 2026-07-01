@@ -74,7 +74,6 @@ Authorization: Bearer <DEV_API_KEY>
   "options": {
     "datetime": "2026-03-16T12:00:00+08:00",
     "spreadType": "three",
-    "signNumber": 8,
     "date": "2026-03-16",
     "temperature": 0.7,
     "supplementaryInfo": {
@@ -113,14 +112,15 @@ Authorization: Bearer <DEV_API_KEY>
 - 奇门不传高级参数即可直接使用默认排盘；需要指定时才通过 `supplementaryInfo.qimenSettings` 传入排盘方式
 - 梅花易数不传高级参数即可按时间起卦；需要指定时才通过 `supplementaryInfo.meihuaSettings` 传入起卦方式
 - `date`（可选）：`daily` 专用，`YYYY-MM-DD`
-- `signNumber`（可选）：`ssgw` 专用，不传则随机抽签
-- `spreadType`（可选）：`tarot` 专用，不传默认 `three`
+- 三山国王灵签签号由服务端调用 `mingyu-core` 随机生成，当前 API 不支持指定签号
+- `spreadType`（可选）：`tarot` 专用，不传默认 `single`（单牌指引）
 - `temperature`（可选）：传给 AI 的 temperature
 - `supplementaryInfo`（可选）：影响解读风格/长度；其中 `meihuaSettings` 会参与梅花易数起卦
 
 `tarot.spreadType` 可用值（与项目内置牌阵一致）：
 
 - `single`、`three`、`love`、`career`、`decision`、`celtic`、`chakra`、`year`、`mindBodySpirit`、`horseshoe`
+- 普通塔罗问题可以不传 `spreadType`，默认会使用与网页端一致的单牌指引；需要三牌或其他牌阵时再显式传入对应值
 
 兼容说明：
 
@@ -247,7 +247,16 @@ curl -s https://sydf.cc/api/v1/divination \
   -d '{"type":"meihua","question":"这件事会怎么发展？","stream":false,"options":{"datetime":"2026-03-16T12:00:00+08:00","supplementaryInfo":{"meihuaSettings":{"method":"external","externalOmens":{"direction":"东","person":"少女","count":5}}}}}'
 ```
 
-塔罗（三牌阵，流式）：
+塔罗（默认单牌指引，流式）：
+
+```bash
+curl -N https://sydf.cc/api/v1/divination \
+  -H "Content-Type: application/json" \
+  -H "X-Api-Key: <DEV_API_KEY>" \
+  -d '{"type":"tarot","question":"我和TA的关系接下来会如何发展？","stream":true}'
+```
+
+塔罗（三牌阵，流式，需要时显式指定）：
 
 ```bash
 curl -N https://sydf.cc/api/v1/divination \
