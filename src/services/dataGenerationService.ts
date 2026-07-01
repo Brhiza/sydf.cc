@@ -12,6 +12,9 @@ import type {
   SupplementaryInfo
 } from '@/types/divination';
 import { createAnchoredDateFromDateKey, normalizeDateKey } from '@/utils/date-formatter';
+import { generateLiuyao } from 'mingyu-core/divination/liuyao';
+import { generateMeihua } from 'mingyu-core/divination/meihua';
+import { generateQimen } from 'mingyu-core/divination/qimen';
 
 export class DataGenerationService {
   /**
@@ -25,16 +28,13 @@ export class DataGenerationService {
   ): Promise<LiuyaoData | MeihuaData | QimenData | TarotData | SsgwData | DailyFortuneData> {
     switch (type) {
       case 'liuyao': {
-        const { generateLiuyao } = await import('./algorithms/liuyao');
         return generateLiuyao();
       }
       case 'meihua': {
-        const { generateMeihua } = await import('./algorithms/meihua');
         const meihuaData = generateMeihua(undefined, supplementaryInfo?.meihuaSettings);
         return meihuaData as MeihuaData;
       }
       case 'qimen': {
-        const { generateQimen } = await import('./algorithms/qimen');
         return generateQimen();
       }
       case 'tarot': {

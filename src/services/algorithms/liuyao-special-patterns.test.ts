@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { generateLiuyao } from './liuyao';
+import { generateLiuyao } from 'mingyu-core/divination/liuyao';
 
 describe('六爻特殊卦式', () => {
   it('无动爻应输出静卦标记', () => {

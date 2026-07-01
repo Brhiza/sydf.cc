@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { generateLiuyao } from './liuyao';
+import { generateLiuyao } from 'mingyu-core/divination/liuyao';
 
 describe('六爻乱动卦', () => {
   it('全动卦应标记为乱动卦', () => {
