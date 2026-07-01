@@ -7,13 +7,14 @@ import { generateLiuyao } from 'mingyu-core/divination/liuyao';
 import { generateMeihua } from 'mingyu-core/divination/meihua';
 import { generateQimen } from 'mingyu-core/divination/qimen';
 import { drawRandomSign } from 'mingyu-core/divination/ssgw';
-import { drawSpreadCards, getCardKeywords, tarotSpreads } from 'mingyu-core/divination/tarot';
+import { drawSpreadCards, getCardKeywords } from 'mingyu-core/divination/tarot';
 import {
   COMPATIBLE_DIVINATION_TYPES,
   isCompatibleDivinationType,
   normalizeDivinationType,
   resolveTarotSpreadType,
 } from '../../../src/utils/divination-type.ts';
+import { type TarotSpreadKey } from '../../../src/shared/tarot-spreads.ts';
 import { getDivinationTime, setTimezoneOffsetMinutesOverride } from '../../../src/utils/timeManager.ts';
 import { buildDivinationSystemPrompt } from '../../../src/shared/divination-system-prompt.ts';
 import { formatQimenSettingsLabel } from '../../../src/shared/qimen-settings.ts';
@@ -262,9 +263,10 @@ async function generateDivinationData(
   }
 
   if (type === 'tarot') {
+    const compatibleTarotType = isLegacyTarotSingle ? 'tarot_single' : 'tarot';
     const spreadType = (
-      isLegacyTarotSingle ? 'single' : resolveTarotSpreadType('tarot', body.options?.spreadType)
-    ) as keyof typeof tarotSpreads;
+      resolveTarotSpreadType(compatibleTarotType, body.options?.spreadType)
+    ) as TarotSpreadKey;
     const result = drawSpreadCards(spreadType);
     const cards = result.cards.map((c) => ({
       id: c.card.number,

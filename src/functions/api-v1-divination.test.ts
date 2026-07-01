@@ -443,4 +443,56 @@ describe('开发者 API 兼容性', () => {
       } | null)?.messages?.find((message) => message.role === 'user')?.content || '')
     ).toContain('【类型】tarot');
   });
+
+  it('塔罗接口未传牌阵时应默认使用单牌指引', async () => {
+    const fetchMock = vi.fn(async () =>
+      new Response(
+        JSON.stringify({
+          choices: [
+            {
+              message: {
+                content: '默认单牌解读',
+              },
+            },
+          ],
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      )
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const request = new Request('https://sydf.cc/api/v1/divination', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer test-dev-key',
+      },
+      body: JSON.stringify({
+        type: 'tarot',
+        question: '我现在该怎么做？',
+        stream: false,
+      }),
+    });
+
+    const response = await onRequest({
+      request,
+      env: {
+        DEV_API_KEY: 'test-dev-key',
+        OPENAI_API_KEY: 'test-openai-key',
+      },
+    });
+
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.ok).toBe(true);
+    expect(data.type).toBe('tarot');
+    expect(data.divination.spreadType).toBe('single');
+    expect(data.divination.spreadName).toBe('单牌指引');
+    expect(data.divination.cards).toHaveLength(1);
+    expect(data.interpretation).toBe('默认单牌解读');
+  });
 });
