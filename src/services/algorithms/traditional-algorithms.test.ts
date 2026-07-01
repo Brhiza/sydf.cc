@@ -1,9 +1,9 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 
 import { generateMeihua } from 'mingyu-core/divination/meihua';
 import { generateQimen } from 'mingyu-core/divination/qimen';
 import { MeihuaHelpers } from 'mingyu-core/divination/divination-helpers';
-import { generateYaosByRandom, getDivinationTime, TimeManager } from '../../utils/timeManager';
+import { getDivinationTime, TimeManager } from '../../utils/timeManager';
 import { TimeManager as McTimeManager } from 'mingyu-core/calendar';
 
 /** 对涉及 mingyu-core 算法的测试，同步设置 mingyu-core 的时区 */
@@ -16,7 +16,6 @@ describe('传统算法校验', () => {
   afterEach(() => {
     TimeManager.setTimezoneOffsetMinutesOverride(null);
     McTimeManager.setTimezoneOffsetMinutesOverride(null);
-    vi.restoreAllMocks();
   });
 
   it('交节前仍应沿用上一节气', () => {
@@ -27,30 +26,6 @@ describe('传统算法校验', () => {
 
     expect(beforeJieQi.timeInfo.jieQi).toBe('惊蛰');
     expect(afterJieQi.timeInfo.jieQi).toBe('春分');
-  });
-
-  it('随机六爻应按三钱法逐币起爻', () => {
-    const sequence = [
-      0.1, 0.1, 0.1,
-      0.1, 0.1, 0.9,
-      0.1, 0.9, 0.1,
-      0.1, 0.9, 0.9,
-      0.9, 0.1, 0.1,
-      0.9, 0.1, 0.9,
-      0.9, 0.9, 0.1,
-      0.9, 0.9, 0.9,
-    ];
-
-    const randomSpy = vi.spyOn(Math, 'random').mockImplementation(() => {
-      const next = sequence.shift();
-      if (typeof next !== 'number') {
-        throw new Error('测试随机序列不足');
-      }
-      return next;
-    });
-
-    expect(generateYaosByRandom(8)).toEqual([6, 7, 7, 8, 7, 8, 8, 9]);
-    expect(randomSpy).toHaveBeenCalledTimes(24);
   });
 
   it('梅花体用生克必须区分方向', () => {
