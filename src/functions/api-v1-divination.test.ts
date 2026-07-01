@@ -259,6 +259,66 @@ describe('开发者 API 兼容性', () => {
     });
   });
 
+  it('三山国王灵签应使用请求指定时间生成签文时间', async () => {
+    const fetchMock = vi.fn(async () =>
+      new Response(
+        JSON.stringify({
+          choices: [
+            {
+              message: {
+                content: '灵签测试解读',
+              },
+            },
+          ],
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      )
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const datetime = '2026-03-16T12:00:00+08:00';
+    const request = new Request('https://sydf.cc/api/v1/divination', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer test-dev-key',
+      },
+      body: JSON.stringify({
+        type: 'ssgw',
+        question: '这件事该怎么处理？',
+        stream: false,
+        options: {
+          datetime,
+        },
+      }),
+    });
+
+    const response = await onRequest({
+      request,
+      env: {
+        DEV_API_KEY: 'test-dev-key',
+        OPENAI_API_KEY: 'test-openai-key',
+      },
+    });
+
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.ok).toBe(true);
+    expect(data.type).toBe('ssgw');
+    expect(data.interpretation).toBe('灵签测试解读');
+    expect(data.divination.timestamp).toBe(new Date(datetime).getTime());
+    expect(data.divination.ganzhi).toMatchObject({
+      year: '丙午',
+      month: '辛卯',
+      day: '己丑',
+      hour: '庚午',
+    });
+  });
+
   it('今日运势非流式接口应返回普通文本解读', async () => {
     let capturedRequestBody: Record<string, unknown> | null = null;
     const fetchMock = vi.fn(async (request: Request) => {
