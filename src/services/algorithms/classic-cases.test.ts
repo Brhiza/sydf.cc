@@ -2,9 +2,9 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { TimeManager } from '../../utils/timeManager';
 import { TimeManager as McTimeManager } from 'mingyu-core/calendar';
-import { generateLiuyao } from './liuyao';
-import { generateMeihua } from './meihua';
-import { generateQimen } from './qimen';
+import { generateLiuyao } from 'mingyu-core/divination/liuyao';
+import { generateMeihua } from 'mingyu-core/divination/meihua';
+import { generateQimen } from 'mingyu-core/divination/qimen';
 
 function setBothTimezones(offset: number) {
   TimeManager.setTimezoneOffsetMinutesOverride(offset);

@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { generateMeihua } from './meihua';
-import { generateQimen } from './qimen';
+import { generateMeihua } from 'mingyu-core/divination/meihua';
+import { generateQimen } from 'mingyu-core/divination/qimen';
 import { MeihuaHelpers } from 'mingyu-core/divination/divination-helpers';
 import { generateYaosByRandom, getDivinationTime, TimeManager } from '../../utils/timeManager';
 import { TimeManager as McTimeManager } from 'mingyu-core/calendar';

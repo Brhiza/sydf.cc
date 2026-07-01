@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { TimeManager } from '../../utils/timeManager';
 import { TimeManager as McTimeManager } from 'mingyu-core/calendar';
-import { generateQimen } from './qimen';
+import { generateQimen } from 'mingyu-core/divination/qimen';
 
 function setBothTimezones(offset: number) {
   TimeManager.setTimezoneOffsetMinutesOverride(offset);

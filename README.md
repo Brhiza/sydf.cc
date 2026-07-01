@@ -28,6 +28,7 @@
 - `Vitest`
 - `Cloudflare Functions`
 - `Workbox / vite-plugin-pwa`
+- `mingyu-core`
 
 ## 快速开始
 
@@ -140,6 +141,8 @@ npm run build
 
 - `src/services/divination-orchestrator.ts`
   - 统一协调占卜数据生成、AI 解读、历史记录落盘与追问流程
+- `mingyu-core`
+  - 提供六爻、梅花易数、奇门遁甲、塔罗与三山国王灵签等核心算法，项目运行时不再维护这些本地算法副本
 - `src/composables/useDivinationUnified.ts`
   - 承接大部分占卜页状态
 - `src/composables/useDailyFortune.ts`

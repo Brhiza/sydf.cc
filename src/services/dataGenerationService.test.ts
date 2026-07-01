@@ -16,15 +16,15 @@ const {
   mockCalculateDailyFortune: vi.fn((_date?: Date) => ({ type: 'daily-result' })),
 }));
 
-vi.mock('./algorithms/liuyao', () => ({
+vi.mock('mingyu-core/divination/liuyao', () => ({
   generateLiuyao: mockGenerateLiuyao,
 }));
 
-vi.mock('./algorithms/meihua', () => ({
+vi.mock('mingyu-core/divination/meihua', () => ({
   generateMeihua: mockGenerateMeihua,
 }));
 
-vi.mock('./algorithms/qimen', () => ({
+vi.mock('mingyu-core/divination/qimen', () => ({
   generateQimen: mockGenerateQimen,
 }));
 

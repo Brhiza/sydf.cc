@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { TimeManager } from '../../utils/timeManager';
 import { TimeManager as McTimeManager } from 'mingyu-core/calendar';
-import { generateMeihua } from './meihua';
+import { generateMeihua } from 'mingyu-core/divination/meihua';
 
 const movingYaoCases = [
   {
