@@ -96,4 +96,28 @@ describe('DivinationResult', () => {
 
     expect(wrapper.find('.section-title').text()).toBe('塔罗牌·单牌指引结果');
   });
+
+  it('旧塔罗结果缺少牌阵名称时应从 mingyu-core 牌阵配置兜底', () => {
+    const wrapper = mount(DivinationResult, {
+      props: {
+        type: 'tarot',
+        result: {
+          id: 'tarot-legacy-1',
+          type: 'tarot',
+          data: {
+            cards: [
+              { id: 1, name: '愚者', position: '现状', reversed: false, keywords: ['开始'] },
+              { id: 2, name: '魔术师', position: '挑战', reversed: false, keywords: ['创造'] },
+              { id: 3, name: '女祭司', position: '建议', reversed: false, keywords: ['直觉'] },
+            ],
+            spreadType: 'three',
+            timestamp: 1,
+          },
+          aiResponse: '测试解读',
+        } as DivinationResultType,
+      },
+    });
+
+    expect(wrapper.find('.section-title').text()).toBe('塔罗牌·时间流牌阵结果');
+  });
 });

@@ -41,6 +41,7 @@ import DivinationAISection from './result/DivinationAISection.vue';
 import {
   getDisplayedConversationHistory,
 } from './result/ai/divination-ai-section';
+import { resolveTarotSpreadName } from '@/shared/tarot-spreads';
 
 const props = withDefaults(
   defineProps<{
@@ -90,19 +91,15 @@ const resultTitle = computed(() => {
   if (type === 'tarot') {
     // TypeScript 现在知道 result.data 是 TarotData 类型
     const data = result.data as import('@/types').TarotData;
-    const spreadName = data.spreadName;
+    const spreadName = resolveTarotSpreadName({
+      spreadName: data.spreadName,
+      spreadType: data.spreadType,
+      cardCount: data.cards?.length || 0,
+    });
     if (spreadName) {
       return `塔罗牌·${spreadName}结果`;
     }
-    // 如果没有牌阵名称，根据卡牌数量判断
-    const cardCount = data.cards?.length || 0;
-    if (cardCount === 1) {
-      return '塔罗牌·单牌指引结果';
-    } else if (cardCount === 3) {
-      return '塔罗牌·时间流牌阵结果';
-    } else {
-      return '塔罗牌占卜结果';
-    }
+    return '塔罗牌占卜结果';
   }
 
   // 其他占卜类型的标题
