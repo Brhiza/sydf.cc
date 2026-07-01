@@ -44,6 +44,17 @@ describe('prompt-guidance', () => {
     ).toContain('性别: 女');
   });
 
+  it('会复用统一奇门排盘设置文案', () => {
+    expect(
+      buildSupplementaryInfoLines({
+        qimenSettings: {
+          method: 'feipan',
+          scope: 'day',
+        },
+      })
+    ).toContain('奇门排盘: 日家飞盘法');
+  });
+
   it('会返回复杂度、情感和术语指导文本', () => {
     expect(
       getComplexityDescription({

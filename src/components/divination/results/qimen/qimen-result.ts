@@ -1,6 +1,7 @@
 import { formatDateTime, formatGanZhi } from '@/utils/date-formatter';
 import type { QimenData, QimenJiuGongGe, SupplementaryInfo } from '@/types/divination';
 import { createQimenPriorityPalaces } from '@/utils/qimen-guidance';
+import { formatQimenScopeLabel } from '@/shared/qimen-settings';
 
 const QIMEN_GONG_ORDER = [4, 9, 2, 3, 5, 7, 8, 1, 6];
 const GONG_POSITION_CLASSES = [
@@ -19,13 +20,6 @@ export interface QimenInfoItem {
   label: string;
   value: string;
 }
-
-const QIMEN_SCOPE_LABELS = {
-  hour: '时家',
-  day: '日家',
-  month: '月家',
-  year: '年家',
-} as const;
 
 function createCompactPatternValue(patternTags: string[] | undefined): string {
   if (!patternTags?.length) {
@@ -99,7 +93,7 @@ export function createQimenInfoItems(
     },
     {
       label: '排盘级别',
-      value: QIMEN_SCOPE_LABELS[data.scope || 'hour'],
+      value: formatQimenScopeLabel(data.scope),
     },
     {
       label: '值符值使',

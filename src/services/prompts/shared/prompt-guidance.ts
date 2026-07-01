@@ -1,4 +1,5 @@
 import type { SupplementaryInfo } from '@/types';
+import { formatQimenSettingsLabel } from '@/shared/qimen-settings';
 import type { ComplexityLevel, EmotionState, UserExperienceLevel } from './types';
 
 const CHINESE_ZODIACS = ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪'];
@@ -53,12 +54,7 @@ export function buildSupplementaryInfoLines(
   }
 
   if (supplementaryInfo.qimenSettings) {
-    const scopeLabels = { hour: '时家', day: '日家', month: '月家', year: '年家' } as const;
-    const methodLabel = supplementaryInfo.qimenSettings.method === 'feipan' ? '飞盘法' : '转盘法';
-    const scopeLabel = supplementaryInfo.qimenSettings.scope
-      ? scopeLabels[supplementaryInfo.qimenSettings.scope]
-      : '时家';
-    infoParts.push(`奇门排盘${delimiter}${scopeLabel}${methodLabel}`);
+    infoParts.push(`奇门排盘${delimiter}${formatQimenSettingsLabel(supplementaryInfo.qimenSettings)}`);
   }
 
   return infoParts;
