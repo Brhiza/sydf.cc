@@ -48,6 +48,7 @@ describe('qimen-result', () => {
       ganzhi: { year: '甲子', month: '乙丑', day: '丙寅', hour: '丁卯' },
       isYangDun: true,
       juShu: 3,
+      scope: 'day',
       zhiFu: '天蓬',
       zhiShi: '休门',
       patternTags: ['星伏吟', '门反吟'],
@@ -58,6 +59,27 @@ describe('qimen-result', () => {
       palaceInsights: [
         { gong: 6, name: '乾六宫', level: '有利', summary: '开门同宫，可作为推进方位。' },
       ],
+      voidBranches: ['子', '丑'],
+      voidPalaces: [{ branch: '子', palace: 1, name: '坎一宫' }],
+      horseStar: { branch: '申', sourceBranch: '寅', palace: 2, name: '坤二宫' },
+      classicPatterns: [
+        { name: '三奇得使', type: 'good', score: 12, summary: '三奇得用。', palaces: [6] },
+      ],
+      directions: {
+        goodDirections: [
+          { gong: 6, name: '乾六宫', direction: '西北', score: 88, use: '推进', reasons: ['开门'] },
+        ],
+        avoidDirections: [
+          { gong: 1, name: '坎一宫', direction: '正北', score: 31, use: '延后', reasons: ['空亡'] },
+        ],
+      },
+      yingQi: {
+        minDays: 3,
+        maxDays: 9,
+        rhythm: '中',
+        sources: ['值使门'],
+        description: '先慢后稳。',
+      },
       timeInfo: {
         year: '2026',
         month: '03',
@@ -81,15 +103,27 @@ describe('qimen-result', () => {
       '起卦时间',
       '干支信息',
       '遁甲局数',
+      '排盘级别',
       '值符值使',
       '特殊时辰',
+      '旬空',
+      '驿马',
       '格局标签',
+      '经典格局',
+      '应期参考',
+      '方位建议',
       '问事焦点',
     ]);
     expect(items[2]?.value).toBe('阳遁3局');
-    expect(items[4]?.value).toBe('五不遇时');
-    expect(items[5]?.value).toBe('星伏吟、门反吟');
-    expect(items[6]?.value).toContain('6宫');
+    expect(items[3]?.value).toBe('日家');
+    expect(items[5]?.value).toBe('五不遇时');
+    expect(items[6]?.value).toContain('空亡子、丑');
+    expect(items[7]?.value).toContain('寅马在申');
+    expect(items[8]?.value).toBe('星伏吟、门反吟');
+    expect(items[9]?.value).toBe('三奇得使');
+    expect(items[10]?.value).toContain('约3-9天');
+    expect(items[11]?.value).toContain('宜西北');
+    expect(items[12]?.value).toContain('6宫');
   });
 
   it('奇门结果页应复用统一的结果外层包裹，保持头部留白一致', () => {

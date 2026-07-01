@@ -7,7 +7,12 @@ import {
   meihuaPersonOptions,
   meihuaSoundOptions,
 } from 'mingyu-core/divination/meihua-omens';
-import type { MeihuaDivinationMethod, SupplementaryInfo } from '@/types/divination';
+import type {
+  MeihuaDivinationMethod,
+  QimenMethod,
+  QimenScope,
+  SupplementaryInfo,
+} from '@/types/divination';
 import { storageService } from '@/services/storageService';
 
 const STORAGE_KEY = 'supplementaryInfo';
@@ -28,6 +33,8 @@ export interface SupplementaryInfoRefs {
   meihuaExternalObject: Ref<typeof meihuaObjectOptions[number]['name'] | undefined>;
   meihuaExternalSound: Ref<typeof meihuaSoundOptions[number]['name'] | undefined>;
   meihuaExternalColor: Ref<typeof meihuaColorOptions[number]['name'] | undefined>;
+  qimenMethod: Ref<QimenMethod>;
+  qimenScope: Ref<QimenScope>;
 }
 
 function restoreFromStorage(refs: SupplementaryInfoRefs) {
@@ -41,6 +48,7 @@ function restoreFromStorage(refs: SupplementaryInfoRefs) {
     outputLength: savedOutputLength,
     dayPillar: savedDayPillar,
     meihuaSettings: savedMeihuaSettings,
+    qimenSettings: savedQimenSettings,
   } = savedInfo;
 
   refs.gender.value = savedGender as '男' | '女' | undefined;
@@ -71,6 +79,15 @@ function restoreFromStorage(refs: SupplementaryInfoRefs) {
   } else {
     refs.meihuaMethod.value = 'time';
   }
+
+  if (savedQimenSettings && typeof savedQimenSettings === 'object' && savedQimenSettings !== null) {
+    const qimenSettings = savedQimenSettings as SupplementaryInfo['qimenSettings'];
+    refs.qimenMethod.value = qimenSettings?.method || 'zhuanpan';
+    refs.qimenScope.value = qimenSettings?.scope || 'hour';
+  } else {
+    refs.qimenMethod.value = 'zhuanpan';
+    refs.qimenScope.value = 'hour';
+  }
 }
 
 function buildPersistedSnapshot(values: {
@@ -89,6 +106,8 @@ function buildPersistedSnapshot(values: {
   meihuaExternalObject: SupplementaryInfoRefs['meihuaExternalObject']['value'];
   meihuaExternalSound: SupplementaryInfoRefs['meihuaExternalSound']['value'];
   meihuaExternalColor: SupplementaryInfoRefs['meihuaExternalColor']['value'];
+  qimenMethod: QimenMethod;
+  qimenScope: QimenScope;
 }) {
   return {
     gender: values.gender,
@@ -138,6 +157,13 @@ function buildPersistedSnapshot(values: {
               : {}),
           }
         : undefined,
+    qimenSettings:
+      values.qimenMethod !== 'zhuanpan' || values.qimenScope !== 'hour'
+        ? {
+            method: values.qimenMethod,
+            scope: values.qimenScope,
+          }
+        : undefined,
   };
 }
 
@@ -163,6 +189,8 @@ export function setupSupplementaryInfoPersistence(refs: SupplementaryInfoRefs) {
       refs.meihuaExternalObject,
       refs.meihuaExternalSound,
       refs.meihuaExternalColor,
+      refs.qimenMethod,
+      refs.qimenScope,
     ],
     ([
       gender,
@@ -180,6 +208,8 @@ export function setupSupplementaryInfoPersistence(refs: SupplementaryInfoRefs) {
       meihuaExternalObject,
       meihuaExternalSound,
       meihuaExternalColor,
+      qimenMethod,
+      qimenScope,
     ]) => {
       const snapshot = buildPersistedSnapshot({
         gender,
@@ -197,6 +227,8 @@ export function setupSupplementaryInfoPersistence(refs: SupplementaryInfoRefs) {
         meihuaExternalObject,
         meihuaExternalSound,
         meihuaExternalColor,
+        qimenMethod,
+        qimenScope,
       });
       storageService.setItem(STORAGE_KEY, snapshot);
     }

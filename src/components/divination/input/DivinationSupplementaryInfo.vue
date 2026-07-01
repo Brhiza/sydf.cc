@@ -20,6 +20,34 @@
           </button>
         </div>
 
+        <template v-if="showQimenMethodSelector">
+          <div class="method-switcher">
+            <button
+              v-for="option in qimenScopeOptions"
+              :key="option.value"
+              type="button"
+              class="method-chip"
+              :class="{ active: qimenScope === option.value }"
+              @click="qimenScope = option.value"
+            >
+              {{ option.label }}
+            </button>
+          </div>
+
+          <div class="method-switcher">
+            <button
+              v-for="option in qimenMethodOptions"
+              :key="option.value"
+              type="button"
+              class="method-chip"
+              :class="{ active: qimenMethod === option.value }"
+              @click="qimenMethod = option.value"
+            >
+              {{ option.label }}
+            </button>
+          </div>
+        </template>
+
         <DatePicker v-if="divinationType === 'daily'" v-model="localDate" />
       </div>
     </div>
@@ -66,7 +94,12 @@
 </template>
 
 <script setup lang="ts">
-import type { DivinationType, MeihuaDivinationMethod } from '@/types/divination';
+import type {
+  DivinationType,
+  MeihuaDivinationMethod,
+  QimenMethod,
+  QimenScope,
+} from '@/types/divination';
 import DatePicker from '@/components/common/DatePicker.vue';
 import BasicSupplementaryFields from './BasicSupplementaryFields.vue';
 import MeihuaMethodFields from './MeihuaMethodFields.vue';
@@ -79,6 +112,7 @@ type SelectOption = { name: string; remark: string };
 defineProps<{
   divinationType?: DivinationType | '';
   showDivinationMethodSelector: boolean;
+  showQimenMethodSelector: boolean;
   supplementaryInfoToggleText: string;
   heavenlyStems: SelectOption[];
   earthlyBranches: SelectOption[];
@@ -111,12 +145,26 @@ const meihuaExternalAnimal = defineModel<string | undefined>('meihuaExternalAnim
 const meihuaExternalObject = defineModel<string | undefined>('meihuaExternalObject');
 const meihuaExternalSound = defineModel<string | undefined>('meihuaExternalSound');
 const meihuaExternalColor = defineModel<string | undefined>('meihuaExternalColor');
+const qimenMethod = defineModel<QimenMethod>('qimenMethod', { default: 'zhuanpan' });
+const qimenScope = defineModel<QimenScope>('qimenScope', { default: 'hour' });
 
 const methodOptions = [
   { label: '时间', value: 'time' },
   { label: '数字', value: 'number' },
   { label: '随机', value: 'random' },
   { label: '外应', value: 'external' },
+] as const;
+
+const qimenScopeOptions = [
+  { label: '时家', value: 'hour' },
+  { label: '日家', value: 'day' },
+  { label: '月家', value: 'month' },
+  { label: '年家', value: 'year' },
+] as const;
+
+const qimenMethodOptions = [
+  { label: '转盘', value: 'zhuanpan' },
+  { label: '飞盘', value: 'feipan' },
 ] as const;
 </script>
 

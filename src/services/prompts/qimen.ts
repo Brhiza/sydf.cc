@@ -94,6 +94,19 @@ function formatQimenData(data: QimenData, context: PromptFormatterContext): stri
   const yongShenHint = getQimenYongShenHint(analysis.types, data, supplementaryInfo);
   const patternHint = data.patternDetails?.map((item) => `${item.tag}：${item.summary}`).join('；') || '无';
   const palaceHint = data.palaceInsights?.map((item) => `${item.name}${item.level}：${item.summary}`).join('；') || '无';
+  const classicPatternHint = data.classicPatterns?.map((item) => `${item.name}（${item.type}，${item.score}分）：${item.summary}`).join('；') || '无';
+  const stemRelationHint = data.stemRelations?.map((item) => `${item.gong}宫${item.heavenStem}/${item.earthStem}：${item.pattern || item.relation}`).join('；') || '无';
+  const goodDirectionHint = data.directions?.goodDirections?.map((item) => `${item.name}${item.direction}（${item.score}分）：${item.use}，${item.reasons.join('、')}`).join('；') || '无';
+  const avoidDirectionHint = data.directions?.avoidDirections?.map((item) => `${item.name}${item.direction}（${item.score}分）：${item.use}，${item.reasons.join('、')}`).join('；') || '无';
+  const voidHint = data.voidBranches?.length
+    ? `${data.voidBranches.join('、')}${data.voidPalaces?.length ? `，落${data.voidPalaces.map((item) => `${item.name}${item.branch}`).join('、')}` : ''}`
+    : '无';
+  const horseHint = data.horseStar
+    ? `${data.horseStar.sourceBranch}马在${data.horseStar.branch}，落${data.horseStar.name}`
+    : '无';
+  const yingQiHint = data.yingQi
+    ? `${data.yingQi.rhythm}，约${data.yingQi.minDays}-${data.yingQi.maxDays}天；${data.yingQi.description}；依据：${data.yingQi.sources.join('、')}`
+    : '无';
   const questionHints = createQimenQuestionHints(question, data, supplementaryInfo);
   const priorityPalaces = createQimenPriorityPalaces(question, data, supplementaryInfo).slice(0, 3);
   const questionHintText =
@@ -126,9 +139,16 @@ function formatQimenData(data: QimenData, context: PromptFormatterContext): stri
 - **${ganzhiStr}**
 - **局数**: ${data.isYangDun ? '阳遁' : '阴遁'}${data.juShu}局
 - **核心**: 值符: ${data.zhiFu} | 值使: ${data.zhiShi}
+- **排盘级别**: ${data.scope || 'hour'}
+- **空亡驿马**: 空亡${voidHint}；驿马${horseHint}
 - **格局标签**: ${data.patternTags?.join('、') || '无明显格局标签'}
 - **格局提示**: ${patternHint}
+- **经典格局**: ${classicPatternHint}
+- **天地盘干关系**: ${stemRelationHint}
 - **宫位提示**: ${palaceHint}
+- **吉方建议**: ${goodDirectionHint}
+- **避方建议**: ${avoidDirectionHint}
+- **应期参考**: ${yingQiHint}
 - **用神参考**: ${yongShenHint}
 
 **问事宫位参考**:

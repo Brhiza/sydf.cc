@@ -37,8 +37,11 @@
       v-model:meihua-external-object="meihuaExternalObject"
       v-model:meihua-external-sound="meihuaExternalSound"
       v-model:meihua-external-color="meihuaExternalColor"
+      v-model:qimen-method="qimenMethod"
+      v-model:qimen-scope="qimenScope"
       :divination-type="divinationType"
       :show-divination-method-selector="divinationType === 'meihua'"
+      :show-qimen-method-selector="divinationType === 'qimen'"
       :supplementary-info-toggle-text="supplementaryInfoToggleText"
       :heavenly-stems="heavenlyStems"
       :earthly-branches="earthlyBranches"
@@ -143,6 +146,8 @@ const {
   meihuaExternalObject,
   meihuaExternalSound,
   meihuaExternalColor,
+  qimenMethod,
+  qimenScope,
   heavenlyStems,
   earthlyBranches,
   meihuaDirectionOptions,

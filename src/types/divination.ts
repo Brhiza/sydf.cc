@@ -73,6 +73,14 @@ export interface MeihuaSettings {
   externalOmens?: MeihuaExternalOmens;
 }
 
+export type QimenMethod = 'zhuanpan' | 'feipan';
+export type QimenScope = 'hour' | 'day' | 'month' | 'year';
+
+export interface QimenSettings {
+  method?: QimenMethod;
+  scope?: QimenScope;
+}
+
 // 基础时间信息
 export interface BaseGanZhi {
   year: string;
@@ -272,8 +280,15 @@ export interface QimenTimeInfo {
   [key: string]: string;
 }
 
+export interface QimenBranchPalace {
+  branch: string;
+  palace: number;
+  name: string;
+}
+
 // 奇门遁甲数据
 export interface QimenData {
+  scope?: QimenScope;
   jiuGongGe: QimenJiuGongGe[];
   ganzhi: BaseGanZhi;
   isYangDun: boolean;
@@ -291,8 +306,52 @@ export interface QimenData {
     level: '有利' | '风险' | '关注';
     summary: string;
   }>;
+  voidBranches?: string[];
+  voidPalaces?: QimenBranchPalace[];
+  horseStar?: QimenBranchPalace & {
+    sourceBranch: string;
+  };
   timeInfo: QimenTimeInfo;
   specialConditions?: QimenSpecialConditions; // 特殊时辰情况
+  classicPatterns?: Array<{
+    name: string;
+    type: 'good' | 'bad' | 'neutral';
+    score: number;
+    summary: string;
+    palaces: number[];
+  }>;
+  stemRelations?: Array<{
+    gong: number;
+    heavenStem: string;
+    earthStem: string;
+    relation: string;
+    pattern?: string;
+  }>;
+  directions?: {
+    goodDirections: Array<{
+      gong: number;
+      name: string;
+      direction: string;
+      score: number;
+      use: string;
+      reasons: string[];
+    }>;
+    avoidDirections: Array<{
+      gong: number;
+      name: string;
+      direction: string;
+      score: number;
+      use: string;
+      reasons: string[];
+    }>;
+  };
+  yingQi?: {
+    minDays: number;
+    maxDays: number;
+    rhythm: '快' | '中' | '慢';
+    sources: string[];
+    description: string;
+  };
   timestamp: number;
 }
 
@@ -446,6 +505,7 @@ export interface SupplementaryInfo {
     earthlyBranch: string; // 地支
   };
   meihuaSettings?: MeihuaSettings;
+  qimenSettings?: QimenSettings;
   date?: string; // YYYY-MM-DD for daily fortune
 }
 

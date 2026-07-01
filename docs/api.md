@@ -51,7 +51,7 @@
 - `daily`：今日运势（日家奇门）
 - `liuyao`：六爻
 - `meihua`：梅花易数
-- `qimen`：奇门遁甲（转盘法）
+- `qimen`：奇门遁甲（默认时家转盘法，可选飞盘法及日/月/年家）
 - `ssgw`：三山国王灵签
 - `tarot`：塔罗（多牌阵）
 - `tarot_single`：旧版单牌塔罗兼容输入（已废弃，建议改用 `tarot` + `options.spreadType: "single"`）
@@ -89,6 +89,10 @@ Authorization: Bearer <DEV_API_KEY>
           "person": "少女",
           "count": 5
         }
+      },
+      "qimenSettings": {
+        "method": "zhuanpan",
+        "scope": "hour"
       }
     }
   }
@@ -105,7 +109,8 @@ Authorization: Bearer <DEV_API_KEY>
 `options`：
 
 - `datetime`（可选）：指定起卦/排盘时间（ISO 8601，建议携带时区偏移，例如 `+08:00`）
-- 六爻、奇门固定使用服务端默认起卦/排盘逻辑
+- 六爻固定使用服务端默认起卦逻辑
+- 奇门默认使用时家转盘法；可通过 `supplementaryInfo.qimenSettings` 指定排盘方式
 - 梅花易数支持通过 `supplementaryInfo.meihuaSettings` 指定起卦方式
 - `date`（可选）：`daily` 专用，`YYYY-MM-DD`
 - `signNumber`（可选）：`ssgw` 专用，不传则随机抽签
@@ -140,6 +145,15 @@ Authorization: Bearer <DEV_API_KEY>
 
 - 外应起卦至少需要两项可映射的外应
 - 当前实现会按固定优先级取前两项外应成上卦、下卦：`direction -> person -> animal -> object -> sound -> color`
+
+`supplementaryInfo.qimenSettings` 可用值：
+
+- `method: "zhuanpan"`：转盘法，默认值
+- `method: "feipan"`：飞盘法
+- `scope: "hour"`：时家奇门，默认值
+- `scope: "day"`：日家奇门
+- `scope: "month"`：月家奇门
+- `scope: "year"`：年家奇门
 
 ### 5.3 非流式响应（`stream=false`）
 

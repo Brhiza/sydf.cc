@@ -36,6 +36,10 @@ interface SupplementaryInfo {
       color?: '金白' | '土黄' | '青碧' | '青绿' | '黑蓝' | '赤紫' | '棕黄' | '银白';
     };
   };
+  qimenSettings?: {
+    method?: 'zhuanpan' | 'feipan';
+    scope?: 'hour' | 'day' | 'month' | 'year';
+  };
   date?: string; // YYYY-MM-DD，仅用于今日运势
 }
 
@@ -199,6 +203,14 @@ function buildUserPrompt(args: {
   if (supplementaryInfo?.birthYear) supplementaryLines.push(`出生年份：${supplementaryInfo.birthYear}`);
   if (supplementaryInfo?.interpretationStyle) supplementaryLines.push(`解读风格：${supplementaryInfo.interpretationStyle}`);
   if (supplementaryInfo?.outputLength) supplementaryLines.push(`输出长度：${supplementaryInfo.outputLength}`);
+  if (supplementaryInfo?.qimenSettings) {
+    const methodLabel = supplementaryInfo.qimenSettings.method === 'feipan' ? '飞盘法' : '转盘法';
+    const scopeLabels = { hour: '时家', day: '日家', month: '月家', year: '年家' } as const;
+    const scopeLabel = supplementaryInfo.qimenSettings.scope
+      ? scopeLabels[supplementaryInfo.qimenSettings.scope]
+      : '时家';
+    supplementaryLines.push(`奇门排盘：${scopeLabel}${methodLabel}`);
+  }
 
   const questionLine =
     typeof question === 'string' && question.trim()
@@ -246,7 +258,8 @@ async function generateDivinationData(
   }
 
   if (type === 'qimen') {
-    return generateQimen(baseDate);
+    const settings = supplementaryInfo?.qimenSettings;
+    return generateQimen(baseDate, settings?.method, settings?.scope);
   }
 
   if (type === 'ssgw') {

@@ -45,18 +45,33 @@ describe('DataGenerationService', () => {
     vi.clearAllMocks();
   });
 
-  it('六爻、奇门应始终走默认算法入口', async () => {
+  it('六爻应始终走默认算法入口', async () => {
     await dataGenerationService.generateDivination('liuyao', undefined, undefined, {
       divinationMethod: 'number',
       divinationNumber: 123456,
     } as unknown as SupplementaryInfo);
+
+    expect(mockGenerateLiuyao).toHaveBeenCalledWith();
+  });
+
+  it('奇门未指定设置时应继续走默认时家转盘', async () => {
     await dataGenerationService.generateDivination('qimen', undefined, undefined, {
       divinationMethod: 'number',
       divinationNumber: 789,
     } as unknown as SupplementaryInfo);
 
-    expect(mockGenerateLiuyao).toHaveBeenCalledWith();
-    expect(mockGenerateQimen).toHaveBeenCalledWith();
+    expect(mockGenerateQimen).toHaveBeenCalledWith(undefined, undefined, undefined);
+  });
+
+  it('奇门应透传原生排盘设置', async () => {
+    await dataGenerationService.generateDivination('qimen', undefined, undefined, {
+      qimenSettings: {
+        method: 'feipan',
+        scope: 'day',
+      },
+    });
+
+    expect(mockGenerateQimen).toHaveBeenCalledWith(undefined, 'feipan', 'day');
   });
 
   it('梅花应透传自定义起卦设置', async () => {
