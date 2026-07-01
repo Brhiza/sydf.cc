@@ -199,6 +199,34 @@ describe('DivinationOrchestrator', () => {
     expect(onAIError).toHaveBeenCalledWith('AI 服务异常')
   })
 
+  it('塔罗请求缺少牌阵时应使用默认单牌指引', async () => {
+    mockGenerateDivination.mockResolvedValue({
+      spreadType: 'single',
+      spreadName: '单牌指引',
+      cards: [],
+      timestamp: 1711111111111,
+    })
+    mockGenerateAIResponse.mockResolvedValue('AI 解读完成')
+
+    const orchestrator = new DivinationOrchestrator()
+
+    await orchestrator.executeDivination(
+      {
+        type: 'tarot',
+        question: '现在该怎么做？',
+      },
+      {
+        onInitialResult: vi.fn(),
+        onAIChunk: vi.fn(),
+        onAIComplete: vi.fn(),
+        onAIError: vi.fn(),
+        onConversationUpdate: vi.fn(),
+      }
+    )
+
+    expect(mockGenerateDivination).toHaveBeenCalledWith('tarot', 'single', undefined)
+  })
+
   it('首轮 AI 流式更新期间应保存已生成的部分内容，避免刷新后历史记录空白', async () => {
     vi.useFakeTimers()
 

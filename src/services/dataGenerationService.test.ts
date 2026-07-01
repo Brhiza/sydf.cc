@@ -141,4 +141,17 @@ describe('DataGenerationService', () => {
       ],
     });
   });
+
+  it('塔罗未传牌阵时应使用默认单牌指引', async () => {
+    mockDrawSpreadCards.mockReturnValue({
+      spreadType: 'single',
+      spreadName: '单牌指引',
+      cards: [],
+      timestamp: 1711111111111,
+    });
+
+    await dataGenerationService.generateDivination('tarot');
+
+    expect(mockDrawSpreadCards).toHaveBeenCalledWith('single');
+  });
 });

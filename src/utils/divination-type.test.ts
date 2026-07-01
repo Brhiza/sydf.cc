@@ -18,7 +18,7 @@ describe('divination-type', () => {
 
   it('旧单牌塔罗兼容入口应统一回到 single 牌阵', () => {
     expect(resolveTarotSpreadType('tarot_single')).toBe('single');
-    expect(resolveTarotSpreadType('tarot')).toBe('three');
+    expect(resolveTarotSpreadType('tarot')).toBe('single');
     expect(resolveTarotSpreadType('tarot', 'celtic')).toBe('celtic');
     expect(resolveTarotSpreadType('qimen')).toBeUndefined();
   });
