@@ -123,6 +123,67 @@ describe('开发者 API 兼容性', () => {
     expect(data.divination.juShu).toBeLessThanOrEqual(9);
   });
 
+  it('奇门应支持原生排盘设置', async () => {
+    const fetchMock = vi.fn(async () =>
+      new Response(
+        JSON.stringify({
+          choices: [
+            {
+              message: {
+                content: '日家奇门测试解读',
+              },
+            },
+          ],
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      )
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const request = new Request('https://sydf.cc/api/v1/divination', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer test-dev-key',
+      },
+      body: JSON.stringify({
+        type: 'qimen',
+        question: '这个月适合推进新项目吗？',
+        stream: false,
+        options: {
+          datetime: '2026-01-01T12:00:00+08:00',
+          supplementaryInfo: {
+            qimenSettings: {
+              method: 'feipan',
+              scope: 'day',
+            },
+          },
+        },
+      }),
+    });
+
+    const response = await onRequest({
+      request,
+      env: {
+        DEV_API_KEY: 'test-dev-key',
+        OPENAI_API_KEY: 'test-openai-key',
+      },
+    });
+
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.ok).toBe(true);
+    expect(data.type).toBe('qimen');
+    expect(data.interpretation).toBe('日家奇门测试解读');
+    expect(data.divination.scope).toBe('day');
+    expect(data.divination.classicPatterns?.length).toBeGreaterThan(0);
+    expect(data.divination.directions?.goodDirections?.length).toBeGreaterThan(0);
+  });
+
   it('梅花应支持数字起卦并返回对应起卦信息', async () => {
     const fetchMock = vi.fn(async () =>
       new Response(

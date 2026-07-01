@@ -52,6 +52,15 @@ export function buildSupplementaryInfoLines(
     infoParts.push(`输出长度${delimiter}${outputLength}`);
   }
 
+  if (supplementaryInfo.qimenSettings) {
+    const scopeLabels = { hour: '时家', day: '日家', month: '月家', year: '年家' } as const;
+    const methodLabel = supplementaryInfo.qimenSettings.method === 'feipan' ? '飞盘法' : '转盘法';
+    const scopeLabel = supplementaryInfo.qimenSettings.scope
+      ? scopeLabels[supplementaryInfo.qimenSettings.scope]
+      : '时家';
+    infoParts.push(`奇门排盘${delimiter}${scopeLabel}${methodLabel}`);
+  }
+
   return infoParts;
 }
 

@@ -35,7 +35,8 @@ export class DataGenerationService {
         return meihuaData as MeihuaData;
       }
       case 'qimen': {
-        return generateQimen();
+        const settings = supplementaryInfo?.qimenSettings;
+        return generateQimen(undefined, settings?.method, settings?.scope);
       }
       case 'tarot': {
         const { drawSpreadCards, getCardKeywords } = await import('mingyu-core/divination/tarot');

@@ -20,6 +20,13 @@ export interface QimenInfoItem {
   value: string;
 }
 
+const QIMEN_SCOPE_LABELS = {
+  hour: '时家',
+  day: '日家',
+  month: '月家',
+  year: '年家',
+} as const;
+
 function createCompactPatternValue(patternTags: string[] | undefined): string {
   if (!patternTags?.length) {
     return '';
@@ -91,6 +98,10 @@ export function createQimenInfoItems(
       value: `${data.isYangDun ? '阳遁' : '阴遁'}${data.juShu}局`,
     },
     {
+      label: '排盘级别',
+      value: QIMEN_SCOPE_LABELS[data.scope || 'hour'],
+    },
+    {
       label: '值符值使',
       value: `${data.zhiFu} ${data.zhiShi}`,
     },
@@ -103,11 +114,68 @@ export function createQimenInfoItems(
     });
   }
 
+  const voidValue = [
+    data.voidBranches?.length ? `空亡${data.voidBranches.join('、')}` : '',
+    data.voidPalaces?.length
+      ? `落${data.voidPalaces.map((item) => `${item.name}${item.branch}`).join('、')}`
+      : '',
+  ]
+    .filter(Boolean)
+    .join('，');
+  if (voidValue) {
+    items.push({
+      label: '旬空',
+      value: voidValue,
+    });
+  }
+
+  if (data.horseStar) {
+    items.push({
+      label: '驿马',
+      value: `${data.horseStar.sourceBranch}马在${data.horseStar.branch}，落${data.horseStar.name}`,
+    });
+  }
+
   const compactPatternValue = createCompactPatternValue(data.patternTags);
   if (compactPatternValue) {
     items.push({
       label: '格局标签',
       value: compactPatternValue,
+    });
+  }
+
+  const classicPatternValue = data.classicPatterns
+    ?.slice(0, 3)
+    .map((item) => item.name)
+    .join('、');
+  if (classicPatternValue) {
+    items.push({
+      label: '经典格局',
+      value: classicPatternValue,
+    });
+  }
+
+  if (data.yingQi) {
+    items.push({
+      label: '应期参考',
+      value: `${data.yingQi.rhythm}，约${data.yingQi.minDays}-${data.yingQi.maxDays}天：${data.yingQi.description}`,
+    });
+  }
+
+  const directionValue = [
+    data.directions?.goodDirections?.[0]
+      ? `宜${data.directions.goodDirections[0].direction}（${data.directions.goodDirections[0].use}）`
+      : '',
+    data.directions?.avoidDirections?.[0]
+      ? `避${data.directions.avoidDirections[0].direction}（${data.directions.avoidDirections[0].use}）`
+      : '',
+  ]
+    .filter(Boolean)
+    .join('；');
+  if (directionValue) {
+    items.push({
+      label: '方位建议',
+      value: directionValue,
     });
   }
 
