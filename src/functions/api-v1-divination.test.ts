@@ -67,8 +67,11 @@ describe('开发者 API 兼容性', () => {
   });
 
   it('奇门旧版 method/divinationNumber 字段应被忽略并继续按时间起局', async () => {
-    const fetchMock = vi.fn(async () =>
-      new Response(
+    let capturedRequestBody: Record<string, unknown> | null = null;
+    const fetchMock = vi.fn(async (request: Request) => {
+      capturedRequestBody = JSON.parse(await request.clone().text());
+
+      return new Response(
         JSON.stringify({
           choices: [
             {
@@ -82,8 +85,8 @@ describe('开发者 API 兼容性', () => {
           status: 200,
           headers: { 'Content-Type': 'application/json' },
         }
-      )
-    );
+      );
+    });
     vi.stubGlobal('fetch', fetchMock);
 
     const request = new Request('https://sydf.cc/api/v1/divination', {
@@ -121,6 +124,11 @@ describe('开发者 API 兼容性', () => {
     expect(data.divination.timeInfo.solarTerm).toBeTypeOf('string');
     expect(data.divination.juShu).toBeGreaterThanOrEqual(1);
     expect(data.divination.juShu).toBeLessThanOrEqual(9);
+    expect(
+      ((capturedRequestBody as {
+        messages?: Array<{ role?: string; content?: string }>;
+      } | null)?.messages?.find((message) => message.role === 'user')?.content || '')
+    ).not.toContain('奇门排盘：');
   });
 
   it('奇门应支持原生排盘设置', async () => {
