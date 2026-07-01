@@ -258,7 +258,7 @@ async function generateDivinationData(
   }
 
   if (type === 'ssgw') {
-    return drawRandomSign();
+    return drawRandomSign(baseDate);
   }
 
   if (type === 'tarot') {
