@@ -65,7 +65,7 @@ export function calculateDailyFortune(date?: Date): DailyFortuneData {
   };
 
   const overallScore = calculateFortuneScore(jiuGongGe);
-  const aspectScores = calculateAspectScores(jiuGongGe, wuxingEnergy);
+  const aspectScores = calculateAspectScores(jiuGongGe, wuxingEnergy, `${dateStr}:${ganzhi.day}`);
   const luckyElements = generateTraditionalLuckyElements(jiuGongGe, ganzhi);
 
   return {
