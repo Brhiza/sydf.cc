@@ -16,6 +16,7 @@ import {
 } from '../../../src/utils/divination-type.ts';
 import { getDivinationTime, setTimezoneOffsetMinutesOverride } from '../../../src/utils/timeManager.ts';
 import { buildDivinationSystemPrompt } from '../../../src/shared/divination-system-prompt.ts';
+import { formatQimenSettingsLabel } from '../../../src/shared/qimen-settings.ts';
 import { proxyAiRequest } from '../../_shared/ai-proxy.js';
 
 interface SupplementaryInfo {
@@ -204,12 +205,7 @@ function buildUserPrompt(args: {
   if (supplementaryInfo?.interpretationStyle) supplementaryLines.push(`解读风格：${supplementaryInfo.interpretationStyle}`);
   if (supplementaryInfo?.outputLength) supplementaryLines.push(`输出长度：${supplementaryInfo.outputLength}`);
   if (supplementaryInfo?.qimenSettings) {
-    const methodLabel = supplementaryInfo.qimenSettings.method === 'feipan' ? '飞盘法' : '转盘法';
-    const scopeLabels = { hour: '时家', day: '日家', month: '月家', year: '年家' } as const;
-    const scopeLabel = supplementaryInfo.qimenSettings.scope
-      ? scopeLabels[supplementaryInfo.qimenSettings.scope]
-      : '时家';
-    supplementaryLines.push(`奇门排盘：${scopeLabel}${methodLabel}`);
+    supplementaryLines.push(`奇门排盘：${formatQimenSettingsLabel(supplementaryInfo.qimenSettings)}`);
   }
 
   const questionLine =
