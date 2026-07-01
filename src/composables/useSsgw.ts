@@ -1,10 +1,7 @@
 import { ref } from 'vue';
 import type { SupplementaryInfo } from '@/types/divination';
 
-/** 三山国王灵签总数 */
-const TOTAL_SIGNS = 92;
-
-type EmitFunction = (event: 'submit', payload: { question: string; signNumber?: number; supplementaryInfo?: SupplementaryInfo | undefined }) => void;
+type EmitFunction = (event: 'submit', payload: { question: string; supplementaryInfo?: SupplementaryInfo | undefined }) => void;
 
 export interface SsgwTossMessage {
   title?: string;
@@ -35,7 +32,6 @@ export function useSsgw(emit: EmitFunction) {
   // 掷杯状态
   const isTossing = ref(false);
   const showTossResult = ref(false);
-  const currentQian = ref(0);
   const beiResults = ref<string[]>([]);
   const tossResult = ref<SsgwTossMessage[]>([]);
   const tossCount = ref(0);
@@ -60,7 +56,6 @@ export function useSsgw(emit: EmitFunction) {
         if (shakingProgress.value >= 5) {
           clearInterval(interval);
           setTimeout(() => {
-            currentQian.value = Math.floor(Math.random() * TOTAL_SIGNS) + 1;
             isShaking.value = false;
             showTossResult.value = true;
             tossCount.value = 0;
@@ -98,7 +93,6 @@ export function useSsgw(emit: EmitFunction) {
           setTimeout(() => {
             emit('submit', {
               question: currentQuestion,
-              signNumber: currentQian.value,
               supplementaryInfo: currentSupplementaryInfo,
             });
           }, 2000);
@@ -140,7 +134,6 @@ export function useSsgw(emit: EmitFunction) {
     shakingProgress,
     isTossing,
     showTossResult,
-    currentQian,
     beiResults,
     tossResult,
     tossCount,

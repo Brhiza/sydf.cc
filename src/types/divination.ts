@@ -515,7 +515,6 @@ export interface DivinationRequest {
   question: string;
   spreadType?: string; // For tarot
   supplementaryInfo?: SupplementaryInfo;
-  signNumber?: number; // For ssgw
   signal?: AbortSignal;
 }
 

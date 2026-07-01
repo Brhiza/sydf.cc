@@ -23,7 +23,6 @@ export class DataGenerationService {
   async generateDivination(
     type: DivinationType,
     spreadType?: string,
-    signNumber?: number,
     supplementaryInfo?: SupplementaryInfo
   ): Promise<LiuyaoData | MeihuaData | QimenData | TarotData | SsgwData | DailyFortuneData> {
     switch (type) {
