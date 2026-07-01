@@ -4,7 +4,7 @@
  */
 
 import type { DivinationData } from '@/types/divination';
-import { LunarUtil } from '@/utils/lunar';
+import { LunarUtil } from 'mingyu-core/calendar';
 import { createAnchoredDateFromDateKey, normalizeDateKey } from '@/utils/date-formatter';
 
 function formatTimeInfoBlock(timeInfoData: ReturnType<typeof LunarUtil.getCurrentTimeInfo>): string {

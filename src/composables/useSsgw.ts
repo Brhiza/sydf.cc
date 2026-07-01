@@ -1,8 +1,25 @@
 import { ref } from 'vue';
-import { throwHolyGrail } from '@/utils/ssgw-data';
 import type { SupplementaryInfo } from '@/types/divination';
 
+/** 三山国王灵签总数 */
+const TOTAL_SIGNS = 92;
+
 type EmitFunction = (event: 'submit', payload: { question: string; signNumber?: number; supplementaryInfo?: SupplementaryInfo | undefined }) => void;
+
+/** 投掷圣杯：一平一凸=圣杯，两平=笑杯，两凸=阴杯 */
+function tossHolyCup(): {
+  result: '圣杯' | '笑杯' | '阴杯';
+  bei1: 'ping' | 'tu';
+  bei2: 'ping' | 'tu';
+} {
+  const bei1 = Math.random() > 0.5 ? 'ping' : 'tu';
+  const bei2 = Math.random() > 0.5 ? 'ping' : 'tu';
+  let result: '圣杯' | '笑杯' | '阴杯';
+  if (bei1 !== bei2) result = '圣杯';
+  else if (bei1 === 'ping') result = '笑杯';
+  else result = '阴杯';
+  return { result, bei1, bei2 };
+}
 
 export function useSsgw(emit: EmitFunction) {
   // 摇签状态
@@ -38,7 +55,7 @@ export function useSsgw(emit: EmitFunction) {
         if (shakingProgress.value >= 5) {
           clearInterval(interval);
           setTimeout(() => {
-            currentQian.value = Math.floor(Math.random() * 61) + 1;
+            currentQian.value = Math.floor(Math.random() * TOTAL_SIGNS) + 1;
             isShaking.value = false;
             showTossResult.value = true;
             tossCount.value = 0;
@@ -59,7 +76,7 @@ export function useSsgw(emit: EmitFunction) {
     beiResults.value = [];
     tossResult.value = '';
 
-    const holyGrailResult = throwHolyGrail();
+    const holyGrailResult = tossHolyCup();
 
     setTimeout(() => {
       beiResults.value = [holyGrailResult.bei1, holyGrailResult.bei2];

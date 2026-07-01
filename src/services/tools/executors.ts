@@ -1,4 +1,4 @@
-import { LunarUtil } from '@/utils/lunar';
+import { LunarUtil } from 'mingyu-core/calendar';
 import { createAnchoredDate, isValidDateParts, pad2 } from './date-utils';
 
 export const toolExecutors: { [key: string]: (args: unknown) => Promise<string> } = {

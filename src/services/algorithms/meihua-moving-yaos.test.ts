@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { TimeManager } from '../../utils/timeManager';
+import { TimeManager as McTimeManager } from 'mingyu-core/calendar';
 import { generateMeihua } from './meihua';
 
 const movingYaoCases = [
@@ -81,11 +82,13 @@ const movingYaoCases = [
 describe('梅花易数动爻回归', () => {
   afterEach(() => {
     TimeManager.setTimezoneOffsetMinutesOverride(null);
+    McTimeManager.setTimezoneOffsetMinutesOverride(null);
   });
 
   it.each(movingYaoCases)(
     '应正确处理第 $movingYao 爻动的体用与变卦体用',
     ({ iso, movingYao, tiGua, yongGua, changedTiGua, changedYongGua, tiYongRelation, changedTiYongRelation, lowerTiYong, upperTiYong }) => {
+      McTimeManager.setTimezoneOffsetMinutesOverride(480);
       TimeManager.setTimezoneOffsetMinutesOverride(480);
 
       const data = generateMeihua(new Date(iso));

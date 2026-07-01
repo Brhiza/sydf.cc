@@ -63,7 +63,7 @@
 import { toRef } from 'vue';
 import { useHexagramDisplay } from '@/composables/useHexagramDisplay';
 import type { MeihuaData } from '@/types/divination';
-import { LiuyaoHelpers } from '@/utils/divination-helpers';
+import { LiuyaoHelpers } from '@/components/divination/results/liuyao/liuyao-helpers';
 import YaoSymbol from '../../common/YaoSymbol.vue';
 import { getInterYaoType, getTrigramInfo, getYaoPositionName } from './meihua-result';
 

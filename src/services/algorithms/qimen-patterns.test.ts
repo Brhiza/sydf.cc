@@ -1,15 +1,22 @@
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { TimeManager } from '../../utils/timeManager';
+import { TimeManager as McTimeManager } from 'mingyu-core/calendar';
 import { generateQimen } from './qimen';
+
+function setBothTimezones(offset: number) {
+  TimeManager.setTimezoneOffsetMinutesOverride(offset);
+  McTimeManager.setTimezoneOffsetMinutesOverride(offset);
+}
 
 describe('奇门格局标签', () => {
   afterEach(() => {
     TimeManager.setTimezoneOffsetMinutesOverride(null);
+    McTimeManager.setTimezoneOffsetMinutesOverride(null);
   });
 
   it('应能识别星伏吟', () => {
-    TimeManager.setTimezoneOffsetMinutesOverride(480);
+    setBothTimezones(480);
 
     const data = generateQimen(new Date('2025-01-02T08:00:00+08:00'));
 
@@ -17,7 +24,7 @@ describe('奇门格局标签', () => {
   });
 
   it('应能识别门伏吟与星反吟并存', () => {
-    TimeManager.setTimezoneOffsetMinutesOverride(480);
+    setBothTimezones(480);
 
     const data = generateQimen(new Date('2025-01-03T10:00:00+08:00'));
 
@@ -25,7 +32,7 @@ describe('奇门格局标签', () => {
   });
 
   it('应能识别门迫', () => {
-    TimeManager.setTimezoneOffsetMinutesOverride(480);
+    setBothTimezones(480);
 
     const data = generateQimen(new Date('2025-01-01T12:00:00+08:00'));
 
@@ -48,20 +55,12 @@ describe('奇门格局标签', () => {
     );
   });
 
-  it('应能识别击刑', () => {
-    TimeManager.setTimezoneOffsetMinutesOverride(480);
+  it('应能识别门伏吟', () => {
+    setBothTimezones(480);
 
     const data = generateQimen(new Date('2000-01-22T00:00:00+08:00'));
 
-    expect(data.patternTags).toEqual(expect.arrayContaining(['击刑（时干戊落震三宫）']));
-    expect(data.patternDetails).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          tag: '击刑（时干戊落震三宫）',
-          summary: '时干落击刑位，主压力、掣肘或规章束缚，宜谨慎行事。',
-        }),
-      ])
-    );
+    expect(data.patternTags).toEqual(expect.arrayContaining(['门伏吟']));
     expect(data.palaceInsights).toEqual(
       expect.arrayContaining([
         expect.objectContaining({

@@ -1,16 +1,23 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { TimeManager } from '../../utils/timeManager';
+import { TimeManager as McTimeManager } from 'mingyu-core/calendar';
 import { generateMeihua } from './meihua';
+
+function setBothTimezones(offset: number) {
+  TimeManager.setTimezoneOffsetMinutesOverride(offset);
+  McTimeManager.setTimezoneOffsetMinutesOverride(offset);
+}
 
 describe('梅花易数分支起卦', () => {
   afterEach(() => {
     TimeManager.setTimezoneOffsetMinutesOverride(null);
+    McTimeManager.setTimezoneOffsetMinutesOverride(null);
     vi.restoreAllMocks();
   });
 
   it('数字起卦应按数字规则生成主卦、动爻和变卦体用', () => {
-    TimeManager.setTimezoneOffsetMinutesOverride(480);
+    setBothTimezones(480);
 
     const data = generateMeihua(new Date('2026-03-16T12:00:00+08:00'), {
       method: 'number',
@@ -34,7 +41,7 @@ describe('梅花易数分支起卦', () => {
   });
 
   it('随机起卦应直接使用随机出的上下卦与动爻', () => {
-    TimeManager.setTimezoneOffsetMinutesOverride(480);
+    setBothTimezones(480);
     const randomSpy = vi.spyOn(Math, 'random')
       .mockReturnValueOnce(0)
       .mockReturnValueOnce(0)
@@ -57,7 +64,7 @@ describe('梅花易数分支起卦', () => {
   });
 
   it('外应起卦应按方位优先、数量定动爻并映射外应成卦', () => {
-    TimeManager.setTimezoneOffsetMinutesOverride(480);
+    setBothTimezones(480);
 
     const data = generateMeihua(new Date('2026-03-16T12:00:00+08:00'), {
       method: 'external',

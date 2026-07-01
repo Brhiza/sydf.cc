@@ -1,5 +1,5 @@
 import type { DailyQimenJiuGongGe } from '../../../types/divination.ts';
-import { qimen, tiangan, dizhi } from '../../../config/divination-data.ts';
+import { qimen, tiangan, dizhi } from 'mingyu-core/divination/divination-data';
 import {
   GAN_PALACE_MAP,
   LUO_SHU_PATH,

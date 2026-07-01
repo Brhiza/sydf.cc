@@ -6,7 +6,6 @@ const {
   mockGenerateQimen,
   mockDrawSpreadCards,
   mockGetCardKeywords,
-  mockGetSignByNumber,
   mockCalculateDailyFortune,
 } = vi.hoisted(() => ({
   mockGenerateLiuyao: vi.fn(() => ({ type: 'liuyao-result' })),
@@ -14,7 +13,6 @@ const {
   mockGenerateQimen: vi.fn(() => ({ type: 'qimen-result' })),
   mockDrawSpreadCards: vi.fn(),
   mockGetCardKeywords: vi.fn(() => '关键词'),
-  mockGetSignByNumber: vi.fn(),
   mockCalculateDailyFortune: vi.fn((_date?: Date) => ({ type: 'daily-result' })),
 }));
 
@@ -30,13 +28,9 @@ vi.mock('./algorithms/qimen', () => ({
   generateQimen: mockGenerateQimen,
 }));
 
-vi.mock('@/utils/tarot', () => ({
+vi.mock('mingyu-core/divination/tarot', () => ({
   drawSpreadCards: mockDrawSpreadCards,
   getCardKeywords: mockGetCardKeywords,
-}));
-
-vi.mock('./algorithms/ssgw', () => ({
-  getSignByNumber: mockGetSignByNumber,
 }));
 
 vi.mock('./algorithms/daily', () => ({

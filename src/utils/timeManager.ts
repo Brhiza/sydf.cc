@@ -2,7 +2,7 @@
  * 统一的占卜时间管理工具
  * 简化时间相关操作，确保所有占卜基于统一的时间基础
  */
-import type { TimeInfo, GanZhiInfo } from './lunar.ts';
+import type { TimeInfo, GanZhiInfo } from 'mingyu-core/calendar';
 import { SolarTime } from 'tyme4ts';
 
 /**

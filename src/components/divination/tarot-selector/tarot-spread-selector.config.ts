@@ -1,4 +1,4 @@
-import { tarotSpreads } from '@/utils/tarot-spreads'
+import { tarotSpreads } from 'mingyu-core/divination/tarot-data'
 
 export type TarotSpreadKey = keyof typeof tarotSpreads
 

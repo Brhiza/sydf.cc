@@ -1,6 +1,6 @@
 import { computed, ref, watch } from 'vue';
 import type { DivinationType, SupplementaryInfo } from '@/types/divination';
-import { tarotSpreads } from '@/utils/tarot-spreads';
+import { tarotSpreads } from 'mingyu-core/divination/tarot-data';
 import { isCustomBuild } from '@/utils/build-target';
 
 interface DivinationInputProps {

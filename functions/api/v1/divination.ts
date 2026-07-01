@@ -6,8 +6,8 @@ import { generateLiuyao } from '../../../src/services/algorithms/liuyao.ts';
 import { generateMeihua } from '../../../src/services/algorithms/meihua.ts';
 import { generateQimen } from '../../../src/services/algorithms/qimen.ts';
 import { type DivinationType } from '../../../src/types/divination.ts';
-import { SSGW_SIGNS } from '../../../src/utils/ssgw-data.ts';
-import { drawSpreadCards, getCardKeywords, tarotSpreads } from '../../../src/utils/tarot.ts';
+import { drawRandomSign } from 'mingyu-core/divination/ssgw';
+import { drawSpreadCards, getCardKeywords, tarotSpreads } from 'mingyu-core/divination/tarot';
 import {
   COMPATIBLE_DIVINATION_TYPES,
   isCompatibleDivinationType,
@@ -250,30 +250,7 @@ async function generateDivinationData(
   }
 
   if (type === 'ssgw') {
-    const { ganzhi, timestamp } = getDivinationTime(baseDate);
-    const signs = SSGW_SIGNS;
-    const total = signs.length;
-    const signNumber = options.signNumber;
-
-    let sign = null as (typeof signs)[number] | null;
-    if (typeof signNumber === 'number') {
-      if (!Number.isInteger(signNumber)) throw new Error('signNumber 必须为整数');
-      if (signNumber < 1 || signNumber > total) throw new Error(`signNumber 必须在 1 到 ${total} 之间`);
-      sign = signs.find((s) => s.id === signNumber) || null;
-      if (!sign) throw new Error(`未找到签号为 ${signNumber} 的灵签`);
-    } else {
-      sign = signs[Math.floor(Math.random() * total)] || null;
-    }
-
-    return {
-      number: sign.id,
-      title: sign.title,
-      poem: sign.qianwen,
-      story: sign.story,
-      details: sign.details,
-      timestamp,
-      ganzhi,
-    };
+    return drawRandomSign();
   }
 
   if (type === 'tarot') {

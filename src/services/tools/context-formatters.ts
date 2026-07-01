@@ -1,4 +1,4 @@
-import { LunarUtil } from '@/utils/lunar';
+import { LunarUtil } from 'mingyu-core/calendar';
 import { formatDateLabel } from './date-utils';
 
 export interface GanzhiQueryContext {

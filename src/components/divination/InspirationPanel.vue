@@ -42,7 +42,7 @@
 </template>
 
 <script setup lang="ts">
-import { getSpreadDefaultQuestions, tarotSpreads } from '@/utils/tarot-spreads';
+import { tarotSpreads } from 'mingyu-core/divination/tarot-data';
 import { computed, ref, watch } from 'vue';
 import InspirationQuestionSection from './inspiration/InspirationQuestionSection.vue';
 import {
@@ -64,7 +64,8 @@ const emit = defineEmits<{
 // 计算牌阵相关数据
 const spreadDefaultQuestions = computed(() => {
   if (!props.spreadType) return [];
-  return getSpreadDefaultQuestions(props.spreadType as keyof typeof tarotSpreads);
+  const spread = tarotSpreads[props.spreadType as keyof typeof tarotSpreads];
+  return spread?.defaultQuestions || [];
 });
 
 const spreadName = computed(() => {

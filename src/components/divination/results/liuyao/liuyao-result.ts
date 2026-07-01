@@ -1,5 +1,5 @@
 import type { LiuyaoData } from '@/types/divination';
-import { LiuyaoHelpers } from '@/utils/divination-helpers';
+import { LiuyaoHelpers } from './liuyao-helpers';
 
 export interface LiuyaoSummaryItem {
   label: string;

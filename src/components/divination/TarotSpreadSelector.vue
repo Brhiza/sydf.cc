@@ -39,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-import { tarotSpreads } from '@/utils/tarot-spreads';
+import { tarotSpreads } from 'mingyu-core/divination/tarot-data';
 import { onMounted, onUnmounted, ref } from 'vue';
 import TarotSpreadBubble from './tarot-selector/TarotSpreadBubble.vue';
 import TarotSpreadPanelItem from './tarot-selector/TarotSpreadPanelItem.vue';

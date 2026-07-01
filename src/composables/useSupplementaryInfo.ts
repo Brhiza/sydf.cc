@@ -6,7 +6,7 @@ import {
   meihuaObjectOptions,
   meihuaPersonOptions,
   meihuaSoundOptions,
-} from '@/config/meihua-omens';
+} from 'mingyu-core/divination/meihua-omens';
 import type { MeihuaDivinationMethod, SupplementaryInfo } from '@/types/divination';
 import { earthlyBranches, heavenlyStems } from './useSupplementaryInfo.constants';
 import { setupSupplementaryInfoPersistence } from './useSupplementaryInfo.persistence';
