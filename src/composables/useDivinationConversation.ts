@@ -1,5 +1,6 @@
 import { computed, type ComputedRef, type Ref } from 'vue';
 import { divinationService } from '@/services/divination';
+import { normalizeQuestionText } from '@/shared/question-text';
 import type { ChatMessage } from '@/types/chat';
 
 interface DivinationServiceLike {
@@ -36,8 +37,9 @@ export function useDivinationConversation(
   });
 
   function handleSendFollowUp() {
+    const normalizedQuestion = normalizeQuestionText(options.followUpQuestion.value);
     if (
-      !options.followUpQuestion.value.trim() ||
+      !normalizedQuestion ||
       options.isFollowUpLoading.value ||
       !options.hasResult()
     ) {
@@ -46,7 +48,6 @@ export function useDivinationConversation(
 
     options.isFollowUpLoading.value = true;
     const currentConversation = [...options.conversationHistory.value];
-    const originalQuestion = options.followUpQuestion.value.trim();
     options.followUpQuestion.value = '';
 
     const recordId = options.resolveRecordId();
@@ -56,7 +57,7 @@ export function useDivinationConversation(
       return;
     }
 
-    currentDivinationService.sendFollowUp(recordId, currentConversation, originalQuestion, {
+    currentDivinationService.sendFollowUp(recordId, currentConversation, normalizedQuestion, {
       onChunk: () => {
         // 对话历史通过 onConversationUpdate 同步
       },

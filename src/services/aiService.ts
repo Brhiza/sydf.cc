@@ -17,6 +17,7 @@ import type {
 import { generatePrompt, generateFollowUpPromptWrapper } from './prompts';
 import { handleError, logError, getUserFriendlyMessage } from '@/utils/error-handler';
 import { buildDivinationSystemPrompt } from '@/shared/divination-system-prompt';
+import { normalizeQuestionText } from '@/shared/question-text';
 
 class AIService {
   /**
@@ -76,12 +77,17 @@ class AIService {
     }
   ): Promise<void> {
     const { onChunk, onComplete, onError, onConversationUpdate } = callbacks;
+    const normalizedFollowUpQuestion = normalizeQuestionText(followUpQuestion);
+    if (!normalizedFollowUpQuestion) {
+      onError('请输入追问内容后再发送');
+      return;
+    }
 
     // 添加用户消息和AI占位符
     const userMessage: ChatMessage = {
       id: `msg-${Date.now()}`,
       role: 'user',
-      content: followUpQuestion,
+      content: normalizedFollowUpQuestion,
     };
     const assistantMessage: ChatMessage = {
       id: `msg-${Date.now() + 1}`,
@@ -97,7 +103,7 @@ class AIService {
         originalQuestion: context?.originalQuestion || '',
         originalResponse: context?.originalResponse || '',
         divinationType: context?.divinationType || 'liuyao',
-        followUpQuestion,
+        followUpQuestion: normalizedFollowUpQuestion,
         originalData: context?.originalData ?? undefined,
         supplementaryInfo: context?.supplementaryInfo ?? undefined,
       };

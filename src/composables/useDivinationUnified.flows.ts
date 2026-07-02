@@ -12,6 +12,7 @@ import type { HistoryRecord } from '@/types/common';
 import { cloneSerializable } from '@/utils/clone';
 import { isPrimaryConversationRetryTarget } from '@/utils/conversation-history';
 import { isHistoryRouteCompatible } from '@/utils/history-navigation';
+import { normalizeQuestionText } from '@/shared/question-text';
 import type { DivinationUnifiedFlowsContext } from './useDivinationUnified.types';
 
 export function createDivinationUnifiedFlows(ctx: DivinationUnifiedFlowsContext) {
@@ -103,7 +104,7 @@ export function createDivinationUnifiedFlows(ctx: DivinationUnifiedFlowsContext)
     return {
       id: recordId || `temporary-${Date.now()}`,
       type: type.value,
-      question: question.value.trim(),
+      question: normalizeQuestionText(question.value),
       result: {
         type: type.value,
         data: cloneSerializable(result.value.data),
@@ -114,7 +115,7 @@ export function createDivinationUnifiedFlows(ctx: DivinationUnifiedFlowsContext)
       },
       conversationHistory: cloneSerializable(conversationHistory.value),
       timestamp: Date.now(),
-      summary: question.value.trim() || '占卜结果',
+      summary: normalizeQuestionText(question.value) || '占卜结果',
     };
   }
 
@@ -144,7 +145,8 @@ export function createDivinationUnifiedFlows(ctx: DivinationUnifiedFlowsContext)
       supplementaryInfo?: SupplementaryInfo | undefined;
     } = {}
   ) {
-    if (isLoading.value || !question.value.trim()) return;
+    const normalizedQuestion = normalizeQuestionText(question.value);
+    if (isLoading.value || !normalizedQuestion) return;
 
     invalidateCurrentSession();
     const thisSessionId = currentSessionId.value;
@@ -161,7 +163,7 @@ export function createDivinationUnifiedFlows(ctx: DivinationUnifiedFlowsContext)
     const { supplementaryInfo, ...restOptions } = options;
     const request: DivinationRequest = {
       type: type.value,
-      question: question.value.trim(),
+      question: normalizedQuestion,
       ...restOptions,
       signal: requestController.signal,
     };

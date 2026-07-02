@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { QUESTION_TEXT_MAX_LENGTH } from '@/shared/question-text';
 import type { ChatMessage } from '@/types/chat';
 
 const {
@@ -74,5 +75,71 @@ describe('aiService.handleFollowUp', () => {
       expect.objectContaining({ role: 'user', content: '我还需要注意什么？' }),
       expect.objectContaining({ role: 'assistant', content: '提示词生成失败' }),
     ]);
+  });
+
+  it('底层追问服务应裁剪超长问题再生成提示词', async () => {
+    const { aiService } = await import('./aiService');
+    const onConversationUpdate = vi.fn();
+    const conversationHistory: ChatMessage[] = [];
+    const longQuestion = '问'.repeat(QUESTION_TEXT_MAX_LENGTH + 20);
+
+    mockGenerateFollowUpPromptWrapper.mockResolvedValue('追问提示词');
+    mockGetAIInsight.mockImplementation(async (_prompt, _onChunk, onComplete) => {
+      onComplete('后续解读');
+    });
+
+    await aiService.handleFollowUp(
+      conversationHistory,
+      longQuestion,
+      {
+        onChunk: vi.fn(),
+        onComplete: vi.fn(),
+        onError: vi.fn(),
+        onConversationUpdate,
+      },
+      {
+        originalQuestion: '原问题',
+        originalResponse: '原解读',
+        divinationType: 'qimen',
+        originalData: null,
+        supplementaryInfo: null,
+      }
+    );
+
+    expect(mockGenerateFollowUpPromptWrapper).toHaveBeenCalledWith(
+      expect.objectContaining({
+        followUpQuestion: '问'.repeat(QUESTION_TEXT_MAX_LENGTH),
+      })
+    );
+    expect(onConversationUpdate).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          role: 'user',
+          content: '问'.repeat(QUESTION_TEXT_MAX_LENGTH),
+        }),
+      ])
+    );
+  });
+
+  it('底层追问服务遇到空问题时不应写入空对话', async () => {
+    const { aiService } = await import('./aiService');
+    const onError = vi.fn();
+    const onConversationUpdate = vi.fn();
+    const conversationHistory: ChatMessage[] = [];
+
+    await aiService.handleFollowUp(
+      conversationHistory,
+      '   ',
+      {
+        onChunk: vi.fn(),
+        onComplete: vi.fn(),
+        onError,
+        onConversationUpdate,
+      }
+    );
+
+    expect(onError).toHaveBeenCalledWith('请输入追问内容后再发送');
+    expect(onConversationUpdate).not.toHaveBeenCalled();
+    expect(conversationHistory).toEqual([]);
   });
 });

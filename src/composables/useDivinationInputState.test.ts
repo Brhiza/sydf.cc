@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { nextTick, reactive } from 'vue';
+import { QUESTION_TEXT_MAX_LENGTH } from '@/shared/question-text';
 import { useDivinationInputState } from './useDivinationInputState';
 
 describe('useDivinationInputState', () => {
@@ -131,6 +132,20 @@ describe('useDivinationInputState', () => {
     });
   });
 
+  it('直接提交超长问题时应按共享上限裁剪', () => {
+    const { state } = createState({ divinationType: 'qimen' });
+    const longQuestion = '问'.repeat(QUESTION_TEXT_MAX_LENGTH + 20);
+
+    state.handleDirectSubmit(longQuestion);
+
+    expect(state.question.value).toHaveLength(QUESTION_TEXT_MAX_LENGTH);
+    expect(emit.submit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        question: '问'.repeat(QUESTION_TEXT_MAX_LENGTH),
+      })
+    );
+  });
+
   it('梅花提交时会透传自定义起卦设置', () => {
     supplementaryInfo.getSupplementaryInfo.mockReturnValue({
       interpretationStyle: '专业',
@@ -172,5 +187,14 @@ describe('useDivinationInputState', () => {
 
     expect(state.question.value).toBe('新的问题');
     expect(focusQuestionInput).toHaveBeenCalledTimes(1);
+  });
+
+  it('选择超长灵感问题时应按共享上限裁剪', () => {
+    const { state } = createState();
+    const longQuestion = '问'.repeat(QUESTION_TEXT_MAX_LENGTH + 20);
+
+    state.selectQuestion(longQuestion);
+
+    expect(state.question.value).toHaveLength(QUESTION_TEXT_MAX_LENGTH);
   });
 });
