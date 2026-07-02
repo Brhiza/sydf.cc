@@ -3,20 +3,23 @@
 
 import { calculateDailyFortune } from '../../../src/services/daily-fortune/index.ts';
 import { type DivinationType } from '../../../src/types/divination.ts';
-import { generateLiuyao } from 'mingyu-core/divination/liuyao';
-import { generateMeihua } from 'mingyu-core/divination/meihua';
-import { generateQimen } from 'mingyu-core/divination/qimen';
-import { drawRandomSign } from 'mingyu-core/divination/ssgw';
-import { drawSpreadCards, getCardKeywords } from 'mingyu-core/divination/tarot';
+import {
+  generateMingyuLiuyao,
+  generateMingyuMeihua,
+  generateMingyuQimen,
+  generateMingyuSsgw,
+  generateMingyuTarot,
+} from '../../../src/shared/mingyu-divination.ts';
 import {
   COMPATIBLE_DIVINATION_TYPES,
   isCompatibleDivinationType,
   normalizeDivinationType,
   resolveTarotSpreadType,
 } from '../../../src/utils/divination-type.ts';
-import { type TarotSpreadKey } from '../../../src/shared/tarot-spreads.ts';
-import { mapMingyuTarotResult } from '../../../src/shared/tarot-result.ts';
-import { getDivinationTime, setTimezoneOffsetMinutesOverride } from '../../../src/utils/timeManager.ts';
+import {
+  getDivinationTime,
+  setTimezoneOffsetMinutesOverride,
+} from '../../../src/utils/timeManager.ts';
 import { buildDivinationSystemPrompt } from '../../../src/shared/divination-system-prompt.ts';
 import { formatQimenSettingsLabel } from '../../../src/shared/qimen-settings.ts';
 import { proxyAiRequest } from '../../_shared/ai-proxy.js';
@@ -34,8 +37,24 @@ interface SupplementaryInfo {
       count?: number;
       person?: '老父' | '老妇' | '长男' | '长女' | '中男' | '中女' | '少男' | '少女';
       animal?: '马' | '牛' | '龙' | '鸡' | '猪' | '雉' | '狗' | '羊';
-      object?: '金玉圆器' | '布帛陶器' | '竹木乐器' | '绳索长木' | '水器液体' | '火电文书' | '石块门板' | '刀剪口器';
-      sound?: '洪亮金石' | '沉厚低缓' | '雷鸣震动' | '风声呼啸' | '流水滴答' | '爆裂鸣叫' | '闷阻叩击' | '清脆笑语';
+      object?:
+        | '金玉圆器'
+        | '布帛陶器'
+        | '竹木乐器'
+        | '绳索长木'
+        | '水器液体'
+        | '火电文书'
+        | '石块门板'
+        | '刀剪口器';
+      sound?:
+        | '洪亮金石'
+        | '沉厚低缓'
+        | '雷鸣震动'
+        | '风声呼啸'
+        | '流水滴答'
+        | '爆裂鸣叫'
+        | '闷阻叩击'
+        | '清脆笑语';
       color?: '金白' | '土黄' | '青碧' | '青绿' | '黑蓝' | '赤紫' | '棕黄' | '银白';
     };
   };
@@ -109,7 +128,7 @@ function buildCorsHeaders(origin: string | null): HeadersInit {
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Api-Key',
     'Access-Control-Max-Age': '86400',
-    'Vary': 'Origin',
+    Vary: 'Origin',
   };
   if (allowOrigin) {
     headers['Access-Control-Allow-Origin'] = allowOrigin;
@@ -117,10 +136,7 @@ function buildCorsHeaders(origin: string | null): HeadersInit {
   return headers;
 }
 
-function jsonResponse(
-  body: unknown,
-  init?: ResponseInit & { origin?: string | null }
-): Response {
+function jsonResponse(body: unknown, init?: ResponseInit & { origin?: string | null }): Response {
   const origin = init?.origin ?? null;
   const headers = new Headers(init?.headers);
   headers.set('Content-Type', 'application/json; charset=utf-8');
@@ -202,17 +218,22 @@ function buildUserPrompt(args: {
 
   const supplementaryLines: string[] = [];
   if (supplementaryInfo?.gender) supplementaryLines.push(`性别：${supplementaryInfo.gender}`);
-  if (supplementaryInfo?.birthYear) supplementaryLines.push(`出生年份：${supplementaryInfo.birthYear}`);
-  if (supplementaryInfo?.interpretationStyle) supplementaryLines.push(`解读风格：${supplementaryInfo.interpretationStyle}`);
-  if (supplementaryInfo?.outputLength) supplementaryLines.push(`输出长度：${supplementaryInfo.outputLength}`);
+  if (supplementaryInfo?.birthYear)
+    supplementaryLines.push(`出生年份：${supplementaryInfo.birthYear}`);
+  if (supplementaryInfo?.interpretationStyle)
+    supplementaryLines.push(`解读风格：${supplementaryInfo.interpretationStyle}`);
+  if (supplementaryInfo?.outputLength)
+    supplementaryLines.push(`输出长度：${supplementaryInfo.outputLength}`);
   if (supplementaryInfo?.qimenSettings) {
-    supplementaryLines.push(`奇门排盘：${formatQimenSettingsLabel(supplementaryInfo.qimenSettings)}`);
+    supplementaryLines.push(
+      `奇门排盘：${formatQimenSettingsLabel(supplementaryInfo.qimenSettings)}`
+    );
   }
 
   const questionLine =
     typeof question === 'string' && question.trim()
       ? `【问题】${question.trim()}`
-        : type === 'daily'
+      : type === 'daily'
         ? '【问题】今日运势（通用解读）'
         : '【问题】（未提供，按通用解读处理）';
 
@@ -229,14 +250,12 @@ function buildUserPrompt(args: {
     .join('\n\n');
 }
 
-async function generateDivinationData(
-  args: {
-    type: DivinationType;
-    isLegacyTarotSingle: boolean;
-    body: DivinationRequestBody;
-    baseDate: Date;
-  }
-) {
+async function generateDivinationData(args: {
+  type: DivinationType;
+  isLegacyTarotSingle: boolean;
+  body: DivinationRequestBody;
+  baseDate: Date;
+}) {
   const { type, isLegacyTarotSingle, body, baseDate } = args;
   const options = body.options || {};
   const supplementaryInfo = options.supplementaryInfo;
@@ -247,29 +266,25 @@ async function generateDivinationData(
   }
 
   if (type === 'liuyao') {
-    return generateLiuyao(baseDate);
+    return generateMingyuLiuyao(baseDate);
   }
 
   if (type === 'meihua') {
-    return generateMeihua(baseDate, supplementaryInfo?.meihuaSettings);
+    return generateMingyuMeihua(supplementaryInfo?.meihuaSettings, baseDate);
   }
 
   if (type === 'qimen') {
-    const settings = supplementaryInfo?.qimenSettings;
-    return generateQimen(baseDate, settings?.method, settings?.scope);
+    return generateMingyuQimen(supplementaryInfo?.qimenSettings, baseDate);
   }
 
   if (type === 'ssgw') {
-    return drawRandomSign(baseDate);
+    return generateMingyuSsgw(baseDate);
   }
 
   if (type === 'tarot') {
     const compatibleTarotType = isLegacyTarotSingle ? 'tarot_single' : 'tarot';
-    const spreadType = (
-      resolveTarotSpreadType(compatibleTarotType, body.options?.spreadType)
-    ) as TarotSpreadKey;
-    const result = drawSpreadCards(spreadType);
-    return mapMingyuTarotResult(result, getCardKeywords);
+    const spreadType = resolveTarotSpreadType(compatibleTarotType, body.options?.spreadType);
+    return generateMingyuTarot(spreadType);
   }
 
   // 理论上不会走到这里
@@ -295,7 +310,10 @@ function buildOpenAiBody(args: {
   };
 }
 
-export async function onRequest(context: { request: Request; env: Record<string, string | undefined> }) {
+export async function onRequest(context: {
+  request: Request;
+  env: Record<string, string | undefined>;
+}) {
   const { request, env } = context;
   const origin = request.headers.get('Origin');
 
@@ -361,7 +379,11 @@ export async function onRequest(context: { request: Request; env: Record<string,
   if (type !== 'daily') {
     if (typeof body.question !== 'string' || !body.question.trim()) {
       return jsonResponse(
-        { ok: false, requestId, error: { code: 'BAD_REQUEST', message: '除 daily 外必须提供 question' } },
+        {
+          ok: false,
+          requestId,
+          error: { code: 'BAD_REQUEST', message: '除 daily 外必须提供 question' },
+        },
         { status: 400, origin }
       );
     }
@@ -448,7 +470,11 @@ export async function onRequest(context: { request: Request; env: Record<string,
     } catch {
       const raw = await aiResp.text().catch(() => '');
       return jsonResponse(
-        { ok: false, requestId, error: { code: 'AI_BAD_RESPONSE', message: 'AI 返回非JSON', details: raw || undefined } },
+        {
+          ok: false,
+          requestId,
+          error: { code: 'AI_BAD_RESPONSE', message: 'AI 返回非JSON', details: raw || undefined },
+        },
         { status: 502, origin }
       );
     }
@@ -464,7 +490,9 @@ export async function onRequest(context: { request: Request; env: Record<string,
         divination: divinationData,
         interpretation: content,
         ...(usage ? { usage } : {}),
-        ...(debug ? { debug: { prompt: { system: systemPrompt, user: userPrompt }, raw: aiJson } } : {}),
+        ...(debug
+          ? { debug: { prompt: { system: systemPrompt, user: userPrompt }, raw: aiJson } }
+          : {}),
       },
       { status: 200, origin }
     );
