@@ -4,6 +4,7 @@ import {
   accumulateToolCallChunk,
   applyStreamDelta,
   createStreamReducerState,
+  MAX_STREAM_TOOL_ARGUMENT_LENGTH,
   parseStreamLineDelta,
   parseStreamResponse,
 } from './stream-parser';
@@ -75,6 +76,21 @@ describe('accumulateToolCallChunk', () => {
       function: { arguments: 'tz":"UTC"}' },
     });
     expect(calls[0].function.arguments).toBe('{"tz":"UTC"}');
+  });
+
+  it('工具参数过长时只保留上限长度加拒绝标记位', () => {
+    const calls: ToolCall[] = [];
+    accumulateToolCallChunk(calls, {
+      index: 0,
+      id: 'tool-1',
+      function: { name: 'getTime', arguments: 'a'.repeat(MAX_STREAM_TOOL_ARGUMENT_LENGTH) },
+    });
+    accumulateToolCallChunk(calls, {
+      index: 0,
+      function: { arguments: 'b'.repeat(100) },
+    });
+
+    expect(calls[0].function.arguments).toHaveLength(MAX_STREAM_TOOL_ARGUMENT_LENGTH + 1);
   });
 });
 

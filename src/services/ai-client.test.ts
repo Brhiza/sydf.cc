@@ -184,4 +184,75 @@ describe('AI 时间工具请求策略', () => {
       content: '第一段第二段',
     });
   });
+
+  it('工具调用参数过长时应拒绝本地执行并继续返回普通解读', async () => {
+    const payloads: Array<Record<string, unknown>> = [];
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      const payload = JSON.parse(String(init?.body || '{}'));
+      payloads.push(payload);
+
+      if (payloads.length === 1) {
+        return new Response(
+          JSON.stringify({
+            choices: [
+              {
+                message: {
+                  content: null,
+                  tool_calls: [
+                    {
+                      id: 'tool-1',
+                      type: 'function',
+                      function: {
+                        name: 'get_current_time_info',
+                        arguments: 'x'.repeat(12001),
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          }),
+          {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          }
+        );
+      }
+
+      const toolMessage = (payload.messages as Array<{ role?: string; content?: string }>).find(
+        (message) => message.role === 'tool'
+      );
+      expect(toolMessage?.content).toContain('工具参数过长');
+
+      return new Response(
+        JSON.stringify({
+          choices: [
+            {
+              message: {
+                content: '已改用普通解读',
+              },
+            },
+          ],
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { AIService } = await import('./ai-client');
+    const result = await AIService.generateResponse([
+      {
+        role: 'user',
+        content: '请查询当前干支后给出建议',
+      },
+    ]);
+
+    expect(result.content).toBe('已改用普通解读');
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
 });

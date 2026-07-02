@@ -29,6 +29,7 @@ export interface ParsedStreamResult {
 }
 
 const STREAM_FLUSH_INTERVAL_MS = 16;
+export const MAX_STREAM_TOOL_ARGUMENT_LENGTH = 12000;
 
 export function createStreamReducerState(): StreamReducerState {
   return {
@@ -59,10 +60,7 @@ export function parseStreamLineDelta(line: string): StreamDelta | 'done' | null 
   }
 }
 
-export function accumulateToolCallChunk(
-  toolCalls: ToolCall[],
-  chunk: StreamToolCallChunk
-): void {
+export function accumulateToolCallChunk(toolCalls: ToolCall[], chunk: StreamToolCallChunk): void {
   const index = chunk.index;
   if (index > 0) return;
 
@@ -74,7 +72,11 @@ export function accumulateToolCallChunk(
     }
   }
   if (chunk.function?.arguments) {
-    toolCalls[index].function.arguments += chunk.function.arguments;
+    const nextArguments = toolCalls[index].function.arguments + chunk.function.arguments;
+    toolCalls[index].function.arguments = nextArguments.slice(
+      0,
+      MAX_STREAM_TOOL_ARGUMENT_LENGTH + 1
+    );
   }
 }
 
