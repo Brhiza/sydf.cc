@@ -783,6 +783,142 @@ describe('开发者 API 兼容性', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
+  it('非法基础补充信息应被忽略且不写入提示词', async () => {
+    let capturedRequestBody: Record<string, unknown> | null = null;
+    const fetchMock = vi.fn(async (request: Request) => {
+      capturedRequestBody = JSON.parse(await request.clone().text());
+
+      return new Response(
+        JSON.stringify({
+          choices: [
+            {
+              message: {
+                content: '非法补充信息默认解读',
+              },
+            },
+          ],
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const request = new Request('https://sydf.cc/api/v1/divination', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer test-dev-key',
+      },
+      body: JSON.stringify({
+        type: 'liuyao',
+        question: '我近期换工作是否顺利？',
+        stream: false,
+        options: {
+          datetime: '2026-03-16T12:00:00+08:00',
+          supplementaryInfo: {
+            birthYear: -1,
+            dayPillar: {
+              heavenlyStem: '坏天干',
+              earthlyBranch: '坏地支',
+            },
+          },
+        },
+      }),
+    });
+
+    const response = await onRequest({
+      request,
+      env: {
+        DEV_API_KEY: 'test-dev-key',
+        OPENAI_API_KEY: 'test-openai-key',
+      },
+    });
+
+    const data = await response.json();
+    const userPrompt =
+      ((capturedRequestBody as {
+        messages?: Array<{ role?: string; content?: string }>;
+      } | null)?.messages?.find((message) => message.role === 'user')?.content || '');
+
+    expect(response.status).toBe(200);
+    expect(data.ok).toBe(true);
+    expect(data.interpretation).toBe('非法补充信息默认解读');
+    expect(userPrompt).not.toContain('出生年份：');
+    expect(userPrompt).not.toContain('日柱：');
+    expect(userPrompt).not.toContain('坏天干');
+    expect(userPrompt).not.toContain('坏地支');
+  });
+
+  it('合法日柱应写入开发者 API 提示词', async () => {
+    let capturedRequestBody: Record<string, unknown> | null = null;
+    const fetchMock = vi.fn(async (request: Request) => {
+      capturedRequestBody = JSON.parse(await request.clone().text());
+
+      return new Response(
+        JSON.stringify({
+          choices: [
+            {
+              message: {
+                content: '合法补充信息解读',
+              },
+            },
+          ],
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const request = new Request('https://sydf.cc/api/v1/divination', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer test-dev-key',
+      },
+      body: JSON.stringify({
+        type: 'qimen',
+        question: '现在适合推进项目吗？',
+        stream: false,
+        options: {
+          datetime: '2026-01-01T12:00:00+08:00',
+          supplementaryInfo: {
+            birthYear: 1990,
+            dayPillar: {
+              heavenlyStem: '甲',
+              earthlyBranch: '子',
+            },
+          },
+        },
+      }),
+    });
+
+    const response = await onRequest({
+      request,
+      env: {
+        DEV_API_KEY: 'test-dev-key',
+        OPENAI_API_KEY: 'test-openai-key',
+      },
+    });
+
+    const data = await response.json();
+    const userPrompt =
+      ((capturedRequestBody as {
+        messages?: Array<{ role?: string; content?: string }>;
+      } | null)?.messages?.find((message) => message.role === 'user')?.content || '');
+
+    expect(response.status).toBe(200);
+    expect(data.ok).toBe(true);
+    expect(data.interpretation).toBe('合法补充信息解读');
+    expect(userPrompt).toContain('出生年份：1990');
+    expect(userPrompt).toContain('日柱：甲子');
+  });
+
   it('异常 stream/debug 开关不应开启流式响应或调试信息', async () => {
     const fetchMock = vi.fn(async () =>
       new Response(
