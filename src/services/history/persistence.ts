@@ -2,7 +2,7 @@ import type { HistoryRecord } from '@/types/common';
 import { storageService } from '../storageService';
 import { handleError, logError } from '@/utils/error-handler';
 import { normalizeRecords, type PersistedHistoryRecord } from '../history-migration';
-import type { AppSettings } from './types';
+import { normalizeAppSettings, type AppSettings } from './types';
 
 const HISTORY_KEY = 'sydf-history';
 const SETTINGS_KEY = 'sydf-app-settings';
@@ -14,9 +14,8 @@ export interface LoadedRecords {
 
 export function loadRecords(): LoadedRecords {
   try {
-    const historyData = storageService.getItem<Array<PersistedHistoryRecord | HistoryRecord>>(
-      HISTORY_KEY
-    );
+    const historyData =
+      storageService.getItem<Array<PersistedHistoryRecord | HistoryRecord>>(HISTORY_KEY);
     if (!historyData) {
       return { records: [], changed: false };
     }
@@ -31,11 +30,11 @@ export function loadRecords(): LoadedRecords {
 
 export function loadSettings<T extends AppSettings>(defaults: T): T {
   try {
-    const settingsData = storageService.getItem<T>(SETTINGS_KEY);
+    const settingsData = storageService.getItem<unknown>(SETTINGS_KEY);
     if (!settingsData) {
       return defaults;
     }
-    return { ...defaults, ...settingsData };
+    return normalizeAppSettings(defaults, settingsData);
   } catch (error) {
     const appError = handleError(error, '加载本地数据失败');
     logError(appError, 'History Service - loadSettings');

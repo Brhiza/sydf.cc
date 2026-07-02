@@ -30,6 +30,32 @@ const DEFAULT_SETTINGS: UserSettings = {
 // 本地存储键名
 const SETTINGS_STORAGE_KEY = 'sydf-settings';
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value && typeof value === 'object' && !Array.isArray(value));
+}
+
+function resolveString(value: unknown, fallback: string): string {
+  return typeof value === 'string' ? value : fallback;
+}
+
+function resolveModelList(value: unknown, fallback: string[]): string[] {
+  if (!Array.isArray(value)) {
+    return fallback;
+  }
+  return value.filter((item): item is string => typeof item === 'string');
+}
+
+function normalizeUserSettings(defaults: UserSettings, value: unknown): UserSettings {
+  const raw = isRecord(value) ? value : {};
+  return {
+    customApiKey: resolveString(raw.customApiKey, defaults.customApiKey),
+    customApiEndpoint: resolveString(raw.customApiEndpoint, defaults.customApiEndpoint),
+    useCustomApi: typeof raw.useCustomApi === 'boolean' ? raw.useCustomApi : defaults.useCustomApi,
+    selectedModel: resolveString(raw.selectedModel, defaults.selectedModel),
+    availableModels: resolveModelList(raw.availableModels, defaults.availableModels),
+  };
+}
+
 /**
  * 设置状态管理Store
  */
@@ -44,9 +70,9 @@ export const useSettingsStore = defineStore('settings', () => {
    */
   function loadSettings() {
     try {
-      const savedSettings = storageService.getItem<UserSettings>(SETTINGS_STORAGE_KEY);
+      const savedSettings = storageService.getItem<unknown>(SETTINGS_STORAGE_KEY);
       if (savedSettings) {
-        settings.value = { ...DEFAULT_SETTINGS, ...savedSettings };
+        settings.value = normalizeUserSettings(DEFAULT_SETTINGS, savedSettings);
       } else {
         settings.value = { ...DEFAULT_SETTINGS };
       }
@@ -62,13 +88,7 @@ export const useSettingsStore = defineStore('settings', () => {
    */
   function updateSettings(newSettings: Partial<UserSettings>) {
     try {
-      const updatedSettings: UserSettings = {
-        customApiKey: newSettings.customApiKey ?? settings.value.customApiKey,
-        customApiEndpoint: newSettings.customApiEndpoint ?? settings.value.customApiEndpoint,
-        useCustomApi: newSettings.useCustomApi ?? settings.value.useCustomApi,
-        selectedModel: newSettings.selectedModel ?? settings.value.selectedModel,
-        availableModels: newSettings.availableModels ?? settings.value.availableModels,
-      };
+      const updatedSettings = normalizeUserSettings(settings.value, newSettings);
 
       // 当关闭自定义API时，重置模型
       if (newSettings.useCustomApi === false) {
@@ -110,7 +130,6 @@ export const useSettingsStore = defineStore('settings', () => {
       const baseUrl = endpoint.replace(/\/v1(\/chat\/completions)?\/?$/, '');
       const modelsUrl = `${baseUrl}/v1/models`;
 
-      
       const response = await fetch(modelsUrl, {
         method: 'GET',
         headers: {
@@ -135,7 +154,10 @@ export const useSettingsStore = defineStore('settings', () => {
       const excludedKeywords = ['embedding', 'reranker', 'BAAI', 'bge'];
       const models = data.data
         .map((model: Model) => model.id)
-        .filter((id: string) => !excludedKeywords.some(keyword => id.toLowerCase().includes(keyword.toLowerCase())))
+        .filter(
+          (id: string) =>
+            !excludedKeywords.some((keyword) => id.toLowerCase().includes(keyword.toLowerCase()))
+        )
         .sort((a: string, b: string) => {
           const getPrefix = (s: string) => s.split(/[-/]/)[0];
           const prefixA = getPrefix(a);
@@ -144,14 +166,14 @@ export const useSettingsStore = defineStore('settings', () => {
           if (prefixA !== prefixB) {
             return prefixA.localeCompare(prefixB);
           }
-          
+
           return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
         });
 
       if (models.length > 0) {
         updateSettings({ availableModels: models });
       }
-      
+
       return models.length > 0 ? models : settings.value.availableModels;
     } catch (err) {
       console.error('获取模型列表失败:', err);
