@@ -606,4 +606,169 @@ describe('开发者 API 兼容性', () => {
     expect(data.divination.cards).toHaveLength(1);
     expect(data.interpretation).toBe('默认单牌解读');
   });
+
+  it('异常 options 应被当作未传并继续使用默认参数', async () => {
+    const fetchMock = vi.fn(async () =>
+      new Response(
+        JSON.stringify({
+          choices: [
+            {
+              message: {
+                content: '异常参数默认解读',
+              },
+            },
+          ],
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      )
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const request = new Request('https://sydf.cc/api/v1/divination', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer test-dev-key',
+      },
+      body: JSON.stringify({
+        type: 'tarot',
+        question: '我现在该怎么做？',
+        stream: false,
+        options: ['bad'],
+      }),
+    });
+
+    const response = await onRequest({
+      request,
+      env: {
+        DEV_API_KEY: 'test-dev-key',
+        OPENAI_API_KEY: 'test-openai-key',
+      },
+    });
+
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.ok).toBe(true);
+    expect(data.type).toBe('tarot');
+    expect(data.divination.spreadType).toBe('single');
+    expect(data.interpretation).toBe('异常参数默认解读');
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('异常 supplementaryInfo 应被忽略且不写入提示词', async () => {
+    let capturedRequestBody: Record<string, unknown> | null = null;
+    const fetchMock = vi.fn(async (request: Request) => {
+      capturedRequestBody = JSON.parse(await request.clone().text());
+
+      return new Response(
+        JSON.stringify({
+          choices: [
+            {
+              message: {
+                content: '补充信息默认解读',
+              },
+            },
+          ],
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const request = new Request('https://sydf.cc/api/v1/divination', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer test-dev-key',
+      },
+      body: JSON.stringify({
+        type: 'qimen',
+        question: '现在适合推进项目吗？',
+        stream: false,
+        options: {
+          datetime: '2026-01-01T12:00:00+08:00',
+          supplementaryInfo: ['bad'],
+        },
+      }),
+    });
+
+    const response = await onRequest({
+      request,
+      env: {
+        DEV_API_KEY: 'test-dev-key',
+        OPENAI_API_KEY: 'test-openai-key',
+      },
+    });
+
+    const data = await response.json();
+    const userPrompt =
+      ((capturedRequestBody as {
+        messages?: Array<{ role?: string; content?: string }>;
+      } | null)?.messages?.find((message) => message.role === 'user')?.content || '');
+
+    expect(response.status).toBe(200);
+    expect(data.ok).toBe(true);
+    expect(data.type).toBe('qimen');
+    expect(data.interpretation).toBe('补充信息默认解读');
+    expect(userPrompt).not.toContain('【补充信息】');
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('异常 stream/debug 开关不应开启流式响应或调试信息', async () => {
+    const fetchMock = vi.fn(async () =>
+      new Response(
+        JSON.stringify({
+          choices: [
+            {
+              message: {
+                content: '普通响应',
+              },
+            },
+          ],
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      )
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const request = new Request('https://sydf.cc/api/v1/divination', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer test-dev-key',
+      },
+      body: JSON.stringify({
+        type: 'tarot',
+        question: '我现在该怎么做？',
+        stream: 'true',
+        debug: 'true',
+      }),
+    });
+
+    const response = await onRequest({
+      request,
+      env: {
+        DEV_API_KEY: 'test-dev-key',
+        OPENAI_API_KEY: 'test-openai-key',
+      },
+    });
+
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('Content-Type')).toContain('application/json');
+    expect(data.ok).toBe(true);
+    expect(data.interpretation).toBe('普通响应');
+    expect(data.debug).toBeUndefined();
+  });
 });
