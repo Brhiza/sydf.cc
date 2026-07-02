@@ -7,11 +7,12 @@ import { registerPlugins } from './plugins';
 import { registerAppServiceWorker } from './services/serviceWorkerRegistration';
 import { setupSeo } from './seo';
 import { isCustomBuild } from './utils/build-target';
-import { bootstrapFrontendTheme } from './composables/useFrontendTheme';
+import { storageService } from './services/storageService';
+import { bootstrapFrontendTheme, FRONTEND_THEME_STORAGE_KEY } from './composables/useFrontendTheme';
 
 bootstrapFrontendTheme({
   search: window.location.search,
-  storedTheme: localStorage.getItem('frontend-theme'),
+  storedTheme: storageService.getItem<string>(FRONTEND_THEME_STORAGE_KEY),
   envTheme: import.meta.env.VITE_APP_FRONTEND_THEME,
 });
 

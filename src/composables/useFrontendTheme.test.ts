@@ -14,6 +14,10 @@ describe('useFrontendTheme', () => {
     expect(normalizeFrontendTheme('theme-v2')).toBe('v2');
   });
 
+  it('兼容本地存储中的 JSON 字符串主题值', () => {
+    expect(normalizeFrontendTheme('"v2"')).toBe('v2');
+  });
+
   it('未知值应忽略', () => {
     expect(normalizeFrontendTheme('unknown')).toBeNull();
   });
