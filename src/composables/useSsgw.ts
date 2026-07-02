@@ -1,26 +1,15 @@
 import { ref } from 'vue';
 import type { SupplementaryInfo } from '@/types/divination';
+import { tossSsgwHolyCup } from '@/shared/ssgw-holy-cup';
 
-type EmitFunction = (event: 'submit', payload: { question: string; supplementaryInfo?: SupplementaryInfo | undefined }) => void;
+type EmitFunction = (
+  event: 'submit',
+  payload: { question: string; supplementaryInfo?: SupplementaryInfo | undefined }
+) => void;
 
 export interface SsgwTossMessage {
   title?: string;
   detail: string;
-}
-
-/** 投掷圣杯：一平一凸=圣杯，两平=笑杯，两凸=阴杯 */
-function tossHolyCup(): {
-  result: '圣杯' | '笑杯' | '阴杯';
-  bei1: 'ping' | 'tu';
-  bei2: 'ping' | 'tu';
-} {
-  const bei1 = Math.random() > 0.5 ? 'ping' : 'tu';
-  const bei2 = Math.random() > 0.5 ? 'ping' : 'tu';
-  let result: '圣杯' | '笑杯' | '阴杯';
-  if (bei1 !== bei2) result = '圣杯';
-  else if (bei1 === 'ping') result = '笑杯';
-  else result = '阴杯';
-  return { result, bei1, bei2 };
 }
 
 export function useSsgw(emit: EmitFunction) {
@@ -36,7 +25,7 @@ export function useSsgw(emit: EmitFunction) {
   const tossResult = ref<SsgwTossMessage[]>([]);
   const tossCount = ref(0);
   const isApproved = ref(false);
-  
+
   let currentQuestion = '';
   let currentSupplementaryInfo: SupplementaryInfo | undefined;
 
@@ -76,7 +65,7 @@ export function useSsgw(emit: EmitFunction) {
     beiResults.value = [];
     tossResult.value = [];
 
-    const holyGrailResult = tossHolyCup();
+    const holyGrailResult = tossSsgwHolyCup();
 
     setTimeout(() => {
       beiResults.value = [holyGrailResult.bei1, holyGrailResult.bei2];
@@ -86,10 +75,7 @@ export function useSsgw(emit: EmitFunction) {
         isApproved.value = true;
         tossResult.value = [{ title: '圣杯', detail: '(一平一凸) - 神明同意此签。' }];
         setTimeout(() => {
-          tossResult.value = [
-            ...tossResult.value,
-            { detail: '正在为您解读签文...' },
-          ];
+          tossResult.value = [...tossResult.value, { detail: '正在为您解读签文...' }];
           setTimeout(() => {
             emit('submit', {
               question: currentQuestion,
@@ -99,9 +85,10 @@ export function useSsgw(emit: EmitFunction) {
         }, 1000);
       } else {
         tossCount.value++;
-        tossResult.value = result === '笑杯'
-          ? [{ title: '笑杯', detail: '(两平) - 神明笑而不语，可能问题不明或时机未到。' }]
-          : [{ title: '阴杯', detail: '(两凸) - 神明不同意此签。' }];
+        tossResult.value =
+          result === '笑杯'
+            ? [{ title: '笑杯', detail: '(两平) - 神明笑而不语，可能问题不明或时机未到。' }]
+            : [{ title: '阴杯', detail: '(两凸) - 神明不同意此签。' }];
 
         if (tossCount.value >= 3) {
           tossResult.value = [
@@ -110,10 +97,7 @@ export function useSsgw(emit: EmitFunction) {
           ];
           isTossing.value = false;
         } else {
-          tossResult.value = [
-            ...tossResult.value,
-            { detail: '请重新为您摇签...' },
-          ];
+          tossResult.value = [...tossResult.value, { detail: '请重新为您摇签...' }];
           setTimeout(() => {
             showTossResult.value = false;
             beiResults.value = [];
