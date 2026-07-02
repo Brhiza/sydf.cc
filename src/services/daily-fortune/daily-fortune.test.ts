@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { TimeManager } from '../../utils/timeManager';
 import { TimeManager as McTimeManager } from 'mingyu-core/calendar';
 import { generateQimen } from 'mingyu-core/divination/qimen';
-import { calculateDailyFortune } from './daily';
+import { calculateDailyFortune } from './index';
 import { DEFAULT_QIMEN_METHOD } from '@/shared/qimen-settings';
 
 function setBothTimezones(offset: number) {
@@ -11,7 +11,7 @@ function setBothTimezones(offset: number) {
   McTimeManager.setTimezoneOffsetMinutesOverride(offset);
 }
 
-describe('今日运势算法', () => {
+describe('今日运势数据组装', () => {
   afterEach(() => {
     TimeManager.setTimezoneOffsetMinutesOverride(null);
     McTimeManager.setTimezoneOffsetMinutesOverride(null);
@@ -44,5 +44,18 @@ describe('今日运势算法', () => {
     const second = calculateDailyFortune(targetDate);
 
     expect(second.aspects).toEqual(first.aspects);
+  });
+
+  it('今日运势应保留简单可用的展示派生字段', () => {
+    setBothTimezones(480);
+
+    const fortune = calculateDailyFortune(new Date('2025-01-03T10:00:00+08:00'));
+
+    expect(fortune.overall.score).toBeGreaterThanOrEqual(20);
+    expect(fortune.overall.score).toBeLessThanOrEqual(95);
+    expect(['吉', '平', '凶']).toContain(fortune.overall.luck);
+    expect(fortune.lucky.numbers.length).toBeGreaterThan(0);
+    expect(fortune.lucky.colors.length).toBeGreaterThan(0);
+    expect(fortune.lucky.time).toMatch(/时\(/);
   });
 });

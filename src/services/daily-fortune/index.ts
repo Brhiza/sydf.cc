@@ -1,7 +1,6 @@
 /**
- * @file 日家奇门今日运势算法服务
- * @description 日家奇门以日干支为核心，一日一局，主要用于预测一日之内的运势变化。
- * 起局方法与时家奇门有显著区别，更注重整体趋势。
+ * @file 今日运势数据组装服务
+ * @description 排盘统一来自 mingyu-core，这里只负责把日家奇门结果整理成页面和 AI 提示词需要的数据。
  */
 import { generateMingyuDailyQimen } from '@/shared/mingyu-divination';
 import type {
@@ -10,14 +9,14 @@ import type {
   DailyQimenTimeInfo,
 } from '../../types/divination.ts';
 import { getDivinationTime } from '../../utils/timeManager.ts';
-import { analyzeDailyQimenPattern } from './daily/pattern-analysis.ts';
+import { analyzeDailyQimenPattern } from './pattern-analysis.ts';
 import {
   calculateAspectScores,
   calculateFortuneScore,
   calculateWuxingEnergy,
   getLuckLevel,
-} from './daily/scoring.ts';
-import { generateTraditionalLuckyElements } from './daily/lucky-elements.ts';
+} from './scoring.ts';
+import { generateTraditionalLuckyElements } from './lucky-elements.ts';
 
 function formatLocalDate(date: Date): string {
   return (
@@ -43,9 +42,9 @@ function mapDailyQimenJiuGong(jiuGongGe: DailyQimenJiuGongGe[]): DailyQimenJiuGo
 }
 
 /**
- * 日家奇门今日运势计算
+ * 生成今日运势数据。
  * @param date 可选日期，默认为当前日期
- * @returns 日家奇门排盘数据
+ * @returns 已合并日家奇门排盘和展示派生字段的今日运势数据
  */
 export function calculateDailyFortune(date?: Date): DailyFortuneData {
   const targetDate = date || new Date();

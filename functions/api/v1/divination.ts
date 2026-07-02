@@ -1,7 +1,7 @@
 // functions/api/v1/divination.ts
 // 开发者占卜API：生成占卜数据 + AI解读（支持SSE流式）
 
-import { calculateDailyFortune } from '../../../src/services/algorithms/daily.ts';
+import { calculateDailyFortune } from '../../../src/services/daily-fortune/index.ts';
 import { type DivinationType } from '../../../src/types/divination.ts';
 import { generateLiuyao } from 'mingyu-core/divination/liuyao';
 import { generateMeihua } from 'mingyu-core/divination/meihua';
