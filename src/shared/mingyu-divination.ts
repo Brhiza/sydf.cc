@@ -11,6 +11,7 @@ import type {
   MeihuaSettings,
 } from '@/types/divination';
 import { DEFAULT_QIMEN_METHOD, resolveQimenSettings } from './qimen-settings';
+import { normalizeMeihuaSettings } from './meihua-settings';
 import { resolveTarotSpreadKey } from './tarot-spreads';
 import { mapMingyuTarotResult } from './tarot-result';
 
@@ -19,7 +20,7 @@ export function generateMingyuLiuyao(date?: Date): LiuyaoData {
 }
 
 export function generateMingyuMeihua(settings?: MeihuaSettings, date?: Date): MeihuaData {
-  return generateMeihua(date, settings) as MeihuaData;
+  return generateMeihua(date, normalizeMeihuaSettings(settings)) as MeihuaData;
 }
 
 export function generateMingyuQimen(settings?: QimenSettings, date?: Date): QimenData {

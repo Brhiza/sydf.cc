@@ -25,25 +25,18 @@ import {
   isDefaultQimenSettings,
   resolveQimenSettings,
 } from '@/shared/qimen-settings';
+import {
+  DEFAULT_MEIHUA_METHOD,
+  normalizeMeihuaSettings,
+  resolveMeihuaMethod,
+  resolveMeihuaOptionName,
+} from '@/shared/meihua-settings';
 import { earthlyBranches, heavenlyStems } from './useSupplementaryInfo.constants';
 
 const STORAGE_KEY = 'supplementaryInfo';
-const DEFAULT_MEIHUA_METHOD: MeihuaDivinationMethod = 'time';
-const MEIHUA_METHODS: readonly MeihuaDivinationMethod[] = [
-  'time',
-  'number',
-  'random',
-  'external',
-];
 const GENDERS = ['男', '女'] as const;
 const INTERPRETATION_STYLES = ['入门', '专业'] as const;
 const OUTPUT_LENGTHS = ['精简', '详细', '超详细'] as const;
-
-function resolveMeihuaMethod(method: unknown): MeihuaDivinationMethod {
-  return MEIHUA_METHODS.includes(method as MeihuaDivinationMethod)
-    ? (method as MeihuaDivinationMethod)
-    : DEFAULT_MEIHUA_METHOD;
-}
 
 function resolveFiniteNumber(value: unknown): number | undefined {
   return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
@@ -51,15 +44,6 @@ function resolveFiniteNumber(value: unknown): number | undefined {
 
 function resolveLiteral<T extends string>(value: unknown, values: readonly T[]): T | undefined {
   return typeof value === 'string' && values.includes(value as T) ? (value as T) : undefined;
-}
-
-function resolveOptionName<T extends string>(
-  value: unknown,
-  options: readonly { name: T }[]
-): T | undefined {
-  return typeof value === 'string' && options.some((option) => option.name === value)
-    ? (value as T)
-    : undefined;
 }
 
 export interface SupplementaryInfoRefs {
@@ -104,60 +88,45 @@ function restoreFromStorage(refs: SupplementaryInfoRefs) {
   if (savedDayPillar && typeof savedDayPillar === 'object' && savedDayPillar !== null) {
     const dayPillar = savedDayPillar as { heavenlyStem?: string; earthlyBranch?: string };
     refs.dayPillarHeavenlyStem.value =
-      resolveOptionName(dayPillar.heavenlyStem, heavenlyStems) || '';
+      resolveMeihuaOptionName(dayPillar.heavenlyStem, heavenlyStems) || '';
     refs.dayPillarEarthlyBranch.value =
-      resolveOptionName(dayPillar.earthlyBranch, earthlyBranches) || '';
+      resolveMeihuaOptionName(dayPillar.earthlyBranch, earthlyBranches) || '';
   } else {
     refs.dayPillarHeavenlyStem.value = '';
     refs.dayPillarEarthlyBranch.value = '';
   }
 
-  if (
-    savedMeihuaSettings &&
-    typeof savedMeihuaSettings === 'object' &&
-    savedMeihuaSettings !== null
-  ) {
-    const meihuaSettings = savedMeihuaSettings as {
-      method?: unknown;
-      number?: unknown;
-      externalOmens?: unknown;
-    };
-    const meihuaMethod = resolveMeihuaMethod(meihuaSettings.method);
-    const externalOmens =
-      meihuaSettings.externalOmens &&
-      typeof meihuaSettings.externalOmens === 'object' &&
-      meihuaSettings.externalOmens !== null
-        ? (meihuaSettings.externalOmens as Record<string, unknown>)
-        : undefined;
+  const meihuaSettings = normalizeMeihuaSettings(savedMeihuaSettings);
 
-    refs.meihuaMethod.value = meihuaMethod;
+  if (meihuaSettings) {
+    refs.meihuaMethod.value = meihuaSettings.method || DEFAULT_MEIHUA_METHOD;
     refs.meihuaNumber.value =
-      meihuaMethod === 'number' ? resolveFiniteNumber(meihuaSettings.number) : undefined;
+      meihuaSettings.method === 'number' ? meihuaSettings.number : undefined;
     refs.meihuaExternalDirection.value =
-      meihuaMethod === 'external'
-        ? resolveOptionName(externalOmens?.direction, meihuaDirectionOptions)
+      meihuaSettings.method === 'external'
+        ? resolveMeihuaOptionName(meihuaSettings.externalOmens?.direction, meihuaDirectionOptions)
         : undefined;
     refs.meihuaExternalCount.value =
-      meihuaMethod === 'external' ? resolveFiniteNumber(externalOmens?.count) : undefined;
+      meihuaSettings.method === 'external' ? meihuaSettings.externalOmens?.count : undefined;
     refs.meihuaExternalPerson.value =
-      meihuaMethod === 'external'
-        ? resolveOptionName(externalOmens?.person, meihuaPersonOptions)
+      meihuaSettings.method === 'external'
+        ? resolveMeihuaOptionName(meihuaSettings.externalOmens?.person, meihuaPersonOptions)
         : undefined;
     refs.meihuaExternalAnimal.value =
-      meihuaMethod === 'external'
-        ? resolveOptionName(externalOmens?.animal, meihuaAnimalOptions)
+      meihuaSettings.method === 'external'
+        ? resolveMeihuaOptionName(meihuaSettings.externalOmens?.animal, meihuaAnimalOptions)
         : undefined;
     refs.meihuaExternalObject.value =
-      meihuaMethod === 'external'
-        ? resolveOptionName(externalOmens?.object, meihuaObjectOptions)
+      meihuaSettings.method === 'external'
+        ? resolveMeihuaOptionName(meihuaSettings.externalOmens?.object, meihuaObjectOptions)
         : undefined;
     refs.meihuaExternalSound.value =
-      meihuaMethod === 'external'
-        ? resolveOptionName(externalOmens?.sound, meihuaSoundOptions)
+      meihuaSettings.method === 'external'
+        ? resolveMeihuaOptionName(meihuaSettings.externalOmens?.sound, meihuaSoundOptions)
         : undefined;
     refs.meihuaExternalColor.value =
-      meihuaMethod === 'external'
-        ? resolveOptionName(externalOmens?.color, meihuaColorOptions)
+      meihuaSettings.method === 'external'
+        ? resolveMeihuaOptionName(meihuaSettings.externalOmens?.color, meihuaColorOptions)
         : undefined;
   } else {
     refs.meihuaMethod.value = DEFAULT_MEIHUA_METHOD;
@@ -201,6 +170,19 @@ function buildPersistedSnapshot(values: {
   qimenScope: QimenScope;
 }) {
   const meihuaMethod = resolveMeihuaMethod(values.meihuaMethod);
+  const meihuaSettings = normalizeMeihuaSettings({
+    method: meihuaMethod,
+    number: values.meihuaNumber,
+    externalOmens: {
+      direction: values.meihuaExternalDirection,
+      count: values.meihuaExternalCount,
+      person: values.meihuaExternalPerson,
+      animal: values.meihuaExternalAnimal,
+      object: values.meihuaExternalObject,
+      sound: values.meihuaExternalSound,
+      color: values.meihuaExternalColor,
+    },
+  });
   const qimenSettings = resolveQimenSettings({
     method: values.qimenMethod,
     scope: values.qimenScope,
@@ -218,53 +200,7 @@ function buildPersistedSnapshot(values: {
             earthlyBranch: values.dayPillarEarthlyBranch,
           }
         : undefined,
-    meihuaSettings:
-      meihuaMethod !== DEFAULT_MEIHUA_METHOD
-        ? {
-            method: meihuaMethod,
-            ...(meihuaMethod === 'number' && typeof values.meihuaNumber === 'number'
-              ? { number: resolveFiniteNumber(values.meihuaNumber) }
-              : {}),
-            ...(meihuaMethod === 'external'
-              ? {
-                  externalOmens: {
-                    ...(values.meihuaExternalDirection
-                      ? {
-                          direction: resolveOptionName(
-                            values.meihuaExternalDirection,
-                            meihuaDirectionOptions
-                          ),
-                        }
-                      : {}),
-                    ...(typeof values.meihuaExternalCount === 'number'
-                      ? { count: resolveFiniteNumber(values.meihuaExternalCount) }
-                      : {}),
-                    ...(values.meihuaExternalPerson
-                      ? {
-                          person: resolveOptionName(values.meihuaExternalPerson, meihuaPersonOptions),
-                        }
-                      : {}),
-                    ...(values.meihuaExternalAnimal
-                      ? {
-                          animal: resolveOptionName(values.meihuaExternalAnimal, meihuaAnimalOptions),
-                        }
-                      : {}),
-                    ...(values.meihuaExternalObject
-                      ? {
-                          object: resolveOptionName(values.meihuaExternalObject, meihuaObjectOptions),
-                        }
-                      : {}),
-                    ...(values.meihuaExternalSound
-                      ? { sound: resolveOptionName(values.meihuaExternalSound, meihuaSoundOptions) }
-                      : {}),
-                    ...(values.meihuaExternalColor
-                      ? { color: resolveOptionName(values.meihuaExternalColor, meihuaColorOptions) }
-                      : {}),
-                  },
-                }
-              : {}),
-          }
-        : undefined,
+    meihuaSettings,
     qimenSettings: !isDefaultQimenSettings(qimenSettings) ? qimenSettings : undefined,
   };
 }

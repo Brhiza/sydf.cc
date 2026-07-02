@@ -72,6 +72,20 @@ describe('useSupplementaryInfo', () => {
     wrapper.unmount();
   });
 
+  it('梅花外应信息不完整时不应提交高级参数', async () => {
+    const { state, wrapper } = mountSupplementaryInfo();
+    await nextTick();
+
+    state.meihuaMethod.value = 'external';
+    state.meihuaExternalDirection.value = '东';
+    state.meihuaExternalCount.value = 7;
+    await nextTick();
+
+    expect(state.getSupplementaryInfo()).toBeUndefined();
+
+    wrapper.unmount();
+  });
+
   it('旧缓存中的非法高级参数应回到默认状态', async () => {
     localStorage.setItem(
       'supplementaryInfo',
@@ -98,6 +112,30 @@ describe('useSupplementaryInfo', () => {
     expect(state.meihuaNumber.value).toBeUndefined();
     expect(state.qimenMethod.value).toBe(DEFAULT_QIMEN_METHOD);
     expect(state.qimenScope.value).toBe(DEFAULT_QIMEN_SCOPE);
+    expect(state.getSupplementaryInfo()).toBeUndefined();
+    expect(state.supplementaryInfoToggleText.value).toBe('补充信息');
+
+    wrapper.unmount();
+  });
+
+  it('旧缓存中的不完整梅花外应应回到默认状态', async () => {
+    localStorage.setItem(
+      'supplementaryInfo',
+      JSON.stringify({
+        meihuaSettings: {
+          method: 'external',
+          externalOmens: {
+            direction: '东',
+            count: 3,
+          },
+        },
+      })
+    );
+
+    const { state, wrapper } = mountSupplementaryInfo();
+    await nextTick();
+
+    expect(state.meihuaMethod.value).toBe('time');
     expect(state.getSupplementaryInfo()).toBeUndefined();
     expect(state.supplementaryInfoToggleText.value).toBe('补充信息');
 
