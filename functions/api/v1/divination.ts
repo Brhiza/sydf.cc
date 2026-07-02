@@ -51,6 +51,23 @@ interface OpenAiProxyResponse {
 }
 
 const DEV_TZ_OFFSET_MINUTES = 480; // 北京时间 UTC+8
+const MIN_BIRTH_YEAR = 1900;
+const MAX_BIRTH_YEAR = 2100;
+const HEAVENLY_STEMS = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'] as const;
+const EARTHLY_BRANCHES = [
+  '子',
+  '丑',
+  '寅',
+  '卯',
+  '辰',
+  '巳',
+  '午',
+  '未',
+  '申',
+  '酉',
+  '戌',
+  '亥',
+] as const;
 
 function createRequestId(): string {
   try {
@@ -88,6 +105,19 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
+function resolveBirthYear(value: unknown): number | undefined {
+  return typeof value === 'number' &&
+    Number.isInteger(value) &&
+    value >= MIN_BIRTH_YEAR &&
+    value <= MAX_BIRTH_YEAR
+    ? value
+    : undefined;
+}
+
+function resolveLiteral<T extends string>(value: unknown, values: readonly T[]): T | undefined {
+  return typeof value === 'string' && values.includes(value as T) ? (value as T) : undefined;
+}
+
 function normalizeSupplementaryInfo(value: unknown): SupplementaryInfo | undefined {
   if (!isRecord(value)) {
     return undefined;
@@ -98,8 +128,9 @@ function normalizeSupplementaryInfo(value: unknown): SupplementaryInfo | undefin
   if (value.gender === '男' || value.gender === '女') {
     info.gender = value.gender;
   }
-  if (typeof value.birthYear === 'number' && Number.isFinite(value.birthYear)) {
-    info.birthYear = value.birthYear;
+  const birthYear = resolveBirthYear(value.birthYear);
+  if (birthYear) {
+    info.birthYear = birthYear;
   }
   if (value.interpretationStyle === '入门' || value.interpretationStyle === '专业') {
     info.interpretationStyle = value.interpretationStyle;
@@ -111,14 +142,16 @@ function normalizeSupplementaryInfo(value: unknown): SupplementaryInfo | undefin
   ) {
     info.outputLength = value.outputLength;
   }
-  if (
-    isRecord(value.dayPillar) &&
-    typeof value.dayPillar.heavenlyStem === 'string' &&
-    typeof value.dayPillar.earthlyBranch === 'string'
-  ) {
+  const heavenlyStem = isRecord(value.dayPillar)
+    ? resolveLiteral(value.dayPillar.heavenlyStem, HEAVENLY_STEMS)
+    : undefined;
+  const earthlyBranch = isRecord(value.dayPillar)
+    ? resolveLiteral(value.dayPillar.earthlyBranch, EARTHLY_BRANCHES)
+    : undefined;
+  if (heavenlyStem && earthlyBranch) {
     info.dayPillar = {
-      heavenlyStem: value.dayPillar.heavenlyStem,
-      earthlyBranch: value.dayPillar.earthlyBranch,
+      heavenlyStem,
+      earthlyBranch,
     };
   }
   const meihuaSettings = normalizeMeihuaSettings(value.meihuaSettings);
@@ -291,6 +324,11 @@ function buildUserPrompt(args: {
     supplementaryLines.push(`解读风格：${supplementaryInfo.interpretationStyle}`);
   if (supplementaryInfo?.outputLength)
     supplementaryLines.push(`输出长度：${supplementaryInfo.outputLength}`);
+  if (supplementaryInfo?.dayPillar) {
+    supplementaryLines.push(
+      `日柱：${supplementaryInfo.dayPillar.heavenlyStem}${supplementaryInfo.dayPillar.earthlyBranch}`
+    );
+  }
   if (supplementaryInfo?.qimenSettings) {
     supplementaryLines.push(
       `奇门排盘：${formatQimenSettingsLabel(supplementaryInfo.qimenSettings)}`
