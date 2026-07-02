@@ -26,6 +26,18 @@ describe('qimen-settings', () => {
     expect(isDefaultQimenSettings({ method: 'feipan', scope: 'hour' })).toBe(false);
   });
 
+  it('无效奇门排盘设置应回到默认值', () => {
+    const invalidSettings = {
+      method: 'unknown',
+      scope: 'bad-scope',
+    };
+
+    expect(resolveQimenSettings(invalidSettings)).toEqual(DEFAULT_QIMEN_SETTINGS);
+    expect(isDefaultQimenSettings(invalidSettings)).toBe(true);
+    expect(formatQimenScopeLabel('bad-scope')).toBe('时家');
+    expect(formatQimenMethodLabel('unknown')).toBe('转盘法');
+  });
+
   it('会格式化指定奇门排盘设置', () => {
     expect(formatQimenSettingsLabel({ method: 'feipan', scope: 'day' })).toBe('日家飞盘法');
     expect(formatQimenSettingsLabel({ method: 'zhuanpan', scope: 'year' })).toBe('年家转盘法');
