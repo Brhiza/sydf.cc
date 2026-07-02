@@ -25,6 +25,7 @@ import {
   isDefaultQimenSettings,
   resolveQimenSettings,
 } from '@/shared/qimen-settings';
+import { earthlyBranches, heavenlyStems } from './useSupplementaryInfo.constants';
 
 const STORAGE_KEY = 'supplementaryInfo';
 const DEFAULT_MEIHUA_METHOD: MeihuaDivinationMethod = 'time';
@@ -34,6 +35,9 @@ const MEIHUA_METHODS: readonly MeihuaDivinationMethod[] = [
   'random',
   'external',
 ];
+const GENDERS = ['男', '女'] as const;
+const INTERPRETATION_STYLES = ['入门', '专业'] as const;
+const OUTPUT_LENGTHS = ['精简', '详细', '超详细'] as const;
 
 function resolveMeihuaMethod(method: unknown): MeihuaDivinationMethod {
   return MEIHUA_METHODS.includes(method as MeihuaDivinationMethod)
@@ -43,6 +47,10 @@ function resolveMeihuaMethod(method: unknown): MeihuaDivinationMethod {
 
 function resolveFiniteNumber(value: unknown): number | undefined {
   return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
+}
+
+function resolveLiteral<T extends string>(value: unknown, values: readonly T[]): T | undefined {
+  return typeof value === 'string' && values.includes(value as T) ? (value as T) : undefined;
 }
 
 function resolveOptionName<T extends string>(
@@ -88,15 +96,17 @@ function restoreFromStorage(refs: SupplementaryInfoRefs) {
     qimenSettings: savedQimenSettings,
   } = savedInfo;
 
-  refs.gender.value = savedGender as '男' | '女' | undefined;
-  refs.birthYear.value = savedBirthYear as number | undefined;
-  refs.interpretationStyle.value = savedInterpretationStyle as '入门' | '专业' | undefined;
-  refs.outputLength.value = savedOutputLength as '精简' | '详细' | '超详细' | undefined;
+  refs.gender.value = resolveLiteral(savedGender, GENDERS);
+  refs.birthYear.value = resolveFiniteNumber(savedBirthYear);
+  refs.interpretationStyle.value = resolveLiteral(savedInterpretationStyle, INTERPRETATION_STYLES);
+  refs.outputLength.value = resolveLiteral(savedOutputLength, OUTPUT_LENGTHS);
 
   if (savedDayPillar && typeof savedDayPillar === 'object' && savedDayPillar !== null) {
     const dayPillar = savedDayPillar as { heavenlyStem?: string; earthlyBranch?: string };
-    refs.dayPillarHeavenlyStem.value = dayPillar.heavenlyStem || '';
-    refs.dayPillarEarthlyBranch.value = dayPillar.earthlyBranch || '';
+    refs.dayPillarHeavenlyStem.value =
+      resolveOptionName(dayPillar.heavenlyStem, heavenlyStems) || '';
+    refs.dayPillarEarthlyBranch.value =
+      resolveOptionName(dayPillar.earthlyBranch, earthlyBranches) || '';
   } else {
     refs.dayPillarHeavenlyStem.value = '';
     refs.dayPillarEarthlyBranch.value = '';

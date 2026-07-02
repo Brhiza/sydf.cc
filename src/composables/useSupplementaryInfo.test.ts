@@ -103,4 +103,34 @@ describe('useSupplementaryInfo', () => {
 
     wrapper.unmount();
   });
+
+  it('旧缓存中的非法基础补充信息应被忽略', async () => {
+    localStorage.setItem(
+      'supplementaryInfo',
+      JSON.stringify({
+        gender: '未知',
+        birthYear: '1990',
+        interpretationStyle: '复杂',
+        outputLength: '很长',
+        dayPillar: {
+          heavenlyStem: '坏天干',
+          earthlyBranch: '坏地支',
+        },
+      })
+    );
+
+    const { state, wrapper } = mountSupplementaryInfo();
+    await nextTick();
+
+    expect(state.gender.value).toBeUndefined();
+    expect(state.birthYear.value).toBeUndefined();
+    expect(state.interpretationStyle.value).toBeUndefined();
+    expect(state.outputLength.value).toBeUndefined();
+    expect(state.dayPillarHeavenlyStem.value).toBe('');
+    expect(state.dayPillarEarthlyBranch.value).toBe('');
+    expect(state.getSupplementaryInfo()).toBeUndefined();
+    expect(state.supplementaryInfoToggleText.value).toBe('补充信息');
+
+    wrapper.unmount();
+  });
 });
