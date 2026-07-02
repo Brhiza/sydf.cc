@@ -552,6 +552,43 @@ describe('开发者 API 兼容性', () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it('开发者 API 提前返回错误后应恢复原时区设置', async () => {
+    TimeManager.setTimezoneOffsetMinutesOverride(0);
+    const timezoneSpy = vi.spyOn(TimeManager, 'setTimezoneOffsetMinutesOverride');
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+
+    const request = new Request('https://sydf.cc/api/v1/divination', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer test-dev-key',
+      },
+      body: JSON.stringify({
+        type: 'daily',
+        stream: false,
+        options: {
+          date: '2026-02-30',
+        },
+      }),
+    });
+
+    const response = await onRequest({
+      request,
+      env: {
+        DEV_API_KEY: 'test-dev-key',
+        OPENAI_API_KEY: 'test-openai-key',
+      },
+    });
+
+    const calls = timezoneSpy.mock.calls.map(([offset]) => offset);
+
+    expect(response.status).toBe(400);
+    expect(calls[0]).toBe(480);
+    expect(calls.at(-1)).toBe(0);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it('今日运势补充信息日期也应拒绝不存在的日期', async () => {
     const fetchMock = vi.fn();
     vi.stubGlobal('fetch', fetchMock);
