@@ -23,7 +23,7 @@ describe('奇门格局标签', () => {
     expect(data.patternTags).toContain('星伏吟');
   });
 
-  it('应能识别新版核心库的反吟与增强格局', () => {
+  it('应能识别 mingyu-core 的反吟与增强格局', () => {
     setBothTimezones(480);
 
     const data = generateQimen(new Date('2025-01-03T10:00:00+08:00'));
