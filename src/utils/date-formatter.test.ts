@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   createAnchoredDateFromDateKey,
   formatDateOnly,
@@ -74,5 +74,16 @@ describe('date-formatter', () => {
     expect(anchoredDate?.getDate()).toBe(25);
     expect(anchoredDate?.getHours()).toBe(12);
     expect(createAnchoredDateFromDateKey('2026-02-30')).toBeNull();
+  });
+
+  it('getMonthDayFromDateKey 遇到无效日期时应回到当前日期，避免展示 NaN', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 6, 2, 9, 0, 0));
+
+    try {
+      expect(getMonthDayFromDateKey('2026-02-30')).toEqual({ month: 7, day: 2 });
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
