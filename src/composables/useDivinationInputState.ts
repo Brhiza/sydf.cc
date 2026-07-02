@@ -1,8 +1,11 @@
 import { computed, ref, watch } from 'vue';
 import type { DivinationType, SupplementaryInfo } from '@/types/divination';
-import { tarotSpreads } from 'mingyu-core/divination/tarot-data';
 import { isCustomBuild } from '@/utils/build-target';
-import { DEFAULT_TAROT_SPREAD_KEY, type TarotSpreadKey } from '@/shared/tarot-spreads';
+import {
+  DEFAULT_TAROT_SPREAD_KEY,
+  resolveTarotSpread,
+  type TarotSpreadKey,
+} from '@/shared/tarot-spreads';
 
 interface DivinationInputProps {
   title: string;
@@ -82,7 +85,7 @@ export function useDivinationInputState(
 
   const computedTitle = computed(() => {
     if (isTarot.value) {
-      const spread = tarotSpreads[selectedSpread.value];
+      const spread = resolveTarotSpread(selectedSpread.value);
       return spread ? `塔罗牌·${spread.name}` : props.title;
     }
 
@@ -91,7 +94,7 @@ export function useDivinationInputState(
 
   const computedDescription = computed(() => {
     if (isTarot.value) {
-      const spread = tarotSpreads[selectedSpread.value];
+      const spread = resolveTarotSpread(selectedSpread.value);
       return spread ? spread.description : props.description;
     }
 

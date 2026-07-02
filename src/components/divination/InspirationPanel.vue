@@ -28,7 +28,13 @@
       />
     </div>
 
-    <div v-for="tab in baseTabs" :id="tab.id" :key="tab.id" class="tab-pane" :class="{ active: activeTab === tab.id }">
+    <div
+      v-for="tab in baseTabs"
+      :id="tab.id"
+      :key="tab.id"
+      class="tab-pane"
+      :class="{ active: activeTab === tab.id }"
+    >
       <InspirationQuestionSection
         v-for="section in questionSections[tab.id]"
         :key="section.heading"
@@ -42,8 +48,8 @@
 </template>
 
 <script setup lang="ts">
-import { tarotSpreads } from 'mingyu-core/divination/tarot-data';
 import { computed, ref, watch } from 'vue';
+import { resolveTarotSpread } from '@/shared/tarot-spreads';
 import InspirationQuestionSection from './inspiration/InspirationQuestionSection.vue';
 import {
   INSPIRATION_CONTENT,
@@ -63,14 +69,12 @@ const emit = defineEmits<{
 
 // 计算牌阵相关数据
 const spreadDefaultQuestions = computed(() => {
-  if (!props.spreadType) return [];
-  const spread = tarotSpreads[props.spreadType as keyof typeof tarotSpreads];
+  const spread = resolveTarotSpread(props.spreadType);
   return spread?.defaultQuestions || [];
 });
 
 const spreadName = computed(() => {
-  if (!props.spreadType) return '';
-  return tarotSpreads[props.spreadType as keyof typeof tarotSpreads]?.name || '';
+  return resolveTarotSpread(props.spreadType)?.name || '';
 });
 
 const questionSections = INSPIRATION_CONTENT;
@@ -118,7 +122,7 @@ function selectQuestion(question: string) {
 
 // 暴露selectQuestion函数供外部使用
 defineExpose({
-  selectQuestion
+  selectQuestion,
 });
 
 // 选择问题并直接提交
@@ -219,7 +223,6 @@ html.dark .inspiration-card {
   height: 20px;
   border-radius: 50%;
 }
-
 
 .tab-pane {
   display: none;
