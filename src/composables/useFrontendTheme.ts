@@ -10,11 +10,7 @@ const QUERY_THEME_KEYS = ['frontend-theme', 'frontendTheme', 'uiTheme', 'themeVe
 const V2_VALUES = ['v2', '2', 'theme-v2', 'frontend-v2', 'next'];
 const V1_VALUES = ['v1', '1', 'theme-v1', 'frontend-v1', 'default', 'current'];
 
-export function normalizeFrontendTheme(value: unknown): FrontendTheme | null {
-  if (typeof value !== 'string') {
-    return null;
-  }
-
+function normalizeFrontendThemeString(value: string): FrontendTheme | null {
   const normalizedValue = value.trim().toLowerCase();
 
   if (V2_VALUES.includes(normalizedValue)) {
@@ -26,6 +22,24 @@ export function normalizeFrontendTheme(value: unknown): FrontendTheme | null {
   }
 
   return null;
+}
+
+export function normalizeFrontendTheme(value: unknown): FrontendTheme | null {
+  if (typeof value !== 'string') {
+    return null;
+  }
+
+  const directTheme = normalizeFrontendThemeString(value);
+  if (directTheme) {
+    return directTheme;
+  }
+
+  try {
+    const parsedValue = JSON.parse(value);
+    return typeof parsedValue === 'string' ? normalizeFrontendThemeString(parsedValue) : null;
+  } catch {
+    return null;
+  }
 }
 
 export function getFrontendThemeFromSearch(search: string): FrontendTheme | null {
