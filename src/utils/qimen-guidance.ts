@@ -1,5 +1,6 @@
 import type { QimenData, SupplementaryInfo } from '@/types/divination';
 import { analyzeQuestion } from '@/services/prompts/shared/question-analyzer';
+import type { QuestionType } from '@/services/prompts/shared/types';
 
 export interface QimenQuestionHint {
   label: string;
@@ -12,6 +13,61 @@ export interface QimenPriorityPalace {
   name: string;
   score: number;
   reasons: string[];
+}
+
+export function createQimenYongShenHint(
+  types: QuestionType,
+  data: QimenData,
+  supplementaryInfo?: SupplementaryInfo
+): string {
+  const hints: string[] = [];
+
+  if (types.isCareer) {
+    hints.push(buildDoorHint(data, '开门', '事业问事常取开门为主')?.text || '');
+    hints.push(buildDoorHint(data, '生门', '求发展与机会时兼看生门')?.text || '');
+  }
+
+  if (types.isFinance) {
+    hints.push(buildDoorHint(data, '生门', '财运问事常取生门为主')?.text || '');
+    hints.push(buildDoorHint(data, '开门', '交易、项目推进可兼看开门')?.text || '');
+  }
+
+  if (types.isHealth) {
+    hints.push(buildStarHint(data, '天芮', '健康问事常参天芮星')?.text || '');
+    hints.push(buildDoorHint(data, '死门', '病症与压力位可兼看死门')?.text || '');
+  }
+
+  if (types.isStudy) {
+    hints.push(buildStarHint(data, '天辅', '学业文书常参天辅星')?.text || '');
+  }
+
+  const relationshipHint = createRelationshipYongShenHint(types, data, supplementaryInfo);
+  if (relationshipHint) {
+    hints.push(relationshipHint);
+  }
+
+  const validHints = hints.filter(Boolean);
+  return validHints.length > 0 ? validHints.join('；') : '未命中固定分类，宜结合问事对象另取用神。';
+}
+
+function createRelationshipYongShenHint(
+  types: QuestionType,
+  data: QimenData,
+  supplementaryInfo?: SupplementaryInfo
+): string | '' {
+  if (!types.isRelationship) {
+    return '';
+  }
+
+  const liuheHint = buildGodHint(data, '六合', '感情问事常参六合')?.text || '';
+  const yiHint =
+    buildStemHint(data, '乙', supplementaryInfo?.gender === '男' ? '男测感情可重点看乙奇' : '乙奇可参')
+      ?.text || '';
+  const gengHint =
+    buildStemHint(data, '庚', supplementaryInfo?.gender === '女' ? '女测感情可重点看庚金' : '庚金可参')
+      ?.text || '';
+
+  return [liuheHint, yiHint, gengHint].filter(Boolean).join('；');
 }
 
 export function createQimenQuestionHints(

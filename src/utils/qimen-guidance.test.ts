@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import { createQimenPriorityPalaces, createQimenQuestionHints } from './qimen-guidance';
+import {
+  createQimenPriorityPalaces,
+  createQimenQuestionHints,
+  createQimenYongShenHint,
+} from './qimen-guidance';
 import type { QimenData } from '@/types/divination';
+import type { QuestionType } from '@/services/prompts/shared/types';
 
 const sampleData: QimenData = {
   jiuGongGe: [
@@ -54,7 +59,49 @@ const sampleData: QimenData = {
   timestamp: 1092110400000,
 };
 
+function questionTypes(overrides: Partial<QuestionType>): QuestionType {
+  return {
+    isQuestion: false,
+    isChoice: false,
+    isTime: false,
+    isAction: false,
+    isFeasibility: false,
+    isRelationship: false,
+    isCareer: false,
+    isFinance: false,
+    isHealth: false,
+    isStudy: false,
+    isReason: false,
+    isPrediction: false,
+    isAdvice: false,
+    isComparison: false,
+    isQuantity: false,
+    isLocation: false,
+    isPerson: false,
+    ...overrides,
+  };
+}
+
 describe('createQimenQuestionHints', () => {
+  it('用神参考应复用共享宫位定位逻辑', () => {
+    const hint = createQimenYongShenHint(questionTypes({ isFinance: true }), sampleData);
+
+    expect(hint).toContain('财运问事常取生门为主，当前落乾六宫');
+    expect(hint).toContain('交易、项目推进可兼看开门，当前落艮八宫');
+  });
+
+  it('感情用神参考应结合性别补充信息', () => {
+    const hint = createQimenYongShenHint(
+      questionTypes({ isRelationship: true }),
+      sampleData,
+      { gender: '女' }
+    );
+
+    expect(hint).toContain('感情问事常参六合，当前落艮八宫');
+    expect(hint).toContain('乙奇可参，天盘落艮八宫');
+    expect(hint).toContain('女测感情可重点看庚金，天盘落坤二宫，地盘落乾六宫');
+  });
+
   it('财运问题应返回生门与开门参考', () => {
     const hints = createQimenQuestionHints('这笔投资收益如何？', sampleData);
 
