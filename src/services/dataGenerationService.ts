@@ -3,21 +3,22 @@
  */
 import type {
   DivinationType,
-  LiuyaoData,
-  MeihuaData,
-  QimenData,
   TarotData,
   SsgwData,
   DailyFortuneData,
-  SupplementaryInfo
+  SupplementaryInfo,
+  LiuyaoData,
+  MeihuaData,
+  QimenData,
 } from '@/types/divination';
 import { createAnchoredDateFromDateKey, normalizeDateKey } from '@/utils/date-formatter';
-import { generateLiuyao } from 'mingyu-core/divination/liuyao';
-import { generateMeihua } from 'mingyu-core/divination/meihua';
-import { generateQimen } from 'mingyu-core/divination/qimen';
-import { DEFAULT_TAROT_SPREAD_KEY } from '@/shared/tarot-spreads';
-import { mapMingyuTarotResult } from '@/shared/tarot-result';
-import { resolveQimenSettings } from '@/shared/qimen-settings';
+import {
+  generateMingyuLiuyao,
+  generateMingyuMeihua,
+  generateMingyuQimen,
+  generateMingyuSsgw,
+  generateMingyuTarot,
+} from '@/shared/mingyu-divination';
 
 export class DataGenerationService {
   /**
@@ -30,26 +31,19 @@ export class DataGenerationService {
   ): Promise<LiuyaoData | MeihuaData | QimenData | TarotData | SsgwData | DailyFortuneData> {
     switch (type) {
       case 'liuyao': {
-        return generateLiuyao();
+        return generateMingyuLiuyao();
       }
       case 'meihua': {
-        const meihuaData = generateMeihua(undefined, supplementaryInfo?.meihuaSettings);
-        return meihuaData as MeihuaData;
+        return generateMingyuMeihua(supplementaryInfo?.meihuaSettings);
       }
       case 'qimen': {
-        const settings = resolveQimenSettings(supplementaryInfo?.qimenSettings);
-        return generateQimen(undefined, settings.method, settings.scope);
+        return generateMingyuQimen(supplementaryInfo?.qimenSettings);
       }
       case 'tarot': {
-        const { drawSpreadCards, getCardKeywords } = await import('mingyu-core/divination/tarot');
-        const result = drawSpreadCards(
-          (spreadType || DEFAULT_TAROT_SPREAD_KEY) as Parameters<typeof drawSpreadCards>[0]
-        );
-        return mapMingyuTarotResult(result, getCardKeywords);
+        return generateMingyuTarot(spreadType);
       }
       case 'ssgw': {
-        const { drawRandomSign } = await import('mingyu-core/divination/ssgw');
-        return drawRandomSign() as SsgwData;
+        return generateMingyuSsgw();
       }
       case 'daily': {
         const { calculateDailyFortune } = await import('./algorithms/daily');

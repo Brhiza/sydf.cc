@@ -1,36 +1,27 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const {
-  mockGenerateLiuyao,
-  mockGenerateMeihua,
-  mockGenerateQimen,
-  mockDrawSpreadCards,
-  mockGetCardKeywords,
+  mockGenerateMingyuLiuyao,
+  mockGenerateMingyuMeihua,
+  mockGenerateMingyuQimen,
+  mockGenerateMingyuTarot,
+  mockGenerateMingyuSsgw,
   mockCalculateDailyFortune,
 } = vi.hoisted(() => ({
-  mockGenerateLiuyao: vi.fn(() => ({ type: 'liuyao-result' })),
-  mockGenerateMeihua: vi.fn(() => ({ calculation: { method: '年月日时起卦法' } })),
-  mockGenerateQimen: vi.fn(() => ({ type: 'qimen-result' })),
-  mockDrawSpreadCards: vi.fn(),
-  mockGetCardKeywords: vi.fn(() => '关键词'),
+  mockGenerateMingyuLiuyao: vi.fn(() => ({ type: 'liuyao-result' })),
+  mockGenerateMingyuMeihua: vi.fn(() => ({ calculation: { method: '年月日时起卦法' } })),
+  mockGenerateMingyuQimen: vi.fn(() => ({ type: 'qimen-result' })),
+  mockGenerateMingyuTarot: vi.fn(),
+  mockGenerateMingyuSsgw: vi.fn(() => ({ type: 'ssgw-result' })),
   mockCalculateDailyFortune: vi.fn((_date?: Date) => ({ type: 'daily-result' })),
 }));
 
-vi.mock('mingyu-core/divination/liuyao', () => ({
-  generateLiuyao: mockGenerateLiuyao,
-}));
-
-vi.mock('mingyu-core/divination/meihua', () => ({
-  generateMeihua: mockGenerateMeihua,
-}));
-
-vi.mock('mingyu-core/divination/qimen', () => ({
-  generateQimen: mockGenerateQimen,
-}));
-
-vi.mock('mingyu-core/divination/tarot', () => ({
-  drawSpreadCards: mockDrawSpreadCards,
-  getCardKeywords: mockGetCardKeywords,
+vi.mock('@/shared/mingyu-divination', () => ({
+  generateMingyuLiuyao: mockGenerateMingyuLiuyao,
+  generateMingyuMeihua: mockGenerateMingyuMeihua,
+  generateMingyuQimen: mockGenerateMingyuQimen,
+  generateMingyuTarot: mockGenerateMingyuTarot,
+  generateMingyuSsgw: mockGenerateMingyuSsgw,
 }));
 
 vi.mock('./algorithms/daily', () => ({
@@ -39,7 +30,6 @@ vi.mock('./algorithms/daily', () => ({
 
 import { dataGenerationService } from './dataGenerationService';
 import type { SupplementaryInfo } from '@/types/divination';
-import { DEFAULT_QIMEN_METHOD, DEFAULT_QIMEN_SCOPE } from '@/shared/qimen-settings';
 
 describe('DataGenerationService', () => {
   beforeEach(() => {
@@ -52,7 +42,7 @@ describe('DataGenerationService', () => {
       divinationNumber: 123456,
     } as unknown as SupplementaryInfo);
 
-    expect(mockGenerateLiuyao).toHaveBeenCalledWith();
+    expect(mockGenerateMingyuLiuyao).toHaveBeenCalledWith();
   });
 
   it('奇门未指定设置时应继续走默认时家转盘', async () => {
@@ -61,11 +51,7 @@ describe('DataGenerationService', () => {
       divinationNumber: 789,
     } as unknown as SupplementaryInfo);
 
-    expect(mockGenerateQimen).toHaveBeenCalledWith(
-      undefined,
-      DEFAULT_QIMEN_METHOD,
-      DEFAULT_QIMEN_SCOPE
-    );
+    expect(mockGenerateMingyuQimen).toHaveBeenCalledWith(undefined);
   });
 
   it('奇门应透传原生排盘设置', async () => {
@@ -76,7 +62,10 @@ describe('DataGenerationService', () => {
       },
     });
 
-    expect(mockGenerateQimen).toHaveBeenCalledWith(undefined, 'feipan', 'day');
+    expect(mockGenerateMingyuQimen).toHaveBeenCalledWith({
+      method: 'feipan',
+      scope: 'day',
+    });
   });
 
   it('梅花应透传自定义起卦设置', async () => {
@@ -91,7 +80,7 @@ describe('DataGenerationService', () => {
       },
     });
 
-    expect(mockGenerateMeihua).toHaveBeenCalledWith(undefined, {
+    expect(mockGenerateMingyuMeihua).toHaveBeenCalledWith({
       method: 'external',
       externalOmens: {
         direction: '东',
@@ -116,14 +105,16 @@ describe('DataGenerationService', () => {
   });
 
   it('塔罗应直接按传入牌阵走统一生成链路', async () => {
-    mockDrawSpreadCards.mockReturnValue({
+    mockGenerateMingyuTarot.mockResolvedValue({
       spreadType: 'single',
       spreadName: '单牌指引',
       cards: [
         {
-          card: { number: 1, name: '愚者' },
-          isReversed: false,
+          id: 1,
+          name: '愚者',
+          reversed: false,
           position: '当前指引',
+          keywords: ['关键词'],
         },
       ],
       timestamp: 1711111111111,
@@ -131,7 +122,7 @@ describe('DataGenerationService', () => {
 
     const result = await dataGenerationService.generateDivination('tarot', 'single');
 
-    expect(mockDrawSpreadCards).toHaveBeenCalledWith('single');
+    expect(mockGenerateMingyuTarot).toHaveBeenCalledWith('single');
     expect(result).toMatchObject({
       spreadType: 'single',
       spreadName: '单牌指引',
@@ -148,7 +139,7 @@ describe('DataGenerationService', () => {
   });
 
   it('塔罗未传牌阵时应使用默认单牌指引', async () => {
-    mockDrawSpreadCards.mockReturnValue({
+    mockGenerateMingyuTarot.mockResolvedValue({
       spreadType: 'single',
       spreadName: '单牌指引',
       cards: [],
@@ -157,6 +148,12 @@ describe('DataGenerationService', () => {
 
     await dataGenerationService.generateDivination('tarot');
 
-    expect(mockDrawSpreadCards).toHaveBeenCalledWith('single');
+    expect(mockGenerateMingyuTarot).toHaveBeenCalledWith(undefined);
+  });
+
+  it('三山国王灵签应走统一核心库适配入口', async () => {
+    await dataGenerationService.generateDivination('ssgw');
+
+    expect(mockGenerateMingyuSsgw).toHaveBeenCalledWith();
   });
 });
