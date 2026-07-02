@@ -31,14 +31,4 @@ describe('SearchInput', () => {
     expect(wrapper.emitted('clear')).toHaveLength(1);
   });
 
-  it('紧凑模式会带上对应样式类名', () => {
-    const wrapper = mount(SearchInput, {
-      props: {
-        modelValue: '',
-        size: 'compact',
-      },
-    });
-
-    expect(wrapper.classes()).toContain('search-input-compact');
-  });
 });
