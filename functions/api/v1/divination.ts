@@ -2,7 +2,7 @@
 // 开发者占卜API：生成占卜数据 + AI解读（支持SSE流式）
 
 import { calculateDailyFortune } from '../../../src/services/daily-fortune/index.ts';
-import { type DivinationType } from '../../../src/types/divination.ts';
+import { type DivinationType, type SupplementaryInfo } from '../../../src/types/divination.ts';
 import {
   generateMingyuLiuyao,
   generateMingyuMeihua,
@@ -23,47 +23,6 @@ import {
 import { buildDivinationSystemPrompt } from '../../../src/shared/divination-system-prompt.ts';
 import { formatQimenSettingsLabel } from '../../../src/shared/qimen-settings.ts';
 import { proxyAiRequest } from '../../_shared/ai-proxy.js';
-
-interface SupplementaryInfo {
-  gender?: '男' | '女';
-  birthYear?: number;
-  interpretationStyle?: '入门' | '专业';
-  outputLength?: '精简' | '详细' | '超详细';
-  meihuaSettings?: {
-    method?: 'time' | 'number' | 'random' | 'external';
-    number?: number;
-    externalOmens?: {
-      direction?: '东' | '东南' | '南' | '西南' | '西' | '西北' | '北' | '东北';
-      count?: number;
-      person?: '老父' | '老妇' | '长男' | '长女' | '中男' | '中女' | '少男' | '少女';
-      animal?: '马' | '牛' | '龙' | '鸡' | '猪' | '雉' | '狗' | '羊';
-      object?:
-        | '金玉圆器'
-        | '布帛陶器'
-        | '竹木乐器'
-        | '绳索长木'
-        | '水器液体'
-        | '火电文书'
-        | '石块门板'
-        | '刀剪口器';
-      sound?:
-        | '洪亮金石'
-        | '沉厚低缓'
-        | '雷鸣震动'
-        | '风声呼啸'
-        | '流水滴答'
-        | '爆裂鸣叫'
-        | '闷阻叩击'
-        | '清脆笑语';
-      color?: '金白' | '土黄' | '青碧' | '青绿' | '黑蓝' | '赤紫' | '棕黄' | '银白';
-    };
-  };
-  qimenSettings?: {
-    method?: 'zhuanpan' | 'feipan';
-    scope?: 'hour' | 'day' | 'month' | 'year';
-  };
-  date?: string; // YYYY-MM-DD，仅用于今日运势
-}
 
 interface DivinationRequestBody {
   type?: string;
