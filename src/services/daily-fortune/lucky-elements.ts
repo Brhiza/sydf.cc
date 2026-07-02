@@ -14,6 +14,9 @@ export interface LuckyElements {
   time: string;
 }
 
+const DEFAULT_LUCKY_NUMBERS = [1, 6, 8];
+const DEFAULT_LUCKY_DIRECTIONS = ['北', '西北'];
+
 export function generateTraditionalLuckyElements(
   jiuGong: DailyQimenJiuGongGe[],
   ganzhi: BaseGanZhi
@@ -25,13 +28,18 @@ export function generateTraditionalLuckyElements(
   });
 
   const numbers =
-    auspiciousPalaces.length > 0 ? auspiciousPalaces.slice(0, 3).map((g) => g.gong) : [1, 6, 8];
+    auspiciousPalaces.length > 0
+      ? auspiciousPalaces.slice(0, 3).map((g) => g.gong)
+      : DEFAULT_LUCKY_NUMBERS;
 
   const dayGan = ganzhi.day.charAt(0);
   const dayGanWuxing = TIANGAN_WUXING[dayGan] || '木';
   const colors = (COLOR_MAP[dayGanWuxing] || COLOR_MAP['木']).slice(0, 3);
 
-  const directions = auspiciousPalaces.slice(0, 2).map((g) => g.direction);
+  const directions =
+    auspiciousPalaces.length > 0
+      ? auspiciousPalaces.slice(0, 2).map((g) => g.direction)
+      : DEFAULT_LUCKY_DIRECTIONS;
 
   const dayZhi = ganzhi.day.charAt(1);
   const time = ZHI_TIME_MAP[dayZhi] || '辰时(07:00-09:00)';
