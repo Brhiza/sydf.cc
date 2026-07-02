@@ -24,18 +24,20 @@ import { buildDivinationSystemPrompt } from '../../../src/shared/divination-syst
 import { formatQimenSettingsLabel } from '../../../src/shared/qimen-settings.ts';
 import { proxyAiRequest } from '../../_shared/ai-proxy.js';
 
+interface DivinationRequestOptions {
+  spreadType?: string;
+  date?: string; // YYYY-MM-DD
+  datetime?: string; // ISO 8601（建议携带时区偏移，如 +08:00）
+  supplementaryInfo?: SupplementaryInfo;
+  temperature?: number;
+}
+
 interface DivinationRequestBody {
-  type?: string;
-  question?: string;
-  stream?: boolean;
-  debug?: boolean;
-  options?: {
-    spreadType?: string;
-    date?: string; // YYYY-MM-DD
-    datetime?: string; // ISO 8601（建议携带时区偏移，如 +08:00）
-    supplementaryInfo?: SupplementaryInfo;
-    temperature?: number;
-  };
+  type?: unknown;
+  question?: unknown;
+  stream?: unknown;
+  debug?: unknown;
+  options?: unknown;
 }
 
 interface OpenAiProxyResponse {
@@ -79,6 +81,84 @@ function getAllowedOrigin(origin: string | null): string | null {
   } catch {
     return null;
   }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function normalizeSupplementaryInfo(value: unknown): SupplementaryInfo | undefined {
+  if (!isRecord(value)) {
+    return undefined;
+  }
+
+  const info: SupplementaryInfo = {};
+
+  if (value.gender === '男' || value.gender === '女') {
+    info.gender = value.gender;
+  }
+  if (typeof value.birthYear === 'number' && Number.isFinite(value.birthYear)) {
+    info.birthYear = value.birthYear;
+  }
+  if (value.interpretationStyle === '入门' || value.interpretationStyle === '专业') {
+    info.interpretationStyle = value.interpretationStyle;
+  }
+  if (
+    value.outputLength === '精简' ||
+    value.outputLength === '详细' ||
+    value.outputLength === '超详细'
+  ) {
+    info.outputLength = value.outputLength;
+  }
+  if (
+    isRecord(value.dayPillar) &&
+    typeof value.dayPillar.heavenlyStem === 'string' &&
+    typeof value.dayPillar.earthlyBranch === 'string'
+  ) {
+    info.dayPillar = {
+      heavenlyStem: value.dayPillar.heavenlyStem,
+      earthlyBranch: value.dayPillar.earthlyBranch,
+    };
+  }
+  if (isRecord(value.meihuaSettings)) {
+    info.meihuaSettings = value.meihuaSettings as SupplementaryInfo['meihuaSettings'];
+  }
+  if (isRecord(value.qimenSettings)) {
+    info.qimenSettings = value.qimenSettings as SupplementaryInfo['qimenSettings'];
+  }
+  if (typeof value.date === 'string' && value.date.trim()) {
+    info.date = value.date.trim();
+  }
+
+  return Object.keys(info).length > 0 ? info : undefined;
+}
+
+function normalizeRequestOptions(value: unknown): DivinationRequestOptions {
+  if (!isRecord(value)) {
+    return {};
+  }
+
+  const options: DivinationRequestOptions = {};
+
+  if (typeof value.spreadType === 'string' && value.spreadType.trim()) {
+    options.spreadType = value.spreadType.trim();
+  }
+  if (typeof value.date === 'string' && value.date.trim()) {
+    options.date = value.date.trim();
+  }
+  if (typeof value.datetime === 'string' && value.datetime.trim()) {
+    options.datetime = value.datetime.trim();
+  }
+  if (typeof value.temperature === 'number' && Number.isFinite(value.temperature)) {
+    options.temperature = value.temperature;
+  }
+
+  const supplementaryInfo = normalizeSupplementaryInfo(value.supplementaryInfo);
+  if (supplementaryInfo) {
+    options.supplementaryInfo = supplementaryInfo;
+  }
+
+  return options;
 }
 
 function buildCorsHeaders(origin: string | null): HeadersInit {
@@ -169,14 +249,14 @@ function parseDatetime(datetime: string): Date {
 
 function resolveDivinationDate(
   type: DivinationType,
-  body: DivinationRequestBody,
+  options: DivinationRequestOptions,
   baseDate: Date
 ): Date {
   if (type !== 'daily') {
     return baseDate;
   }
 
-  const dateStr = body.options?.date || body.options?.supplementaryInfo?.date;
+  const dateStr = options.date || options.supplementaryInfo?.date;
   return dateStr ? parseDateOnly(dateStr) : baseDate;
 }
 
@@ -238,11 +318,10 @@ function buildUserPrompt(args: {
 async function generateDivinationData(args: {
   type: DivinationType;
   isLegacyTarotSingle: boolean;
-  body: DivinationRequestBody;
+  options: DivinationRequestOptions;
   baseDate: Date;
 }) {
-  const { type, isLegacyTarotSingle, body, baseDate } = args;
-  const options = body.options || {};
+  const { type, isLegacyTarotSingle, options, baseDate } = args;
   const supplementaryInfo = options.supplementaryInfo;
 
   if (type === 'daily') {
@@ -267,7 +346,7 @@ async function generateDivinationData(args: {
 
   if (type === 'tarot') {
     const compatibleTarotType = isLegacyTarotSingle ? 'tarot_single' : 'tarot';
-    const spreadType = resolveTarotSpreadType(compatibleTarotType, body.options?.spreadType);
+    const spreadType = resolveTarotSpreadType(compatibleTarotType, options.spreadType);
     return generateMingyuTarot(spreadType);
   }
 
@@ -335,7 +414,8 @@ export async function onRequest(context: {
 
   let body: DivinationRequestBody;
   try {
-    body = (await request.json()) as DivinationRequestBody;
+    const parsedBody = await request.json();
+    body = isRecord(parsedBody) ? parsedBody : {};
   } catch {
     return jsonResponse(
       { ok: false, requestId, error: { code: 'BAD_REQUEST', message: '请求体必须为JSON' } },
@@ -344,7 +424,7 @@ export async function onRequest(context: {
   }
 
   const type = body?.type;
-  if (!type || !isCompatibleDivinationType(type)) {
+  if (typeof type !== 'string' || !isCompatibleDivinationType(type)) {
     return jsonResponse(
       {
         ok: false,
@@ -359,9 +439,11 @@ export async function onRequest(context: {
   }
   const normalizedType = normalizeDivinationType(type);
   const isLegacyTarotSingle = type === 'tarot_single';
+  const question = typeof body.question === 'string' ? body.question : undefined;
+  const options = normalizeRequestOptions(body.options);
 
   if (type !== 'daily') {
-    if (typeof body.question !== 'string' || !body.question.trim()) {
+    if (!question?.trim()) {
       return jsonResponse(
         {
           ok: false,
@@ -377,11 +459,11 @@ export async function onRequest(context: {
   let divinationDate: Date;
   try {
     baseDate = (() => {
-      const dt = body.options?.datetime;
-      if (typeof dt === 'string' && dt.trim()) return parseDatetime(dt.trim());
+      const dt = options.datetime;
+      if (dt) return parseDatetime(dt);
       return new Date();
     })();
-    divinationDate = resolveDivinationDate(normalizedType, body, baseDate);
+    divinationDate = resolveDivinationDate(normalizedType, options, baseDate);
   } catch (error) {
     const message = error instanceof Error ? error.message : '时间参数不正确';
     return jsonResponse(
@@ -395,7 +477,7 @@ export async function onRequest(context: {
     divinationData = await generateDivinationData({
       type: normalizedType,
       isLegacyTarotSingle,
-      body,
+      options,
       baseDate: divinationDate,
     });
   } catch (error) {
@@ -409,7 +491,7 @@ export async function onRequest(context: {
   // 时间信息：使用同一时间点生成，便于AI解读（北京时间）
   const timeInfoText = formatTimeInfo(getDivinationTime(divinationDate));
 
-  const supplementaryInfo = body.options?.supplementaryInfo;
+  const supplementaryInfo = options.supplementaryInfo;
   const systemPrompt = buildDivinationSystemPrompt(normalizedType, {
     strictDataOnly: true,
     requireStructuredSections: true,
@@ -418,15 +500,15 @@ export async function onRequest(context: {
   });
   const userPrompt = buildUserPrompt({
     type: normalizedType,
-    question: body.question,
+    question,
     timeInfoText,
     divinationData,
     supplementaryInfo,
   });
 
-  const stream = !!body.stream;
-  const debug = !!body.debug;
-  const temperature = body.options?.temperature;
+  const stream = body.stream === true;
+  const debug = body.debug === true;
+  const temperature = options.temperature;
 
   const aiBody = buildOpenAiBody({ systemPrompt, userPrompt, stream, temperature });
 
