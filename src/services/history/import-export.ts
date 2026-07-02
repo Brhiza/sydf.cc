@@ -1,5 +1,5 @@
 import type { HistoryRecord } from '@/types/common';
-import { normalizeRecords, type PersistedHistoryRecord } from '../history-migration';
+import { normalizeRecords } from '../history-migration';
 import type { AppSettings } from './types';
 
 export interface ExportPayload {
@@ -31,7 +31,10 @@ export function parseImportPayload(jsonData: string): ParsedImportPayload {
     if (!importData.records || !Array.isArray(importData.records)) {
       return { success: false, message: '无效的数据格式' };
     }
-    const { records } = normalizeRecords(importData.records as PersistedHistoryRecord[]);
+    const { records } = normalizeRecords(importData.records);
+    if (records.length === 0) {
+      return { success: false, message: '没有可导入的有效历史记录' };
+    }
     return { success: true, message: '解析成功', records };
   } catch {
     return { success: false, message: '数据解析失败' };

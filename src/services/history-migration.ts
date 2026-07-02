@@ -1,6 +1,6 @@
 import type { ChatMessage } from '@/types/chat';
 import type { HistoryRecord } from '@/types/common';
-import { normalizeDivinationType } from '@/utils/divination-type';
+import { isCompatibleDivinationType, normalizeDivinationType } from '@/utils/divination-type';
 
 const LEGACY_AI_ERROR_KEYWORDS = [
   '抱歉',
@@ -27,8 +27,37 @@ type LegacyPersistedTarotSingleRecord = Omit<HistoryRecord, 'type' | 'result'> &
 
 export type PersistedHistoryRecord = HistoryRecord | LegacyPersistedTarotSingleRecord;
 
+function isObjectRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === 'string' && value.trim().length > 0;
+}
+
+function isValidPersistedRecord(value: unknown): value is PersistedHistoryRecord {
+  if (!isObjectRecord(value)) {
+    return false;
+  }
+
+  if (
+    !isNonEmptyString(value.id) ||
+    !isCompatibleDivinationType(String(value.type)) ||
+    typeof value.question !== 'string' ||
+    typeof value.summary !== 'string' ||
+    typeof value.timestamp !== 'number' ||
+    !Number.isFinite(value.timestamp) ||
+    !isObjectRecord(value.result)
+  ) {
+    return false;
+  }
+
+  const result = value.result;
+  return isCompatibleDivinationType(String(result.type)) && isObjectRecord(result.data);
+}
+
 export function normalizePersistedRecord<
-  T extends PersistedHistoryRecord | Omit<HistoryRecord, 'timestamp' | 'summary'>
+  T extends PersistedHistoryRecord | Omit<HistoryRecord, 'timestamp' | 'summary'>,
 >(record: T): T {
   const normalizedType = normalizeDivinationType(record.type);
   const normalizedResultType = normalizeDivinationType(record.result.type);
@@ -71,12 +100,21 @@ export function migrateLegacyErrorMarkers(history: ChatMessage[] | undefined): {
   return changed ? { history: migratedHistory, changed: true } : { history, changed: false };
 }
 
-export function normalizeRecords(
-  records: Array<PersistedHistoryRecord | HistoryRecord>
-): { records: HistoryRecord[]; changed: boolean } {
+export function normalizeRecords(records: unknown[]): {
+  records: HistoryRecord[];
+  changed: boolean;
+} {
   let changed = false;
 
-  const normalizedRecords = records.map((record) => {
+  const validRecords = records.filter((record) => {
+    const valid = isValidPersistedRecord(record);
+    if (!valid) {
+      changed = true;
+    }
+    return valid;
+  });
+
+  const normalizedRecords = validRecords.map((record) => {
     const normalizedRecord = normalizePersistedRecord(record);
     if (normalizedRecord !== record) {
       changed = true;
