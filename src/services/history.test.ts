@@ -208,6 +208,137 @@ describe('HistoryService', () => {
     expect(storedRecords.map((record) => record.id)).toEqual(['daily-local-valid']);
   });
 
+  it('导入历史时应清洗异常对话历史消息', async () => {
+    localStorage.setItem('sydf-history', JSON.stringify([]));
+
+    const { historyService } = await import('./history');
+    const importPayload = JSON.stringify({
+      records: [
+        {
+          ...createDailyRecord('daily-with-conversation', 5000, '2026-03-29'),
+          conversationHistory: [
+            {
+              id: 'assistant-1',
+              role: 'assistant',
+              content: '正常解读',
+              isError: false,
+              extra: 'bad',
+            },
+            {
+              role: 'bad',
+              content: '坏消息',
+            },
+            {
+              role: 'assistant',
+              content: '抱歉，服务器暂时繁忙，请稍后重试',
+            },
+          ],
+        },
+      ],
+    });
+
+    const result = historyService.importRecords(importPayload);
+    const record = historyService.getRecord('daily-with-conversation');
+
+    expect(result).toEqual({
+      success: true,
+      message: '成功导入 1 条记录',
+      count: 1,
+    });
+    expect(record?.conversationHistory).toEqual([
+      {
+        id: 'assistant-1',
+        role: 'assistant',
+        content: '正常解读',
+        isError: false,
+      },
+      {
+        role: 'assistant',
+        content: '抱歉，服务器暂时繁忙，请稍后重试',
+        isError: true,
+      },
+    ]);
+  });
+
+  it('加载本地历史时应清洗异常对话历史消息并写回本地存储', async () => {
+    localStorage.setItem(
+      'sydf-history',
+      JSON.stringify([
+        {
+          ...createDailyRecord('daily-bad-conversation', 6000, '2026-03-30'),
+          conversationHistory: {},
+        },
+        {
+          ...createDailyRecord('daily-clean-conversation', 7000, '2026-03-31'),
+          conversationHistory: [
+            {
+              role: 'user',
+              content: '继续说',
+              tool_calls: 'bad',
+            },
+            {
+              role: 'tool',
+              content: null,
+              tool_call_id: '',
+            },
+            {
+              role: 'assistant',
+              content: '有效追问解读',
+              tool_calls: [
+                {
+                  id: 'call-1',
+                  type: 'function',
+                  function: {
+                    name: 'get_context',
+                    arguments: '{}',
+                    extra: 'bad',
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      ])
+    );
+
+    const { historyService } = await import('./history');
+    const storedRecords = JSON.parse(
+      localStorage.getItem('sydf-history') || '[]'
+    ) as HistoryRecord[];
+
+    expect(historyService.getRecord('daily-bad-conversation')?.conversationHistory).toBeUndefined();
+    expect(historyService.getRecord('daily-clean-conversation')?.conversationHistory).toEqual([
+      {
+        role: 'user',
+        content: '继续说',
+      },
+      {
+        role: 'tool',
+        content: null,
+      },
+      {
+        role: 'assistant',
+        content: '有效追问解读',
+        tool_calls: [
+          {
+            id: 'call-1',
+            type: 'function',
+            function: {
+              name: 'get_context',
+              arguments: '{}',
+            },
+          },
+        ],
+      },
+    ]);
+    expect(storedRecords.find((record) => record.id === 'daily-bad-conversation')).not.toHaveProperty(
+      'conversationHistory'
+    );
+    expect(storedRecords.find((record) => record.id === 'daily-clean-conversation')?.conversationHistory).toEqual(
+      historyService.getRecord('daily-clean-conversation')?.conversationHistory
+    );
+  });
+
   it('加载异常本地设置时应回到安全默认值', async () => {
     localStorage.setItem(
       'sydf-app-settings',

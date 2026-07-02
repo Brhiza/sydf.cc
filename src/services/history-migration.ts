@@ -35,6 +35,155 @@ function isNonEmptyString(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0;
 }
 
+function isChatRole(value: unknown): value is ChatMessage['role'] {
+  return value === 'system' || value === 'user' || value === 'assistant' || value === 'tool';
+}
+
+function normalizeToolCalls(value: unknown): {
+  toolCalls?: ChatMessage['tool_calls'];
+  changed: boolean;
+} {
+  if (value === undefined) {
+    return { changed: false };
+  }
+
+  if (!Array.isArray(value)) {
+    return { changed: true };
+  }
+
+  let changed = false;
+  const toolCalls = value.flatMap((item) => {
+    if (!isObjectRecord(item) || item.type !== 'function' || !isObjectRecord(item.function)) {
+      changed = true;
+      return [];
+    }
+
+    const toolFunction = item.function;
+    if (
+      !isNonEmptyString(item.id) ||
+      !isNonEmptyString(toolFunction.name) ||
+      typeof toolFunction.arguments !== 'string'
+    ) {
+      changed = true;
+      return [];
+    }
+
+    const normalized = {
+      id: item.id,
+      type: 'function' as const,
+      function: {
+        name: toolFunction.name,
+        arguments: toolFunction.arguments,
+      },
+    };
+
+    if (
+      Object.keys(item).length !== 3 ||
+      Object.keys(toolFunction).length !== 2 ||
+      normalized.id !== item.id ||
+      normalized.function.name !== toolFunction.name ||
+      normalized.function.arguments !== toolFunction.arguments
+    ) {
+      changed = true;
+    }
+
+    return [normalized];
+  });
+
+  return toolCalls.length > 0 ? { toolCalls, changed } : { changed: true };
+}
+
+function normalizeChatMessage(value: unknown): {
+  message?: ChatMessage;
+  changed: boolean;
+} {
+  if (!isObjectRecord(value) || !isChatRole(value.role)) {
+    return { changed: true };
+  }
+
+  if (typeof value.content !== 'string' && value.content !== null) {
+    return { changed: true };
+  }
+
+  let changed = false;
+  const normalized: ChatMessage = {
+    role: value.role,
+    content: value.content,
+  };
+
+  const allowedKeys = new Set(['id', 'role', 'content', 'tool_calls', 'tool_call_id', 'isError']);
+
+  if ('id' in value) {
+    if (isNonEmptyString(value.id)) {
+      normalized.id = value.id;
+    } else {
+      changed = true;
+    }
+  }
+
+  if ('tool_call_id' in value) {
+    if (isNonEmptyString(value.tool_call_id)) {
+      normalized.tool_call_id = value.tool_call_id;
+    } else {
+      changed = true;
+    }
+  }
+
+  if ('isError' in value) {
+    if (typeof value.isError === 'boolean') {
+      normalized.isError = value.isError;
+    } else {
+      changed = true;
+    }
+  }
+
+  const normalizedToolCalls = normalizeToolCalls(value.tool_calls);
+  if (normalizedToolCalls.toolCalls) {
+    normalized.tool_calls = normalizedToolCalls.toolCalls;
+  }
+  if (normalizedToolCalls.changed) {
+    changed = true;
+  }
+
+  if (Object.keys(value).some((key) => !allowedKeys.has(key))) {
+    changed = true;
+  }
+
+  return { message: normalized, changed };
+}
+
+export function normalizeConversationHistory(history: unknown): {
+  history: ChatMessage[] | undefined;
+  changed: boolean;
+} {
+  if (history === undefined) {
+    return { history: undefined, changed: false };
+  }
+
+  if (!Array.isArray(history)) {
+    return { history: undefined, changed: true };
+  }
+
+  let changed = false;
+  const normalizedHistory = history.flatMap((message) => {
+    const normalized = normalizeChatMessage(message);
+    if (normalized.changed) {
+      changed = true;
+    }
+    return normalized.message ? [normalized.message] : [];
+  });
+
+  if (normalizedHistory.length !== history.length) {
+    changed = true;
+  }
+
+  if (normalizedHistory.length === 0) {
+    return { history: undefined, changed };
+  }
+
+  return { history: normalizedHistory, changed };
+}
+
 function isValidPersistedRecord(value: unknown): value is PersistedHistoryRecord {
   if (!isObjectRecord(value)) {
     return false;
@@ -120,13 +269,17 @@ export function normalizeRecords(records: unknown[]): {
       changed = true;
     }
 
-    const migration = migrateLegacyErrorMarkers(normalizedRecord.conversationHistory);
-    if (migration.changed) {
+    const normalizedConversation = normalizeConversationHistory(normalizedRecord.conversationHistory);
+    const migration = migrateLegacyErrorMarkers(normalizedConversation.history);
+    if (normalizedConversation.changed || migration.changed) {
       changed = true;
-      return {
-        ...normalizedRecord,
-        conversationHistory: migration.history,
-      } as HistoryRecord;
+      const recordWithCleanConversation: HistoryRecord = { ...normalizedRecord } as HistoryRecord;
+      if (migration.history && migration.history.length > 0) {
+        recordWithCleanConversation.conversationHistory = migration.history;
+      } else {
+        delete recordWithCleanConversation.conversationHistory;
+      }
+      return recordWithCleanConversation;
     }
 
     return normalizedRecord as HistoryRecord;
