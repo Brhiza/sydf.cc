@@ -1,4 +1,4 @@
-import type { DailyQimenJiuGongGe } from '../../../types/divination.ts';
+import type { DailyQimenJiuGongGe } from '../../types/divination.ts';
 import { DOOR_AUSPICIOUS, GOD_AUSPICIOUS, STAR_AUSPICIOUS } from './constants.ts';
 
 export interface DailyQimenAnalysis {

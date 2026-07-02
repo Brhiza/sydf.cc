@@ -1,5 +1,11 @@
-import type { BaseGanZhi, DailyQimenJiuGongGe } from '../../../types/divination.ts';
-import { COLOR_MAP, DOOR_AUSPICIOUS, STAR_AUSPICIOUS, TIANGAN_WUXING, ZHI_TIME_MAP } from './constants.ts';
+import type { BaseGanZhi, DailyQimenJiuGongGe } from '../../types/divination.ts';
+import {
+  COLOR_MAP,
+  DOOR_AUSPICIOUS,
+  STAR_AUSPICIOUS,
+  TIANGAN_WUXING,
+  ZHI_TIME_MAP,
+} from './constants.ts';
 
 export interface LuckyElements {
   numbers: number[];
@@ -18,9 +24,8 @@ export function generateTraditionalLuckyElements(
     return starNature === '吉' || doorNature === '吉';
   });
 
-  const numbers = auspiciousPalaces.length > 0
-    ? auspiciousPalaces.slice(0, 3).map((g) => g.gong)
-    : [1, 6, 8];
+  const numbers =
+    auspiciousPalaces.length > 0 ? auspiciousPalaces.slice(0, 3).map((g) => g.gong) : [1, 6, 8];
 
   const dayGan = ganzhi.day.charAt(0);
   const dayGanWuxing = TIANGAN_WUXING[dayGan] || '木';

@@ -24,7 +24,7 @@ vi.mock('@/shared/mingyu-divination', () => ({
   generateMingyuSsgw: mockGenerateMingyuSsgw,
 }));
 
-vi.mock('./algorithms/daily', () => ({
+vi.mock('./daily-fortune', () => ({
   calculateDailyFortune: mockCalculateDailyFortune,
 }));
 

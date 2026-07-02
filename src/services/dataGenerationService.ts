@@ -46,7 +46,7 @@ export class DataGenerationService {
         return generateMingyuSsgw();
       }
       case 'daily': {
-        const { calculateDailyFortune } = await import('./algorithms/daily');
+        const { calculateDailyFortune } = await import('./daily-fortune');
         const normalizedDate = supplementaryInfo?.date
           ? normalizeDateKey(supplementaryInfo.date)
           : undefined;
