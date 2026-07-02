@@ -4,11 +4,16 @@
  */
 
 import type { DivinationData } from '@/types/divination';
-import { LunarUtil } from 'mingyu-core/calendar';
+import {
+  formatTimeDisplay,
+  getCurrentTimeInfo,
+  getTimeInfo,
+  type TimeInfo,
+} from '@/shared/mingyu-calendar';
 import { createAnchoredDateFromDateKey, normalizeDateKey } from '@/utils/date-formatter';
 
-function formatTimeInfoBlock(timeInfoData: ReturnType<typeof LunarUtil.getCurrentTimeInfo>): string {
-  const timeDisplay = LunarUtil.formatTimeDisplay(timeInfoData);
+function formatTimeInfoBlock(timeInfoData: TimeInfo): string {
+  const timeDisplay = formatTimeDisplay(timeInfoData);
 
   return `**时间信息**：
 ${timeDisplay.solar}
@@ -22,7 +27,11 @@ function extractDivinationDate(data?: DivinationData): Date | null {
     return null;
   }
 
-  if ('timestamp' in data && typeof data.timestamp === 'number' && Number.isFinite(data.timestamp)) {
+  if (
+    'timestamp' in data &&
+    typeof data.timestamp === 'number' &&
+    Number.isFinite(data.timestamp)
+  ) {
     return new Date(data.timestamp);
   }
 
@@ -38,7 +47,7 @@ function extractDivinationDate(data?: DivinationData): Date | null {
  * 包含公历、农历、干支和节气信息
  */
 export async function getFormattedTimeInfo(date?: Date): Promise<string> {
-  const timeInfoData = date ? LunarUtil.getTimeInfo(date) : LunarUtil.getCurrentTimeInfo();
+  const timeInfoData = date ? getTimeInfo(date) : getCurrentTimeInfo();
   return formatTimeInfoBlock(timeInfoData);
 }
 
@@ -56,7 +65,7 @@ export async function getFormattedTimeInfoForDivination(data?: DivinationData): 
  * 用于需要自定义格式化的场景
  */
 export async function getRawTimeData() {
-  return LunarUtil.getCurrentTimeInfo();
+  return getCurrentTimeInfo();
 }
 
 /**
@@ -64,11 +73,11 @@ export async function getRawTimeData() {
  * 用于需要分别处理各部分时间信息的场景
  */
 export async function getDisplayTimeData() {
-  const timeInfoData = LunarUtil.getCurrentTimeInfo();
-  const timeDisplay = LunarUtil.formatTimeDisplay(timeInfoData);
-  
+  const timeInfoData = getCurrentTimeInfo();
+  const timeDisplay = formatTimeDisplay(timeInfoData);
+
   return {
     ...timeDisplay,
-    jieqi: timeInfoData.jieQi
+    jieqi: timeInfoData.jieQi,
   };
 }

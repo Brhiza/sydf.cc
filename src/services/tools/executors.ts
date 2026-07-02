@@ -1,10 +1,16 @@
-import { LunarUtil } from 'mingyu-core/calendar';
+import {
+  formatTimeDisplay,
+  getCurrentTimeInfo,
+  getGanZhiForMonth,
+  getGanZhiForYear,
+  getTimeInfo,
+} from '@/shared/mingyu-calendar';
 import { createAnchoredDate, isValidDateParts, pad2 } from './date-utils';
 
 export const toolExecutors: { [key: string]: (args: unknown) => Promise<string> } = {
   get_current_time_info: async () => {
     try {
-      const timeInfo = LunarUtil.getCurrentTimeInfo();
+      const timeInfo = getCurrentTimeInfo();
       return JSON.stringify(timeInfo);
     } catch (error) {
       console.error('执行 get_current_time_info 工具时出错:', error);
@@ -17,7 +23,7 @@ export const toolExecutors: { [key: string]: (args: unknown) => Promise<string> 
       if (!year || !month) {
         return JSON.stringify({ error: '缺少年份或月份参数' });
       }
-      const data = LunarUtil.getGanZhiForMonth(year, month);
+      const data = getGanZhiForMonth(year, month);
       return JSON.stringify(data);
     } catch (error) {
       console.error('执行 get_ganzhi_for_month 工具时出错:', error);
@@ -30,7 +36,7 @@ export const toolExecutors: { [key: string]: (args: unknown) => Promise<string> 
       if (!year) {
         return JSON.stringify({ error: '缺少年份参数' });
       }
-      const data = LunarUtil.getGanZhiForYear(year);
+      const data = getGanZhiForYear(year);
       return JSON.stringify(data);
     } catch (error) {
       console.error('执行 get_ganzhi_for_year 工具时出错:', error);
@@ -49,8 +55,8 @@ export const toolExecutors: { [key: string]: (args: unknown) => Promise<string> 
       }
 
       const date = createAnchoredDate(year, month, day);
-      const timeInfo = LunarUtil.getTimeInfo(date);
-      const display = LunarUtil.formatTimeDisplay(timeInfo);
+      const timeInfo = getTimeInfo(date);
+      const display = formatTimeDisplay(timeInfo);
       return JSON.stringify({
         date: `${year}-${pad2(month)}-${pad2(day)}`,
         solar: display.solar,
