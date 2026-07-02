@@ -147,7 +147,7 @@ describe('useSupplementaryInfo', () => {
       'supplementaryInfo',
       JSON.stringify({
         gender: '未知',
-        birthYear: '1990',
+        birthYear: 1800,
         interpretationStyle: '复杂',
         outputLength: '很长',
         dayPillar: {
@@ -166,6 +166,21 @@ describe('useSupplementaryInfo', () => {
     expect(state.outputLength.value).toBeUndefined();
     expect(state.dayPillarHeavenlyStem.value).toBe('');
     expect(state.dayPillarEarthlyBranch.value).toBe('');
+    expect(state.getSupplementaryInfo()).toBeUndefined();
+    expect(state.supplementaryInfoToggleText.value).toBe('补充信息');
+
+    wrapper.unmount();
+  });
+
+  it('手动异常基础补充信息不应被提交或显示为已补充', async () => {
+    const { state, wrapper } = mountSupplementaryInfo();
+    await nextTick();
+
+    state.birthYear.value = 2101;
+    state.dayPillarHeavenlyStem.value = '坏天干';
+    state.dayPillarEarthlyBranch.value = '子';
+    await nextTick();
+
     expect(state.getSupplementaryInfo()).toBeUndefined();
     expect(state.supplementaryInfoToggleText.value).toBe('补充信息');
 
