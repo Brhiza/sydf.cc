@@ -171,7 +171,16 @@ function parseDateOnly(dateStr: string): Date {
     throw new Error('date 格式不正确');
   }
   // 使用“UTC中午”作为锚点，减少时区换算导致的跨日风险
-  return new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
+  const date = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
+  if (
+    date.getUTCFullYear() !== year ||
+    date.getUTCMonth() !== month - 1 ||
+    date.getUTCDate() !== day
+  ) {
+    throw new Error('date 不是有效日期');
+  }
+
+  return date;
 }
 
 function parseDatetime(datetime: string): Date {
@@ -261,8 +270,7 @@ async function generateDivinationData(args: {
   const supplementaryInfo = options.supplementaryInfo;
 
   if (type === 'daily') {
-    const targetDate = resolveDivinationDate(type, body, baseDate);
-    return calculateDailyFortune(targetDate);
+    return calculateDailyFortune(baseDate);
   }
 
   if (type === 'liuyao') {
@@ -389,20 +397,30 @@ export async function onRequest(context: {
     }
   }
 
-  const baseDate = (() => {
-    const dt = body.options?.datetime;
-    if (typeof dt === 'string' && dt.trim()) return parseDatetime(dt.trim());
-    return new Date();
-  })();
+  let baseDate: Date;
+  let divinationDate: Date;
+  try {
+    baseDate = (() => {
+      const dt = body.options?.datetime;
+      if (typeof dt === 'string' && dt.trim()) return parseDatetime(dt.trim());
+      return new Date();
+    })();
+    divinationDate = resolveDivinationDate(normalizedType, body, baseDate);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : '时间参数不正确';
+    return jsonResponse(
+      { ok: false, requestId, error: { code: 'BAD_REQUEST', message } },
+      { status: 400, origin }
+    );
+  }
 
   let divinationData: unknown;
-  const divinationDate = resolveDivinationDate(normalizedType, body, baseDate);
   try {
     divinationData = await generateDivinationData({
       type: normalizedType,
       isLegacyTarotSingle,
       body,
-      baseDate,
+      baseDate: divinationDate,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : '生成占卜数据失败';
