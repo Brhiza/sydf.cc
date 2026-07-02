@@ -1,4 +1,9 @@
-import { LunarUtil } from 'mingyu-core/calendar';
+import {
+  formatTimeDisplay,
+  getGanZhiForMonth,
+  getGanZhiForYear,
+  getTimeInfo,
+} from '@/shared/mingyu-calendar';
 import { formatDateLabel } from './date-utils';
 
 export interface GanzhiQueryContext {
@@ -7,8 +12,8 @@ export interface GanzhiQueryContext {
 }
 
 export function formatDateContext(date: Date): GanzhiQueryContext {
-  const timeInfo = LunarUtil.getTimeInfo(date);
-  const display = LunarUtil.formatTimeDisplay(timeInfo);
+  const timeInfo = getTimeInfo(date);
+  const display = formatTimeDisplay(timeInfo);
   return {
     resolution: 'date',
     message: [
@@ -22,7 +27,7 @@ export function formatDateContext(date: Date): GanzhiQueryContext {
 }
 
 export function formatMonthContext(year: number, month: number): GanzhiQueryContext {
-  const monthRows = LunarUtil.getGanZhiForMonth(year, month);
+  const monthRows = getGanZhiForMonth(year, month);
   return {
     resolution: 'month',
     message: [
@@ -33,7 +38,7 @@ export function formatMonthContext(year: number, month: number): GanzhiQueryCont
 }
 
 export function formatYearContext(year: number): GanzhiQueryContext {
-  const yearRows = LunarUtil.getGanZhiForYear(year);
+  const yearRows = getGanZhiForYear(year);
   return {
     resolution: 'year',
     message: [
