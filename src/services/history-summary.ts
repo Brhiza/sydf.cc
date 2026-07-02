@@ -17,7 +17,12 @@ const summaryGenerators: Record<string, SummaryGenerator> = {
     return '梅花易数: 未知卦';
   },
   qimen: (data) => {
-    if ('chart' in data) {
+    if (
+      ('jiuGongGe' in data && Array.isArray(data.jiuGongGe)) ||
+      ('juShu' in data && typeof data.juShu === 'number') ||
+      ('timeInfo' in data && !!data.timeInfo) ||
+      'chart' in data
+    ) {
       return '奇门遁甲: 排盘完成';
     }
     return '奇门遁甲: 未知局';
