@@ -124,4 +124,35 @@ describe('UnifiedDailyDivinationContent', () => {
 
     expect(refreshHistoryState).toHaveBeenCalledTimes(1);
   });
+
+  it('historyId 格式异常时仍应显示结果返回按钮', () => {
+    useDailyFortuneMock.mockReturnValue(
+      createDailyFortuneState({
+        route: { query: { historyId: ['history-daily-1'] } },
+      })
+    );
+
+    const wrapper = mount(UnifiedDailyDivinationContent);
+
+    expect(wrapper.find('.result-header-actions-stub').exists()).toBe(true);
+  });
+
+  it('historyId 格式异常且无结果时不应因历史更新刷新内容', async () => {
+    const refreshHistoryState = vi.fn();
+
+    useDailyFortuneMock.mockReturnValue(
+      createDailyFortuneState({
+        route: { query: { historyId: ['history-daily-1'] } },
+        result: ref(null),
+        refreshHistoryState,
+      })
+    );
+
+    mount(UnifiedDailyDivinationContent);
+
+    eventBus.emit(EVENTS.HISTORY_UPDATED);
+    await nextTick();
+
+    expect(refreshHistoryState).not.toHaveBeenCalled();
+  });
 });

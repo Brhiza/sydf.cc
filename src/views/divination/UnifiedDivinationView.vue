@@ -20,7 +20,7 @@
       />
 
       <UnifiedResultHeaderActions
-        v-if="displayResult && !route.query.historyId"
+        v-if="displayResult && !routeHistoryId"
         @back="handleClear"
       />
 
@@ -62,6 +62,7 @@ import StatusPageCard from '@/components/common/StatusPageCard.vue';
 import DivinationInput from '@/components/divination/DivinationInput.vue';
 import DivinationResult from '@/components/divination/DivinationResult.vue';
 import { useUnifiedDivinationPage } from '@/composables/useUnifiedDivinationPage';
+import { resolveRouteHistoryId } from '@/composables/useRouteHistoryParam';
 import type { DivinationType } from '@/types';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { eventBus, EVENTS } from '@/utils/eventBus';
@@ -105,12 +106,14 @@ const {
   refreshHistoryState,
 } = useUnifiedDivinationPage(props, pageContainerRef);
 
+const routeHistoryId = computed(() => resolveRouteHistoryId(route.query));
+
 function handleHistoryUpdated() {
   if (isDaily.value) {
     return;
   }
 
-  if (typeof route.query.historyId !== 'string' || !route.query.historyId) {
+  if (!routeHistoryId.value) {
     return;
   }
 
