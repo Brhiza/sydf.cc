@@ -18,7 +18,7 @@ import {
 } from '../../../src/utils/divination-type.ts';
 import {
   getDivinationTime,
-  setTimezoneOffsetMinutesOverride,
+  runWithTimezoneOffsetMinutesOverride,
 } from '../../../src/utils/timeManager.ts';
 import { buildDivinationSystemPrompt } from '../../../src/shared/divination-system-prompt.ts';
 import {
@@ -205,9 +205,7 @@ function parseDateOnly(dateStr: string): Date {
 function isValidDateParts(year: number, month: number, day: number): boolean {
   const date = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
   return (
-    date.getUTCFullYear() === year &&
-    date.getUTCMonth() === month - 1 &&
-    date.getUTCDate() === day
+    date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day
   );
 }
 
@@ -399,255 +397,255 @@ export async function onRequest(context: {
   const requestId = createRequestId();
 
   // 统一把占卜相关时间计算固定到北京时间（UTC+8）
-  setTimezoneOffsetMinutesOverride(DEV_TZ_OFFSET_MINUTES);
-
-  let body: DivinationRequestBody;
-  try {
-    const parsedBody = await request.json();
-    body = isRecord(parsedBody) ? parsedBody : {};
-  } catch {
-    return jsonResponse(
-      { ok: false, requestId, error: { code: 'BAD_REQUEST', message: '请求体必须为JSON' } },
-      { status: 400, origin }
-    );
-  }
-
-  const type = body?.type;
-  if (typeof type !== 'string' || !isCompatibleDivinationType(type)) {
-    return jsonResponse(
-      {
-        ok: false,
-        requestId,
-        error: {
-          code: 'BAD_REQUEST',
-          message: `type 不合法，必须为：${COMPATIBLE_DIVINATION_TYPES.join(' | ')}`,
-        },
-      },
-      { status: 400, origin }
-    );
-  }
-  const normalizedType = normalizeDivinationType(type);
-  const isLegacyTarotSingle = type === 'tarot_single';
-  const question = normalizeQuestionText(body.question) || undefined;
-  const options = normalizeRequestOptions(body.options);
-
-  if (type !== 'daily') {
-    if (!question?.trim()) {
+  return runWithTimezoneOffsetMinutesOverride(DEV_TZ_OFFSET_MINUTES, async () => {
+    let body: DivinationRequestBody;
+    try {
+      const parsedBody = await request.json();
+      body = isRecord(parsedBody) ? parsedBody : {};
+    } catch {
       return jsonResponse(
-        {
-          ok: false,
-          requestId,
-          error: { code: 'BAD_REQUEST', message: '除 daily 外必须提供 question' },
-        },
+        { ok: false, requestId, error: { code: 'BAD_REQUEST', message: '请求体必须为JSON' } },
         { status: 400, origin }
       );
     }
-  }
 
-  let baseDate: Date;
-  let divinationDate: Date;
-  try {
-    baseDate = (() => {
-      const dt = options.datetime;
-      if (dt) return parseDatetime(dt);
-      return new Date();
-    })();
-    divinationDate = resolveDivinationDate(normalizedType, options, baseDate);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : '时间参数不正确';
-    return jsonResponse(
-      { ok: false, requestId, error: { code: 'BAD_REQUEST', message } },
-      { status: 400, origin }
-    );
-  }
-
-  let divinationData: unknown;
-  try {
-    divinationData = await generateDivinationData({
-      type: normalizedType,
-      isLegacyTarotSingle,
-      options,
-      baseDate: divinationDate,
-    });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : '生成占卜数据失败';
-    return jsonResponse(
-      { ok: false, requestId, error: { code: 'DIVINATION_FAILED', message } },
-      { status: 400, origin }
-    );
-  }
-
-  // 时间信息：使用同一时间点生成，便于AI解读（北京时间）
-  const timeInfoText = formatTimeInfo(getDivinationTime(divinationDate));
-
-  const supplementaryInfo = options.supplementaryInfo;
-  const systemPrompt = buildDivinationSystemPrompt(normalizedType, {
-    strictDataOnly: true,
-    requireStructuredSections: true,
-    interpretationStyle: supplementaryInfo?.interpretationStyle,
-    outputLength: supplementaryInfo?.outputLength,
-  });
-  const userPrompt = buildUserPrompt({
-    type: normalizedType,
-    question,
-    timeInfoText,
-    divinationData,
-    supplementaryInfo,
-  });
-
-  const stream = body.stream === true;
-  const debug = body.debug === true;
-  const temperature = options.temperature;
-
-  const aiBody = buildOpenAiBody({ systemPrompt, userPrompt, stream, temperature });
-
-  if (!stream) {
-    let aiResp: Response;
-    try {
-      aiResp = await proxyAiRequest(env, aiBody);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'AI 请求失败';
-      return jsonResponse(
-        { ok: false, requestId, error: { code: 'AI_REQUEST_FAILED', message } },
-        { status: 502, origin }
-      );
-    }
-
-    if (!aiResp.ok) {
-      const errText = await aiResp.text().catch(() => '');
+    const type = body?.type;
+    if (typeof type !== 'string' || !isCompatibleDivinationType(type)) {
       return jsonResponse(
         {
           ok: false,
           requestId,
           error: {
-            code: 'AI_ERROR',
-            message: `AI 服务返回错误：${aiResp.status}`,
-            details: errText || undefined,
+            code: 'BAD_REQUEST',
+            message: `type 不合法，必须为：${COMPATIBLE_DIVINATION_TYPES.join(' | ')}`,
           },
         },
-        { status: 502, origin }
+        { status: 400, origin }
       );
     }
+    const normalizedType = normalizeDivinationType(type);
+    const isLegacyTarotSingle = type === 'tarot_single';
+    const question = normalizeQuestionText(body.question) || undefined;
+    const options = normalizeRequestOptions(body.options);
 
-    let aiJson: OpenAiProxyResponse | null = null;
+    if (type !== 'daily') {
+      if (!question?.trim()) {
+        return jsonResponse(
+          {
+            ok: false,
+            requestId,
+            error: { code: 'BAD_REQUEST', message: '除 daily 外必须提供 question' },
+          },
+          { status: 400, origin }
+        );
+      }
+    }
+
+    let baseDate: Date;
+    let divinationDate: Date;
     try {
-      aiJson = await aiResp.json();
-    } catch {
-      const raw = await aiResp.text().catch(() => '');
+      baseDate = (() => {
+        const dt = options.datetime;
+        if (dt) return parseDatetime(dt);
+        return new Date();
+      })();
+      divinationDate = resolveDivinationDate(normalizedType, options, baseDate);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '时间参数不正确';
       return jsonResponse(
-        {
-          ok: false,
-          requestId,
-          error: { code: 'AI_BAD_RESPONSE', message: 'AI 返回非JSON', details: raw || undefined },
-        },
-        { status: 502, origin }
+        { ok: false, requestId, error: { code: 'BAD_REQUEST', message } },
+        { status: 400, origin }
       );
     }
 
-    const content = aiJson?.choices?.[0]?.message?.content ?? null;
-    const usage = aiJson?.usage ?? undefined;
-
-    return jsonResponse(
-      {
-        ok: true,
-        requestId,
+    let divinationData: unknown;
+    try {
+      divinationData = await generateDivinationData({
         type: normalizedType,
-        divination: divinationData,
-        interpretation: content,
-        ...(usage ? { usage } : {}),
-        ...(debug
-          ? { debug: { prompt: { system: systemPrompt, user: userPrompt }, raw: aiJson } }
-          : {}),
-      },
-      { status: 200, origin }
-    );
-  }
-
-  // SSE 流式：先发 meta，再透传 /api/ai 的 SSE
-  const encoder = new TextEncoder();
-  const abortController = new AbortController();
-
-  const sseStream = new ReadableStream<Uint8Array>({
-    async start(controller) {
-      const write = (text: string) => controller.enqueue(encoder.encode(text));
-      const writeEvent = (eventName: string, data: unknown) => {
-        write(`event: ${eventName}\n`);
-        write(`data: ${JSON.stringify(data)}\n\n`);
-      };
-
-      writeEvent('meta', {
-        requestId,
-        type: normalizedType,
-        divination: divinationData,
-        ...(debug ? { debug: { prompt: { system: systemPrompt, user: userPrompt } } } : {}),
+        isLegacyTarotSingle,
+        options,
+        baseDate: divinationDate,
       });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '生成占卜数据失败';
+      return jsonResponse(
+        { ok: false, requestId, error: { code: 'DIVINATION_FAILED', message } },
+        { status: 400, origin }
+      );
+    }
 
+    // 时间信息：使用同一时间点生成，便于AI解读（北京时间）
+    const timeInfoText = formatTimeInfo(getDivinationTime(divinationDate));
+
+    const supplementaryInfo = options.supplementaryInfo;
+    const systemPrompt = buildDivinationSystemPrompt(normalizedType, {
+      strictDataOnly: true,
+      requireStructuredSections: true,
+      interpretationStyle: supplementaryInfo?.interpretationStyle,
+      outputLength: supplementaryInfo?.outputLength,
+    });
+    const userPrompt = buildUserPrompt({
+      type: normalizedType,
+      question,
+      timeInfoText,
+      divinationData,
+      supplementaryInfo,
+    });
+
+    const stream = body.stream === true;
+    const debug = body.debug === true;
+    const temperature = options.temperature;
+
+    const aiBody = buildOpenAiBody({ systemPrompt, userPrompt, stream, temperature });
+
+    if (!stream) {
       let aiResp: Response;
       try {
-        aiResp = await proxyAiRequest(env, aiBody, {
-          signal: abortController.signal,
-        });
+        aiResp = await proxyAiRequest(env, aiBody);
       } catch (error) {
         const message = error instanceof Error ? error.message : 'AI 请求失败';
-        writeEvent('error', { requestId, code: 'AI_REQUEST_FAILED', message });
-        controller.close();
-        return;
+        return jsonResponse(
+          { ok: false, requestId, error: { code: 'AI_REQUEST_FAILED', message } },
+          { status: 502, origin }
+        );
       }
 
       if (!aiResp.ok) {
         const errText = await aiResp.text().catch(() => '');
-        writeEvent('error', {
-          requestId,
-          code: 'AI_ERROR',
-          message: `AI 服务返回错误：${aiResp.status}`,
-          details: errText || undefined,
-        });
-        controller.close();
-        return;
+        return jsonResponse(
+          {
+            ok: false,
+            requestId,
+            error: {
+              code: 'AI_ERROR',
+              message: `AI 服务返回错误：${aiResp.status}`,
+              details: errText || undefined,
+            },
+          },
+          { status: 502, origin }
+        );
       }
 
-      const contentType = aiResp.headers.get('Content-Type') || '';
-      if (!contentType.includes('text/event-stream')) {
-        const raw = await aiResp.text().catch(() => '');
-        writeEvent('error', {
-          requestId,
-          code: 'AI_BAD_RESPONSE',
-          message: 'AI 返回非SSE流式响应',
-          details: raw || undefined,
-        });
-        controller.close();
-        return;
-      }
-
-      if (!aiResp.body) {
-        writeEvent('error', { requestId, code: 'AI_BAD_RESPONSE', message: 'AI 响应体为空' });
-        controller.close();
-        return;
-      }
-
-      const reader = aiResp.body.getReader();
+      let aiJson: OpenAiProxyResponse | null = null;
       try {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          if (value) controller.enqueue(value);
-        }
-      } catch (error) {
-        const message = error instanceof Error ? error.message : 'SSE 读取失败';
-        writeEvent('error', { requestId, code: 'STREAM_ERROR', message });
-      } finally {
-        try {
-          reader.releaseLock();
-        } catch {
-          // ignore
-        }
-        controller.close();
+        aiJson = await aiResp.json();
+      } catch {
+        const raw = await aiResp.text().catch(() => '');
+        return jsonResponse(
+          {
+            ok: false,
+            requestId,
+            error: { code: 'AI_BAD_RESPONSE', message: 'AI 返回非JSON', details: raw || undefined },
+          },
+          { status: 502, origin }
+        );
       }
-    },
-    cancel() {
-      abortController.abort('客户端已断开');
-    },
-  });
 
-  return sseResponse(sseStream, origin);
+      const content = aiJson?.choices?.[0]?.message?.content ?? null;
+      const usage = aiJson?.usage ?? undefined;
+
+      return jsonResponse(
+        {
+          ok: true,
+          requestId,
+          type: normalizedType,
+          divination: divinationData,
+          interpretation: content,
+          ...(usage ? { usage } : {}),
+          ...(debug
+            ? { debug: { prompt: { system: systemPrompt, user: userPrompt }, raw: aiJson } }
+            : {}),
+        },
+        { status: 200, origin }
+      );
+    }
+
+    // SSE 流式：先发 meta，再透传 /api/ai 的 SSE
+    const encoder = new TextEncoder();
+    const abortController = new AbortController();
+
+    const sseStream = new ReadableStream<Uint8Array>({
+      async start(controller) {
+        const write = (text: string) => controller.enqueue(encoder.encode(text));
+        const writeEvent = (eventName: string, data: unknown) => {
+          write(`event: ${eventName}\n`);
+          write(`data: ${JSON.stringify(data)}\n\n`);
+        };
+
+        writeEvent('meta', {
+          requestId,
+          type: normalizedType,
+          divination: divinationData,
+          ...(debug ? { debug: { prompt: { system: systemPrompt, user: userPrompt } } } : {}),
+        });
+
+        let aiResp: Response;
+        try {
+          aiResp = await proxyAiRequest(env, aiBody, {
+            signal: abortController.signal,
+          });
+        } catch (error) {
+          const message = error instanceof Error ? error.message : 'AI 请求失败';
+          writeEvent('error', { requestId, code: 'AI_REQUEST_FAILED', message });
+          controller.close();
+          return;
+        }
+
+        if (!aiResp.ok) {
+          const errText = await aiResp.text().catch(() => '');
+          writeEvent('error', {
+            requestId,
+            code: 'AI_ERROR',
+            message: `AI 服务返回错误：${aiResp.status}`,
+            details: errText || undefined,
+          });
+          controller.close();
+          return;
+        }
+
+        const contentType = aiResp.headers.get('Content-Type') || '';
+        if (!contentType.includes('text/event-stream')) {
+          const raw = await aiResp.text().catch(() => '');
+          writeEvent('error', {
+            requestId,
+            code: 'AI_BAD_RESPONSE',
+            message: 'AI 返回非SSE流式响应',
+            details: raw || undefined,
+          });
+          controller.close();
+          return;
+        }
+
+        if (!aiResp.body) {
+          writeEvent('error', { requestId, code: 'AI_BAD_RESPONSE', message: 'AI 响应体为空' });
+          controller.close();
+          return;
+        }
+
+        const reader = aiResp.body.getReader();
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            if (value) controller.enqueue(value);
+          }
+        } catch (error) {
+          const message = error instanceof Error ? error.message : 'SSE 读取失败';
+          writeEvent('error', { requestId, code: 'STREAM_ERROR', message });
+        } finally {
+          try {
+            reader.releaseLock();
+          } catch {
+            // ignore
+          }
+          controller.close();
+        }
+      },
+      cancel() {
+        abortController.abort('客户端已断开');
+      },
+    });
+
+    return sseResponse(sseStream, origin);
+  });
 }

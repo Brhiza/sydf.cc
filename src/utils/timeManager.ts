@@ -15,3 +15,26 @@ export function getDivinationTime(customTime?: Date): DivinationTime {
 
 export const setTimezoneOffsetMinutesOverride =
   TimeManager.setTimezoneOffsetMinutesOverride.bind(TimeManager);
+
+type TimeManagerWithRuntimeOverride = typeof TimeManager & {
+  timezoneOffsetMinutesOverride?: number | null;
+};
+
+function getTimezoneOffsetMinutesOverride(): number | null {
+  const manager = TimeManager as TimeManagerWithRuntimeOverride;
+  return manager.timezoneOffsetMinutesOverride ?? null;
+}
+
+export async function runWithTimezoneOffsetMinutesOverride<T>(
+  offsetMinutes: number | null,
+  run: () => T | Promise<T>
+): Promise<T> {
+  const previousOffset = getTimezoneOffsetMinutesOverride();
+  TimeManager.setTimezoneOffsetMinutesOverride(offsetMinutes);
+
+  try {
+    return await run();
+  } finally {
+    TimeManager.setTimezoneOffsetMinutesOverride(previousOffset);
+  }
+}
