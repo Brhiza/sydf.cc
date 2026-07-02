@@ -6,13 +6,13 @@ import { MeihuaHelpers } from 'mingyu-core/divination/divination-helpers';
 import { getDivinationTime, TimeManager } from '../../utils/timeManager';
 import { TimeManager as McTimeManager } from 'mingyu-core/calendar';
 
-/** 对涉及 mingyu-core 算法的测试，同步设置 mingyu-core 的时区 */
+/** 对涉及 mingyu-core 的回归测试，同步设置核心库时区 */
 function setBothTimezones(offset: number) {
   TimeManager.setTimezoneOffsetMinutesOverride(offset);
   McTimeManager.setTimezoneOffsetMinutesOverride(offset);
 }
 
-describe('传统算法校验', () => {
+describe('mingyu-core 回归校验', () => {
   afterEach(() => {
     TimeManager.setTimezoneOffsetMinutesOverride(null);
     McTimeManager.setTimezoneOffsetMinutesOverride(null);
