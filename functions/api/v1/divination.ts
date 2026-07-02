@@ -21,8 +21,13 @@ import {
   setTimezoneOffsetMinutesOverride,
 } from '../../../src/utils/timeManager.ts';
 import { buildDivinationSystemPrompt } from '../../../src/shared/divination-system-prompt.ts';
-import { formatQimenSettingsLabel } from '../../../src/shared/qimen-settings.ts';
+import {
+  formatQimenSettingsLabel,
+  isDefaultQimenSettings,
+  resolveQimenSettings,
+} from '../../../src/shared/qimen-settings.ts';
 import { normalizeMeihuaSettings } from '../../../src/shared/meihua-settings.ts';
+import { normalizeBasicSupplementaryInfo } from '../../../src/shared/supplementary-info.ts';
 import { proxyAiRequest } from '../../_shared/ai-proxy.js';
 
 interface DivinationRequestOptions {
@@ -51,23 +56,6 @@ interface OpenAiProxyResponse {
 }
 
 const DEV_TZ_OFFSET_MINUTES = 480; // 北京时间 UTC+8
-const MIN_BIRTH_YEAR = 1900;
-const MAX_BIRTH_YEAR = 2100;
-const HEAVENLY_STEMS = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'] as const;
-const EARTHLY_BRANCHES = [
-  '子',
-  '丑',
-  '寅',
-  '卯',
-  '辰',
-  '巳',
-  '午',
-  '未',
-  '申',
-  '酉',
-  '戌',
-  '亥',
-] as const;
 
 function createRequestId(): string {
   try {
@@ -105,61 +93,21 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-function resolveBirthYear(value: unknown): number | undefined {
-  return typeof value === 'number' &&
-    Number.isInteger(value) &&
-    value >= MIN_BIRTH_YEAR &&
-    value <= MAX_BIRTH_YEAR
-    ? value
-    : undefined;
-}
-
-function resolveLiteral<T extends string>(value: unknown, values: readonly T[]): T | undefined {
-  return typeof value === 'string' && values.includes(value as T) ? (value as T) : undefined;
-}
-
 function normalizeSupplementaryInfo(value: unknown): SupplementaryInfo | undefined {
   if (!isRecord(value)) {
     return undefined;
   }
 
-  const info: SupplementaryInfo = {};
-
-  if (value.gender === '男' || value.gender === '女') {
-    info.gender = value.gender;
-  }
-  const birthYear = resolveBirthYear(value.birthYear);
-  if (birthYear) {
-    info.birthYear = birthYear;
-  }
-  if (value.interpretationStyle === '入门' || value.interpretationStyle === '专业') {
-    info.interpretationStyle = value.interpretationStyle;
-  }
-  if (
-    value.outputLength === '精简' ||
-    value.outputLength === '详细' ||
-    value.outputLength === '超详细'
-  ) {
-    info.outputLength = value.outputLength;
-  }
-  const heavenlyStem = isRecord(value.dayPillar)
-    ? resolveLiteral(value.dayPillar.heavenlyStem, HEAVENLY_STEMS)
-    : undefined;
-  const earthlyBranch = isRecord(value.dayPillar)
-    ? resolveLiteral(value.dayPillar.earthlyBranch, EARTHLY_BRANCHES)
-    : undefined;
-  if (heavenlyStem && earthlyBranch) {
-    info.dayPillar = {
-      heavenlyStem,
-      earthlyBranch,
-    };
-  }
+  const info: SupplementaryInfo = normalizeBasicSupplementaryInfo(value) || {};
   const meihuaSettings = normalizeMeihuaSettings(value.meihuaSettings);
   if (meihuaSettings) {
     info.meihuaSettings = meihuaSettings;
   }
   if (isRecord(value.qimenSettings)) {
-    info.qimenSettings = value.qimenSettings as SupplementaryInfo['qimenSettings'];
+    const qimenSettings = resolveQimenSettings(value.qimenSettings);
+    if (!isDefaultQimenSettings(qimenSettings)) {
+      info.qimenSettings = qimenSettings;
+    }
   }
   if (typeof value.date === 'string' && value.date.trim()) {
     info.date = value.date.trim();

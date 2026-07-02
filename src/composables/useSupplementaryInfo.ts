@@ -27,6 +27,10 @@ import {
   isDefaultQimenSettings,
 } from '@/shared/qimen-settings';
 import { normalizeMeihuaSettings } from '@/shared/meihua-settings';
+import {
+  resolveSupplementaryBirthYear,
+  resolveSupplementaryDayPillar,
+} from '@/shared/supplementary-info';
 
 export function useSupplementaryInfo() {
   const showSupplementaryInfo = ref(false);
@@ -67,11 +71,13 @@ export function useSupplementaryInfo() {
   const supplementaryInfoToggleText = computed(() => {
     if (
       gender.value ||
-      birthYear.value ||
+      resolveSupplementaryBirthYear(birthYear.value) ||
       interpretationStyle.value ||
       outputLength.value ||
-      dayPillarHeavenlyStem.value ||
-      dayPillarEarthlyBranch.value ||
+      resolveSupplementaryDayPillar({
+        heavenlyStem: dayPillarHeavenlyStem.value,
+        earthlyBranch: dayPillarEarthlyBranch.value,
+      }) ||
       hasMeihuaCustomSettings.value ||
       !isDefaultQimenSettings({ method: qimenMethod.value, scope: qimenScope.value })
     ) {
@@ -83,15 +89,15 @@ export function useSupplementaryInfo() {
   const getSupplementaryInfo = (options: { date?: string } = {}): SupplementaryInfo | undefined => {
     const info: SupplementaryInfo = {};
     if (gender.value) info.gender = gender.value;
-    if (birthYear.value) info.birthYear = birthYear.value;
+    const resolvedBirthYear = resolveSupplementaryBirthYear(birthYear.value);
+    if (resolvedBirthYear) info.birthYear = resolvedBirthYear;
     if (interpretationStyle.value) info.interpretationStyle = interpretationStyle.value;
     if (outputLength.value) info.outputLength = outputLength.value;
-    if (dayPillarHeavenlyStem.value && dayPillarEarthlyBranch.value) {
-      info.dayPillar = {
-        heavenlyStem: dayPillarHeavenlyStem.value,
-        earthlyBranch: dayPillarEarthlyBranch.value,
-      };
-    }
+    const dayPillar = resolveSupplementaryDayPillar({
+      heavenlyStem: dayPillarHeavenlyStem.value,
+      earthlyBranch: dayPillarEarthlyBranch.value,
+    });
+    if (dayPillar) info.dayPillar = dayPillar;
     const meihuaSettings = normalizeMeihuaSettings({
       method: meihuaMethod.value,
       number: meihuaNumber.value,

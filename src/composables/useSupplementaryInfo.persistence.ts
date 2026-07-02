@@ -32,19 +32,13 @@ import {
   resolveMeihuaOptionName,
 } from '@/shared/meihua-settings';
 import { earthlyBranches, heavenlyStems } from './useSupplementaryInfo.constants';
+import {
+  normalizeBasicSupplementaryInfo,
+  resolveSupplementaryBirthYear,
+  resolveSupplementaryDayPillar,
+} from '@/shared/supplementary-info';
 
 const STORAGE_KEY = 'supplementaryInfo';
-const GENDERS = ['男', '女'] as const;
-const INTERPRETATION_STYLES = ['入门', '专业'] as const;
-const OUTPUT_LENGTHS = ['精简', '详细', '超详细'] as const;
-
-function resolveFiniteNumber(value: unknown): number | undefined {
-  return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
-}
-
-function resolveLiteral<T extends string>(value: unknown, values: readonly T[]): T | undefined {
-  return typeof value === 'string' && values.includes(value as T) ? (value as T) : undefined;
-}
 
 export interface SupplementaryInfoRefs {
   gender: Ref<'男' | '女' | undefined>;
@@ -80,13 +74,21 @@ function restoreFromStorage(refs: SupplementaryInfoRefs) {
     qimenSettings: savedQimenSettings,
   } = savedInfo;
 
-  refs.gender.value = resolveLiteral(savedGender, GENDERS);
-  refs.birthYear.value = resolveFiniteNumber(savedBirthYear);
-  refs.interpretationStyle.value = resolveLiteral(savedInterpretationStyle, INTERPRETATION_STYLES);
-  refs.outputLength.value = resolveLiteral(savedOutputLength, OUTPUT_LENGTHS);
+  const basicInfo = normalizeBasicSupplementaryInfo({
+    gender: savedGender,
+    birthYear: savedBirthYear,
+    interpretationStyle: savedInterpretationStyle,
+    outputLength: savedOutputLength,
+    dayPillar: savedDayPillar,
+  });
 
-  if (savedDayPillar && typeof savedDayPillar === 'object' && savedDayPillar !== null) {
-    const dayPillar = savedDayPillar as { heavenlyStem?: string; earthlyBranch?: string };
+  refs.gender.value = basicInfo?.gender;
+  refs.birthYear.value = basicInfo?.birthYear;
+  refs.interpretationStyle.value = basicInfo?.interpretationStyle;
+  refs.outputLength.value = basicInfo?.outputLength;
+
+  if (basicInfo?.dayPillar) {
+    const dayPillar = basicInfo.dayPillar;
     refs.dayPillarHeavenlyStem.value =
       resolveMeihuaOptionName(dayPillar.heavenlyStem, heavenlyStems) || '';
     refs.dayPillarEarthlyBranch.value =
@@ -188,18 +190,17 @@ function buildPersistedSnapshot(values: {
     scope: values.qimenScope,
   });
 
+  const dayPillar = resolveSupplementaryDayPillar({
+    heavenlyStem: values.dayPillarHeavenlyStem,
+    earthlyBranch: values.dayPillarEarthlyBranch,
+  });
+
   return {
     gender: values.gender,
-    birthYear: values.birthYear,
+    birthYear: resolveSupplementaryBirthYear(values.birthYear),
     interpretationStyle: values.interpretationStyle,
     outputLength: values.outputLength,
-    dayPillar:
-      values.dayPillarHeavenlyStem && values.dayPillarEarthlyBranch
-        ? {
-            heavenlyStem: values.dayPillarHeavenlyStem,
-            earthlyBranch: values.dayPillarEarthlyBranch,
-          }
-        : undefined,
+    dayPillar,
     meihuaSettings,
     qimenSettings: !isDefaultQimenSettings(qimenSettings) ? qimenSettings : undefined,
   };
