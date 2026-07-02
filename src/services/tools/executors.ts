@@ -7,6 +7,25 @@ import {
 } from '@/shared/mingyu-calendar';
 import { createAnchoredDate, isValidDateParts, pad2 } from './date-utils';
 
+function isObjectArgs(args: unknown): args is Record<string, unknown> {
+  return typeof args === 'object' && args !== null;
+}
+
+function hasArg(args: Record<string, unknown>, key: string): boolean {
+  return (
+    Object.prototype.hasOwnProperty.call(args, key) && args[key] !== undefined && args[key] !== null
+  );
+}
+
+function parseIntegerArg(args: Record<string, unknown>, key: string): number | undefined {
+  const value = args[key];
+  return Number.isInteger(value) ? value : undefined;
+}
+
+function isSupportedSolarYear(year: number): boolean {
+  return year >= 1900 && year <= 2100;
+}
+
 export const toolExecutors: { [key: string]: (args: unknown) => Promise<string> } = {
   get_current_time_info: async () => {
     try {
@@ -19,9 +38,26 @@ export const toolExecutors: { [key: string]: (args: unknown) => Promise<string> 
   },
   get_ganzhi_for_month: async (args: unknown) => {
     try {
-      const { year, month } = args as { year: number; month: number };
-      if (!year || !month) {
+      if (!isObjectArgs(args)) {
+        return JSON.stringify({ error: '工具参数格式不合法' });
+      }
+
+      const year = parseIntegerArg(args, 'year');
+      const month = parseIntegerArg(args, 'month');
+      if (!hasArg(args, 'year') || !hasArg(args, 'month')) {
         return JSON.stringify({ error: '缺少年份或月份参数' });
+      }
+      if (year === undefined) {
+        return JSON.stringify({ error: '年份参数不合法' });
+      }
+      if (month === undefined) {
+        return JSON.stringify({ error: '月份参数不合法' });
+      }
+      if (!isSupportedSolarYear(year)) {
+        return JSON.stringify({ error: '年份参数不合法' });
+      }
+      if (month < 1 || month > 12) {
+        return JSON.stringify({ error: '月份参数不合法' });
       }
       const data = getGanZhiForMonth(year, month);
       return JSON.stringify(data);
@@ -32,9 +68,19 @@ export const toolExecutors: { [key: string]: (args: unknown) => Promise<string> 
   },
   get_ganzhi_for_year: async (args: unknown) => {
     try {
-      const { year } = args as { year: number };
-      if (!year) {
+      if (!isObjectArgs(args)) {
+        return JSON.stringify({ error: '工具参数格式不合法' });
+      }
+
+      const year = parseIntegerArg(args, 'year');
+      if (!hasArg(args, 'year')) {
         return JSON.stringify({ error: '缺少年份参数' });
+      }
+      if (year === undefined) {
+        return JSON.stringify({ error: '年份参数不合法' });
+      }
+      if (!isSupportedSolarYear(year)) {
+        return JSON.stringify({ error: '年份参数不合法' });
       }
       const data = getGanZhiForYear(year);
       return JSON.stringify(data);
@@ -45,9 +91,24 @@ export const toolExecutors: { [key: string]: (args: unknown) => Promise<string> 
   },
   get_ganzhi_for_date: async (args: unknown) => {
     try {
-      const { year, month, day } = args as { year: number; month: number; day: number };
-      if (!year || !month || !day) {
+      if (!isObjectArgs(args)) {
+        return JSON.stringify({ error: '工具参数格式不合法' });
+      }
+
+      const year = parseIntegerArg(args, 'year');
+      const month = parseIntegerArg(args, 'month');
+      const day = parseIntegerArg(args, 'day');
+      if (!hasArg(args, 'year') || !hasArg(args, 'month') || !hasArg(args, 'day')) {
         return JSON.stringify({ error: '缺少年份、月份或日期参数' });
+      }
+      if (year === undefined) {
+        return JSON.stringify({ error: '年份参数不合法' });
+      }
+      if (month === undefined || day === undefined) {
+        return JSON.stringify({ error: '日期参数不合法' });
+      }
+      if (!isSupportedSolarYear(year)) {
+        return JSON.stringify({ error: '年份参数不合法' });
       }
 
       if (!isValidDateParts(year, month, day)) {
