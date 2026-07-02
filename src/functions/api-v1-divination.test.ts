@@ -385,6 +385,80 @@ describe('开发者 API 兼容性', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
+  it('今日运势接口应拒绝不存在的日期', async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+
+    const request = new Request('https://sydf.cc/api/v1/divination', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer test-dev-key',
+      },
+      body: JSON.stringify({
+        type: 'daily',
+        stream: false,
+        options: {
+          date: '2026-02-30',
+        },
+      }),
+    });
+
+    const response = await onRequest({
+      request,
+      env: {
+        DEV_API_KEY: 'test-dev-key',
+        OPENAI_API_KEY: 'test-openai-key',
+      },
+    });
+
+    const data = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(data.ok).toBe(false);
+    expect(data.error.code).toBe('BAD_REQUEST');
+    expect(data.error.message).toContain('date 不是有效日期');
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('今日运势补充信息日期也应拒绝不存在的日期', async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+
+    const request = new Request('https://sydf.cc/api/v1/divination', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer test-dev-key',
+      },
+      body: JSON.stringify({
+        type: 'daily',
+        stream: false,
+        options: {
+          supplementaryInfo: {
+            date: '2026-02-30',
+          },
+        },
+      }),
+    });
+
+    const response = await onRequest({
+      request,
+      env: {
+        DEV_API_KEY: 'test-dev-key',
+        OPENAI_API_KEY: 'test-openai-key',
+      },
+    });
+
+    const data = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(data.ok).toBe(false);
+    expect(data.error.code).toBe('BAD_REQUEST');
+    expect(data.error.message).toContain('date 不是有效日期');
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it('旧版单牌塔罗接口应统一走普通塔罗单牌牌阵数据结构', async () => {
     let capturedRequestBody: Record<string, unknown> | null = null;
     const fetchMock = vi.fn(async (request: Request) => {
