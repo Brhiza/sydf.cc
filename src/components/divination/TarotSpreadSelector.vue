@@ -6,7 +6,7 @@
           v-for="spreadKey in visibleSpreadKeys"
           :key="spreadKey"
           :icon="getTarotSpreadIcon(spreadKey)"
-          :label="tarotSpreads[spreadKey].name"
+          :label="TAROT_SPREADS[spreadKey].name"
           :is-active="selectedSpread === spreadKey"
           @select="selectSpread(spreadKey)"
         />
@@ -26,9 +26,9 @@
             v-for="spreadKey in orderedSpreadKeys"
             :key="spreadKey"
             :icon="getTarotSpreadIcon(spreadKey)"
-            :title="tarotSpreads[spreadKey].name"
-            :description="tarotSpreads[spreadKey].description"
-            :card-count="tarotSpreads[spreadKey].cardCount"
+            :title="TAROT_SPREADS[spreadKey].name"
+            :description="TAROT_SPREADS[spreadKey].description"
+            :card-count="TAROT_SPREADS[spreadKey].cardCount"
             :is-active="selectedSpread === spreadKey"
             @select="selectSpreadFromPanel(spreadKey)"
           />
@@ -39,8 +39,8 @@
 </template>
 
 <script setup lang="ts">
-import { tarotSpreads } from 'mingyu-core/divination/tarot-data';
 import { onMounted, onUnmounted, ref } from 'vue';
+import { TAROT_SPREADS } from '@/shared/tarot-spreads';
 import TarotSpreadBubble from './tarot-selector/TarotSpreadBubble.vue';
 import TarotSpreadPanelItem from './tarot-selector/TarotSpreadPanelItem.vue';
 import {

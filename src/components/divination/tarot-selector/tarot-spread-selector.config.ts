@@ -1,9 +1,7 @@
-import { tarotSpreads } from 'mingyu-core/divination/tarot-data'
+import { TAROT_SPREADS, type TarotSpreadKey } from '@/shared/tarot-spreads';
 
-export type TarotSpreadKey = keyof typeof tarotSpreads
-
-export const ORDERED_TAROT_SPREAD_KEYS = Object.keys(tarotSpreads) as TarotSpreadKey[]
-export const DEFAULT_VISIBLE_TAROT_SPREAD_KEYS = ORDERED_TAROT_SPREAD_KEYS.slice(0, 4)
+export const ORDERED_TAROT_SPREAD_KEYS = Object.keys(TAROT_SPREADS) as TarotSpreadKey[];
+export const DEFAULT_VISIBLE_TAROT_SPREAD_KEYS = ORDERED_TAROT_SPREAD_KEYS.slice(0, 4);
 
 const TAROT_SPREAD_ICONS: Record<string, string> = {
   single: '🔮',
@@ -16,8 +14,8 @@ const TAROT_SPREAD_ICONS: Record<string, string> = {
   year: '📅',
   mindBodySpirit: '🌿',
   horseshoe: '🐴',
-}
+};
 
 export function getTarotSpreadIcon(spreadKey: string): string {
-  return TAROT_SPREAD_ICONS[spreadKey] || '🎴'
+  return TAROT_SPREAD_ICONS[spreadKey] || '🎴';
 }
