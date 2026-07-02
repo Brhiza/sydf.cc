@@ -78,6 +78,16 @@ describe('useDivinationInputState', () => {
     expect(state.question.value).toBe('');
   });
 
+  it('切换到非法塔罗牌阵时应回到默认单牌指引', () => {
+    const { state } = createState({ divinationType: 'tarot' });
+
+    state.selectSpread('bad-spread');
+
+    expect(state.selectedSpread.value).toBe('single');
+    expect(emit.spreadChange).toHaveBeenLastCalledWith('single');
+    expect(state.question.value).toBe('');
+  });
+
   it('三山国王灵签空问题提交时会使用默认问题并先清空结果', () => {
     const { state } = createState({ divinationType: 'ssgw' });
 

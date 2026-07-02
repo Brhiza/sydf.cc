@@ -17,7 +17,7 @@ import {
 } from './history-snapshot';
 import { handleChaoticLiuyao, isChaoticLiuyao } from './chaotic-liuyao';
 import { generateAIInterpretation } from './ai-interpretation';
-import { DEFAULT_TAROT_SPREAD_KEY } from '@/shared/tarot-spreads';
+import { resolveTarotSpreadKey } from '@/shared/tarot-spreads';
 
 const PRIMARY_HISTORY_SAVE_INTERVAL = 1000;
 
@@ -50,7 +50,7 @@ export async function executeDivination(
 ): Promise<void> {
   const { type, question, spreadType, supplementaryInfo, signal } = request;
   const { onInitialResult, onAIChunk, onAIComplete, onAIError, onConversationUpdate } = callbacks;
-  const normalizedSpreadType = type === 'tarot' ? spreadType || DEFAULT_TAROT_SPREAD_KEY : spreadType;
+  const normalizedSpreadType = type === 'tarot' ? resolveTarotSpreadKey(spreadType) : spreadType;
 
   try {
     const data = await dataGenerationService.generateDivination(

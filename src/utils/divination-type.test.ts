@@ -20,6 +20,7 @@ describe('divination-type', () => {
     expect(resolveTarotSpreadType('tarot_single')).toBe('single');
     expect(resolveTarotSpreadType('tarot')).toBe('single');
     expect(resolveTarotSpreadType('tarot', 'celtic')).toBe('celtic');
+    expect(resolveTarotSpreadType('tarot', 'bad-spread')).toBe('single');
     expect(resolveTarotSpreadType('qimen')).toBeUndefined();
   });
 

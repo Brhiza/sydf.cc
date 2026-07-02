@@ -11,7 +11,7 @@ import type {
   MeihuaSettings,
 } from '@/types/divination';
 import { DEFAULT_QIMEN_METHOD, resolveQimenSettings } from './qimen-settings';
-import { DEFAULT_TAROT_SPREAD_KEY } from './tarot-spreads';
+import { resolveTarotSpreadKey } from './tarot-spreads';
 import { mapMingyuTarotResult } from './tarot-result';
 
 export function generateMingyuLiuyao(date?: Date): LiuyaoData {
@@ -33,9 +33,7 @@ export function generateMingyuDailyQimen(date: Date): QimenData {
 
 export async function generateMingyuTarot(spreadType?: string): Promise<TarotData> {
   const { drawSpreadCards, getCardKeywords } = await import('mingyu-core/divination/tarot');
-  const result = drawSpreadCards(
-    (spreadType || DEFAULT_TAROT_SPREAD_KEY) as Parameters<typeof drawSpreadCards>[0]
-  );
+  const result = drawSpreadCards(resolveTarotSpreadKey(spreadType));
   return mapMingyuTarotResult(result, getCardKeywords);
 }
 

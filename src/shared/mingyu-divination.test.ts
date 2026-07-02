@@ -148,6 +148,12 @@ describe('mingyu-divination', () => {
     });
   });
 
+  it('塔罗传入非法牌阵时应回到默认单牌指引', async () => {
+    await generateMingyuTarot('bad-spread');
+
+    expect(mockDrawSpreadCards).toHaveBeenCalledWith('single');
+  });
+
   it('三山国王灵签应使用 mingyu-core 抽签入口', async () => {
     const result = await generateMingyuSsgw();
 

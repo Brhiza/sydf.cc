@@ -227,6 +227,35 @@ describe('DivinationOrchestrator', () => {
     expect(mockGenerateDivination).toHaveBeenCalledWith('tarot', 'single', undefined)
   })
 
+  it('塔罗请求传入非法牌阵时应回到默认单牌指引', async () => {
+    mockGenerateDivination.mockResolvedValue({
+      spreadType: 'single',
+      spreadName: '单牌指引',
+      cards: [],
+      timestamp: 1711111111111,
+    })
+    mockGenerateAIResponse.mockResolvedValue('AI 解读完成')
+
+    const orchestrator = new DivinationOrchestrator()
+
+    await orchestrator.executeDivination(
+      {
+        type: 'tarot',
+        question: '现在该怎么做？',
+        spreadType: 'bad-spread',
+      },
+      {
+        onInitialResult: vi.fn(),
+        onAIChunk: vi.fn(),
+        onAIComplete: vi.fn(),
+        onAIError: vi.fn(),
+        onConversationUpdate: vi.fn(),
+      }
+    )
+
+    expect(mockGenerateDivination).toHaveBeenCalledWith('tarot', 'single', undefined)
+  })
+
   it('首轮 AI 流式更新期间应保存已生成的部分内容，避免刷新后历史记录空白', async () => {
     vi.useFakeTimers()
 
