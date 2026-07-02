@@ -66,13 +66,32 @@ describe('mingyu-divination', () => {
   it('六爻应使用 mingyu-core 默认入口', () => {
     generateMingyuLiuyao();
 
-    expect(mockGenerateLiuyao).toHaveBeenCalledWith();
+    expect(mockGenerateLiuyao).toHaveBeenCalledWith(undefined);
+  });
+
+  it('六爻应支持透传指定时间给 mingyu-core', () => {
+    const date = new Date('2026-03-16T12:00:00+08:00');
+
+    generateMingyuLiuyao(date);
+
+    expect(mockGenerateLiuyao).toHaveBeenCalledWith(date);
   });
 
   it('梅花应把起卦设置透传给 mingyu-core', () => {
     generateMingyuMeihua({ method: 'number', number: 123 });
 
     expect(mockGenerateMeihua).toHaveBeenCalledWith(undefined, {
+      method: 'number',
+      number: 123,
+    });
+  });
+
+  it('梅花应支持透传指定时间和起卦设置', () => {
+    const date = new Date('2026-03-16T12:00:00+08:00');
+
+    generateMingyuMeihua({ method: 'number', number: 123 }, date);
+
+    expect(mockGenerateMeihua).toHaveBeenCalledWith(date, {
       method: 'number',
       number: 123,
     });
@@ -86,6 +105,14 @@ describe('mingyu-divination', () => {
       DEFAULT_QIMEN_METHOD,
       DEFAULT_QIMEN_SCOPE
     );
+  });
+
+  it('奇门应支持透传指定时间并继续固定默认时家转盘', () => {
+    const date = new Date('2026-03-16T12:00:00+08:00');
+
+    generateMingyuQimen(undefined, date);
+
+    expect(mockGenerateQimen).toHaveBeenCalledWith(date, DEFAULT_QIMEN_METHOD, DEFAULT_QIMEN_SCOPE);
   });
 
   it('奇门应透传解析后的原生设置', () => {
@@ -124,7 +151,15 @@ describe('mingyu-divination', () => {
   it('三山国王灵签应使用 mingyu-core 抽签入口', async () => {
     const result = await generateMingyuSsgw();
 
-    expect(mockDrawRandomSign).toHaveBeenCalledWith();
+    expect(mockDrawRandomSign).toHaveBeenCalledWith(undefined);
     expect(result).toMatchObject({ number: 1, title: '第一签' });
+  });
+
+  it('三山国王灵签应支持透传指定时间', async () => {
+    const date = new Date('2026-03-16T12:00:00+08:00');
+
+    await generateMingyuSsgw(date);
+
+    expect(mockDrawRandomSign).toHaveBeenCalledWith(date);
   });
 });

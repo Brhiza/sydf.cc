@@ -14,17 +14,17 @@ import { DEFAULT_QIMEN_METHOD, resolveQimenSettings } from './qimen-settings';
 import { DEFAULT_TAROT_SPREAD_KEY } from './tarot-spreads';
 import { mapMingyuTarotResult } from './tarot-result';
 
-export function generateMingyuLiuyao(): LiuyaoData {
-  return generateLiuyao();
+export function generateMingyuLiuyao(date?: Date): LiuyaoData {
+  return generateLiuyao(date);
 }
 
-export function generateMingyuMeihua(settings?: MeihuaSettings): MeihuaData {
-  return generateMeihua(undefined, settings) as MeihuaData;
+export function generateMingyuMeihua(settings?: MeihuaSettings, date?: Date): MeihuaData {
+  return generateMeihua(date, settings) as MeihuaData;
 }
 
-export function generateMingyuQimen(settings?: QimenSettings): QimenData {
+export function generateMingyuQimen(settings?: QimenSettings, date?: Date): QimenData {
   const resolved = resolveQimenSettings(settings);
-  return generateQimen(undefined, resolved.method, resolved.scope);
+  return generateQimen(date, resolved.method, resolved.scope);
 }
 
 export function generateMingyuDailyQimen(date: Date): QimenData {
@@ -39,7 +39,7 @@ export async function generateMingyuTarot(spreadType?: string): Promise<TarotDat
   return mapMingyuTarotResult(result, getCardKeywords);
 }
 
-export async function generateMingyuSsgw(): Promise<SsgwData> {
+export async function generateMingyuSsgw(date?: Date): Promise<SsgwData> {
   const { drawRandomSign } = await import('mingyu-core/divination/ssgw');
-  return drawRandomSign() as SsgwData;
+  return drawRandomSign(date) as SsgwData;
 }
