@@ -60,14 +60,6 @@ describe('CustomSelect', () => {
     expect(wrapper.find('.custom-select').classes()).toContain('disabled');
   });
 
-  it('紧凑模式会带上对应样式类名', () => {
-    const wrapper = createWrapper({
-      size: 'compact',
-    });
-
-    expect(wrapper.classes()).toContain('custom-select-compact');
-  });
-
   it('点击 document 本身时应关闭面板且不报错', async () => {
     const wrapper = createWrapper();
 

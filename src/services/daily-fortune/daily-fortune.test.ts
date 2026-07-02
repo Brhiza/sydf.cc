@@ -24,6 +24,8 @@ describe('今日运势数据组装', () => {
     const coreQimen = generateQimen(targetDate, DEFAULT_QIMEN_METHOD, 'day');
     const fortune = calculateDailyFortune(targetDate);
 
+    expect(fortune.ganzhi).toEqual(coreQimen.ganzhi);
+    expect(fortune.timestamp).toBe(coreQimen.timestamp);
     expect(fortune.qimen.jiuGongGe).toEqual(coreQimen.jiuGongGe);
     expect(fortune.qimen.timeInfo).toEqual({
       solarTerm: coreQimen.timeInfo.solarTerm,

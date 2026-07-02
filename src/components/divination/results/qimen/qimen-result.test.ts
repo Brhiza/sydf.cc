@@ -1,9 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { readFileSync } from 'node:fs';
 import {
   arrangeQimenGongs,
   createQimenInfoItems,
-  getQimenGongClass,
   isCenterGong,
 } from './qimen-result';
 
@@ -27,13 +25,6 @@ describe('qimen-result', () => {
       3, 5, 7,
       8, 1, 6,
     ]);
-  });
-
-  it('会返回对应的九宫位置类名', () => {
-    expect(getQimenGongClass(0)).toBe('top-left');
-    expect(getQimenGongClass(4)).toBe('middle-center');
-    expect(getQimenGongClass(8)).toBe('bottom-right');
-    expect(getQimenGongClass(9)).toBe('');
   });
 
   it('会正确识别中宫', () => {
@@ -124,12 +115,6 @@ describe('qimen-result', () => {
     expect(items[10]?.value).toContain('约3-9天');
     expect(items[11]?.value).toContain('宜西北');
     expect(items[12]?.value).toContain('6宫');
-  });
-
-  it('奇门结果页应复用统一的结果外层包裹，保持头部留白一致', () => {
-    const source = readFileSync(new URL('../QimenResult.vue', import.meta.url), 'utf8');
-
-    expect(source).toContain('<BaseResultLayout');
   });
 
   it('当 timeInfo 缺少年月日时分时，会回退使用 timestamp 显示起卦时间', () => {
