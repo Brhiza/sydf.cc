@@ -208,6 +208,29 @@ describe('HistoryService', () => {
     expect(storedRecords.map((record) => record.id)).toEqual(['daily-local-valid']);
   });
 
+  it('加载异常本地设置时应回到安全默认值', async () => {
+    localStorage.setItem(
+      'sydf-app-settings',
+      JSON.stringify({
+        autoSave: 'yes',
+        maxHistoryItems: -1,
+        theme: 'blue',
+        useCustomApi: 'true',
+        customApiKey: 123,
+        customApiEndpoint: {},
+      })
+    );
+
+    const { historyService } = await import('./history');
+
+    expect(historyService.getSettings()).toEqual({
+      autoSave: true,
+      maxHistoryItems: 100,
+      theme: 'light',
+      useCustomApi: false,
+    });
+  });
+
   it('迁移后的旧单牌塔罗记录应能被正式塔罗筛选命中', async () => {
     localStorage.setItem(
       'sydf-history',

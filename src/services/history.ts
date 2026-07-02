@@ -13,7 +13,7 @@ import { createId } from '@/utils/id';
 import { formatLocalDateKey } from '@/utils/date-formatter';
 import { normalizePersistedRecord } from './history-migration';
 import { generateSummary } from './history-summary';
-import { type AppSettings, DEFAULT_SETTINGS } from './history/types';
+import { type AppSettings, DEFAULT_SETTINGS, normalizeAppSettings } from './history/types';
 import { loadRecords, loadSettings, saveRecords, saveSettings } from './history/persistence';
 import {
   filterRecordsByType,
@@ -156,7 +156,7 @@ export class HistoryService {
   }
 
   updateSettings(newSettings: Partial<AppSettings>): void {
-    this.settings = { ...this.settings, ...newSettings };
+    this.settings = normalizeAppSettings(this.settings, newSettings);
     saveSettings(this.settings);
   }
 
