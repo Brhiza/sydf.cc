@@ -129,20 +129,37 @@ function parseDateOnly(dateStr: string): Date {
   if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) {
     throw new Error('date 格式不正确');
   }
-  // 使用“UTC中午”作为锚点，减少时区换算导致的跨日风险
-  const date = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
-  if (
-    date.getUTCFullYear() !== year ||
-    date.getUTCMonth() !== month - 1 ||
-    date.getUTCDate() !== day
-  ) {
+  if (!isValidDateParts(year, month, day)) {
     throw new Error('date 不是有效日期');
   }
 
+  // 使用“UTC中午”作为锚点，减少时区换算导致的跨日风险
+  const date = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
   return date;
 }
 
+function isValidDateParts(year: number, month: number, day: number): boolean {
+  const date = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
+  return (
+    date.getUTCFullYear() === year &&
+    date.getUTCMonth() === month - 1 &&
+    date.getUTCDate() === day
+  );
+}
+
 function parseDatetime(datetime: string): Date {
+  const dateParts = datetime.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T\s]|$)/);
+  if (!dateParts) {
+    throw new Error('datetime 必须为 ISO 8601 格式');
+  }
+
+  const year = Number(dateParts[1]);
+  const month = Number(dateParts[2]);
+  const day = Number(dateParts[3]);
+  if (!isValidDateParts(year, month, day)) {
+    throw new Error('datetime 不是有效日期');
+  }
+
   const d = new Date(datetime);
   if (Number.isNaN(d.getTime())) {
     throw new Error('datetime 不是有效的ISO时间字符串');
