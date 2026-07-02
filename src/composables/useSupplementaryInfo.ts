@@ -1,12 +1,18 @@
 import { ref, computed } from 'vue';
 import {
+  type MeihuaAnimalOptionName,
+  type MeihuaColorOptionName,
+  type MeihuaDirectionOptionName,
+  type MeihuaObjectOptionName,
+  type MeihuaPersonOptionName,
+  type MeihuaSoundOptionName,
   meihuaAnimalOptions,
   meihuaColorOptions,
   meihuaDirectionOptions,
   meihuaObjectOptions,
   meihuaPersonOptions,
   meihuaSoundOptions,
-} from 'mingyu-core/divination/meihua-omens';
+} from '@/shared/meihua-omens';
 import type {
   MeihuaDivinationMethod,
   QimenMethod,
@@ -31,13 +37,13 @@ export function useSupplementaryInfo() {
   const dayPillarEarthlyBranch = ref<string>('');
   const meihuaMethod = ref<MeihuaDivinationMethod>('time');
   const meihuaNumber = ref<number | undefined>();
-  const meihuaExternalDirection = ref<typeof meihuaDirectionOptions[number]['name'] | undefined>();
+  const meihuaExternalDirection = ref<MeihuaDirectionOptionName | undefined>();
   const meihuaExternalCount = ref<number | undefined>();
-  const meihuaExternalPerson = ref<typeof meihuaPersonOptions[number]['name'] | undefined>();
-  const meihuaExternalAnimal = ref<typeof meihuaAnimalOptions[number]['name'] | undefined>();
-  const meihuaExternalObject = ref<typeof meihuaObjectOptions[number]['name'] | undefined>();
-  const meihuaExternalSound = ref<typeof meihuaSoundOptions[number]['name'] | undefined>();
-  const meihuaExternalColor = ref<typeof meihuaColorOptions[number]['name'] | undefined>();
+  const meihuaExternalPerson = ref<MeihuaPersonOptionName | undefined>();
+  const meihuaExternalAnimal = ref<MeihuaAnimalOptionName | undefined>();
+  const meihuaExternalObject = ref<MeihuaObjectOptionName | undefined>();
+  const meihuaExternalSound = ref<MeihuaSoundOptionName | undefined>();
+  const meihuaExternalColor = ref<MeihuaColorOptionName | undefined>();
   const qimenMethod = ref<QimenMethod>(DEFAULT_QIMEN_METHOD);
   const qimenScope = ref<QimenScope>(DEFAULT_QIMEN_SCOPE);
 

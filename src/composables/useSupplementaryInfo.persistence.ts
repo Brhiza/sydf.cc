@@ -1,12 +1,12 @@
 import { onMounted, watch, type Ref } from 'vue';
-import {
-  meihuaAnimalOptions,
-  meihuaColorOptions,
-  meihuaDirectionOptions,
-  meihuaObjectOptions,
-  meihuaPersonOptions,
-  meihuaSoundOptions,
-} from 'mingyu-core/divination/meihua-omens';
+import type {
+  MeihuaAnimalOptionName,
+  MeihuaColorOptionName,
+  MeihuaDirectionOptionName,
+  MeihuaObjectOptionName,
+  MeihuaPersonOptionName,
+  MeihuaSoundOptionName,
+} from '@/shared/meihua-omens';
 import type {
   MeihuaDivinationMethod,
   QimenMethod,
@@ -31,13 +31,13 @@ export interface SupplementaryInfoRefs {
   dayPillarEarthlyBranch: Ref<string>;
   meihuaMethod: Ref<MeihuaDivinationMethod>;
   meihuaNumber: Ref<number | undefined>;
-  meihuaExternalDirection: Ref<typeof meihuaDirectionOptions[number]['name'] | undefined>;
+  meihuaExternalDirection: Ref<MeihuaDirectionOptionName | undefined>;
   meihuaExternalCount: Ref<number | undefined>;
-  meihuaExternalPerson: Ref<typeof meihuaPersonOptions[number]['name'] | undefined>;
-  meihuaExternalAnimal: Ref<typeof meihuaAnimalOptions[number]['name'] | undefined>;
-  meihuaExternalObject: Ref<typeof meihuaObjectOptions[number]['name'] | undefined>;
-  meihuaExternalSound: Ref<typeof meihuaSoundOptions[number]['name'] | undefined>;
-  meihuaExternalColor: Ref<typeof meihuaColorOptions[number]['name'] | undefined>;
+  meihuaExternalPerson: Ref<MeihuaPersonOptionName | undefined>;
+  meihuaExternalAnimal: Ref<MeihuaAnimalOptionName | undefined>;
+  meihuaExternalObject: Ref<MeihuaObjectOptionName | undefined>;
+  meihuaExternalSound: Ref<MeihuaSoundOptionName | undefined>;
+  meihuaExternalColor: Ref<MeihuaColorOptionName | undefined>;
   qimenMethod: Ref<QimenMethod>;
   qimenScope: Ref<QimenScope>;
 }
@@ -70,7 +70,11 @@ function restoreFromStorage(refs: SupplementaryInfoRefs) {
     refs.dayPillarEarthlyBranch.value = '';
   }
 
-  if (savedMeihuaSettings && typeof savedMeihuaSettings === 'object' && savedMeihuaSettings !== null) {
+  if (
+    savedMeihuaSettings &&
+    typeof savedMeihuaSettings === 'object' &&
+    savedMeihuaSettings !== null
+  ) {
     const meihuaSettings = savedMeihuaSettings as SupplementaryInfo['meihuaSettings'];
     refs.meihuaMethod.value = meihuaSettings?.method || 'time';
     refs.meihuaNumber.value = meihuaSettings?.number;
@@ -142,33 +146,22 @@ function buildPersistedSnapshot(values: {
                     ...(typeof values.meihuaExternalCount === 'number'
                       ? { count: values.meihuaExternalCount }
                       : {}),
-                    ...(values.meihuaExternalPerson
-                      ? { person: values.meihuaExternalPerson }
-                      : {}),
-                    ...(values.meihuaExternalAnimal
-                      ? { animal: values.meihuaExternalAnimal }
-                      : {}),
-                    ...(values.meihuaExternalObject
-                      ? { object: values.meihuaExternalObject }
-                      : {}),
-                    ...(values.meihuaExternalSound
-                      ? { sound: values.meihuaExternalSound }
-                      : {}),
-                    ...(values.meihuaExternalColor
-                      ? { color: values.meihuaExternalColor }
-                      : {}),
+                    ...(values.meihuaExternalPerson ? { person: values.meihuaExternalPerson } : {}),
+                    ...(values.meihuaExternalAnimal ? { animal: values.meihuaExternalAnimal } : {}),
+                    ...(values.meihuaExternalObject ? { object: values.meihuaExternalObject } : {}),
+                    ...(values.meihuaExternalSound ? { sound: values.meihuaExternalSound } : {}),
+                    ...(values.meihuaExternalColor ? { color: values.meihuaExternalColor } : {}),
                   },
                 }
               : {}),
           }
         : undefined,
-    qimenSettings:
-      !isDefaultQimenSettings({ method: values.qimenMethod, scope: values.qimenScope })
-        ? {
-            method: values.qimenMethod,
-            scope: values.qimenScope,
-          }
-        : undefined,
+    qimenSettings: !isDefaultQimenSettings({ method: values.qimenMethod, scope: values.qimenScope })
+      ? {
+          method: values.qimenMethod,
+          scope: values.qimenScope,
+        }
+      : undefined,
   };
 }
 
