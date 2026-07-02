@@ -7,6 +7,7 @@ import {
   resolveTarotSpreadKey,
   type TarotSpreadKey,
 } from '@/shared/tarot-spreads';
+import { normalizeQuestionText } from '@/shared/question-text';
 
 interface DivinationInputProps {
   title: string;
@@ -52,7 +53,7 @@ export function useDivinationInputState(
   props: DivinationInputProps,
   options: UseDivinationInputStateOptions
 ) {
-  const question = ref(props.modelValue || '');
+  const question = ref(normalizeQuestionText(props.modelValue));
   const localDate = ref(props.selectedDate || '');
   const selectedSpread = ref<TarotSpreadKey>(DEFAULT_TAROT_SPREAD_KEY);
 
@@ -119,9 +120,10 @@ export function useDivinationInputState(
 
   function handleSubmit() {
     const supplementaryInfo = buildSupplementaryInfo();
+    const normalizedQuestion = normalizeQuestionText(question.value);
 
     if (isSsgw.value) {
-      const questionToSubmit = question.value.trim() || '心中所想之事';
+      const questionToSubmit = normalizedQuestion || '心中所想之事';
       options.emit.clear();
       options.ssgw.startShaking(questionToSubmit, supplementaryInfo);
       return;
@@ -137,12 +139,12 @@ export function useDivinationInputState(
       return;
     }
 
-    if (!question.value.trim() || props.loading) {
+    if (!normalizedQuestion || props.loading) {
       return;
     }
 
     options.emit.submit({
-      question: question.value.trim(),
+      question: normalizedQuestion,
       supplementaryInfo,
     });
   }
@@ -152,7 +154,7 @@ export function useDivinationInputState(
       return;
     }
 
-    question.value = questionText;
+    question.value = normalizeQuestionText(questionText);
     options.focusQuestionInput?.();
   }
 
@@ -161,16 +163,16 @@ export function useDivinationInputState(
       return;
     }
 
-    const trimmedQuestion = questionText.trim();
-    if (!trimmedQuestion) {
+    const normalizedQuestion = normalizeQuestionText(questionText);
+    if (!normalizedQuestion) {
       console.error('问题为空，无法提交');
       return;
     }
 
-    question.value = trimmedQuestion;
+    question.value = normalizedQuestion;
 
     options.emit.submit({
-      question: trimmedQuestion,
+      question: normalizedQuestion,
       supplementaryInfo: buildSupplementaryInfo(),
     });
   }
@@ -178,7 +180,7 @@ export function useDivinationInputState(
   watch(
     () => props.modelValue,
     (newValue) => {
-      question.value = newValue || '';
+      question.value = normalizeQuestionText(newValue);
     }
   );
 

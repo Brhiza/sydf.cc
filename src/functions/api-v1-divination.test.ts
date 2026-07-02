@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { onRequest } from '../../functions/api/v1/divination.ts';
+import { QUESTION_TEXT_MAX_LENGTH } from '../shared/question-text';
 import { TimeManager } from '../utils/timeManager';
 
 describe('开发者 API 兼容性', () => {
@@ -1036,5 +1037,65 @@ describe('开发者 API 兼容性', () => {
     expect(data.ok).toBe(true);
     expect(data.interpretation).toBe('普通响应');
     expect(data.debug).toBeUndefined();
+  });
+
+  it('超长 question 应裁剪后再写入开发者 API 提示词', async () => {
+    let capturedRequestBody: Record<string, unknown> | null = null;
+    const fetchMock = vi.fn(async (request: Request) => {
+      capturedRequestBody = JSON.parse(await request.clone().text());
+
+      return new Response(
+        JSON.stringify({
+          choices: [
+            {
+              message: {
+                content: '裁剪后解读',
+              },
+            },
+          ],
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const longQuestion = ` ${'问'.repeat(QUESTION_TEXT_MAX_LENGTH + 20)} `;
+    const request = new Request('https://sydf.cc/api/v1/divination', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer test-dev-key',
+      },
+      body: JSON.stringify({
+        type: 'liuyao',
+        question: longQuestion,
+        stream: false,
+        options: {
+          datetime: '2026-01-01T12:00:00+08:00',
+        },
+      }),
+    });
+
+    const response = await onRequest({
+      request,
+      env: {
+        DEV_API_KEY: 'test-dev-key',
+        OPENAI_API_KEY: 'test-openai-key',
+      },
+    });
+
+    const data = await response.json();
+    const userPrompt =
+      ((capturedRequestBody as {
+        messages?: Array<{ role?: string; content?: string }>;
+      } | null)?.messages?.find((message) => message.role === 'user')?.content || '');
+
+    expect(response.status).toBe(200);
+    expect(data.ok).toBe(true);
+    expect(userPrompt).toContain(`【问题】${'问'.repeat(QUESTION_TEXT_MAX_LENGTH)}`);
+    expect(userPrompt).not.toContain('问'.repeat(QUESTION_TEXT_MAX_LENGTH + 1));
   });
 });

@@ -17,6 +17,7 @@
         type="text"
         :placeholder="placeholder"
         :disabled="loading"
+        :maxlength="QUESTION_TEXT_MAX_LENGTH"
         class="question-input"
         @input="handleQuestionInput"
         @keyup.enter="$emit('submit')"
@@ -42,6 +43,7 @@
 
 <script setup lang="ts">
 import type { DivinationType } from '@/types/divination'
+import { QUESTION_TEXT_MAX_LENGTH } from '@/shared/question-text'
 import TarotSpreadSelector from '../TarotSpreadSelector.vue'
 
 defineProps<{

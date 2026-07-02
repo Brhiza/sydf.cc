@@ -28,6 +28,7 @@ import {
 } from '../../../src/shared/qimen-settings.ts';
 import { normalizeMeihuaSettings } from '../../../src/shared/meihua-settings.ts';
 import { normalizeBasicSupplementaryInfo } from '../../../src/shared/supplementary-info.ts';
+import { normalizeQuestionText } from '../../../src/shared/question-text.ts';
 import { proxyAiRequest } from '../../_shared/ai-proxy.js';
 
 interface DivinationRequestOptions {
@@ -427,7 +428,7 @@ export async function onRequest(context: {
   }
   const normalizedType = normalizeDivinationType(type);
   const isLegacyTarotSingle = type === 'tarot_single';
-  const question = typeof body.question === 'string' ? body.question : undefined;
+  const question = normalizeQuestionText(body.question) || undefined;
   const options = normalizeRequestOptions(body.options);
 
   if (type !== 'daily') {

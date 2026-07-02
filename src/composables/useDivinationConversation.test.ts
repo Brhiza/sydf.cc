@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { ref } from 'vue';
+import { QUESTION_TEXT_MAX_LENGTH } from '@/shared/question-text';
 import type { ChatMessage } from '@/types/chat';
 import { useDivinationConversation } from './useDivinationConversation';
 
@@ -109,6 +110,17 @@ describe('useDivinationConversation', () => {
       callbacks.onError('解读失败');
       expect(deps.error.value).toBe('解读失败');
       expect(deps.isFollowUpLoading.value).toBe(false);
+    });
+
+    it('超长追问应按共享上限裁剪后再发送', () => {
+      const { deps, sendFollowUp } = createDeps();
+      deps.followUpQuestion.value = '问'.repeat(QUESTION_TEXT_MAX_LENGTH + 20);
+
+      const { handleSendFollowUp } = useDivinationConversation(deps);
+      handleSendFollowUp();
+
+      expect(sendFollowUp).toHaveBeenCalledTimes(1);
+      expect(sendFollowUp.mock.calls[0][2]).toBe('问'.repeat(QUESTION_TEXT_MAX_LENGTH));
     });
 
     it('onComplete 后会停止 follow up loading', () => {

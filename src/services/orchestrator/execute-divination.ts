@@ -18,6 +18,7 @@ import {
 import { handleChaoticLiuyao, isChaoticLiuyao } from './chaotic-liuyao';
 import { generateAIInterpretation } from './ai-interpretation';
 import { resolveTarotSpreadKey } from '@/shared/tarot-spreads';
+import { normalizeQuestionText } from '@/shared/question-text';
 
 const PRIMARY_HISTORY_SAVE_INTERVAL = 1000;
 
@@ -51,8 +52,13 @@ export async function executeDivination(
   const { type, question, spreadType, supplementaryInfo, signal } = request;
   const { onInitialResult, onAIChunk, onAIComplete, onAIError, onConversationUpdate } = callbacks;
   const normalizedSpreadType = type === 'tarot' ? resolveTarotSpreadKey(spreadType) : spreadType;
+  const normalizedQuestion = normalizeQuestionText(question);
 
   try {
+    if (type !== 'daily' && !normalizedQuestion) {
+      throw new Error('请输入问题后再开始占卜');
+    }
+
     const data = await dataGenerationService.generateDivination(
       type,
       normalizedSpreadType,
@@ -68,14 +74,14 @@ export async function executeDivination(
     };
 
     const conversationHistory: ChatMessage[] = [
-      { id: `msg-${Date.now()}`, role: 'user', content: question },
+      { id: `msg-${Date.now()}`, role: 'user', content: normalizedQuestion },
       { id: `msg-${Date.now() + 1}`, role: 'assistant', content: '' },
     ];
 
     const initialRecord = historyService.addRecord({
       id: initialResult.id,
       type,
-      question: resolveFinalQuestion(request),
+      question: resolveFinalQuestion({ ...request, question: normalizedQuestion }),
       result: buildHistoryResultSnapshot(initialResult),
       conversationHistory: cloneSerializable(conversationHistory),
     });
@@ -105,7 +111,7 @@ export async function executeDivination(
     try {
       await generateAIInterpretation({
         type,
-        question,
+        question: normalizedQuestion,
         data,
         supplementaryInfo,
         signal,
