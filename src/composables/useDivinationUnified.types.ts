@@ -1,9 +1,6 @@
 import type { ComputedRef, Ref } from 'vue';
 import type { LocationQueryRaw } from 'vue-router';
-import type {
-  DivinationResult,
-  DivinationType,
-} from '@/types';
+import type { DivinationResult, DivinationType } from '@/types';
 import type { ChatMessage } from '@/types/chat';
 import type { HistoryRecord } from '@/types/common';
 import type { divinationService, performDivination } from '@/services/divination';
@@ -60,7 +57,6 @@ export interface DivinationUnifiedFlowsContext {
   performDivination: typeof performDivination;
   generateRegeneratedAI: typeof generateRegeneratedAI;
   regenerateConversationMessage: typeof regenerateConversationMessage;
-  abortController: Ref<AbortController | null>;
   createController: () => AbortController;
   clearController: (cancel?: boolean) => void;
   cancelAbortSession: (onCancel?: () => void) => boolean;

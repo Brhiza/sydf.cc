@@ -1,15 +1,9 @@
 import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import type {
-  DivinationResult,
-  DivinationType,
-} from '@/types';
+import type { DivinationResult, DivinationType } from '@/types';
 import type { ChatMessage } from '@/types/chat';
 import { divinationService, performDivination } from '@/services/divination';
-import {
-  generateRegeneratedAI,
-  regenerateConversationMessage,
-} from '@/services/ai-regeneration';
+import { generateRegeneratedAI, regenerateConversationMessage } from '@/services/ai-regeneration';
 import { historyService } from '@/services/history';
 import { useDivinationConversation } from './useDivinationConversation';
 import { useAbortableSession } from './useAbortableSession';
@@ -45,11 +39,12 @@ export function useDivinationUnified(
   const currentSessionId = ref(0);
 
   const {
-    abortController,
     createController,
     clearController,
     cancel: cancelAbortSession,
-  } = useAbortableSession({ isCancelled });
+  } = useAbortableSession({
+    isCancelled,
+  });
   const { getRouteHistoryId, clearHistoryParam } = useRouteHistoryParam({
     route,
     router,
@@ -87,7 +82,6 @@ export function useDivinationUnified(
     performDivination: currentPerformDivination,
     generateRegeneratedAI: currentGenerateRegeneratedAI,
     regenerateConversationMessage: currentRegenerateConversationMessage,
-    abortController,
     createController,
     clearController,
     cancelAbortSession,

@@ -19,7 +19,7 @@ function hasArg(args: Record<string, unknown>, key: string): boolean {
 
 function parseIntegerArg(args: Record<string, unknown>, key: string): number | undefined {
   const value = args[key];
-  return Number.isInteger(value) ? value : undefined;
+  return typeof value === 'number' && Number.isInteger(value) ? value : undefined;
 }
 
 function isSupportedSolarYear(year: number): boolean {

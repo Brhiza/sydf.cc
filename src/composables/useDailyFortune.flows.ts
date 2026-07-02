@@ -3,11 +3,12 @@ import { storageService } from '@/services/storageService';
 import {
   applyAIErrorState as applyAIErrorStateHelper,
   buildUpdatedHistoryRecord,
+  executeAIRegeneration,
+  shouldSyncPrimaryRegenerationResponse,
 } from '@/services/ai-regeneration';
 import type { ChatMessage, ChatMessageRetryTarget } from '@/types/chat';
 import type { DailyFortuneData, DivinationResult } from '@/types/divination';
 import type { HistoryRecord } from '@/types/common';
-import { isPrimaryConversationRetryTarget } from '@/utils/conversation-history';
 import {
   applyDailyRecordToState,
   clearDailyRecordFromState,
@@ -229,7 +230,7 @@ export function createDailyFortuneFlows(ctx: DailyFortuneFlowsContext) {
     });
   }
 
-  function handleRetry(target?: ChatMessageRetryTarget) {
+  async function handleRetry(target?: ChatMessageRetryTarget) {
     state.error.value = null;
     state.isCancelled.value = false;
 
@@ -246,9 +247,7 @@ export function createDailyFortuneFlows(ctx: DailyFortuneFlowsContext) {
         aiResponse: aiResponse.value,
         conversationHistory: conversationHistory.value,
       });
-    const shouldSyncPrimaryResponse =
-      !target ||
-      isPrimaryConversationRetryTarget(record.type, record.conversationHistory || [], target);
+    const shouldSyncPrimaryResponse = shouldSyncPrimaryRegenerationResponse(record, target);
 
     const requestController = createController();
     isAILoading.value = true;
@@ -257,44 +256,43 @@ export function createDailyFortuneFlows(ctx: DailyFortuneFlowsContext) {
       aiResponse.value = '';
     }
     conversationHistory.value = [];
-    const regenerationOptions = {
+
+    const execution = await executeAIRegeneration({
+      record,
+      target,
       signal: requestController.signal,
-      onChunk: (chunk: string) => {
-        if (isRequestCancelled(requestController) || !shouldSyncPrimaryResponse) return;
+      shouldSyncPrimaryResponse,
+      generateRegeneratedAI,
+      regenerateConversationMessage,
+      isStale: () => isRequestCancelled(requestController),
+      isCancelled: () => isRequestCancelled(requestController),
+      onPrimaryChunk: (chunk: string) => {
         aiResponse.value += chunk;
       },
       onConversationUpdate: (updatedHistory: ChatMessage[]) => {
-        if (isRequestCancelled(requestController)) return;
         conversationHistory.value = updatedHistory;
       },
-    };
+    });
 
-    const regenerationTask = target
-      ? regenerateConversationMessage(record, target, regenerationOptions)
-      : generateRegeneratedAI(record, regenerationOptions);
+    if (execution.status === 'stale') return;
 
-    void regenerationTask
-      .then((regenerated) => {
-        if (isRequestCancelled(requestController)) return;
-        aiResponse.value = regenerated.aiResponse;
-        conversationHistory.value = regenerated.conversationHistory;
-        isAILoading.value = false;
-        isLoading.value = false;
-        clearController();
-        historyService.updateRecord(record.id, buildUpdatedHistoryRecord(record, regenerated));
-      })
-      .catch((regenerationError) => {
-        if (isRequestCancelled(requestController)) return;
-        isAILoading.value = false;
-        isLoading.value = false;
-        const errorMessage =
-          regenerationError instanceof Error
-            ? regenerationError.message
-            : '重新生成失败，请稍后重试';
-        state.error.value = errorMessage;
-        applyAIErrorState(record, errorMessage);
-        clearController();
-      });
+    if (execution.status === 'completed') {
+      aiResponse.value = execution.regenerated.aiResponse;
+      conversationHistory.value = execution.regenerated.conversationHistory;
+      historyService.updateRecord(
+        record.id,
+        buildUpdatedHistoryRecord(record, execution.regenerated)
+      );
+    } else if (execution.status === 'cancelled') {
+      state.isCancelled.value = true;
+    } else {
+      state.error.value = execution.errorMessage;
+      applyAIErrorState(record, execution.errorMessage);
+    }
+
+    isAILoading.value = false;
+    isLoading.value = false;
+    clearController();
   }
 
   return {
