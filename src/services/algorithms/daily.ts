@@ -3,9 +3,12 @@
  * @description 日家奇门以日干支为核心，一日一局，主要用于预测一日之内的运势变化。
  * 起局方法与时家奇门有显著区别，更注重整体趋势。
  */
-import { generateQimen } from 'mingyu-core/divination/qimen';
-import { DEFAULT_QIMEN_METHOD } from '@/shared/qimen-settings';
-import type { DailyFortuneData, DailyQimenJiuGongGe, DailyQimenTimeInfo } from '../../types/divination.ts';
+import { generateMingyuDailyQimen } from '@/shared/mingyu-divination';
+import type {
+  DailyFortuneData,
+  DailyQimenJiuGongGe,
+  DailyQimenTimeInfo,
+} from '../../types/divination.ts';
 import { getDivinationTime } from '../../utils/timeManager.ts';
 import { analyzeDailyQimenPattern } from './daily/pattern-analysis.ts';
 import {
@@ -49,7 +52,7 @@ export function calculateDailyFortune(date?: Date): DailyFortuneData {
   const dateStr = formatLocalDate(targetDate);
   const { timeInfo, ganzhi, timestamp } = getDivinationTime(targetDate);
 
-  const qimenData = generateQimen(targetDate, DEFAULT_QIMEN_METHOD, 'day');
+  const qimenData = generateMingyuDailyQimen(targetDate);
   const { isYangDun, juShu, zhiFu, zhiShi } = qimenData;
   const jiuGongGe = mapDailyQimenJiuGong(qimenData.jiuGongGe);
 
