@@ -4,6 +4,7 @@ import { sendRequestWithRetry } from './request-executor';
 import type { AIResponse, OpenAIRequestBody, PreparedRequestContext } from './types';
 
 const MAX_TOOL_CALLS = 3;
+const MAX_TOOL_ARGUMENT_LENGTH = 12000;
 
 async function executeToolCall(
   toolCall: NonNullable<AIResponse['tool_calls']>[number]
@@ -17,7 +18,11 @@ async function executeToolCall(
     };
   }
   try {
-    const args = JSON.parse(toolCall.function.arguments);
+    const rawArguments = toolCall.function.arguments || '{}';
+    if (rawArguments.length > MAX_TOOL_ARGUMENT_LENGTH) {
+      throw new Error('工具参数过长，已拒绝执行');
+    }
+    const args = JSON.parse(rawArguments);
     const result = await executor(args);
     return { role: 'tool', tool_call_id: toolCall.id, content: result };
   } catch (e) {
