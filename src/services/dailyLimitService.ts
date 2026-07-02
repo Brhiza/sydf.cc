@@ -13,6 +13,38 @@ interface DailyLimitRecord {
 }
 
 export const DAILY_LIMIT_STORAGE_KEY = 'divination:daily:limit';
+const EMPTY_DAILY_LIMIT_RECORD: DailyLimitRecord = {
+  date: '',
+  hasUsed: false,
+  timestamp: 0,
+};
+
+function isValidDateKey(value: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value);
+}
+
+function normalizeDailyLimitRecord(value: unknown): DailyLimitRecord {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return { ...EMPTY_DAILY_LIMIT_RECORD };
+  }
+
+  const record = value as Partial<Record<keyof DailyLimitRecord, unknown>>;
+  if (
+    typeof record.date !== 'string' ||
+    !isValidDateKey(record.date) ||
+    typeof record.hasUsed !== 'boolean' ||
+    typeof record.timestamp !== 'number' ||
+    !Number.isFinite(record.timestamp)
+  ) {
+    return { ...EMPTY_DAILY_LIMIT_RECORD };
+  }
+
+  return {
+    date: record.date,
+    hasUsed: record.hasUsed,
+    timestamp: record.timestamp,
+  };
+}
 
 /**
  * 每日限制服务类
@@ -46,17 +78,13 @@ export class DailyLimitService {
    * 获取当前记录
    */
   static getRecord(): DailyLimitRecord {
-    const record = storageService.getItem<DailyLimitRecord>(DAILY_LIMIT_STORAGE_KEY);
+    const record = storageService.getItem<unknown>(DAILY_LIMIT_STORAGE_KEY);
     
     if (!record) {
-      return {
-        date: '',
-        hasUsed: false,
-        timestamp: 0
-      };
+      return { ...EMPTY_DAILY_LIMIT_RECORD };
     }
     
-    return record;
+    return normalizeDailyLimitRecord(record);
   }
 
   /**

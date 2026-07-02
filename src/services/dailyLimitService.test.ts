@@ -76,4 +76,29 @@ describe('DailyLimitService', () => {
       timestamp: 0,
     });
   });
+
+  it('非法本地限制记录应回到未使用状态', async () => {
+    const { DailyLimitService, DAILY_LIMIT_STORAGE_KEY } = await import('./dailyLimitService');
+
+    storage.set(
+      DAILY_LIMIT_STORAGE_KEY,
+      JSON.stringify({
+        date: '2026-03-24',
+        hasUsed: 'true',
+        timestamp: 'bad-time',
+      })
+    );
+
+    expect(DailyLimitService.getRecord()).toEqual({
+      date: '',
+      hasUsed: false,
+      timestamp: 0,
+    });
+    expect(DailyLimitService.hasUsedToday()).toBe(false);
+    expect(DailyLimitService.canDrawToday()).toBe(true);
+    expect(DailyLimitService.getTodayStatus()).toEqual({
+      hasUsed: false,
+      canDraw: true,
+    });
+  });
 });
