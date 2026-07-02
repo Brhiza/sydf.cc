@@ -26,6 +26,7 @@ import {
   DEFAULT_QIMEN_SCOPE,
   isDefaultQimenSettings,
 } from '@/shared/qimen-settings';
+import { normalizeMeihuaSettings } from '@/shared/meihua-settings';
 
 export function useSupplementaryInfo() {
   const showSupplementaryInfo = ref(false);
@@ -91,29 +92,20 @@ export function useSupplementaryInfo() {
         earthlyBranch: dayPillarEarthlyBranch.value,
       };
     }
-    if (meihuaMethod.value === 'number' && meihuaNumber.value) {
-      info.meihuaSettings = {
-        method: 'number',
-        number: meihuaNumber.value,
-      };
-    } else if (meihuaMethod.value === 'random') {
-      info.meihuaSettings = {
-        method: 'random',
-      };
-    } else if (meihuaMethod.value === 'external') {
-      info.meihuaSettings = {
-        method: 'external',
-        externalOmens: {
-          ...(meihuaExternalDirection.value && { direction: meihuaExternalDirection.value }),
-          ...(meihuaExternalCount.value && { count: meihuaExternalCount.value }),
-          ...(meihuaExternalPerson.value && { person: meihuaExternalPerson.value }),
-          ...(meihuaExternalAnimal.value && { animal: meihuaExternalAnimal.value }),
-          ...(meihuaExternalObject.value && { object: meihuaExternalObject.value }),
-          ...(meihuaExternalSound.value && { sound: meihuaExternalSound.value }),
-          ...(meihuaExternalColor.value && { color: meihuaExternalColor.value }),
-        },
-      };
-    }
+    const meihuaSettings = normalizeMeihuaSettings({
+      method: meihuaMethod.value,
+      number: meihuaNumber.value,
+      externalOmens: {
+        direction: meihuaExternalDirection.value,
+        count: meihuaExternalCount.value,
+        person: meihuaExternalPerson.value,
+        animal: meihuaExternalAnimal.value,
+        object: meihuaExternalObject.value,
+        sound: meihuaExternalSound.value,
+        color: meihuaExternalColor.value,
+      },
+    });
+    if (meihuaSettings) info.meihuaSettings = meihuaSettings;
     if (!isDefaultQimenSettings({ method: qimenMethod.value, scope: qimenScope.value })) {
       info.qimenSettings = {
         method: qimenMethod.value,

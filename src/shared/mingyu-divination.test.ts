@@ -97,6 +97,12 @@ describe('mingyu-divination', () => {
     });
   });
 
+  it('梅花非法起卦设置应回到默认时间起卦', () => {
+    generateMingyuMeihua({ method: 'number', number: 0 });
+
+    expect(mockGenerateMeihua).toHaveBeenCalledWith(undefined, undefined);
+  });
+
   it('奇门未传设置时应固定默认时家转盘', () => {
     generateMingyuQimen();
 

@@ -259,6 +259,68 @@ describe('开发者 API 兼容性', () => {
     });
   });
 
+  it('梅花非法数字起卦参数应回到默认时间起卦', async () => {
+    const fetchMock = vi.fn(async () =>
+      new Response(
+        JSON.stringify({
+          choices: [
+            {
+              message: {
+                content: '梅花默认解读',
+              },
+            },
+          ],
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      )
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const request = new Request('https://sydf.cc/api/v1/divination', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer test-dev-key',
+      },
+      body: JSON.stringify({
+        type: 'meihua',
+        question: '这件事会怎么发展？',
+        stream: false,
+        options: {
+          datetime: '2026-03-16T12:00:00+08:00',
+          supplementaryInfo: {
+            meihuaSettings: {
+              method: 'number',
+              number: 0,
+            },
+          },
+        },
+      }),
+    });
+
+    const response = await onRequest({
+      request,
+      env: {
+        DEV_API_KEY: 'test-dev-key',
+        OPENAI_API_KEY: 'test-openai-key',
+      },
+    });
+
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.ok).toBe(true);
+    expect(data.type).toBe('meihua');
+    expect(data.interpretation).toBe('梅花默认解读');
+    expect(data.divination.calculation).toMatchObject({
+      method: '年月日时起卦法',
+      methodKey: 'time',
+    });
+  });
+
   it('三山国王灵签应使用请求指定时间生成签文时间', async () => {
     const fetchMock = vi.fn(async () =>
       new Response(

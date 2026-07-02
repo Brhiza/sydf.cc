@@ -22,6 +22,7 @@ import {
 } from '../../../src/utils/timeManager.ts';
 import { buildDivinationSystemPrompt } from '../../../src/shared/divination-system-prompt.ts';
 import { formatQimenSettingsLabel } from '../../../src/shared/qimen-settings.ts';
+import { normalizeMeihuaSettings } from '../../../src/shared/meihua-settings.ts';
 import { proxyAiRequest } from '../../_shared/ai-proxy.js';
 
 interface DivinationRequestOptions {
@@ -120,8 +121,9 @@ function normalizeSupplementaryInfo(value: unknown): SupplementaryInfo | undefin
       earthlyBranch: value.dayPillar.earthlyBranch,
     };
   }
-  if (isRecord(value.meihuaSettings)) {
-    info.meihuaSettings = value.meihuaSettings as SupplementaryInfo['meihuaSettings'];
+  const meihuaSettings = normalizeMeihuaSettings(value.meihuaSettings);
+  if (meihuaSettings) {
+    info.meihuaSettings = meihuaSettings;
   }
   if (isRecord(value.qimenSettings)) {
     info.qimenSettings = value.qimenSettings as SupplementaryInfo['qimenSettings'];
