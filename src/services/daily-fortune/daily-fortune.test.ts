@@ -56,6 +56,7 @@ describe('今日运势数据组装', () => {
     expect(['吉', '平', '凶']).toContain(fortune.overall.luck);
     expect(fortune.lucky.numbers.length).toBeGreaterThan(0);
     expect(fortune.lucky.colors.length).toBeGreaterThan(0);
+    expect(fortune.lucky.directions.length).toBeGreaterThan(0);
     expect(fortune.lucky.time).toMatch(/时\(/);
   });
 });
