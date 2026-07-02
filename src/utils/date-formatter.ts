@@ -11,6 +11,10 @@ function isDateKey(value: string): boolean {
   return /^\d{4}-\d{2}-\d{2}$/.test(value);
 }
 
+function isValidDate(value: Date): boolean {
+  return !Number.isNaN(value.getTime());
+}
+
 function formatDateParts(
   year: number | string,
   month: number | string,
@@ -57,7 +61,7 @@ export function normalizeDateKey(value: string | Date): string {
   }
 
   const parsedDate = new Date(value);
-  if (!Number.isNaN(parsedDate.getTime())) {
+  if (isValidDate(parsedDate)) {
     return formatLocalDateKey(parsedDate);
   }
 
@@ -69,6 +73,13 @@ export function getMonthDayFromDateKey(value: string | Date): { month: number; d
   const match = dateKey.match(/^(\d{4})-(\d{2})-(\d{2})$/);
 
   if (match) {
+    if (!createAnchoredDateFromDateKey(dateKey)) {
+      const currentDate = new Date();
+      return {
+        month: currentDate.getMonth() + 1,
+        day: currentDate.getDate(),
+      };
+    }
     return {
       month: Number(match[2]),
       day: Number(match[3]),
@@ -76,9 +87,10 @@ export function getMonthDayFromDateKey(value: string | Date): { month: number; d
   }
 
   const fallbackDate = value instanceof Date ? value : new Date(value);
+  const safeDate = isValidDate(fallbackDate) ? fallbackDate : new Date();
   return {
-    month: fallbackDate.getMonth() + 1,
-    day: fallbackDate.getDate(),
+    month: safeDate.getMonth() + 1,
+    day: safeDate.getDate(),
   };
 }
 

@@ -104,6 +104,14 @@ describe('DataGenerationService', () => {
     expect(calledDate.getHours()).toBe(12);
   });
 
+  it('今日运势日期无效时应回到默认今日，不向核心链路传入错误日期', async () => {
+    await dataGenerationService.generateDivination('daily', undefined, {
+      date: '2026-02-30',
+    });
+
+    expect(mockCalculateDailyFortune).toHaveBeenCalledWith(undefined);
+  });
+
   it('塔罗应直接按传入牌阵走统一生成链路', async () => {
     mockGenerateMingyuTarot.mockResolvedValue({
       spreadType: 'single',

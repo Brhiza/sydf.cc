@@ -20,6 +20,11 @@ import {
   generateMingyuTarot,
 } from '@/shared/mingyu-divination';
 
+function resolveDailyFortuneDate(date?: string): Date | undefined {
+  if (!date) return undefined;
+  return createAnchoredDateFromDateKey(normalizeDateKey(date)) || undefined;
+}
+
 export class DataGenerationService {
   /**
    * 生成占卜数据
@@ -47,13 +52,7 @@ export class DataGenerationService {
       }
       case 'daily': {
         const { calculateDailyFortune } = await import('./daily-fortune');
-        const normalizedDate = supplementaryInfo?.date
-          ? normalizeDateKey(supplementaryInfo.date)
-          : undefined;
-        const date = normalizedDate
-          ? createAnchoredDateFromDateKey(normalizedDate) || new Date(normalizedDate)
-          : undefined;
-        return calculateDailyFortune(date);
+        return calculateDailyFortune(resolveDailyFortuneDate(supplementaryInfo?.date));
       }
       default:
         throw new Error(`不支持的占卜类型: ${type}`);
