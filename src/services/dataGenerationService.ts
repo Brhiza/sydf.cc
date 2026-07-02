@@ -11,7 +11,7 @@ import type {
   MeihuaData,
   QimenData,
 } from '@/types/divination';
-import { createAnchoredDateFromDateKey, normalizeDateKey } from '@/utils/date-formatter';
+import { createAnchoredDateFromDateKey } from '@/utils/date-formatter';
 import {
   generateMingyuLiuyao,
   generateMingyuMeihua,
@@ -22,7 +22,7 @@ import {
 
 function resolveDailyFortuneDate(date?: string): Date | undefined {
   if (!date) return undefined;
-  return createAnchoredDateFromDateKey(normalizeDateKey(date)) || undefined;
+  return createAnchoredDateFromDateKey(date) || undefined;
 }
 
 export class DataGenerationService {
