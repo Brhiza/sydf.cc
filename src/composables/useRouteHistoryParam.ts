@@ -15,14 +15,18 @@ export interface UseRouteHistoryParamOptions {
   fallbackPath?: string;
 }
 
+export function resolveRouteHistoryId(query: Record<string, unknown>): string | null {
+  const historyId = query.historyId;
+  if (typeof historyId !== 'string') {
+    return null;
+  }
+  const trimmed = historyId.trim();
+  return trimmed ? trimmed : null;
+}
+
 export function useRouteHistoryParam(options: UseRouteHistoryParamOptions) {
   function getRouteHistoryId(): string | null {
-    const historyId = options.route.query.historyId;
-    if (typeof historyId !== 'string') {
-      return null;
-    }
-    const trimmed = historyId.trim();
-    return trimmed ? trimmed : null;
+    return resolveRouteHistoryId(options.route.query);
   }
 
   function clearHistoryParam(): void {
