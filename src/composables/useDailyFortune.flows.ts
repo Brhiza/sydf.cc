@@ -1,4 +1,5 @@
 import { DAILY_LIMIT_STORAGE_KEY } from '@/services/dailyLimitService';
+import { storageService } from '@/services/storageService';
 import {
   applyAIErrorState as applyAIErrorStateHelper,
   buildUpdatedHistoryRecord,
@@ -192,7 +193,7 @@ export function createDailyFortuneFlows(ctx: DailyFortuneFlowsContext) {
       }
 
       keysToRemove.forEach((key) => {
-        localStorage.removeItem(key);
+        storageService.removeItem(key);
       });
 
       handleClear();
