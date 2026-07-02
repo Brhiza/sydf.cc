@@ -107,9 +107,9 @@ export function useDailyFortune(options: UseDailyFortuneOptions = {}) {
   currentDailyLimitService.cleanupExpiredRecord();
 
   watch(
-    () => route.query.historyId,
+    () => getRouteHistoryId(),
     (historyId, oldHistoryId) => {
-      if (typeof historyId === 'string' && historyId) {
+      if (historyId) {
         flows.refreshHistoryState();
         return;
       }
@@ -124,7 +124,7 @@ export function useDailyFortune(options: UseDailyFortuneOptions = {}) {
   watch(
     selectedDate,
     (date, oldDate) => {
-      if (typeof route.query.historyId === 'string' && route.query.historyId) {
+      if (getRouteHistoryId()) {
         return;
       }
 

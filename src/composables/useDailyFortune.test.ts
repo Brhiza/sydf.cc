@@ -210,6 +210,86 @@ describe('useDailyFortune', () => {
     expect(dailyFortune.selectedDate.value).toBe('2026-03-25');
   });
 
+  it('historyId 格式异常时应按普通今日运势页面处理', async () => {
+    mockGetDailyFortuneForDate.mockReturnValue({
+      id: 'daily-cache-1',
+      type: 'daily',
+      question: '今日运势',
+      result: {
+        type: 'daily',
+        data: { date: '2026-03-25' },
+        aiResponse: '缓存中的今日运势解读',
+      },
+      conversationHistory: [],
+      timestamp: 1,
+      summary: '今日运势',
+    });
+
+    const dailyFortune = useDailyFortune({
+      route: {
+        query: { historyId: ['history-daily-1'] },
+      },
+      divinationService: {
+        startDivination: mockStartDivination,
+        sendFollowUp: mockSendFollowUp,
+      },
+      historyService: {
+        getRecord: mockGetRecord,
+        getDailyFortuneForDate: mockGetDailyFortuneForDate,
+        updateRecord: mockUpdateRecord,
+        deleteRecord: mockDeleteRecord,
+        findTodayDailyFortune: mockFindTodayDailyFortune,
+      },
+      dailyLimitService: {
+        hasUsedToday: mockHasUsedToday,
+        markAsUsed: mockMarkAsUsed,
+        resetRecord: mockResetRecord,
+        cleanupExpiredRecord: mockCleanupExpiredRecord,
+      },
+      isDevMode: false,
+    });
+
+    await nextTick();
+
+    expect(mockGetRecord).not.toHaveBeenCalled();
+    expect(mockGetDailyFortuneForDate).toHaveBeenCalledWith(dailyFortune.selectedDate.value);
+    expect(dailyFortune.result.value).toEqual({ date: '2026-03-25' });
+    expect(dailyFortune.aiResponse.value).toBe('缓存中的今日运势解读');
+  });
+
+  it('historyId 只有空白时应按普通今日运势页面处理', async () => {
+    mockGetDailyFortuneForDate.mockReturnValue(undefined);
+
+    useDailyFortune({
+      route: {
+        query: { historyId: '   ' },
+      },
+      divinationService: {
+        startDivination: mockStartDivination,
+        sendFollowUp: mockSendFollowUp,
+      },
+      historyService: {
+        getRecord: mockGetRecord,
+        getDailyFortuneForDate: mockGetDailyFortuneForDate,
+        updateRecord: mockUpdateRecord,
+        deleteRecord: mockDeleteRecord,
+        findTodayDailyFortune: mockFindTodayDailyFortune,
+      },
+      dailyLimitService: {
+        hasUsedToday: mockHasUsedToday,
+        markAsUsed: mockMarkAsUsed,
+        resetRecord: mockResetRecord,
+        cleanupExpiredRecord: mockCleanupExpiredRecord,
+      },
+      isDevMode: false,
+    });
+
+    await nextTick();
+
+    expect(mockGetRecord).not.toHaveBeenCalled();
+    expect(mockGetDailyFortuneForDate).toHaveBeenCalled();
+  });
+
   it('带无效 historyId 进入时应退出错误的历史上下文', async () => {
     mockGetRecord.mockReturnValue(undefined);
     mockGetDailyFortuneForDate.mockReturnValue(undefined);

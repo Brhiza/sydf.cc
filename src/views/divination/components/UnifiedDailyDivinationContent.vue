@@ -15,7 +15,7 @@
     @update:selected-date="selectedDate = $event"
   />
 
-  <UnifiedResultHeaderActions v-if="result && !route.query.historyId" @back="handleClear" />
+  <UnifiedResultHeaderActions v-if="result && !routeHistoryId" @back="handleClear" />
 
   <ContentSectionCard
     v-if="result"
@@ -54,6 +54,7 @@ import DivinationAISection from '@/components/divination/result/DivinationAISect
 import DailyInterpretationResult from '@/components/divination/results/DailyInterpretationResult.vue';
 import { getDivinationConfig } from '@/config/divination';
 import { useDailyFortune } from '@/composables/useDailyFortune';
+import { resolveRouteHistoryId } from '@/composables/useRouteHistoryParam';
 import { eventBus, EVENTS } from '@/utils/eventBus';
 import UnifiedFollowUpComposer from './UnifiedFollowUpComposer.vue';
 import UnifiedResultHeaderActions from './UnifiedResultHeaderActions.vue';
@@ -82,12 +83,14 @@ const {
   refreshHistoryState,
 } = useDailyFortune();
 
+const routeHistoryId = computed(() => resolveRouteHistoryId(route.query));
+
 function handleSubmit() {
   void startDailyFortune();
 }
 
 function handleHistoryUpdated() {
-  if (!result.value && !(typeof route.query.historyId === 'string' && route.query.historyId)) {
+  if (!result.value && !routeHistoryId.value) {
     return;
   }
 

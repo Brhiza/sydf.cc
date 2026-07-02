@@ -191,4 +191,105 @@ describe('UnifiedDivinationView daily', () => {
 
     expect(refreshHistoryState).toHaveBeenCalledTimes(1);
   });
+
+  it('historyId 格式异常时仍应显示结果返回按钮', () => {
+    useUnifiedDivinationPageMock.mockReturnValue({
+      route: { query: { historyId: ['history-1'] } },
+      question: ref('测试问题'),
+      isLoading: ref(false),
+      result: ref({
+        id: 'result-1',
+        type: 'qimen',
+        data: { jiuGongGe: [] },
+        aiResponse: '测试解读',
+      }),
+      aiResponse: ref('测试解读'),
+      error: ref<string | null>(null),
+      isAiLoading: ref(false),
+      hasResult: computed(() => true),
+      hasAiResponse: computed(() => true),
+      viewingHistory: ref(false),
+      isCancelled: ref(false),
+      clearResult: vi.fn(),
+      conversationHistory: ref([]),
+      followUpQuestion: ref(''),
+      isFollowUpLoading: ref(false),
+      handleSendFollowUp: vi.fn(),
+      refreshHistoryState: vi.fn(),
+      displayResult: computed(() => ({
+        id: 'result-1',
+        type: 'qimen',
+        data: { jiuGongGe: [] },
+        aiResponse: '测试解读',
+      })),
+      config: computed(() => null),
+      isCustomBuild: computed(() => false),
+      handleSpreadChange: vi.fn(),
+      handleSubmit: vi.fn(),
+      handleClear: vi.fn(),
+      clearError: vi.fn(),
+      handleRetry: vi.fn(),
+    });
+
+    const wrapper = mount(UnifiedDivinationView, {
+      props: {
+        divinationType: 'qimen',
+      },
+    });
+
+    expect(wrapper.find('.result-header-actions-stub').exists()).toBe(true);
+  });
+
+  it('historyId 格式异常时收到历史更新事件不应刷新当前结果', async () => {
+    const refreshHistoryState = vi.fn();
+
+    useUnifiedDivinationPageMock.mockReturnValue({
+      route: { query: { historyId: ['history-1'] } },
+      question: ref('测试问题'),
+      isLoading: ref(false),
+      result: ref({
+        id: 'result-1',
+        type: 'qimen',
+        data: { jiuGongGe: [] },
+        aiResponse: '测试解读',
+      }),
+      aiResponse: ref('测试解读'),
+      error: ref<string | null>(null),
+      isAiLoading: ref(false),
+      hasResult: computed(() => true),
+      hasAiResponse: computed(() => true),
+      viewingHistory: ref(false),
+      isCancelled: ref(false),
+      clearResult: vi.fn(),
+      conversationHistory: ref([]),
+      followUpQuestion: ref(''),
+      isFollowUpLoading: ref(false),
+      handleSendFollowUp: vi.fn(),
+      refreshHistoryState,
+      displayResult: computed(() => ({
+        id: 'result-1',
+        type: 'qimen',
+        data: { jiuGongGe: [] },
+        aiResponse: '测试解读',
+      })),
+      config: computed(() => null),
+      isCustomBuild: computed(() => false),
+      handleSpreadChange: vi.fn(),
+      handleSubmit: vi.fn(),
+      handleClear: vi.fn(),
+      clearError: vi.fn(),
+      handleRetry: vi.fn(),
+    });
+
+    mount(UnifiedDivinationView, {
+      props: {
+        divinationType: 'qimen',
+      },
+    });
+
+    eventBus.emit(EVENTS.HISTORY_UPDATED);
+    await nextTick();
+
+    expect(refreshHistoryState).not.toHaveBeenCalled();
+  });
 });
