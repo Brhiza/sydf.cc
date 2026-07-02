@@ -16,12 +16,12 @@ export function getDivinationTime(customTime?: Date): DivinationTime {
 export const setTimezoneOffsetMinutesOverride =
   TimeManager.setTimezoneOffsetMinutesOverride.bind(TimeManager);
 
-type TimeManagerWithRuntimeOverride = typeof TimeManager & {
+interface TimeManagerRuntimeOverride {
   timezoneOffsetMinutesOverride?: number | null;
-};
+}
 
 function getTimezoneOffsetMinutesOverride(): number | null {
-  const manager = TimeManager as TimeManagerWithRuntimeOverride;
+  const manager = TimeManager as unknown as TimeManagerRuntimeOverride;
   return manager.timezoneOffsetMinutesOverride ?? null;
 }
 

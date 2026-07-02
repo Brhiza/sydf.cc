@@ -1,16 +1,13 @@
 import {
   applyAIErrorState as applyAIErrorStateHelper,
   buildUpdatedHistoryRecord,
+  executeAIRegeneration,
+  shouldSyncPrimaryRegenerationResponse,
 } from '@/services/ai-regeneration';
 import type { ChatMessage, ChatMessageRetryTarget } from '@/types/chat';
-import type {
-  DivinationRequest,
-  DivinationResult,
-  SupplementaryInfo,
-} from '@/types';
+import type { DivinationRequest, DivinationResult, SupplementaryInfo } from '@/types';
 import type { HistoryRecord } from '@/types/common';
 import { cloneSerializable } from '@/utils/clone';
-import { isPrimaryConversationRetryTarget } from '@/utils/conversation-history';
 import { isHistoryRouteCompatible } from '@/utils/history-navigation';
 import { normalizeQuestionText } from '@/shared/question-text';
 import type { DivinationUnifiedFlowsContext } from './useDivinationUnified.types';
@@ -35,7 +32,6 @@ export function createDivinationUnifiedFlows(ctx: DivinationUnifiedFlowsContext)
     performDivination,
     generateRegeneratedAI,
     regenerateConversationMessage,
-    abortController,
     createController,
     clearController,
     cancelAbortSession,
@@ -271,9 +267,7 @@ export function createDivinationUnifiedFlows(ctx: DivinationUnifiedFlowsContext)
 
     const record = buildCurrentHistoryRecord();
     if (!record) return;
-    const shouldSyncPrimaryResponse =
-      !target ||
-      isPrimaryConversationRetryTarget(record.type, record.conversationHistory || [], target);
+    const shouldSyncPrimaryResponse = shouldSyncPrimaryRegenerationResponse(record, target);
 
     clearController(true);
     invalidateCurrentSession();
@@ -291,55 +285,54 @@ export function createDivinationUnifiedFlows(ctx: DivinationUnifiedFlowsContext)
     }
     resetConversationState();
     const requestController = createController();
-    const regenerationOptions = {
+    const execution = await executeAIRegeneration({
+      record,
+      target,
       signal: requestController.signal,
-      onChunk: (chunk: string) => {
-        if (thisSessionId !== currentSessionId.value || !shouldSyncPrimaryResponse) return;
+      shouldSyncPrimaryResponse,
+      generateRegeneratedAI,
+      regenerateConversationMessage,
+      isStale: () => thisSessionId !== currentSessionId.value,
+      isCancelled: () => requestController.signal.aborted,
+      onPrimaryChunk: (chunk: string) => {
         aiResponse.value += chunk;
         if (result.value) {
           result.value.aiResponse = aiResponse.value;
         }
       },
       onConversationUpdate: (history: ChatMessage[]) => {
-        if (thisSessionId !== currentSessionId.value) return;
         conversationHistory.value = history;
       },
-    };
+    });
 
-    try {
-      const regenerated = target
-        ? await regenerateConversationMessage(record, target, regenerationOptions)
-        : await generateRegeneratedAI(record, regenerationOptions);
+    if (execution.status === 'stale') return;
 
-      if (thisSessionId !== currentSessionId.value) return;
-
-      conversationHistory.value = regenerated.conversationHistory;
-      aiResponse.value = regenerated.aiResponse;
+    if (execution.status === 'completed') {
+      conversationHistory.value = execution.regenerated.conversationHistory;
+      aiResponse.value = execution.regenerated.aiResponse;
       if (result.value) {
-        result.value.aiResponse = regenerated.aiResponse;
+        result.value.aiResponse = execution.regenerated.aiResponse;
       }
 
-      historyService.updateRecord?.(record.id, buildUpdatedHistoryRecord(record, regenerated));
+      historyService.updateRecord?.(
+        record.id,
+        buildUpdatedHistoryRecord(record, execution.regenerated)
+      );
       isAiLoading.value = false;
       clearController();
-    } catch (regenerationError) {
-      if (thisSessionId !== currentSessionId.value) return;
-
-      if (abortController.value?.signal.aborted) {
-        isCancelled.value = true;
-        error.value = null;
-      } else {
-        const errorMessage =
-          regenerationError instanceof Error
-            ? regenerationError.message
-            : '重新生成失败，请稍后重试';
-        error.value = errorMessage;
-        applyAIErrorState(record, errorMessage);
-      }
-
-      isAiLoading.value = false;
-      clearController();
+      return;
     }
+
+    if (execution.status === 'cancelled') {
+      isCancelled.value = true;
+      error.value = null;
+    } else {
+      error.value = execution.errorMessage;
+      applyAIErrorState(record, execution.errorMessage);
+    }
+
+    isAiLoading.value = false;
+    clearController();
   }
 
   function handleHistoryParam() {
