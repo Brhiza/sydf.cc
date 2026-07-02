@@ -71,4 +71,36 @@ describe('useSupplementaryInfo', () => {
 
     wrapper.unmount();
   });
+
+  it('旧缓存中的非法高级参数应回到默认状态', async () => {
+    localStorage.setItem(
+      'supplementaryInfo',
+      JSON.stringify({
+        meihuaSettings: {
+          method: 'bad-method',
+          number: 8,
+          externalOmens: {
+            direction: '坏方向',
+            count: Number.NaN,
+          },
+        },
+        qimenSettings: {
+          method: 'bad-method',
+          scope: 'bad-scope',
+        },
+      })
+    );
+
+    const { state, wrapper } = mountSupplementaryInfo();
+    await nextTick();
+
+    expect(state.meihuaMethod.value).toBe('time');
+    expect(state.meihuaNumber.value).toBeUndefined();
+    expect(state.qimenMethod.value).toBe(DEFAULT_QIMEN_METHOD);
+    expect(state.qimenScope.value).toBe(DEFAULT_QIMEN_SCOPE);
+    expect(state.getSupplementaryInfo()).toBeUndefined();
+    expect(state.supplementaryInfoToggleText.value).toBe('补充信息');
+
+    wrapper.unmount();
+  });
 });
