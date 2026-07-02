@@ -6,6 +6,7 @@ import type { DivinationType, SupplementaryInfo } from '@/types';
 import { eventBus, EVENTS } from '@/utils/eventBus';
 import type { ChatMessage, ChatMessageRetryTarget, DivinationResult } from '@/types';
 import { isCustomBuild } from '@/utils/build-target';
+import { resolveRouteHistoryId } from './useRouteHistoryParam';
 
 interface PageProps {
   divinationType: DivinationType;
@@ -155,9 +156,9 @@ export function useUnifiedDivinationPage(
   );
 
   watch(
-    () => route.query.historyId,
+    () => resolveRouteHistoryId(route.query),
     (newId, oldId) => {
-      if (newId && typeof newId === 'string') {
+      if (newId) {
         divination.handleHistoryParam();
       } else if (oldId && !newId) {
         divination.clearResult();

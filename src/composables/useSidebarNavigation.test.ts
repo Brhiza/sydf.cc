@@ -62,6 +62,38 @@ describe('useSidebarNavigation', () => {
     expect(navigation.selectedHistoryId.value).toBe('history-1');
   });
 
+  it('historyId 带空白时应使用清理后的历史记录编号', async () => {
+    const route = reactive({
+      path: '/divination/qimen',
+      name: 'divination',
+      params: { type: 'qimen' },
+      query: { historyId: '  history-1  ' },
+    });
+    useRouteMock.mockReturnValue(route);
+
+    const { useSidebarNavigation } = await import('./useSidebarNavigation');
+    const navigation = useSidebarNavigation();
+
+    expect(navigation.selectedHistoryId.value).toBe('history-1');
+  });
+
+  it('historyId 格式异常时不应关闭当前导航高亮', async () => {
+    const route = reactive({
+      path: '/divination/qimen',
+      name: 'divination',
+      params: { type: 'qimen' },
+      query: { historyId: ['history-1'] },
+    });
+    useRouteMock.mockReturnValue(route);
+
+    const { useSidebarNavigation } = await import('./useSidebarNavigation');
+    const navigation = useSidebarNavigation();
+    const qimenItem = navigation.primaryNavItems.value.find((item) => item.title === '奇门遁甲');
+
+    expect(navigation.selectedHistoryId.value).toBeNull();
+    expect(qimenItem?.isActive).toBe(true);
+  });
+
   it('退出历史详情后应清空当前历史高亮', async () => {
     const route = reactive({
       path: '/divination/qimen',

@@ -3,6 +3,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { divinationNavItems } from '@/config/divination';
 import { eventBus, EVENTS } from '@/utils/eventBus';
 import { isCustomBuild } from '@/utils/build-target';
+import { resolveRouteHistoryId } from './useRouteHistoryParam';
 
 interface SidebarPrimaryNavItem {
   path: string;
@@ -29,9 +30,9 @@ export function useSidebarNavigation() {
   const sidebarTitle = computed(() => (customBuildEnabled ? '时月东方 oyyy 版' : '时月东方'));
 
   watch(
-    () => route.query.historyId,
+    () => resolveRouteHistoryId(route.query),
     (historyId) => {
-      if (typeof historyId === 'string' && historyId.trim()) {
+      if (historyId) {
         selectedHistoryId.value = historyId;
       } else {
         selectedHistoryId.value = null;
@@ -57,7 +58,7 @@ export function useSidebarNavigation() {
   }
 
   function isNavItemActive(path: string): boolean {
-    if (route.query.historyId || selectedHistoryId.value) {
+    if (resolveRouteHistoryId(route.query) || selectedHistoryId.value) {
       return false;
     }
 

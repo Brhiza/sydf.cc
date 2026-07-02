@@ -116,6 +116,49 @@ describe('useUnifiedDivinationPage', () => {
     expect(divination.handleHistoryParam).toHaveBeenCalledTimes(1);
   });
 
+  it('historyId 只有空白或格式异常时不应进入历史模式', async () => {
+    const props = reactive<{ divinationType: DivinationType }>({ divinationType: 'qimen' });
+    const route = reactive({
+      query: { historyId: ['history-1'] } as LocationQueryRaw,
+    });
+    const divination = createDivinationStub();
+
+    useUnifiedDivinationPage(props, ref(null), {
+      route,
+      divination,
+      getConfig: mockGetConfig,
+      emitHistorySelectionReset,
+      scrollTo,
+      buildTarget: 'DEFAULT',
+    });
+
+    expect(divination.handleHistoryParam).not.toHaveBeenCalled();
+
+    route.query = { historyId: '   ' };
+    await nextTick();
+
+    expect(divination.handleHistoryParam).not.toHaveBeenCalled();
+  });
+
+  it('historyId 带空白时应按清理后的有效编号加载历史记录', () => {
+    const props = reactive<{ divinationType: DivinationType }>({ divinationType: 'qimen' });
+    const route = reactive({
+      query: { historyId: '  history-1  ' } as LocationQueryRaw,
+    });
+    const divination = createDivinationStub();
+
+    useUnifiedDivinationPage(props, ref(null), {
+      route,
+      divination,
+      getConfig: mockGetConfig,
+      emitHistorySelectionReset,
+      scrollTo,
+      buildTarget: 'DEFAULT',
+    });
+
+    expect(divination.handleHistoryParam).toHaveBeenCalledTimes(1);
+  });
+
   it('离开历史记录模式时会清空当前结果', async () => {
     const props = reactive<{ divinationType: DivinationType }>({ divinationType: 'qimen' });
     const route = reactive({
