@@ -11,9 +11,16 @@ const CARD_COUNT_SPREAD_FALLBACKS: Record<number, TarotSpreadKey> = {
   3: 'three',
 };
 
+export function isTarotSpreadKey(spreadType?: string | null): spreadType is TarotSpreadKey {
+  return Boolean(spreadType && spreadType in TAROT_SPREADS);
+}
+
+export function resolveTarotSpreadKey(spreadType?: string | null): TarotSpreadKey {
+  return isTarotSpreadKey(spreadType) ? spreadType : DEFAULT_TAROT_SPREAD_KEY;
+}
+
 export function resolveTarotSpread(spreadType?: string | null) {
-  if (!spreadType) return undefined;
-  return TAROT_SPREADS[spreadType as TarotSpreadKey];
+  return isTarotSpreadKey(spreadType) ? TAROT_SPREADS[spreadType] : undefined;
 }
 
 export function resolveTarotSpreadName(args: {

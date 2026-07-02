@@ -4,6 +4,7 @@ import { isCustomBuild } from '@/utils/build-target';
 import {
   DEFAULT_TAROT_SPREAD_KEY,
   resolveTarotSpread,
+  resolveTarotSpreadKey,
   type TarotSpreadKey,
 } from '@/shared/tarot-spreads';
 
@@ -106,8 +107,9 @@ export function useDivinationInputState(
   }
 
   function selectSpread(spreadKey: string) {
-    selectedSpread.value = spreadKey as TarotSpreadKey;
-    options.emit.spreadChange(spreadKey);
+    const resolvedSpreadKey = resolveTarotSpreadKey(spreadKey);
+    selectedSpread.value = resolvedSpreadKey;
+    options.emit.spreadChange(resolvedSpreadKey);
     question.value = '';
   }
 

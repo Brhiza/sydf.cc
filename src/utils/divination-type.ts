@@ -1,6 +1,6 @@
 import { DIVINATION_TYPES } from '@/types';
 import type { DivinationType } from '@/types';
-import { DEFAULT_TAROT_SPREAD_KEY } from '@/shared/tarot-spreads';
+import { resolveTarotSpreadKey } from '@/shared/tarot-spreads';
 
 // 兼容类型仅允许存在于 API、历史迁移等边界层，不应继续扩散到正式业务类型定义。
 const LEGACY_DIVINATION_TYPES = ['tarot_single'] as const;
@@ -32,7 +32,7 @@ export function resolveTarotSpreadType(
   }
 
   if (type === 'tarot') {
-    return spreadType || DEFAULT_TAROT_SPREAD_KEY;
+    return resolveTarotSpreadKey(spreadType);
   }
 
   return spreadType;
