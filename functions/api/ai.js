@@ -3,6 +3,21 @@
 import { getHttpErrorStatus, proxyAiRequest } from '../_shared/ai-proxy.js';
 
 const TRUSTED_FETCH_SITES = new Set(['same-origin', 'same-site', 'none']);
+const UPSTREAM_RESPONSE_HEADERS_TO_STRIP = [
+  'Access-Control-Allow-Credentials',
+  'Access-Control-Allow-Headers',
+  'Access-Control-Allow-Methods',
+  'Access-Control-Allow-Origin',
+  'Access-Control-Expose-Headers',
+  'Access-Control-Max-Age',
+  'Connection',
+  'Content-Encoding',
+  'Content-Length',
+  'Keep-Alive',
+  'Set-Cookie',
+  'Transfer-Encoding',
+  'Upgrade',
+];
 
 function parseUrl(value) {
   if (!value) return null;
@@ -61,6 +76,9 @@ function applyTrustedCorsHeaders(headers, request) {
 
 function createResponseHeaders(request, extraHeaders) {
   const headers = new Headers(extraHeaders);
+  for (const headerName of UPSTREAM_RESPONSE_HEADERS_TO_STRIP) {
+    headers.delete(headerName);
+  }
   headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
   headers.set('X-Content-Type-Options', 'nosniff');
   headers.set('Vary', 'Origin, Referer, Sec-Fetch-Site');

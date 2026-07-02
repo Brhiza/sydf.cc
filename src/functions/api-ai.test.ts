@@ -94,4 +94,50 @@ describe('/api/ai 安全限制', () => {
     expect(data.choices[0].message.content).toBe('测试成功');
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
+
+  it('不透传上游响应里的敏感头和跨域头', async () => {
+    const fetchMock = vi.fn(async () =>
+      new Response(JSON.stringify({ ok: true }), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': 'https://evil.example',
+          'Access-Control-Allow-Credentials': 'true',
+          'Content-Encoding': 'gzip',
+          'Content-Length': '999',
+          'Set-Cookie': 'sid=upstream; HttpOnly',
+        },
+      })
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const request = new Request('https://sydf.cc/api/ai', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Origin: 'https://sydf.cc',
+        Referer: 'https://sydf.cc/divination/liuyao',
+      },
+      body: JSON.stringify({
+        stream: false,
+        messages: [{ role: 'user', content: '你好' }],
+      }),
+    });
+
+    const response = await onRequest({
+      request,
+      env: {
+        OPENAI_API_KEY: 'test-openai-key',
+        OPENAI_API_MODEL: 'server-model',
+      },
+    });
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('Content-Type')).toContain('application/json');
+    expect(response.headers.get('Access-Control-Allow-Origin')).toBe('https://sydf.cc');
+    expect(response.headers.get('Access-Control-Allow-Credentials')).toBeNull();
+    expect(response.headers.get('Content-Encoding')).toBeNull();
+    expect(response.headers.get('Content-Length')).toBeNull();
+    expect(response.headers.get('Set-Cookie')).toBeNull();
+  });
 });
