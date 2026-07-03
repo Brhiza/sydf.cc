@@ -92,7 +92,10 @@ build/
 dist
 dist-ssr
 
-# 本地主题环境变量
+# 本地环境变量
+.env
+.env.local
+.env.*.local
 .env.oyyy
 
 # yarn v2
@@ -104,3 +107,7 @@ dist-ssr
 
 # macOS
 .DS_Store
+
+# Windows
+Thumbs.db
+Desktop.ini
