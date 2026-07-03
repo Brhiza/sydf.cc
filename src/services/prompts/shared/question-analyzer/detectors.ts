@@ -99,23 +99,16 @@ export function detectEmotionalState(question: string): EmotionState {
     intensity = 0.9;
   }
 
-  let supportNeeded = '';
-  switch (emotion) {
-    case 'anxious':
-      supportNeeded = '需要安抚和鼓励，提供安全感和确定性';
-      break;
-    case 'hopeful':
-      supportNeeded = '需要肯定和指引，帮助实现目标';
-      break;
-    case 'confused':
-      supportNeeded = '需要清晰的解释和方向指引';
-      break;
-    case 'determined':
-      supportNeeded = '需要具体的行动建议和策略支持';
-      break;
-    default:
-      supportNeeded = '需要客观分析和实用建议';
-  }
+  const supportNeeded =
+    emotion === 'anxious'
+      ? '需要安抚和鼓励，提供安全感和确定性'
+      : emotion === 'hopeful'
+        ? '需要肯定和指引，帮助实现目标'
+        : emotion === 'confused'
+          ? '需要清晰的解释和方向指引'
+          : emotion === 'determined'
+            ? '需要具体的行动建议和策略支持'
+            : '需要客观分析和实用建议';
 
   return {
     emotion,

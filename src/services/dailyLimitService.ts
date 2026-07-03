@@ -119,12 +119,10 @@ export class DailyLimitService {
     const hours = Math.floor(timeDiff / (1000 * 60 * 60));
     const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
     
-    let message = '';
-    if (hours > 0) {
-      message = `距离下次可抽取还有 ${hours} 小时${minutes > 0 ? ` ${minutes} 分钟` : ''}`;
-    } else {
-      message = `距离下次可抽取还有 ${minutes} 分钟`;
-    }
+    const message =
+      hours > 0
+        ? `距离下次可抽取还有 ${hours} 小时${minutes > 0 ? ` ${minutes} 分钟` : ''}`
+        : `距离下次可抽取还有 ${minutes} 分钟`;
     
     return {
       canDraw: false,

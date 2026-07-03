@@ -150,7 +150,7 @@ select {
 }
 
 /* 响应式断点 */
-@media (max-width: var(--mobile-breakpoint)) {
+@media (max-width: 768px) {
   html {
     font-size: 15px;
   }

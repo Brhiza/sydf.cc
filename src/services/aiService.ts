@@ -52,7 +52,7 @@ class AIService {
     } catch (error) {
       const appError = handleError(error, 'AI响应生成失败');
       logError(appError, 'AI Service - generateAIResponse');
-      throw new Error(getUserFriendlyMessage(appError));
+      throw new Error(getUserFriendlyMessage(appError), { cause: error });
     }
   }
 

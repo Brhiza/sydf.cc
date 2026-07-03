@@ -526,7 +526,7 @@ export async function onRequest(context: {
         );
       }
 
-      let aiJson: OpenAiProxyResponse | null = null;
+      let aiJson: OpenAiProxyResponse;
       try {
         aiJson = await aiResp.json();
       } catch {

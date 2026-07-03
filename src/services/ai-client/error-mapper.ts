@@ -15,7 +15,7 @@ export function getHttpErrorMessage(status: number): string {
 }
 
 export async function buildErrorFromResponse(response: Response): Promise<Error> {
-  let errorDetails = '';
+  let errorDetails;
   try {
     const errorData = await response.json();
     errorDetails = errorData.error?.message || errorData.message || response.statusText;
