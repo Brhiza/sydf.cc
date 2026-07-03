@@ -82,7 +82,9 @@ export async function sendRequestWithRetry({
       if (error instanceof DOMException && error.name === 'AbortError') {
         if (!signal?.aborted) {
           console.error(`AI 请求超时 (${REQUEST_TIMEOUT_MS}ms)`);
-          throw new Error('AI 请求超时，请检查网络连接或API端点设置。');
+          throw new Error('AI 请求超时，请检查网络连接或API端点设置。', {
+            cause: error,
+          });
         }
         throw error;
       }

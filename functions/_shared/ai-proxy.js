@@ -36,7 +36,7 @@ function normalizeNonEmptyString(value, fieldName, maxLength = 256) {
 }
 
 function cloneJsonWithLimit(value, fieldName, maxLength) {
-  let serialized = '';
+  let serialized;
   try {
     serialized = JSON.stringify(value);
   } catch {
@@ -107,17 +107,20 @@ function normalizeMessages(messages) {
       throw createHttpError(`messages[${index}].role 不受支持`, 400);
     }
 
-    let content = null;
-    if (message.content === null) {
-      content = null;
-    } else if (typeof message.content === 'string') {
-      if (message.content.length > MAX_MESSAGE_CONTENT_LENGTH) {
-        throw createHttpError(`messages[${index}].content 过长`, 400);
+    const content = (() => {
+      if (message.content === null) {
+        return null;
       }
-      content = message.content;
-    } else {
+
+      if (typeof message.content === 'string') {
+        if (message.content.length > MAX_MESSAGE_CONTENT_LENGTH) {
+          throw createHttpError(`messages[${index}].content 过长`, 400);
+        }
+        return message.content;
+      }
+
       throw createHttpError(`messages[${index}].content 必须为字符串或 null`, 400);
-    }
+    })();
 
     const normalizedMessage = {
       role,

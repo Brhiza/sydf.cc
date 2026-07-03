@@ -16,9 +16,8 @@
     "allowImportingTsExtensions": true,
     "lib": ["ESNext", "DOM"],
     "skipLibCheck": true,
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     },
     "types": ["vite/client", "vite-plugin-pwa/client", "node"]
   },
