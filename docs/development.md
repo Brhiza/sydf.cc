@@ -6,15 +6,15 @@
 
 建议准备：
 
-- Node.js
-- npm
+- Node.js 22 LTS 或更新版本
+- npm 10 以上版本
 
-项目当前依赖的是现代 Vite 生态，建议使用较新的 Node 版本进行开发。
+项目的 CI 使用 Node.js 22。仓库根目录提供 `.nvmrc`，使用 `nvm` 时可以直接切换到一致版本。
 
 ## 安装依赖
 
 ```bash
-npm install
+npm ci
 ```
 
 ## 本地启动

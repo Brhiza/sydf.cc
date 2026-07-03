@@ -25,8 +25,10 @@
 
 ### 安装依赖
 
+请使用 Node.js 22 LTS 或更新版本，以及 npm 10 以上版本，避免本地环境和 CI 不一致。
+
 ```bash
-npm install
+npm ci
 ```
 
 ### 启动开发
