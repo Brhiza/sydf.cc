@@ -12,11 +12,13 @@
     "oyyy": "npm run clean && vite build --mode oyyy && npm run prerender -- --custom-build",
     "preview": "vite preview",
     "test": "vitest run",
-    "lint": "eslint . --ext .vue,.js,.ts --fix",
+    "typecheck": "tsc --noEmit --pretty false",
+    "lint": "eslint . --ext .vue,.js,.ts",
+    "lint:fix": "npm run lint -- --fix",
+    "check": "npm run typecheck && npm run lint && npm test && npm run build",
     "format": "prettier --write \"src/**/*.{vue,ts,css,md}\""
   },
   "dependencies": {
-    "@vueuse/components": "^13.9.0",
     "marked": "^16.3.0",
     "mingyu-core": "^0.1.8",
     "pinia": "^3.0.3",
@@ -26,8 +28,6 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260702.1",
     "@types/node": "^24.6.1",
-    "@typescript-eslint/eslint-plugin": "^8.45.0",
-    "@typescript-eslint/parser": "^8.45.0",
     "@vitejs/plugin-vue": "^6.0.1",
     "@vue/test-utils": "^2.4.6",
     "@vue/tsconfig": "^0.8.1",
@@ -37,7 +37,6 @@
     "eslint-plugin-vue": "^10.5.0",
     "jsdom": "^26.1.0",
     "prettier": "^3.6.2",
-    "rollup-plugin-visualizer": "^6.0.3",
     "sharp": "^0.34.4",
     "tsconfig-paths": "^4.2.0",
     "tsx": "^4.22.4",

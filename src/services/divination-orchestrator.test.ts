@@ -326,15 +326,38 @@ describe('DivinationOrchestrator', () => {
 
   it('今日运势保存历史标题时应直接使用日期键，不受 Date 字符串解析换日影响', async () => {
     const RealDate = Date
+    type ShiftedDateArgs =
+      | []
+      | [value: string | number | Date]
+      | [
+          year: number,
+          monthIndex: number,
+          date?: number,
+          hours?: number,
+          minutes?: number,
+          seconds?: number,
+          ms?: number,
+        ]
 
     class ShiftedDate extends RealDate {
-      constructor(...args: any[]) {
+      constructor(...args: ShiftedDateArgs) {
         if (args.length === 1 && args[0] === '2026-03-16') {
           super('2026-03-15T16:00:00.000Z')
           return
         }
 
-        super(...(args as ConstructorParameters<DateConstructor>))
+        if (args.length === 0) {
+          super()
+          return
+        }
+
+        if (args.length === 1) {
+          const [value] = args
+          super(value instanceof RealDate ? value.valueOf() : value)
+          return
+        }
+
+        super(args[0], args[1], args[2], args[3], args[4], args[5], args[6])
       }
 
       static now() {

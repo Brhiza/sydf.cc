@@ -14,6 +14,9 @@ const resolvedViteConfig =
     ? (viteConfig(testEnv) as UserConfig)
     : (viteConfig as UserConfig)
 
+const nodeMajorVersion = Number.parseInt(process.versions.node.split('.')[0] ?? '0', 10)
+const execArgv = nodeMajorVersion >= 25 ? ['--no-webstorage'] : []
+
 export default mergeConfig(
   resolvedViteConfig,
   defineConfig({
@@ -22,7 +25,7 @@ export default mergeConfig(
       clearMocks: true,
       restoreMocks: true,
       include: ['src/**/*.test.ts'],
-      execArgv: ['--no-webstorage'],
+      execArgv,
     },
   })
 )

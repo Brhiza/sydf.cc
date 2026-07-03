@@ -42,6 +42,6 @@ export default [
     },
   },
   {
-    ignores: ['dist', 'node_modules', 'public', 'old', '*.cjs'],
+    ignores: ['dist', 'node_modules', 'public', 'old', '.playwright-cli', '*.cjs'],
   },
 ];
