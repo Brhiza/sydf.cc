@@ -158,9 +158,8 @@ export default defineConfig((_env) => {
       // terser配置
       terserOptions: {
         compress: {
-          drop_console: true,
           drop_debugger: true,
-          pure_funcs: ['console.log']
+          pure_funcs: ['console.log', 'console.debug', 'console.info']
         }
       },
       // 启用源码映射（生产环境建议关闭）
