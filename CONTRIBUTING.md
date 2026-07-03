@@ -52,8 +52,8 @@ npm run build
 请至少完成以下检查：
 
 1. 受影响的功能在本地手动跑通过
-2. `npm test` 通过
-3. `npm run build` 通过
+2. `npm run check` 通过
+3. 如只需局部验证，至少运行 `npm test` 与 `npm run build`
 4. 如果改了接口、页面文案、SEO、构建模式或历史记录逻辑，同步更新文档
 
 ## 建议的改动范围

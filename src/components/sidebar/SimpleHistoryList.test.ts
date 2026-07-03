@@ -33,7 +33,16 @@ vi.mock('./history/HistoryListFilters.vue', () => ({
 
 vi.mock('./SimpleHistoryItem.vue', () => ({
   default: defineComponent({
-    props: ['record', 'isActive'],
+    props: {
+      record: {
+        type: Object,
+        required: true,
+      },
+      isActive: {
+        type: Boolean,
+        required: true,
+      },
+    },
     emits: ['click', 'pin', 'edit', 'delete'],
     template: `
       <div class="simple-history-item-stub">

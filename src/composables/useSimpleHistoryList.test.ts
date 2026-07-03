@@ -23,6 +23,9 @@ vi.mock('./useHistoryActions', () => ({
 }));
 
 const TestHarness = defineComponent({
+  setup() {
+    return useSimpleHistoryList();
+  },
   template: `
     <div>
       <div class="menu-container">
@@ -30,9 +33,6 @@ const TestHarness = defineComponent({
       </div>
     </div>
   `,
-  setup() {
-    return useSimpleHistoryList();
-  },
 });
 
 describe('useSimpleHistoryList', () => {

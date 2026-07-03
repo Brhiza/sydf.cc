@@ -80,7 +80,10 @@ npm run build
 | `npm run oyyy` | 生成定制构建版本并预渲染 |
 | `npm run preview` | 本地预览构建产物 |
 | `npm test` | 运行 Vitest 测试 |
-| `npm run lint` | 运行 ESLint，并自动修复可修复问题 |
+| `npm run typecheck` | 运行 TypeScript 类型检查 |
+| `npm run lint` | 运行 ESLint 检查 |
+| `npm run lint:fix` | 运行 ESLint，并自动修复可修复问题 |
+| `npm run check` | 依次运行类型检查、ESLint、测试和生产构建 |
 | `npm run format` | 使用 Prettier 格式化部分源码文件 |
 
 ## 环境变量
@@ -176,7 +179,7 @@ npm run build
 - 改动占卜规则时，同时检查 `src`、`functions`、`docs` 与类型定义
 - 改动结果页、历史页、追问链路时，同时回归错误态与重新生成流程
 - 改动 SEO 或 PWA 时，同时验证无 JavaScript 回退、缓存更新与生产构建
-- 提交前至少运行 `npm test` 与 `npm run build`
+- 提交前至少运行 `npm run check`
 
 ## 项目状态
 

@@ -25,7 +25,12 @@ vi.mock('./history/HistoryRecordSummary.vue', () => ({
 
 vi.mock('./history/HistoryRecordActionsMenu.vue', () => ({
   default: defineComponent({
-    props: ['showMenu'],
+    props: {
+      showMenu: {
+        type: Boolean,
+        required: true,
+      },
+    },
     emits: ['toggle-menu'],
     template: `
       <div class="history-actions-stub">

@@ -68,13 +68,31 @@ npm test
 
 ## 代码质量
 
+### 综合检查
+
+```bash
+npm run check
+```
+
+该命令会依次运行类型检查、ESLint、Vitest 测试和生产构建，适合提交前或 CI 中使用。
+
+### TypeScript
+
+```bash
+npm run typecheck
+```
+
 ### ESLint
 
 ```bash
 npm run lint
 ```
 
-注意：当前脚本带 `--fix`，会自动修改文件。批量运行前请确认工作区改动可控。
+该命令只检查问题，不会自动修改文件。需要自动修复时运行：
+
+```bash
+npm run lint:fix
+```
 
 ### Prettier
 

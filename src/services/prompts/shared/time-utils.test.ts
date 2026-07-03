@@ -10,7 +10,7 @@ describe('time-utils', () => {
 
   it('会优先使用占卜结果自身的时间戳生成时间信息', async () => {
     const formatted = await getFormattedTimeInfoForDivination({
-      timestamp: new Date('2026-03-20T00:00:00+08:00').getTime(),
+      timestamp: new Date('2026-03-20T12:00:00+08:00').getTime(),
     } as never);
 
     expect(formatted).toContain('公历：2026年3月20日');

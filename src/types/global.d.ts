@@ -1,8 +1,3 @@
-/**
- * 全局类型声明
- */
-import type { LiuyaoData, MeihuaData, QimenData } from './divination';
-
 // 全局类型声明 - 与原项目JavaScript函数对应
 
 // AI响应接口
