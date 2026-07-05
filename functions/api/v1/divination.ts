@@ -57,6 +57,21 @@ interface OpenAiProxyResponse {
 }
 
 const DEV_TZ_OFFSET_MINUTES = 480; // 北京时间 UTC+8
+const MAX_REQUEST_BODY_BYTES = 64 * 1024;
+const MAX_AI_ERROR_DETAILS_LENGTH = 2000;
+const DEFAULT_DEV_API_RATE_LIMIT_MAX = 60;
+const DEFAULT_DEV_API_RATE_LIMIT_WINDOW_MS = 60 * 1000;
+const rateLimitBuckets = new Map<string, { count: number; startedAt: number; windowMs: number }>();
+
+class RequestBodyError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+    readonly code: string
+  ) {
+    super(message);
+  }
+}
 
 function createRequestId(): string {
   try {
@@ -74,6 +89,66 @@ function getHeaderApiKey(headers: Headers): string | null {
   if (!auth) return null;
   const match = auth.match(/^Bearer\s+(.+)$/i);
   return match?.[1]?.trim() || null;
+}
+
+function parsePositiveInteger(value: string | undefined, fallback: number): number {
+  const parsed = Number.parseInt(String(value ?? ''), 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+function getRateLimitConfig(env: Record<string, string | undefined>): {
+  max: number;
+  windowMs: number;
+} {
+  return {
+    max: parsePositiveInteger(env.DEV_API_RATE_LIMIT_MAX, DEFAULT_DEV_API_RATE_LIMIT_MAX),
+    windowMs: parsePositiveInteger(
+      env.DEV_API_RATE_LIMIT_WINDOW_MS,
+      DEFAULT_DEV_API_RATE_LIMIT_WINDOW_MS
+    ),
+  };
+}
+
+function getClientKey(request: Request, apiKey: string): string {
+  const forwardedFor =
+    request.headers.get('CF-Connecting-IP') || request.headers.get('X-Forwarded-For');
+  const ip = forwardedFor ? forwardedFor.split(',')[0].trim() : new URL(request.url).hostname;
+  return `${apiKey}:${ip}`;
+}
+
+function cleanupExpiredRateLimitBuckets(now: number): void {
+  for (const [key, bucket] of rateLimitBuckets.entries()) {
+    if (now - bucket.startedAt >= bucket.windowMs) {
+      rateLimitBuckets.delete(key);
+    }
+  }
+}
+
+function checkRateLimit(
+  request: Request,
+  apiKey: string,
+  env: Record<string, string | undefined>
+): { limited: false } | { limited: true; retryAfterSeconds: number } {
+  const config = getRateLimitConfig(env);
+  const now = Date.now();
+  cleanupExpiredRateLimitBuckets(now);
+
+  const key = getClientKey(request, apiKey);
+  const bucket = rateLimitBuckets.get(key);
+  if (!bucket || now - bucket.startedAt >= bucket.windowMs) {
+    rateLimitBuckets.set(key, { count: 1, startedAt: now, windowMs: config.windowMs });
+    return { limited: false };
+  }
+
+  bucket.count += 1;
+  if (bucket.count <= config.max) {
+    return { limited: false };
+  }
+
+  return {
+    limited: true,
+    retryAfterSeconds: Math.max(1, Math.ceil((bucket.startedAt + bucket.windowMs - now) / 1000)),
+  };
 }
 
 function getAllowedOrigin(origin: string | null): string | null {
@@ -168,6 +243,79 @@ function jsonResponse(body: unknown, init?: ResponseInit & { origin?: string | n
   const cors = buildCorsHeaders(origin);
   for (const [k, v] of Object.entries(cors)) headers.set(k, v);
   return new Response(JSON.stringify(body), { ...init, headers });
+}
+
+function getContentLength(headers: Headers): number | null {
+  const raw = headers.get('Content-Length');
+  if (!raw) return null;
+  const parsed = Number.parseInt(raw, 10);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+}
+
+async function parseJsonBodyWithLimit(request: Request): Promise<unknown> {
+  const contentLength = getContentLength(request.headers);
+  if (contentLength !== null && contentLength > MAX_REQUEST_BODY_BYTES) {
+    throw new RequestBodyError('请求体过大', 413, 'PAYLOAD_TOO_LARGE');
+  }
+
+  if (!request.body) {
+    throw new RequestBodyError('请求体必须为JSON', 400, 'BAD_REQUEST');
+  }
+
+  const reader = request.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (!value) continue;
+
+      total += value.byteLength;
+      if (total > MAX_REQUEST_BODY_BYTES) {
+        try {
+          await reader.cancel();
+        } catch {
+          // ignore
+        }
+        throw new RequestBodyError('请求体过大', 413, 'PAYLOAD_TOO_LARGE');
+      }
+      chunks.push(value);
+    }
+  } finally {
+    try {
+      reader.releaseLock();
+    } catch {
+      // ignore
+    }
+  }
+
+  const bytes = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+
+  try {
+    return JSON.parse(new TextDecoder().decode(bytes));
+  } catch {
+    throw new RequestBodyError('请求体必须为JSON', 400, 'BAD_REQUEST');
+  }
+}
+
+function truncateErrorDetails(details: string): string {
+  return details.length > MAX_AI_ERROR_DETAILS_LENGTH
+    ? `${details.slice(0, MAX_AI_ERROR_DETAILS_LENGTH)}...`
+    : details;
+}
+
+function errorDetailsForDebug(details: string, debug: boolean): string | undefined {
+  if (!debug || !details) {
+    return undefined;
+  }
+  return truncateErrorDetails(details);
 }
 
 function sseResponse(stream: ReadableStream<Uint8Array>, origin: string | null): Response {
@@ -394,18 +542,36 @@ export async function onRequest(context: {
     );
   }
 
+  const rateLimit = checkRateLimit(request, providedKey, env);
+  if (rateLimit.limited) {
+    return jsonResponse(
+      { ok: false, error: { code: 'RATE_LIMITED', message: '请求过于频繁，请稍后再试' } },
+      {
+        status: 429,
+        origin,
+        headers: {
+          'Retry-After': String(rateLimit.retryAfterSeconds),
+        },
+      }
+    );
+  }
+
   const requestId = createRequestId();
 
   // 统一把占卜相关时间计算固定到北京时间（UTC+8）
   return runWithTimezoneOffsetMinutesOverride(DEV_TZ_OFFSET_MINUTES, async () => {
     let body: DivinationRequestBody;
     try {
-      const parsedBody = await request.json();
+      const parsedBody = await parseJsonBodyWithLimit(request);
       body = isRecord(parsedBody) ? parsedBody : {};
-    } catch {
+    } catch (error) {
+      const bodyError =
+        error instanceof RequestBodyError
+          ? error
+          : new RequestBodyError('请求体必须为JSON', 400, 'BAD_REQUEST');
       return jsonResponse(
-        { ok: false, requestId, error: { code: 'BAD_REQUEST', message: '请求体必须为JSON' } },
-        { status: 400, origin }
+        { ok: false, requestId, error: { code: bodyError.code, message: bodyError.message } },
+        { status: bodyError.status, origin }
       );
     }
 
@@ -519,7 +685,7 @@ export async function onRequest(context: {
             error: {
               code: 'AI_ERROR',
               message: `AI 服务返回错误：${aiResp.status}`,
-              details: errText || undefined,
+              details: errorDetailsForDebug(errText, debug),
             },
           },
           { status: 502, origin }
@@ -527,15 +693,20 @@ export async function onRequest(context: {
       }
 
       let aiJson: OpenAiProxyResponse;
+      let aiRaw = '';
       try {
-        aiJson = await aiResp.json();
+        aiRaw = await aiResp.text();
+        aiJson = JSON.parse(aiRaw) as OpenAiProxyResponse;
       } catch {
-        const raw = await aiResp.text().catch(() => '');
         return jsonResponse(
           {
             ok: false,
             requestId,
-            error: { code: 'AI_BAD_RESPONSE', message: 'AI 返回非JSON', details: raw || undefined },
+            error: {
+              code: 'AI_BAD_RESPONSE',
+              message: 'AI 返回非JSON',
+              details: errorDetailsForDebug(aiRaw, debug),
+            },
           },
           { status: 502, origin }
         );
@@ -597,7 +768,7 @@ export async function onRequest(context: {
             requestId,
             code: 'AI_ERROR',
             message: `AI 服务返回错误：${aiResp.status}`,
-            details: errText || undefined,
+            details: errorDetailsForDebug(errText, debug),
           });
           controller.close();
           return;
@@ -610,7 +781,7 @@ export async function onRequest(context: {
             requestId,
             code: 'AI_BAD_RESPONSE',
             message: 'AI 返回非SSE流式响应',
-            details: raw || undefined,
+            details: errorDetailsForDebug(raw, debug),
           });
           controller.close();
           return;
@@ -648,4 +819,8 @@ export async function onRequest(context: {
 
     return sseResponse(sseStream, origin);
   });
+}
+
+export function resetDevApiDivinationRateLimitForTests() {
+  rateLimitBuckets.clear();
 }
