@@ -9,7 +9,22 @@ export interface ExportPayload {
   version: string;
   exportTime: string;
   records: HistoryRecord[];
-  settings: AppSettings;
+  settings: Omit<AppSettings, 'customApiKey'>;
+}
+
+function sanitizeExportSettings(settings: AppSettings): Omit<AppSettings, 'customApiKey'> {
+  const safeSettings: Omit<AppSettings, 'customApiKey'> = {
+    autoSave: settings.autoSave,
+    maxHistoryItems: settings.maxHistoryItems,
+    theme: settings.theme,
+    useCustomApi: settings.useCustomApi,
+  };
+
+  if (settings.customApiEndpoint) {
+    safeSettings.customApiEndpoint = settings.customApiEndpoint;
+  }
+
+  return safeSettings;
 }
 
 export function exportRecordsToJson(records: HistoryRecord[], settings: AppSettings): string {
@@ -17,7 +32,7 @@ export function exportRecordsToJson(records: HistoryRecord[], settings: AppSetti
     version: '1.0',
     exportTime: new Date().toISOString(),
     records,
-    settings,
+    settings: sanitizeExportSettings(settings),
   };
   return JSON.stringify(payload, null, 2);
 }

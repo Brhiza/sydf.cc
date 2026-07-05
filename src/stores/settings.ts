@@ -4,6 +4,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { storageService } from '../services/storageService';
+import { resolveCustomModelsEndpoint } from '../services/ai-client/endpoint-resolver';
 
 // 定义设置类型
 interface UserSettings {
@@ -126,9 +127,10 @@ export const useSettingsStore = defineStore('settings', () => {
     error.value = null;
 
     try {
-      // 统一处理URL，移除路径末尾的/v1/chat/completions或/v1
-      const baseUrl = endpoint.replace(/\/v1(\/chat\/completions)?\/?$/, '');
-      const modelsUrl = `${baseUrl}/v1/models`;
+      const modelsUrl = resolveCustomModelsEndpoint(endpoint);
+      if (!modelsUrl) {
+        throw new Error('API 端点必须是 HTTPS 地址；本机 localhost 调试可使用 HTTP');
+      }
 
       const response = await fetch(modelsUrl, {
         method: 'GET',
