@@ -3,6 +3,8 @@
 import { getHttpErrorStatus, proxyAiRequest } from '../_shared/ai-proxy.js';
 
 const TRUSTED_FETCH_SITES = new Set(['same-origin', 'same-site', 'none']);
+const DEFAULT_RATE_LIMIT_MAX = 20;
+const DEFAULT_RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const UPSTREAM_RESPONSE_HEADERS_TO_STRIP = [
   'Access-Control-Allow-Credentials',
   'Access-Control-Allow-Headers',
@@ -18,6 +20,7 @@ const UPSTREAM_RESPONSE_HEADERS_TO_STRIP = [
   'Transfer-Encoding',
   'Upgrade',
 ];
+const rateLimitBuckets = new Map();
 
 function parseUrl(value) {
   if (!value) return null;
@@ -30,7 +33,12 @@ function parseUrl(value) {
 }
 
 function isLoopbackHost(hostname) {
-  return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1' || hostname === '[::1]';
+  return (
+    hostname === 'localhost' ||
+    hostname === '127.0.0.1' ||
+    hostname === '::1' ||
+    hostname === '[::1]'
+  );
 }
 
 function isTrustedAppUrl(candidateUrl, requestUrl) {
@@ -48,16 +56,67 @@ function isTrustedBrowserRequest(request) {
     return false;
   }
 
-  const candidates = [
-    parseUrl(request.headers.get('Origin')),
-    parseUrl(request.headers.get('Referer')),
-  ].filter(Boolean);
-
-  if (candidates.length === 0) {
+  const originUrl = parseUrl(request.headers.get('Origin'));
+  const refererUrl = parseUrl(request.headers.get('Referer'));
+  if (!originUrl || !refererUrl) {
     return false;
   }
 
-  return candidates.some((candidateUrl) => isTrustedAppUrl(candidateUrl, requestUrl));
+  return isTrustedAppUrl(originUrl, requestUrl) && isTrustedAppUrl(refererUrl, requestUrl);
+}
+
+function parsePositiveInteger(value, fallback) {
+  const parsed = Number.parseInt(String(value ?? ''), 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+function getRateLimitConfig(env) {
+  return {
+    max: parsePositiveInteger(env.AI_PROXY_RATE_LIMIT_MAX, DEFAULT_RATE_LIMIT_MAX),
+    windowMs: parsePositiveInteger(env.AI_PROXY_RATE_LIMIT_WINDOW_MS, DEFAULT_RATE_LIMIT_WINDOW_MS),
+  };
+}
+
+function getClientKey(request) {
+  const forwardedFor =
+    request.headers.get('CF-Connecting-IP') || request.headers.get('X-Forwarded-For');
+  if (forwardedFor) {
+    return forwardedFor.split(',')[0].trim();
+  }
+
+  return new URL(request.url).hostname;
+}
+
+function cleanupExpiredRateLimitBuckets(now) {
+  for (const [key, bucket] of rateLimitBuckets.entries()) {
+    if (now - bucket.startedAt >= bucket.windowMs) {
+      rateLimitBuckets.delete(key);
+    }
+  }
+}
+
+function checkRateLimit(request, env) {
+  const config = getRateLimitConfig(env);
+  const now = Date.now();
+  cleanupExpiredRateLimitBuckets(now);
+
+  const key = getClientKey(request);
+  const bucket = rateLimitBuckets.get(key);
+  if (!bucket || now - bucket.startedAt >= bucket.windowMs) {
+    rateLimitBuckets.set(key, { count: 1, startedAt: now, windowMs: config.windowMs });
+    return { limited: false };
+  }
+
+  bucket.count += 1;
+  if (bucket.count <= config.max) {
+    return { limited: false };
+  }
+
+  const retryAfterSeconds = Math.max(
+    1,
+    Math.ceil((bucket.startedAt + bucket.windowMs - now) / 1000)
+  );
+  return { limited: true, retryAfterSeconds };
 }
 
 function applyTrustedCorsHeaders(headers, request) {
@@ -95,6 +154,17 @@ function jsonResponse(request, body, status) {
   });
 }
 
+function rateLimitResponse(request, retryAfterSeconds) {
+  const headers = createResponseHeaders(request, {
+    'Content-Type': 'application/json; charset=utf-8',
+    'Retry-After': String(retryAfterSeconds),
+  });
+  return new Response(JSON.stringify({ error: '请求过于频繁，请稍后再试。' }), {
+    status: 429,
+    headers,
+  });
+}
+
 function proxyResponse(request, upstreamResponse) {
   const headers = createResponseHeaders(request, upstreamResponse.headers);
   return new Response(upstreamResponse.body, {
@@ -126,6 +196,11 @@ export async function onRequest(context) {
     );
   }
 
+  const rateLimit = checkRateLimit(request, env);
+  if (rateLimit.limited) {
+    return rateLimitResponse(request, rateLimit.retryAfterSeconds);
+  }
+
   const contentType = request.headers.get('Content-Type') || '';
   if (!contentType.toLowerCase().includes('application/json')) {
     return jsonResponse(request, { error: '请求体必须为 application/json。' }, 415);
@@ -146,4 +221,8 @@ export async function onRequest(context) {
     const message = error instanceof Error ? error.message : 'Error processing AI request.';
     return jsonResponse(request, { error: message }, status);
   }
+}
+
+export function resetApiAiRateLimitForTests() {
+  rateLimitBuckets.clear();
 }

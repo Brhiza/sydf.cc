@@ -5,6 +5,20 @@ import type { AIResponse, OpenAIRequestBody } from './types';
 const MAX_RETRIES = 3;
 const REQUEST_TIMEOUT_MS = 30000;
 
+function getErrorStatus(error: unknown): number | null {
+  const status = (error as { status?: unknown })?.status;
+  return typeof status === 'number' && Number.isFinite(status) ? status : null;
+}
+
+function shouldRetryError(error: unknown): boolean {
+  const status = getErrorStatus(error);
+  if (status === null) {
+    return true;
+  }
+
+  return status === 429 || status >= 500;
+}
+
 function linkSignals(...signals: (AbortSignal | undefined)[]): AbortSignal {
   const controller = new AbortController();
   for (const signal of signals) {
@@ -88,12 +102,12 @@ export async function sendRequestWithRetry({
         }
         throw error;
       }
-      if (attempt < MAX_RETRIES) {
+      if (attempt < MAX_RETRIES && shouldRetryError(error)) {
         const delay = Math.min(500 * Math.pow(2, attempt - 1), 2000);
-        console.debug(
-          `AI服务调用失败，后台自动重试 (${attempt}/${MAX_RETRIES})，${delay}ms后重试`
-        );
+        console.debug(`AI服务调用失败，后台自动重试 (${attempt}/${MAX_RETRIES})，${delay}ms后重试`);
         await new Promise((resolve) => setTimeout(resolve, delay));
+      } else {
+        throw error;
       }
     }
   }

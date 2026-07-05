@@ -129,6 +129,7 @@ export async function parseStreamResponse(
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buffer = '';
+  let doneReceived = false;
   const state = createStreamReducerState();
   const flushContentBuffer = () => {
     if (!state.contentBuffer) {
@@ -138,6 +139,26 @@ export async function parseStreamResponse(
     onChunk(state.contentBuffer);
     state.contentBuffer = '';
     state.lastFlushTime = Date.now();
+  };
+  const processLine = (line: string) => {
+    if (doneReceived) {
+      return;
+    }
+
+    const delta = parseStreamLineDelta(line);
+    if (delta === 'done') {
+      doneReceived = true;
+      return;
+    }
+    if (!delta) {
+      return;
+    }
+
+    applyStreamDelta(delta, state, onChunk, flushContentBuffer);
+
+    if (Date.now() - state.lastFlushTime > STREAM_FLUSH_INTERVAL_MS && state.contentBuffer) {
+      flushContentBuffer();
+    }
   };
 
   try {
@@ -151,20 +172,17 @@ export async function parseStreamResponse(
       buffer = lines.pop() || '';
 
       for (const line of lines) {
-        const delta = parseStreamLineDelta(line);
-        if (delta === 'done') break;
-        if (!delta) continue;
-
-        applyStreamDelta(delta, state, onChunk, flushContentBuffer);
-
-        if (Date.now() - state.lastFlushTime > STREAM_FLUSH_INTERVAL_MS && state.contentBuffer) {
-          flushContentBuffer();
-        }
+        processLine(line);
       }
 
       flushContentBuffer();
     }
 
+    buffer += decoder.decode();
+    if (buffer.trim()) {
+      processLine(buffer);
+      buffer = '';
+    }
     flushContentBuffer();
   } finally {
     reader.releaseLock();

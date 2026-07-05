@@ -23,5 +23,8 @@ export async function buildErrorFromResponse(response: Response): Promise<Error>
     errorDetails = response.statusText;
   }
   const userFriendlyMessage = getHttpErrorMessage(response.status);
-  return new Error(`${userFriendlyMessage} (错误代码: ${response.status} - ${errorDetails})`);
+  return Object.assign(
+    new Error(`${userFriendlyMessage} (错误代码: ${response.status} - ${errorDetails})`),
+    { status: response.status }
+  );
 }

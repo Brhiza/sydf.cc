@@ -2,6 +2,7 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { HistoryRecord } from '@/types/common';
+import { IMPORT_JSON_MAX_LENGTH, IMPORT_RECORDS_MAX_COUNT } from './history/import-export';
 
 const { mockEmit } = vi.hoisted(() => ({
   mockEmit: vi.fn(),
@@ -71,6 +72,46 @@ describe('HistoryService', () => {
     });
     expect(historyService.getRecord('daily-imported')?.id).toBe('daily-imported');
     expect(mockEmit).toHaveBeenCalledWith('history:updated');
+  });
+
+  it('导入历史文件过大时应拒绝且不改变现有记录', async () => {
+    localStorage.setItem(
+      'sydf-history',
+      JSON.stringify([createDailyRecord('daily-existing', 1000, '2026-03-25')])
+    );
+
+    const { historyService } = await import('./history');
+    const result = historyService.importRecords('x'.repeat(IMPORT_JSON_MAX_LENGTH + 1));
+
+    expect(result).toEqual({
+      success: false,
+      message: '导入文件过大，请选择较小的历史备份文件',
+    });
+    expect(historyService.getRecords().map((record) => record.id)).toEqual(['daily-existing']);
+    expect(mockEmit).not.toHaveBeenCalled();
+  });
+
+  it('导入历史记录数量过多时应拒绝且不改变现有记录', async () => {
+    localStorage.setItem(
+      'sydf-history',
+      JSON.stringify([createDailyRecord('daily-existing', 1000, '2026-03-25')])
+    );
+
+    const { historyService } = await import('./history');
+    const importPayload = JSON.stringify({
+      records: Array.from({ length: IMPORT_RECORDS_MAX_COUNT + 1 }, (_, index) =>
+        createDailyRecord(`daily-import-${index}`, 2000 + index, '2026-03-26')
+      ),
+    });
+
+    const result = historyService.importRecords(importPayload);
+
+    expect(result).toEqual({
+      success: false,
+      message: `一次最多导入 ${IMPORT_RECORDS_MAX_COUNT} 条历史记录`,
+    });
+    expect(historyService.getRecords().map((record) => record.id)).toEqual(['daily-existing']);
+    expect(mockEmit).not.toHaveBeenCalled();
   });
 
   it('加载旧单牌塔罗历史时应自动迁移为普通塔罗类型并写回本地存储', async () => {

@@ -1,10 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { onRequest } from '../../functions/api/ai.js';
+import { onRequest, resetApiAiRateLimitForTests } from '../../functions/api/ai.js';
 
 describe('/api/ai 安全限制', () => {
   afterEach(() => {
     vi.restoreAllMocks();
+    resetApiAiRateLimitForTests();
   });
 
   it('拒绝没有本站来源标识的请求', async () => {
@@ -15,6 +16,37 @@ describe('/api/ai 安全限制', () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        messages: [{ role: 'user', content: '你好' }],
+        stream: false,
+      }),
+    });
+
+    const response = await onRequest({
+      request,
+      env: {
+        OPENAI_API_KEY: 'test-openai-key',
+        OPENAI_API_MODEL: 'server-model',
+      },
+    });
+
+    const data = await response.json();
+
+    expect(response.status).toBe(403);
+    expect(data.error).toContain('仅允许');
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('拒绝只有 Origin 的伪造同源请求', async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+
+    const request = new Request('https://sydf.cc/api/ai', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Origin: 'https://sydf.cc',
       },
       body: JSON.stringify({
         messages: [{ role: 'user', content: '你好' }],
@@ -95,19 +127,63 @@ describe('/api/ai 安全限制', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
-  it('不透传上游响应里的敏感头和跨域头', async () => {
-    const fetchMock = vi.fn(async () =>
-      new Response(JSON.stringify({ ok: true }), {
-        status: 200,
+  it('同一客户端超过限额时不再转发上游 AI', async () => {
+    const fetchMock = vi.fn(
+      async () =>
+        new Response(JSON.stringify({ choices: [{ message: { content: '测试成功' } }] }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        })
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const createRequest = () =>
+      new Request('https://sydf.cc/api/ai', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': 'https://evil.example',
-          'Access-Control-Allow-Credentials': 'true',
-          'Content-Encoding': 'gzip',
-          'Content-Length': '999',
-          'Set-Cookie': 'sid=upstream; HttpOnly',
+          Origin: 'https://sydf.cc',
+          Referer: 'https://sydf.cc/divination/liuyao',
+          'CF-Connecting-IP': '203.0.113.10',
         },
-      })
+        body: JSON.stringify({
+          stream: false,
+          messages: [{ role: 'user', content: '你好' }],
+        }),
+      });
+
+    const env = {
+      OPENAI_API_KEY: 'test-openai-key',
+      OPENAI_API_MODEL: 'server-model',
+      AI_PROXY_RATE_LIMIT_MAX: '1',
+      AI_PROXY_RATE_LIMIT_WINDOW_MS: '60000',
+    };
+
+    const firstResponse = await onRequest({ request: createRequest(), env });
+    const secondResponse = await onRequest({ request: createRequest(), env });
+    const secondData = await secondResponse.json();
+
+    expect(firstResponse.status).toBe(200);
+    expect(secondResponse.status).toBe(429);
+    expect(secondResponse.headers.get('Retry-After')).toBe('60');
+    expect(secondData.error).toContain('请求过于频繁');
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('不透传上游响应里的敏感头和跨域头', async () => {
+    const fetchMock = vi.fn(
+      async () =>
+        new Response(JSON.stringify({ ok: true }), {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': 'https://evil.example',
+            'Access-Control-Allow-Credentials': 'true',
+            'Content-Encoding': 'gzip',
+            'Content-Length': '999',
+            'Set-Cookie': 'sid=upstream; HttpOnly',
+          },
+        })
     );
     vi.stubGlobal('fetch', fetchMock);
 

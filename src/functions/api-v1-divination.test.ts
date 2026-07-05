@@ -1,12 +1,16 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { onRequest } from '../../functions/api/v1/divination.ts';
+import {
+  onRequest,
+  resetDevApiDivinationRateLimitForTests,
+} from '../../functions/api/v1/divination.ts';
 import { QUESTION_TEXT_MAX_LENGTH } from '../shared/question-text';
 import { TimeManager } from '../utils/timeManager';
 
 describe('开发者 API 兼容性', () => {
   afterEach(() => {
     vi.restoreAllMocks();
+    resetDevApiDivinationRateLimitForTests();
     TimeManager.setTimezoneOffsetMinutesOverride(null);
   });
 
@@ -1134,5 +1138,121 @@ describe('开发者 API 兼容性', () => {
     expect(data.ok).toBe(true);
     expect(userPrompt).toContain(`【问题】${'问'.repeat(QUESTION_TEXT_MAX_LENGTH)}`);
     expect(userPrompt).not.toContain('问'.repeat(QUESTION_TEXT_MAX_LENGTH + 1));
+  });
+
+  it('请求体过大时应提前拒绝且不调用上游 AI', async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+
+    const request = new Request('https://sydf.cc/api/v1/divination', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer test-dev-key',
+      },
+      body: JSON.stringify({
+        type: 'daily',
+        stream: false,
+        extra: 'x'.repeat(70 * 1024),
+      }),
+    });
+
+    const response = await onRequest({
+      request,
+      env: {
+        DEV_API_KEY: 'test-dev-key',
+        OPENAI_API_KEY: 'test-openai-key',
+      },
+    });
+    const data = await response.json();
+
+    expect(response.status).toBe(413);
+    expect(data.ok).toBe(false);
+    expect(data.error.code).toBe('PAYLOAD_TOO_LARGE');
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('同一开发者客户端超过限额时不再调用上游 AI', async () => {
+    const fetchMock = vi.fn(
+      async () =>
+        new Response(JSON.stringify({ choices: [{ message: { content: '测试解读' } }] }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        })
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const createRequest = () =>
+      new Request('https://sydf.cc/api/v1/divination', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer test-dev-key',
+          'CF-Connecting-IP': '203.0.113.20',
+        },
+        body: JSON.stringify({
+          type: 'daily',
+          stream: false,
+          options: {
+            date: '2026-03-24',
+          },
+        }),
+      });
+
+    const env = {
+      DEV_API_KEY: 'test-dev-key',
+      OPENAI_API_KEY: 'test-openai-key',
+      DEV_API_RATE_LIMIT_MAX: '1',
+      DEV_API_RATE_LIMIT_WINDOW_MS: '60000',
+    };
+
+    const firstResponse = await onRequest({ request: createRequest(), env });
+    const secondResponse = await onRequest({ request: createRequest(), env });
+    const secondData = await secondResponse.json();
+
+    expect(firstResponse.status).toBe(200);
+    expect(secondResponse.status).toBe(429);
+    expect(secondResponse.headers.get('Retry-After')).toBe('60');
+    expect(secondData.error.code).toBe('RATE_LIMITED');
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('非调试模式下不应返回上游 AI 原始错误正文', async () => {
+    const fetchMock = vi.fn(
+      async () =>
+        new Response('upstream secret detail', {
+          status: 500,
+          headers: { 'Content-Type': 'text/plain' },
+        })
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const request = new Request('https://sydf.cc/api/v1/divination', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer test-dev-key',
+      },
+      body: JSON.stringify({
+        type: 'daily',
+        stream: false,
+        options: {
+          date: '2026-03-24',
+        },
+      }),
+    });
+
+    const response = await onRequest({
+      request,
+      env: {
+        DEV_API_KEY: 'test-dev-key',
+        OPENAI_API_KEY: 'test-openai-key',
+      },
+    });
+    const data = await response.json();
+
+    expect(response.status).toBe(502);
+    expect(data.error.code).toBe('AI_ERROR');
+    expect(data.error.details).toBeUndefined();
   });
 });
