@@ -175,6 +175,16 @@ describe('parseStreamResponse', () => {
     expect(onChunk.mock.calls.map((c) => c[0]).join('')).toBe('你好');
   });
 
+  it('解析没有换行结尾的最后一个 content 事件', async () => {
+    const chunks = ['data: {"choices":[{"delta":{"content":"最后一段"}}]}'];
+    const response = createSseResponse(chunks);
+    const onChunk = vi.fn();
+    const result = await parseStreamResponse(response, onChunk);
+
+    expect(result.content).toBe('最后一段');
+    expect(onChunk.mock.calls.map((c) => c[0]).join('')).toBe('最后一段');
+  });
+
   it('解析 tool_calls 并写入结果', async () => {
     const chunks = [
       'data: {"choices":[{"delta":{"tool_calls":[{"index":0,"id":"t1","function":{"name":"fn","arguments":"{}"}}]}}]}\n',
