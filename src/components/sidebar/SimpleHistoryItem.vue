@@ -64,19 +64,9 @@ function handleDelete() {
   showMenu.value = false;
 }
 
-// 点击外部关闭菜单
-function handleClickOutside(event: MouseEvent) {
-  const target = event.target;
-  if (!(target instanceof Element)) {
-    showMenu.value = false;
-    return;
-  }
-
-  const isInside = target.closest('.history-item');
-  
-  if (!isInside) {
-    showMenu.value = false;
-  }
+// 点击菜单外部时关闭操作菜单；菜单自身的点击会在子组件里阻止冒泡。
+function handleClickOutside() {
+  showMenu.value = false;
 }
 
 onMounted(() => {

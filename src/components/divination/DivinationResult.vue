@@ -1,5 +1,5 @@
 <template>
-  <div class="content-card">
+  <div :class="['content-card', 'divination-result-card', `divination-result-card-${type}`]">
     <div v-if="showHeader" class="result-header">
       <h2 class="section-title">{{ resultTitle }}</h2>
     </div>
@@ -38,9 +38,7 @@ import type {
 import { computed } from 'vue';
 import DivinationResultBody from './result/DivinationResultBody.vue';
 import DivinationAISection from './result/DivinationAISection.vue';
-import {
-  getDisplayedConversationHistory,
-} from './result/ai/divination-ai-section';
+import { getDisplayedConversationHistory } from './result/ai/divination-ai-section';
 import { resolveTarotSpreadName } from '@/shared/tarot-spreads';
 
 const props = withDefaults(
@@ -118,9 +116,17 @@ const resultTitle = computed(() => {
 <style scoped>
 /* 组件特定样式 */
 .result-header {
-  margin-bottom: var(--spacing-4);
+  margin-bottom: var(--spacing-5);
   padding-bottom: var(--spacing-4);
   border-bottom: 1px solid var(--color-border-light);
+}
+
+.result-header .section-title {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
 }
 
 .result-actions {
@@ -128,5 +134,30 @@ const resultTitle = computed(() => {
   justify-content: center;
   gap: var(--spacing-4);
   margin-top: var(--spacing-4);
+}
+
+@media (max-width: 768px) {
+  .divination-result-card {
+    padding: var(--spacing-4);
+  }
+
+  .result-header {
+    margin-bottom: var(--spacing-3);
+    padding-bottom: var(--spacing-3);
+  }
+
+  .result-header .section-title {
+    font-size: var(--font-size-xl);
+  }
+}
+
+@media (max-width: 480px) {
+  .divination-result-card {
+    padding: var(--spacing-3);
+  }
+
+  .result-actions {
+    margin-top: var(--spacing-3);
+  }
 }
 </style>

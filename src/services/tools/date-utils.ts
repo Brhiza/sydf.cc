@@ -21,29 +21,3 @@ export function isValidDateParts(year: number, month: number, day: number): bool
     date.getDate() === day
   );
 }
-
-export function shiftAnchoredDate(baseDate: Date, diffDays: number): Date {
-  const anchored = new Date(baseDate);
-  anchored.setHours(12, 0, 0, 0);
-  anchored.setDate(anchored.getDate() + diffDays);
-  return anchored;
-}
-
-export function shiftMonth(baseDate: Date, diffMonths: number): { year: number; month: number } {
-  const anchored = new Date(baseDate);
-  anchored.setHours(12, 0, 0, 0);
-  anchored.setDate(1);
-  anchored.setMonth(anchored.getMonth() + diffMonths);
-  return {
-    year: anchored.getFullYear(),
-    month: anchored.getMonth() + 1,
-  };
-}
-
-export function shiftYear(baseDate: Date, diffYears: number): number {
-  return baseDate.getFullYear() + diffYears;
-}
-
-export function formatDateLabel(date: Date): string {
-  return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
-}

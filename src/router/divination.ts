@@ -1,7 +1,22 @@
 import type { RouteRecordRaw } from 'vue-router';
+import { EXTERNAL_DAILY_FORTUNE_URL } from '@/shared/external-projects';
 import { isDivinationType } from '@/utils/divination-type';
 
+const ExternalRedirectPlaceholder = { render: () => null };
+
 const divinationRoutes: RouteRecordRaw[] = [
+  {
+    path: '/divination/daily',
+    name: 'daily-fortune-redirect',
+    component: ExternalRedirectPlaceholder,
+    beforeEnter: () => {
+      if (typeof window !== 'undefined') {
+        window.location.assign(EXTERNAL_DAILY_FORTUNE_URL);
+      }
+
+      return false;
+    },
+  },
   {
     path: '/divination/:type',
     name: 'divination',

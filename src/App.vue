@@ -108,7 +108,6 @@ onUnmounted(() => {
 /* 导入新的样式系统 */
 @import '@/styles/main.css';
 @import '@/styles/layout/app.css';
-@import '@/styles/markdown.css'; /* 确保在变量定义后导入 */
 
 .app-container {
   /* 适配安全区域 */

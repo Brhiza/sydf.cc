@@ -2,12 +2,15 @@ import { createRouter, createWebHistory } from 'vue-router';
 import divinationRoutes from './divination';
 import historyRoutes from './history';
 import settingsRoutes from './settings';
+import { EXTERNAL_DAILY_FORTUNE_URL } from '@/shared/external-projects';
 import { isCustomBuild } from '@/utils/build-target';
 
 const customBuildEnabled = isCustomBuild({
   buildTarget: import.meta.env.VITE_APP_BUILD_TARGET,
   mode: import.meta.env.MODE,
 });
+
+const ExternalRedirectPlaceholder = { render: () => null };
 
 // 创建路由实例
 const router = createRouter({
@@ -34,10 +37,14 @@ const router = createRouter({
     {
       path: '/daily-fortune',
       name: 'daily-fortune-legacy',
-      redirect: (to) => ({
-        path: '/divination/daily',
-        query: to.query,
-      }),
+      component: ExternalRedirectPlaceholder,
+      beforeEnter: () => {
+        if (typeof window !== 'undefined') {
+          window.location.assign(EXTERNAL_DAILY_FORTUNE_URL);
+        }
+
+        return false;
+      },
     },
     // 404页面
     {

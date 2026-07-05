@@ -2,10 +2,7 @@
   <button
     type="button"
     class="compact-icon-button"
-    :class="[
-      `compact-icon-button-${size}`,
-      { active, 'hover-reveal': revealOnHover },
-    ]"
+    :class="[`compact-icon-button-${size}`, { active, 'hover-reveal': revealOnHover }]"
     :title="title"
     :aria-label="ariaLabel || title"
     @click="$emit('click', $event)"
@@ -38,42 +35,53 @@ defineEmits<{
 
 <style scoped>
 .compact-icon-button {
-  border: none;
-  border-radius: 4px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
   background: transparent;
   color: var(--color-text-secondary);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  flex: 0 0 auto;
+  line-height: 1;
+  padding: 0;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    opacity var(--transition-fast),
+    transform var(--transition-fast);
 }
 
 .compact-icon-button-default {
+  width: 28px;
+  height: 28px;
+}
+
+.compact-icon-button-compact {
   width: 24px;
   height: 24px;
 }
 
-.compact-icon-button-compact {
-  width: 20px;
-  height: 20px;
-}
-
 .compact-icon-button:hover {
-  background: rgba(0, 0, 0, 0.08);
+  background: var(--color-background-soft);
+  border-color: var(--color-border-light);
   color: var(--color-text-primary);
+  transform: translateY(-1px);
 }
 
-html.dark .compact-icon-button:hover {
-  background: rgba(255, 255, 255, 0.1);
+.compact-icon-button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 12%, transparent);
 }
 
 .compact-icon-button.active {
-  color: #6b46c1;
-}
-
-html.dark .compact-icon-button.active {
-  color: rgba(255, 255, 255, 0.8);
+  background: var(--color-primary-muted);
+  border-color: color-mix(in srgb, var(--color-primary) 24%, transparent);
+  color: var(--color-primary);
 }
 
 .compact-icon-button.hover-reveal {
@@ -87,8 +95,8 @@ html.dark .compact-icon-button.active {
 
 @media (max-width: 768px) {
   .compact-icon-button-compact {
-    width: 18px;
-    height: 18px;
+    width: 28px;
+    height: 28px;
   }
 
   .compact-icon-button.hover-reveal {

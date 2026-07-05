@@ -3,9 +3,15 @@
     <div class="logo-section">
       <span class="logo-text">{{ title }}</span>
       <img src="/static/favicon.png" alt="网站Logo" class="website-logo" />
-      <div class="theme-toggle-compact" :title="themeTitle" @click="$emit('toggle-theme')">
+      <button
+        class="theme-toggle-compact"
+        type="button"
+        :title="themeTitle"
+        :aria-label="themeTitle || '切换主题'"
+        @click="$emit('toggle-theme')"
+      >
         <span class="theme-icon-compact">{{ themeIcon }}</span>
-      </div>
+      </button>
     </div>
   </div>
 </template>
@@ -24,29 +30,30 @@ defineEmits<{
 
 <style scoped>
 .sidebar-header {
-  padding: 12px 16px 8px 16px;
+  padding: var(--spacing-3) var(--spacing-4) var(--spacing-2);
   border-bottom: none;
-  margin-bottom: 4px;
+  margin-bottom: var(--spacing-1);
 }
 
 .logo-section {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--spacing-2);
 }
 
 .logo-text {
-  font-size: 16px;
-  font-weight: 700;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
   flex: 1;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
+  line-height: var(--line-height-tight);
 }
 
 .website-logo {
   width: 28px;
   height: 28px;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   flex-shrink: 0;
 }
 
@@ -56,24 +63,27 @@ defineEmits<{
   justify-content: center;
   width: 28px;
   height: 28px;
-  border-radius: 6px;
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    transform var(--transition-fast);
   flex-shrink: 0;
-  background: rgba(0, 0, 0, 0.04);
-}
-
-html.dark .theme-toggle-compact {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--color-background-soft);
+  color: var(--color-text-primary);
 }
 
 .theme-toggle-compact:hover {
-  background: rgba(0, 0, 0, 0.08);
-  transform: scale(1.05);
+  background: var(--color-primary-muted);
+  border-color: color-mix(in srgb, var(--color-primary) 24%, var(--color-border));
+  transform: translateY(-1px);
 }
 
-html.dark .theme-toggle-compact:hover {
-  background: rgba(255, 255, 255, 0.12);
+.theme-toggle-compact:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .theme-icon-compact {
@@ -83,13 +93,13 @@ html.dark .theme-toggle-compact:hover {
 
 @media (max-width: 768px) {
   .sidebar-header {
-    padding: 10px 12px 6px 12px;
+    padding: var(--spacing-3) var(--spacing-3) var(--spacing-2);
   }
 }
 
 @media (max-width: 480px) {
   .sidebar-header {
-    padding: 8px 10px 4px 10px;
+    padding: var(--spacing-2);
   }
 }
 </style>

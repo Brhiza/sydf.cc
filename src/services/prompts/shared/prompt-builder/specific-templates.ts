@@ -1,13 +1,12 @@
-import type { PromptBuildConfig, QuestionAnalysis } from '../types';
+import type { PromptBuildConfig } from '../types';
 import { buildBasePromptStructure } from './sections';
 
 export type SpecificPromptKey = 'liuyao' | 'meihua' | 'qimen' | 'tarot' | 'ssgw';
-type ExperienceLevel = QuestionAnalysis['userExperience']['level'];
 
 interface SpecificPromptTemplate {
   title: string;
   requirements: string[];
-  terminologyByLevel: Record<ExperienceLevel, string>;
+  terminologyGuidance: string;
 }
 
 const SPECIFIC_PROMPT_TEMPLATES: Record<SpecificPromptKey, SpecificPromptTemplate> = {
@@ -23,11 +22,7 @@ const SPECIFIC_PROMPT_TEMPLATES: Record<SpecificPromptKey, SpecificPromptTemplat
       '**空亡影响**：分析空亡爻对卦象的影响和注意事项',
       '**特殊卦式优先级**：若数据中标注为静卦，则以本卦卦意、世应和用神静态旺衰为主；若为独静卦，则突出独静爻的指向；若为全动卦，则以本卦与变卦总势为主，不要逐爻做琐碎细断；若为乾卦用九或坤卦用六，则优先按用九、用六的总辞把握大势',
     ],
-    terminologyByLevel: {
-      beginner: '请用简单语言解释世爻、应爻、用神等概念',
-      intermediate: '可适当使用专业术语并简要解释',
-      advanced: '可使用专业术语进行深度分析',
-    },
+    terminologyGuidance: '请根据用户表达自行决定术语深度；涉及世爻、应爻、用神时，必要处简要解释。',
   },
   meihua: {
     title: '梅花易数专业分析要求',
@@ -38,11 +33,7 @@ const SPECIFIC_PROMPT_TEMPLATES: Record<SpecificPromptKey, SpecificPromptTemplat
       '**旺衰权衡**：结合占卜季节分析体卦和用卦的旺相休囚死，权衡生克力量轻重',
       '**卦象象征**：结合卦象的象征意义进行具体人事解读',
     ],
-    terminologyByLevel: {
-      beginner: '请用简单语言解释体卦、用卦、五行生克等概念',
-      intermediate: '可适当使用专业术语并简要解释',
-      advanced: '可使用专业术语进行深度分析',
-    },
+    terminologyGuidance: '请根据用户表达自行决定术语深度；涉及体卦、用卦、五行生克时，必要处简要解释。',
   },
   qimen: {
     title: '奇门遁甲专业分析要求',
@@ -56,11 +47,7 @@ const SPECIFIC_PROMPT_TEMPLATES: Record<SpecificPromptKey, SpecificPromptTemplat
       '**战略态势**：评估利主利客、利内利外态势',
       '**结构标签**：若数据中已有格局标签（如星伏吟、门反吟、门迫、击刑），需优先解释其对事件推进节奏、阻滞点和风险位的影响',
     ],
-    terminologyByLevel: {
-      beginner: '请用简单语言解释值符、值使、用神、九宫等概念',
-      intermediate: '可适当使用专业术语并简要解释',
-      advanced: '可使用专业术语进行深度战略分析',
-    },
+    terminologyGuidance: '请根据用户表达自行决定术语深度；涉及值符、值使、用神、九宫时，必要处简要解释。',
   },
   tarot: {
     title: '塔罗牌专业分析要求',
@@ -72,11 +59,7 @@ const SPECIFIC_PROMPT_TEMPLATES: Record<SpecificPromptKey, SpecificPromptTemplat
       '**图案符号**：解读牌面图案中的关键符号和隐喻',
       '**整体能量**：综合分析整个牌阵的能量流向和整体信息',
     ],
-    terminologyByLevel: {
-      beginner: '请用简单语言解释塔罗牌的基本概念',
-      intermediate: '可适当使用专业术语并简要解释',
-      advanced: '可使用专业术语进行深度分析',
-    },
+    terminologyGuidance: '请根据用户表达自行决定术语深度；涉及牌义、牌阵和元素时，必要处简要解释。',
   },
   ssgw: {
     title: '三山国王灵签解读要求',
@@ -87,11 +70,7 @@ const SPECIFIC_PROMPT_TEMPLATES: Record<SpecificPromptKey, SpecificPromptTemplat
       '**现实落点**：结合用户问题，说明当下宜做什么、不宜做什么',
       '**趋避提醒**：指出需要等待、规避或重点把握的事项',
     ],
-    terminologyByLevel: {
-      beginner: '请用简单语言解释签诗、典故、寓意等概念',
-      intermediate: '可适当使用解签术语并简要解释',
-      advanced: '可使用较专业的解签表达，但结论必须清晰直白',
-    },
+    terminologyGuidance: '请根据用户表达自行决定术语深度；签诗、典故和寓意要解释清楚，结论保持直白。',
   },
 };
 
@@ -104,15 +83,14 @@ export function resolveSpecificPromptKey(divinationType: string): SpecificPrompt
 
 function appendSpecificSection(
   basePrompt: string,
-  template: SpecificPromptTemplate,
-  experienceLevel: ExperienceLevel
+  template: SpecificPromptTemplate
 ): string {
   return `${basePrompt}
 
 ## ${template.title}
 ${template.requirements.map((requirement) => `- ${requirement}`).join('\n')}
 
-**专业术语解释**：${template.terminologyByLevel[experienceLevel]}`;
+**专业术语解释**：${template.terminologyGuidance}`;
 }
 
 export function buildConfiguredPrompt(
@@ -120,9 +98,5 @@ export function buildConfiguredPrompt(
   key: SpecificPromptKey
 ): string {
   const basePrompt = buildBasePromptStructure(config);
-  return appendSpecificSection(
-    basePrompt,
-    SPECIFIC_PROMPT_TEMPLATES[key],
-    config.analysis.userExperience.level
-  );
+  return appendSpecificSection(basePrompt, SPECIFIC_PROMPT_TEMPLATES[key]);
 }

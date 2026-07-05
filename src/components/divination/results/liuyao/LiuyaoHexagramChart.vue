@@ -1,29 +1,27 @@
 <template>
   <div class="paipan-section">
-    <div class="hexagram-container">
-      <div class="main-hexagram">
-        <div
-          v-for="row in displayRows"
-          :key="row.key"
-          class="yao-line"
-        >
-          <span class="six-god">{{ row.sixGod }}</span>
-          <YaoSymbol :yao-type="row.yaoType" :is-main="true" />
-          <span class="change-mark">{{ row.changeMarkSymbol }}</span>
-          <span class="yao-info">{{ row.yaoInfo }}</span>
-          <span class="void-mark">{{ row.voidMark }}</span>
-          <span class="world-response">{{ row.worldResponseMark }}</span>
+    <div class="paipan-section-header">
+      <h3 class="paipan-section-title">六爻排盘</h3>
+      <span class="paipan-section-meta">本卦 / 变卦</span>
+    </div>
+    <div class="paipan-scroll">
+      <div class="hexagram-container">
+        <div class="main-hexagram">
+          <div v-for="row in displayRows" :key="row.key" class="yao-line">
+            <span class="six-god">{{ row.sixGod }}</span>
+            <YaoSymbol :yao-type="row.yaoType" :is-main="true" />
+            <span class="change-mark">{{ row.changeMarkSymbol }}</span>
+            <span class="yao-info">{{ row.yaoInfo }}</span>
+            <span class="void-mark">{{ row.voidMark }}</span>
+            <span class="world-response">{{ row.worldResponseMark }}</span>
+          </div>
         </div>
-      </div>
 
-      <div class="changed-hexagram">
-        <div
-          v-for="row in displayRows"
-          :key="row.key"
-          class="yao-line"
-        >
-          <YaoSymbol :yao-type="row.changedYaoType" :is-main="false" />
-          <span class="yao-info">{{ row.changedYaoInfo }}</span>
+        <div class="changed-hexagram">
+          <div v-for="row in displayRows" :key="row.key" class="yao-line">
+            <YaoSymbol :yao-type="row.changedYaoType" :is-main="false" />
+            <span class="yao-info">{{ row.changedYaoInfo }}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -49,19 +47,17 @@ const displayRows = computed(() => {
 @import '@/styles/components/results.css';
 
 .main-hexagram {
-  flex: 0 0 auto;
-  width: auto;
-  min-width: 280px;
+  flex: 1 1 58%;
+  min-width: 0;
 }
 
 .changed-hexagram {
-  flex: 0 0 auto;
-  width: auto;
-  min-width: 200px;
+  flex: 1 1 38%;
+  min-width: 0;
 }
 
 .six-god {
-  width: 32px;
+  width: clamp(18px, 4vw, 28px);
   flex-shrink: 0;
   color: var(--color-text-secondary);
   font-weight: var(--font-weight-medium);
@@ -69,13 +65,16 @@ const displayRows = computed(() => {
 }
 
 .yao-info {
-  width: 75px;
-  flex-shrink: 0;
+  flex: 1 1 auto;
+  min-width: 0;
   color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .void-mark {
-  width: 12px;
+  width: clamp(6px, 2vw, 12px);
   flex-shrink: 0;
   color: var(--color-danger);
   font-size: var(--font-size-xs);
@@ -84,7 +83,7 @@ const displayRows = computed(() => {
 }
 
 .world-response {
-  width: 18px;
+  width: clamp(10px, 3vw, 18px);
   flex-shrink: 0;
   color: var(--color-danger);
   font-weight: bold;
@@ -92,52 +91,30 @@ const displayRows = computed(() => {
 }
 
 @media (max-width: 768px) {
-  .main-hexagram {
-    min-width: 200px;
-  }
-
-  .changed-hexagram {
-    min-width: 150px;
-  }
-
   .six-god {
-    width: 26px;
     font-size: var(--font-size-xs);
   }
 
   .yao-info {
-    width: 62px;
     font-size: var(--font-size-xs);
   }
 
   .void-mark {
-    width: 8px;
     font-size: var(--font-size-xs);
   }
 
   .world-response {
-    width: 14px;
     font-size: var(--font-size-xs);
   }
 }
 
 @media (max-width: 480px) {
-  .main-hexagram {
-    min-width: 170px;
-  }
-
-  .changed-hexagram {
-    min-width: 130px;
-  }
-
   .six-god {
-    width: 24px;
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .yao-info {
-    width: 56px;
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .void-mark {
@@ -147,7 +124,7 @@ const displayRows = computed(() => {
 
   .world-response {
     width: 14px;
-    font-size: 13px;
+    font-size: 12px;
   }
 }
 

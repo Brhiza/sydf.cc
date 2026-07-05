@@ -21,7 +21,7 @@ const props = defineProps<{
 }>();
 
 const highlightedGongs = computed(() =>
-  createQimenPriorityPalaces(props.question, props.data, props.supplementaryInfo)
+  createQimenPriorityPalaces(props.data)
     .slice(0, 2)
     .map((item) => item.gong)
 );

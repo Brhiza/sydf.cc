@@ -43,7 +43,7 @@ export function generateTarotPrompt(
 - **核心建议**：基于牌阵，提供1-2个最关键、最可行的行动建议
 - **展望与提醒**：简要说明若遵循建议，可能出现的积极展望，并提醒需要注意的潜在挑战
 
-**专业术语解释**：${context.analysis.userExperience.level === 'beginner' ? '请用简单语言解释塔罗牌的基本概念' : context.analysis.userExperience.level === 'intermediate' ? '可适当使用专业术语并简要解释' : '可使用专业术语进行深度分析'}
+**专业术语解释**：请根据用户表达自行决定术语深度；涉及牌义、牌阵和元素时，必要处简要解释。
 
 **解读要求**：
 - 语言富有启发性，但不过于冗长

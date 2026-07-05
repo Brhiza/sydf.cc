@@ -63,7 +63,7 @@ describe('DivinationAISection', () => {
       },
     });
 
-    expect(wrapper.find('.loading-dots').exists()).toBe(true);
+    expect(wrapper.find('.ai-thinking-status').exists()).toBe(true);
 
     assistantMessage.content = '第一段解读';
     await wrapper.setProps({
@@ -71,7 +71,7 @@ describe('DivinationAISection', () => {
       isAiLoading: true,
     } as Record<string, unknown>);
 
-    expect(wrapper.find('.loading-dots').exists()).toBe(false);
+    expect(wrapper.find('.ai-thinking-status').exists()).toBe(false);
     expect(wrapper.text()).toContain('第一段解读');
   });
 
@@ -97,7 +97,7 @@ describe('DivinationAISection', () => {
       },
     });
 
-    expect(wrapper.find('.loading-dots').exists()).toBe(false);
+    expect(wrapper.find('.ai-thinking-status').exists()).toBe(false);
     expect(wrapper.text()).toContain('AI 解读已中断，可点击重新生成。');
     expect(wrapper.find('button[title="重新生成"]').exists()).toBe(true);
   });

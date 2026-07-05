@@ -1,11 +1,24 @@
 <template>
   <div class="search-input" :class="[sizeClass, { disabled }]">
-    <span class="search-icon" aria-hidden="true">⌕</span>
+    <svg
+      class="search-icon"
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <circle cx="11" cy="11" r="7" />
+      <path d="m20 20-3.5-3.5" />
+    </svg>
     <input
       :value="modelValue"
       :type="type"
       :placeholder="placeholder"
       :disabled="disabled"
+      :aria-label="ariaLabel || placeholder"
       class="search-field"
       @input="handleInput"
     />
@@ -16,7 +29,17 @@
       aria-label="清空搜索"
       @click="clearValue"
     >
-      ×
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+      >
+        <path d="M18 6 6 18" />
+        <path d="m6 6 12 12" />
+      </svg>
     </button>
   </div>
 </template>
@@ -32,6 +55,7 @@ const props = withDefaults(
     clearable?: boolean;
     type?: 'text' | 'search';
     size?: 'default' | 'compact';
+    ariaLabel?: string;
   }>(),
   {
     placeholder: '请输入关键词',
@@ -39,6 +63,7 @@ const props = withDefaults(
     clearable: true,
     type: 'search',
     size: 'default',
+    ariaLabel: '',
   }
 );
 
@@ -69,21 +94,30 @@ function clearValue() {
 .search-input {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--spacing-2);
   width: 100%;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-background);
+  min-width: 0;
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-xl);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--color-primary) 2%, transparent), transparent),
+    var(--color-background);
   color: var(--color-text-primary);
   transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    background-color var(--transition-fast);
   box-sizing: border-box;
+}
+
+.search-input:hover:not(.disabled) {
+  border-color: color-mix(in srgb, var(--color-primary) 24%, var(--color-border));
 }
 
 .search-input:focus-within {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(107, 70, 193, 0.1);
+  background: var(--color-background);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 14%, transparent);
 }
 
 .search-input.disabled {
@@ -91,21 +125,21 @@ function clearValue() {
 }
 
 .search-input-default {
-  padding: 0 12px;
+  padding: 0 var(--spacing-3);
   min-height: 44px;
 }
 
 .search-input-compact {
-  padding: 0 8px;
-  min-height: 32px;
-  border-radius: var(--radius-base);
+  padding: 0 var(--spacing-2);
+  min-height: 36px;
+  border-radius: var(--radius-lg);
 }
 
 .search-icon {
   flex-shrink: 0;
   color: var(--color-text-secondary);
-  font-size: 14px;
-  line-height: 1;
+  width: 16px;
+  height: 16px;
 }
 
 .search-field {
@@ -124,11 +158,11 @@ function clearValue() {
 }
 
 .search-input-compact .search-field {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
 }
 
 .search-field::placeholder {
-  color: var(--color-text-secondary);
+  color: var(--color-text-muted);
 }
 
 .search-field:disabled {
@@ -137,20 +171,36 @@ function clearValue() {
 
 .clear-button {
   flex-shrink: 0;
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   border: none;
   border-radius: 999px;
-  background: var(--color-background-soft, rgba(0, 0, 0, 0.06));
+  background: var(--color-background-soft);
   color: var(--color-text-secondary);
   cursor: pointer;
-  line-height: 1;
-  font-size: 14px;
   padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.clear-button svg {
+  width: 14px;
+  height: 14px;
 }
 
 .clear-button:hover {
   background: var(--color-primary-muted);
   color: var(--color-primary);
+  transform: scale(1.04);
+}
+
+.clear-button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 </style>

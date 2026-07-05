@@ -1,8 +1,6 @@
 <template>
   <div ref="messageRef" class="chat-message" :class="`message-${message.role}`">
-    <div v-if="showLoadingDots" class="loading-dots">
-      <span></span><span></span><span></span>
-    </div>
+    <AIThinkingIndicator v-if="showThinkingIndicator" class="ai-thinking-status" />
     <div v-else class="markdown-container">
       <StreamingMarkdown
         :content="message.content || ''"
@@ -79,6 +77,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import AIThinkingIndicator from '@/components/common/AIThinkingIndicator.vue';
 import StreamingMarkdown from '@/components/common/StreamingMarkdown.vue';
 import { useClipboard } from '@/composables/useClipboard';
 import type { ChatMessage } from '@/types';
@@ -106,7 +105,7 @@ const emit = defineEmits<{
 const { copy, copied } = useClipboard();
 const messageRef = ref<HTMLElement | null>(null);
 
-const showLoadingDots = computed(() => {
+const showThinkingIndicator = computed(() => {
   return (
     props.message.role === 'assistant' &&
     !props.message.content &&
@@ -154,10 +153,11 @@ function handleCopy() {
 .chat-message {
   position: relative;
   max-width: 90%;
-  padding: 12px 18px;
-  border-radius: 18px;
+  padding: var(--spacing-3) var(--spacing-4);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-xl);
   box-shadow: var(--shadow-sm);
-  line-height: 1.7;
+  line-height: var(--line-height-relaxed);
   word-wrap: break-word;
 }
 
@@ -171,14 +171,15 @@ function handleCopy() {
 
 .chat-message :deep(ul),
 .chat-message :deep(ol) {
-  padding-left: 20px;
+  padding-left: var(--spacing-5);
 }
 
 .message-user {
   align-self: flex-end;
   background-color: var(--color-primary);
-  color: white;
-  border-radius: 18px;
+  border-color: color-mix(in srgb, var(--color-primary) 40%, transparent);
+  color: var(--color-white);
+  border-radius: var(--radius-xl);
 }
 
 .message-user :deep(p),
@@ -187,25 +188,25 @@ function handleCopy() {
 .message-user :deep(code),
 .message-user :deep(strong),
 .message-user :deep(em) {
-  color: white !important;
+  color: var(--color-white) !important;
 }
 
 .message-assistant {
   position: relative;
   align-self: flex-start;
-  padding-bottom: 36px;
-  background-color: var(--color-bg-secondary);
+  padding-bottom: var(--spacing-8);
+  background-color: var(--color-background-soft);
   color: var(--color-text-primary);
-  border-radius: 18px;
+  border-radius: var(--radius-xl);
 }
 
 .message-actions {
   position: absolute;
-  bottom: 10px;
-  left: 15px;
-  z-index: 10;
+  bottom: var(--spacing-2);
+  left: var(--spacing-3);
+  z-index: 1;
   display: flex;
-  gap: 8px;
+  gap: var(--spacing-1);
 }
 
 .markdown-container {
@@ -214,17 +215,35 @@ function handleCopy() {
 }
 
 .message-action-button {
-  padding: 4px;
-  border: none;
-  background: none;
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
   color: var(--color-text-secondary);
   cursor: pointer;
   opacity: 0.6;
-  transition: opacity 0.2s;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    opacity var(--transition-fast);
 }
 
 .message-action-button:hover {
+  background: var(--color-background);
+  border-color: var(--color-border-light);
+  color: var(--color-text-primary);
   opacity: 1;
+}
+
+.message-action-button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .message-action-button:disabled {
@@ -236,39 +255,4 @@ function handleCopy() {
   display: block;
 }
 
-.loading-dots {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  height: 24px;
-}
-
-.loading-dots span {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: currentColor;
-  opacity: 0;
-  animation: blink 1.4s infinite both;
-}
-
-.loading-dots span:nth-child(2) {
-  animation-delay: 0.2s;
-}
-
-.loading-dots span:nth-child(3) {
-  animation-delay: 0.4s;
-}
-
-@keyframes blink {
-  0%,
-  80%,
-  100% {
-    opacity: 0;
-  }
-  40% {
-    opacity: 1;
-  }
-}
 </style>

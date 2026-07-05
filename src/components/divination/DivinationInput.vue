@@ -6,7 +6,6 @@
       :description="computedDescription"
       :placeholder="computedPlaceholder"
       :button-text="buttonText"
-      :loading-text="loadingText"
       :loading="loading"
       :question="question"
       :selected-spread="selectedSpread"
@@ -94,7 +93,6 @@ interface Props {
   description: string;
   placeholder?: string;
   buttonText?: string;
-  loadingText?: string;
   loading?: boolean;
   modelValue?: string;
   selectedDate?: string; // YYYY-MM-DD
@@ -115,7 +113,6 @@ interface Emits {
 const props = withDefaults(defineProps<Props>(), {
   placeholder: '请输入您的问题',
   buttonText: '询问赛博大师',
-  loadingText: 'AI思考中',
   loading: false,
   modelValue: '',
   selectedDate: '',
@@ -219,12 +216,15 @@ const {
 .input-card {
   width: 100%;
   background: var(--color-background);
-  border-radius: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-base);
   border: 1px solid var(--color-border-light);
-  padding: 32px;
+  padding: var(--spacing-8);
   box-sizing: border-box;
-  transition: all 0.3s ease;
+  transition:
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    transform var(--transition-base);
   position: relative;
   overflow: visible;
   display: flex;
@@ -240,35 +240,38 @@ html.dark .input-card {
 }
 
 .input-card.loading {
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow-md);
 }
 
 .toggle-container {
   display: flex;
   background: var(--color-background-muted);
-  border-radius: 12px;
-  padding: 4px;
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-1);
   width: 100%;
   max-width: 300px;
 }
 
 .toggle-button {
   flex: 1;
-  padding: 10px 16px;
+  padding: var(--spacing-2) var(--spacing-4);
   border: none;
   background: transparent;
   color: var(--color-text-secondary);
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  border-radius: 8px;
-  transition: all 0.3s ease;
+  border-radius: var(--radius-md);
+  transition:
+    background-color var(--transition-base),
+    color var(--transition-base),
+    box-shadow var(--transition-base);
 }
 
 .toggle-button.active {
   background: var(--color-primary);
-  color: white;
-  box-shadow: 0 2px 8px rgba(161, 52, 219, 0.3);
+  color: var(--color-text-inverse);
+  box-shadow: var(--shadow-sm);
 }
 
 .tarot-spread-container {
@@ -282,7 +285,7 @@ html.dark .input-card {
 
 @media (max-width: 768px) {
   .input-card {
-    padding: 24px 16px;
+    padding: var(--spacing-6) var(--spacing-4);
   }
 
   .tarot-spread-container {
@@ -292,7 +295,7 @@ html.dark .input-card {
 
 @media (max-width: 480px) {
   .input-card {
-    padding: 20px 12px;
+    padding: var(--spacing-5) var(--spacing-3);
   }
 
   .tarot-spread-container {

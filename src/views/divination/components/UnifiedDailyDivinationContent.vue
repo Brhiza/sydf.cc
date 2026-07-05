@@ -5,7 +5,6 @@
     :description="isCustomBuild ? '' : config?.description || ''"
     :button-text="config?.buttonText || '查看今日运势'"
     :loading="isLoading"
-    :loading-text="loadingTip"
     :placeholder="config?.placeholder || ''"
     divination-type="daily"
     :show-inspiration="false"
@@ -74,7 +73,6 @@ const {
   isFollowUpLoading,
   hasAiResponse,
   pageTitle,
-  loadingTip,
   hasVisibleConversation,
   startDailyFortune,
   handleClear,

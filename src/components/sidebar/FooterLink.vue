@@ -1,12 +1,13 @@
 <template>
   <li class="footer-item">
-    <div
+    <button
       :class="{ 'footer-link-active': isActive }"
       class="footer-link"
+      type="button"
       @click="handleClick"
     >
       <span class="footer-text">{{ title }}</span>
-    </div>
+    </button>
   </li>
 </template>
 
@@ -28,66 +29,76 @@ const handleClick = () => {
 
 <style scoped>
 .footer-item {
-  margin-bottom: 2px;
+  margin-bottom: var(--spacing-1);
 }
 
 .footer-link {
+  width: 100%;
   display: flex;
   align-items: center;
-  padding: 8px;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2);
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg);
+  background: transparent;
   color: var(--color-text-secondary);
   text-decoration: none;
-  transition: all 0.2s ease;
-  font-size: 14px;
-  font-weight: 500;
-  border-radius: 10px;
+  font: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  text-align: left;
   margin: 0;
   cursor: pointer;
-  gap: 8px;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    transform var(--transition-fast);
 }
 
 .footer-link:hover {
-  background: rgba(0, 0, 0, 0.04);
+  background: var(--color-background-soft);
   color: var(--color-text-primary);
   transform: translateX(2px);
 }
 
-html.dark .footer-link:hover {
-  background: rgba(255, 255, 255, 0.06);
+.footer-link:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .footer-link.footer-link-active {
-  background: #eae7f8;
-  color: #6b46c1;
-  font-weight: 600;
-  box-shadow: 0 2px 8px rgba(234, 231, 248, 0.5);
+  background: var(--color-primary-muted);
+  border-color: color-mix(in srgb, var(--color-primary) 18%, transparent);
+  color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+  box-shadow: var(--shadow-sm);
 }
 
 html.dark .footer-link.footer-link-active {
-  background: #232426;
-  color: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  background: var(--color-background-soft);
+  color: var(--color-text-primary);
 }
 
 .footer-text {
   font-weight: inherit;
-  line-height: 1.4;
+  line-height: var(--line-height-normal);
 }
 
 @media (max-width: 768px) {
   .footer-link {
-    padding: 6px;
+    padding: var(--spacing-2);
     margin: 0;
   }
 }
 
 @media (max-width: 480px) {
   .footer-text {
-    font-size: 13px;
+    font-size: var(--font-size-sm);
   }
 
   .footer-link {
-    padding: 5px;
+    padding: var(--spacing-2);
     margin: 0;
   }
 }

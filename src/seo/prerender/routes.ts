@@ -88,7 +88,7 @@ function createHomeRoute(isCustomBuild: boolean): PrerenderRoute {
     path: '/',
     params: {},
     contentTitle: '欢迎来到时月东方',
-    lead: '这里提供今日运势、六爻、梅花易数、奇门遁甲、塔罗牌与三山国王灵签的在线入口。',
+    lead: '这里提供六爻、梅花易数、奇门遁甲、塔罗牌与三山国王灵签的在线入口，并收录相关外部项目。',
     blocks: [
       {
         title: '主要服务',
@@ -148,7 +148,6 @@ function createStaticRoutes(isCustomBuild: boolean): PrerenderRoute[] {
 export function getPrerenderRoutes(isCustomBuild: boolean): PrerenderRoute[] {
   return [
     createHomeRoute(isCustomBuild),
-    createDivinationRoute('daily'),
     createDivinationRoute('liuyao'),
     createDivinationRoute('meihua'),
     createDivinationRoute('qimen'),

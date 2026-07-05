@@ -53,7 +53,7 @@ describe('divination-ai-section', () => {
     expect(getLastAssistantMessage(messages)).toEqual(messages[4]);
   });
 
-  it('加载中且最后一条助手消息为空时显示思考标题', () => {
+  it('加载中且最后一条助手消息为空时也保持默认标题', () => {
     expect(
       getAISectionTitle(
         [
@@ -63,11 +63,11 @@ describe('divination-ai-section', () => {
         true,
         false
       )
-    ).toBe('AI正在思考...');
+    ).toBe('AI深度解读');
   });
 
-  it('加载中且还没有任何消息时也显示思考标题', () => {
-    expect(getAISectionTitle([], true, false)).toBe('AI正在思考...');
+  it('加载中且还没有任何消息时也保持默认标题', () => {
+    expect(getAISectionTitle([], true, false)).toBe('AI深度解读');
   });
 
   it('非加载中时显示默认标题', () => {

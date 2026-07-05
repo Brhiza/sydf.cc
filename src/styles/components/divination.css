@@ -3,14 +3,17 @@
 /* 占卜输入卡片 */
 .input-card {
   width: 100%;
-  background: #ffffff;
+  background: var(--color-background);
   border-radius: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-base);
   border: 1px solid var(--color-border-light);
-  padding: 32px;
+  padding: var(--spacing-8);
   box-sizing: border-box;
   text-align: center;
-  transition: all 0.3s ease;
+  transition:
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    transform var(--transition-base);
   position: relative;
   overflow: visible;
   max-width: 800px;
@@ -19,11 +22,11 @@
 }
 
 html.dark .input-card {
-  background: #1d1d1d;
+  background: var(--color-background);
 }
 
 .input-card.loading {
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow-md);
 }
 
 /* 卡片标题 */
@@ -31,39 +34,42 @@ html.dark .input-card {
   text-align: center;
   color: var(--color-text-primary);
   margin-top: 0;
-  margin-bottom: 16px;
-  font-size: 1.8em;
-  font-weight: 700;
+  margin-bottom: var(--spacing-4);
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
 }
 
 /* 卡片描述 */
 .card-description {
   text-align: center;
   color: var(--color-text-secondary);
-  margin-bottom: 32px;
-  font-size: 16px;
-  line-height: 1.6;
+  margin-bottom: var(--spacing-8);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-relaxed);
 }
 
 /* 卡片图片 */
 .card-image {
   width: 200px;
   height: auto;
-  border-radius: 12px;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-xl);
+  margin-bottom: var(--spacing-5);
+  box-shadow: var(--shadow-md);
 }
 
 /* 问题输入框 */
 .question-input {
   width: 100%;
-  padding: 16px;
+  padding: var(--spacing-4);
   border: 2px solid var(--color-border);
-  border-radius: 12px;
-  font-size: 16px;
+  border-radius: var(--radius-xl);
+  font-size: var(--font-size-base);
   box-sizing: border-box;
   outline: none;
-  transition: all 0.3s ease;
+  transition:
+    background-color var(--transition-base),
+    border-color var(--transition-base),
+    box-shadow var(--transition-base);
   background: var(--color-background-muted);
   color: var(--color-text-primary);
 }
@@ -76,7 +82,7 @@ html.dark .input-card {
   outline: none;
   border-color: var(--color-primary);
   background: var(--color-background);
-  box-shadow: 0 0 0 3px rgba(107, 70, 193, 0.15);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 16%, transparent);
 }
 
 .question-input:disabled {
@@ -88,46 +94,51 @@ html.dark .input-card {
 /* 提交按钮 */
 .submit-button {
   width: 100%;
-  padding: 16px;
+  padding: var(--spacing-4);
   border: none;
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   background: var(--color-primary);
-  color: white;
-  font-size: 16px;
-  font-weight: 600;
+  color: var(--color-white);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition:
+    background-color var(--transition-base),
+    box-shadow var(--transition-base),
+    transform var(--transition-base);
   position: relative;
   z-index: 2;
 }
 
 .submit-button:hover:not(:disabled) {
-  background: #805ad5;
+  background: var(--color-primary-dark);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(107, 70, 193, 0.3);
+  box-shadow: var(--shadow-md);
 }
 
 .submit-button:disabled {
-  background: #c7b8e6;
+  background: var(--color-primary-disabled);
   cursor: not-allowed;
 }
 
 html.dark .submit-button:disabled {
-  background: #3a3a3a;
-  color: #6b7280;
+  background: var(--color-primary-disabled);
+  color: var(--color-text-muted);
 }
 
 /* 投掷按钮（特殊样式） */
 .toss-button {
-  background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(45deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  color: var(--color-white);
   border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 500;
+  padding: var(--spacing-3) var(--spacing-6);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition:
+    box-shadow var(--transition-base),
+    transform var(--transition-base);
   width: 100%;
   max-width: 200px;
   margin: 0 auto;
@@ -136,7 +147,7 @@ html.dark .submit-button:disabled {
 
 .toss-button:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+  box-shadow: var(--shadow-md);
 }
 
 .toss-button:disabled {
@@ -243,57 +254,11 @@ html.dark .submit-button:disabled {
   font-size: 16px;
 }
 
-.loading-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 24px 0;
-}
-
-.loading-dots {
-  display: flex;
-  gap: 4px;
-  margin-bottom: 12px;
-}
-
-.loading-dots span {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: var(--color-primary);
-  animation: loading-bounce 1.4s ease-in-out infinite both;
-}
-
-.loading-dots span:nth-child(1) {
-  animation-delay: -0.32s;
-}
-
-.loading-dots span:nth-child(2) {
-  animation-delay: -0.16s;
-}
-
-.loading-text {
-  color: var(--color-text-secondary);
-  font-size: 14px;
-  margin: 0;
-}
-
 .response-actions {
   margin-top: 16px;
   display: flex;
   gap: 12px;
   justify-content: center;
-}
-
-@keyframes loading-bounce {
-  0%,
-  80%,
-  100% {
-    transform: scale(0);
-  }
-  40% {
-    transform: scale(1);
-  }
 }
 
 /* AI响应响应式样式 */

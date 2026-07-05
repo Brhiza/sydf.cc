@@ -31,7 +31,7 @@ html.dark .main-content {
   /* 使用标准暗色模式卡片样式 - 与欢迎语卡片保持一致 */
   background: #1d1d1d;
   border: 1px solid rgba(255, 255, 255, 0.1); /* 使用更明显的暗色模式边框 */
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-base);
 }
 
 

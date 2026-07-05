@@ -6,19 +6,22 @@
 .card {
   background: var(--color-background);
   border-radius: 20px; /* 统一使用20px圆角 */
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); /* 统一阴影效果 */
+  box-shadow: var(--shadow-base); /* 统一阴影效果 */
   border: 1px solid var(--color-border-light); /* 统一边框 */
   overflow: hidden;
   width: 100%;
   box-sizing: border-box;
   margin-bottom: var(--spacing-6); /* 增加底部间距 */
-  transition: all 0.3s ease; /* 统一过渡效果 */
+  transition:
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    transform var(--transition-base);
 }
 
 html.dark .card {
-  background: #1d1d1d; /* 暗色模式背景 */
-  border: 1px solid #262628; /* 暗色模式边框 */
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15); /* 暗色模式阴影 */
+  background: var(--color-background); /* 暗色模式背景 */
+  border: 1px solid var(--color-border-light); /* 暗色模式边框 */
+  box-shadow: var(--shadow-base); /* 暗色模式阴影 */
 }
 
 .card-header {
@@ -114,7 +117,7 @@ html.dark .card {
 .input:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 16%, transparent);
 }
 
 .input::placeholder {
@@ -182,31 +185,31 @@ html.dark .card {
 
 /* 错误状态 */
 .error {
-  background-color: rgba(220, 53, 69, 0.1);
+  background-color: color-mix(in srgb, var(--color-danger) 10%, var(--color-background));
   color: var(--color-danger);
   padding: var(--spacing-4);
   border-radius: var(--radius-lg);
-  border: 1px solid rgba(220, 53, 69, 0.2);
+  border: 1px solid color-mix(in srgb, var(--color-danger) 22%, var(--color-border-light));
   margin: var(--spacing-4) 0;
 }
 
 /* 成功状态 */
 .success {
-  background-color: rgba(40, 167, 69, 0.1);
+  background-color: color-mix(in srgb, var(--color-success) 10%, var(--color-background));
   color: var(--color-success);
   padding: var(--spacing-4);
   border-radius: var(--radius-lg);
-  border: 1px solid rgba(40, 167, 69, 0.2);
+  border: 1px solid color-mix(in srgb, var(--color-success) 22%, var(--color-border-light));
   margin: var(--spacing-4) 0;
 }
 
 /* 警告状态 */
 .warning {
-  background-color: rgba(255, 193, 7, 0.1);
+  background-color: color-mix(in srgb, var(--color-warning) 12%, var(--color-background));
   color: var(--color-warning);
   padding: var(--spacing-4);
   border-radius: var(--radius-lg);
-  border: 1px solid rgba(255, 193, 7, 0.2);
+  border: 1px solid color-mix(in srgb, var(--color-warning) 24%, var(--color-border-light));
   margin: var(--spacing-4) 0;
 }
 

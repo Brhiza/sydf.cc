@@ -101,7 +101,7 @@ function createStructuredData(
         url: `${siteUrl}/`,
         inLanguage: DEFAULT_LANGUAGE,
         description:
-          '免费 AI 在线占卜平台，提供今日运势、六爻、梅花易数、奇门遁甲、塔罗牌与三山国王灵签。',
+          '免费 AI 在线占卜平台，提供六爻、梅花易数、奇门遁甲、塔罗牌与三山国王灵签，并收录相关外部项目入口。',
       },
       {
         '@type': definition.schemaType || 'WebPage',

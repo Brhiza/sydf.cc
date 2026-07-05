@@ -5,18 +5,14 @@
 
 import type { QimenData, SupplementaryInfo } from '@/types';
 import { generatePromptWithFormatter, type PromptFormatterContext } from './shared/prompt-generator';
-import {
-  createQimenPriorityPalaces,
-  createQimenQuestionHints,
-  createQimenYongShenHint,
-} from '@/utils/qimen-guidance';
+import { createQimenPriorityPalaces } from '@/utils/qimen-guidance';
 import { DEFAULT_QIMEN_SCOPE } from '@/shared/qimen-settings';
 
 /**
  * 格式化奇门遁甲数据为可读的文本
  */
 function formatQimenData(data: QimenData, context: PromptFormatterContext): string {
-  const { question, supplementaryInfo, analysis } = context;
+  const { supplementaryInfo } = context;
   // 使用3x3表格呈现九宫格，增强AI对空间方位的理解
   const timeStr = data.timeInfo
     ? `${data.timeInfo.solarTerm} ${data.timeInfo.epoch}`
@@ -25,7 +21,9 @@ function formatQimenData(data: QimenData, context: PromptFormatterContext): stri
   const ganzhiStr = data.ganzhi
     ? `干支：${data.ganzhi.year}年 ${data.ganzhi.month}月 ${data.ganzhi.day}日 ${data.ganzhi.hour}时`
     : '干支信息未知';
-  const yongShenHint = createQimenYongShenHint(analysis.types, data, supplementaryInfo);
+  const yongShenHint = supplementaryInfo?.gender
+    ? `请根据用户原始问题自行取用神；用户补充性别：${supplementaryInfo.gender}，仅作为辅助信息。`
+    : '请根据用户原始问题和盘面信息自行取用神。';
   const patternHint = data.patternDetails?.map((item) => `${item.tag}：${item.summary}`).join('；') || '无';
   const palaceHint = data.palaceInsights?.map((item) => `${item.name}${item.level}：${item.summary}`).join('；') || '无';
   const classicPatternHint = data.classicPatterns?.map((item) => `${item.name}（${item.type}，${item.score}分）：${item.summary}`).join('；') || '无';
@@ -41,12 +39,7 @@ function formatQimenData(data: QimenData, context: PromptFormatterContext): stri
   const yingQiHint = data.yingQi
     ? `${data.yingQi.rhythm}，约${data.yingQi.minDays}-${data.yingQi.maxDays}天；${data.yingQi.description}；依据：${data.yingQi.sources.join('、')}`
     : '无';
-  const questionHints = createQimenQuestionHints(question, data, supplementaryInfo);
-  const priorityPalaces = createQimenPriorityPalaces(question, data, supplementaryInfo).slice(0, 3);
-  const questionHintText =
-    questionHints.length > 0
-      ? questionHints.map((item) => `- **${item.label}**: ${item.value}`).join('\n')
-      : '- **问事参考**: 未命中固定分类，宜结合具体目标另取用神。';
+  const priorityPalaces = createQimenPriorityPalaces(data).slice(0, 3);
   const priorityText =
     priorityPalaces.length > 0
       ? priorityPalaces.map((item, index) => `${index + 1}. ${item.name}（评分${item.score}）：${item.reasons.join('；')}`).join('\n')
@@ -83,12 +76,9 @@ function formatQimenData(data: QimenData, context: PromptFormatterContext): stri
 - **吉方建议**: ${goodDirectionHint}
 - **避方建议**: ${avoidDirectionHint}
 - **应期参考**: ${yingQiHint}
-- **用神参考**: ${yongShenHint}
+- **用神取用**: ${yongShenHint}
 
-**问事宫位参考**:
-${questionHintText}
-
-**重点宫位排序**:
+**盘面重点宫位排序**:
 ${priorityText}
 
 **九宫格详情 (方位图)**:

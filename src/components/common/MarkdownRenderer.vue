@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onUnmounted } from 'vue';
+import { onUnmounted, ref, watch } from 'vue';
 import cacheManager from '@/utils/cacheManager';
 import { escapeHtml, renderSafeMarkdown } from '@/utils/markdown';
 
@@ -13,22 +13,19 @@ interface Props {
 
 const props = defineProps<Props>();
 const renderedContent = ref('');
+let renderVersion = 0;
+let debounceTimeout: ReturnType<typeof setTimeout> | null = null;
 
-// 生成缓存键
 function generateCacheKey(content: string): string {
   return cacheManager.generateKey('markdown', content);
 }
 
-// 防抖处理
-let debounceTimeout: ReturnType<typeof setTimeout> | null = null;
-
 async function processMarkdown(content: string): Promise<string> {
-  if (!content || content === undefined) return '';
-  
-  // 确保content是有效字符串
-  const validContent = content || '';
-  
-  // 检查缓存
+  const validContent = content ?? '';
+  if (!validContent) {
+    return '';
+  }
+
   const cacheKey = generateCacheKey(validContent);
   const cachedResult = cacheManager.get('markdown', cacheKey) as string;
   if (cachedResult) {
@@ -36,13 +33,12 @@ async function processMarkdown(content: string): Promise<string> {
   }
   
   try {
-    const parsed = await renderSafeMarkdown(content);
+    const parsed = await renderSafeMarkdown(validContent);
     cacheManager.set('markdown', cacheKey, parsed, 100);
     return parsed;
   } catch (error) {
     console.warn('Markdown 解析失败:', error);
-    // 如果解析失败，回退为转义后的纯文本
-    const fallback = escapeHtml(content).replace(/\n/g, '<br>');
+    const fallback = escapeHtml(validContent).replace(/\n/g, '<br>');
     cacheManager.set('markdown', cacheKey, fallback, 100);
     return fallback;
   }
@@ -51,26 +47,26 @@ async function processMarkdown(content: string): Promise<string> {
 watch(
   () => props.content,
   async (newContent) => {
-    // 清除之前的防抖
     if (debounceTimeout) {
       clearTimeout(debounceTimeout);
     }
-    
-    // 使用防抖优化频繁更新
+
+    const currentVersion = ++renderVersion;
     debounceTimeout = setTimeout(async () => {
-      renderedContent.value = await processMarkdown(newContent || '');
-    }, 50); // 50ms防抖延迟
+      const html = await processMarkdown(newContent);
+      if (currentVersion === renderVersion) {
+        renderedContent.value = html;
+      }
+    }, 50);
   },
   { immediate: true }
 );
 
-// 组件卸载时清理
 onUnmounted(() => {
+  renderVersion += 1;
   if (debounceTimeout) {
     clearTimeout(debounceTimeout);
   }
-  // 可选：清理缓存
-  // markdownCache.clear();
 });
 </script>
 

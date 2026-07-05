@@ -3,6 +3,7 @@
     <SearchInput
       :model-value="searchQuery"
       placeholder="搜索历史记录..."
+      aria-label="搜索历史记录"
       size="compact"
       @update:model-value="$emit('update:search-query', $event)"
     />
@@ -25,39 +26,39 @@ import CustomSelect from '@/components/common/CustomSelect.vue';
 import SearchInput from '@/components/common/SearchInput.vue';
 
 interface FilterItem {
-  type: string
-  title: string
+  type: string;
+  title: string;
 }
 
 const props = defineProps<{
-  showSearch: boolean
-  showFilter: boolean
-  searchQuery: string
-  selectedType: string
-  filterItems: FilterItem[]
-}>()
+  showSearch: boolean;
+  showFilter: boolean;
+  searchQuery: string;
+  selectedType: string;
+  filterItems: FilterItem[];
+}>();
 
 defineEmits<{
-  (e: 'update:search-query', value: string): void
-  (e: 'update:selected-type', value: string): void
-}>()
+  (e: 'update:search-query', value: string): void;
+  (e: 'update:selected-type', value: string): void;
+}>();
 
 const filterOptions = computed(() => [
   {
     name: '',
     displayName: '所有类型',
   },
-  ...props.filterItems.map(item => ({
+  ...props.filterItems.map((item) => ({
     name: item.type,
     displayName: item.title,
   })),
-])
+]);
 </script>
 
 <style scoped>
 .search-section,
 .filter-section {
-  padding: 6px 12px;
-  border-top: 1px solid var(--color-border);
+  padding: var(--spacing-2) var(--spacing-3);
+  border-top: 1px solid var(--color-border-light);
 }
 </style>

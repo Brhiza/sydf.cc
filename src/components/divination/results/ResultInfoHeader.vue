@@ -1,14 +1,14 @@
 <template>
   <div class="result-header">
-    <div
-      v-for="item in items"
-      :key="item.label"
-      :class="['info-line', item.className]"
-    >
-      <span class="info-label">{{ item.label }}：</span>
-      <span class="info-value">{{ item.value }}</span>
+    <div class="result-header-grid">
+      <div v-for="item in items" :key="item.label" :class="['info-line', item.className]">
+        <span class="info-label">{{ item.label }}</span>
+        <span class="info-value">{{ item.value }}</span>
+      </div>
     </div>
-    <slot></slot>
+    <div v-if="$slots.default" class="result-header-extra">
+      <slot></slot>
+    </div>
   </div>
 </template>
 
@@ -26,45 +26,65 @@ defineProps<{
 
 <style scoped>
 .result-header {
-  margin-bottom: var(--spacing-4);
-  padding: var(--spacing-4);
-  background: var(--color-background-elevated);
-  border-radius: var(--radius-md);
+  padding-bottom: var(--spacing-3);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.result-header-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-3);
 }
 
 .info-line {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: var(--spacing-2);
-  line-height: 1.4;
-}
-
-.info-line:last-child {
-  margin-bottom: 0;
+  display: grid;
+  grid-template-columns: minmax(72px, auto) minmax(0, 1fr);
+  align-items: baseline;
+  gap: var(--spacing-2);
+  min-width: 0;
+  line-height: 1.45;
 }
 
 .info-label {
-  width: 80px;
-  flex-shrink: 0;
   color: var(--color-text-secondary);
-  font-size: 16px;
-  font-weight: var(--font-weight-medium);
-  text-align: justify;
-  text-align-last: justify;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
 }
 
 .info-value {
-  flex: 1;
-  margin-left: var(--spacing-2);
+  min-width: 0;
   color: var(--color-text-primary);
-  font-size: 16px;
-  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
   text-align: left;
+  overflow-wrap: anywhere;
+}
+
+.result-header-extra {
+  margin-top: var(--spacing-3);
+  padding-top: var(--spacing-3);
+  border-top: 1px solid var(--color-border-light);
 }
 
 @media (max-width: 768px) {
-  .info-label,
+  .result-header {
+    padding-bottom: var(--spacing-3);
+  }
+
+  .result-header-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-2);
+  }
+
+  .info-line {
+    grid-template-columns: minmax(68px, auto) minmax(0, 1fr);
+  }
+
+  .info-label {
+    font-size: 13px;
+  }
+
   .info-value {
     font-size: 15px;
   }

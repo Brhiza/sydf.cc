@@ -44,7 +44,7 @@ describe('Markdown 安全渲染', () => {
     expect(html).toContain('危险链接');
   });
 
-  it('StreamingMarkdown 完整思考块不应透传原始 HTML', async () => {
+  it('StreamingMarkdown 完整思考块不应输出思考内容', async () => {
     const wrapper = mount(StreamingMarkdown, {
       props: {
         content:
@@ -56,15 +56,16 @@ describe('Markdown 安全渲染', () => {
     await flushPromises();
 
     const html = wrapper.html();
-    expect(wrapper.find('details').exists()).toBe(true);
+    expect(wrapper.find('details').exists()).toBe(false);
     expect(wrapper.find('script').exists()).toBe(false);
     expect(wrapper.find('img').exists()).toBe(false);
     expect(html).not.toContain('href="javascript:alert(1)"');
-    expect(html).toContain('&lt;img');
+    expect(html).not.toContain('分析');
+    expect(html).not.toContain('&lt;img');
     expect(html).toContain('最终结论');
   });
 
-  it('StreamingMarkdown 未闭合思考块不应透传原始 HTML', async () => {
+  it('StreamingMarkdown 未闭合思考块只显示思考动画', async () => {
     const wrapper = mount(StreamingMarkdown, {
       props: {
         content: '<think>正在分析<script>alert(1)</script><img src=x onerror="alert(1)">',
@@ -75,10 +76,11 @@ describe('Markdown 安全渲染', () => {
     await flushPromises();
 
     const html = wrapper.html();
-    expect(wrapper.find('.thinking-bubble').exists()).toBe(true);
+    expect(wrapper.find('.thinking-animation').exists()).toBe(true);
     expect(wrapper.find('script').exists()).toBe(false);
     expect(wrapper.find('img').exists()).toBe(false);
-    expect(html).toContain('&lt;script');
-    expect(html).toContain('正在分析');
+    expect(html).not.toContain('&lt;script');
+    expect(html).not.toContain('正在分析');
+    expect(wrapper.find('.thinking-animation').exists()).toBe(true);
   });
 });

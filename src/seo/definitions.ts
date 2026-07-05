@@ -18,10 +18,10 @@ export interface PageSeoDefinition {
 
 export const STATIC_PAGE_SEO: Record<string, PageSeoDefinition> = {
   home: {
-    pageTitle: 'AI 在线占卜，免费六爻、梅花易数、奇门遁甲、塔罗牌与今日运势',
+    pageTitle: 'AI 在线占卜，免费六爻、梅花易数、奇门遁甲、塔罗牌',
     description:
-      '时月东方提供免费的 AI 在线占卜服务，支持今日运势、六爻、梅花易数、奇门遁甲、塔罗牌和三山国王灵签，适合感情、事业、财运与决策参考。',
-    keywords: ['时月东方', 'AI占卜', '免费占卜', '在线算命', '今日运势', '塔罗牌'],
+      '时月东方提供免费的 AI 在线占卜服务，支持六爻、梅花易数、奇门遁甲、塔罗牌和三山国王灵签，并提供命语、时月奇门与揣测等相关项目入口。',
+    keywords: ['时月东方', 'AI占卜', '免费占卜', '在线算命', '塔罗牌', '奇门遁甲'],
     schemaType: 'WebPage',
   },
   history: {
@@ -60,12 +60,6 @@ export const STATIC_PAGE_SEO: Record<string, PageSeoDefinition> = {
 };
 
 export const DIVINATION_PAGE_SEO: Partial<Record<DivinationType, PageSeoDefinition>> = {
-  daily: {
-    pageTitle: '今日运势在线查询',
-    description: '免费查看今日运势，基于日家奇门遁甲思路提供事业、财运、感情与健康方向的 AI 解读。',
-    keywords: ['今日运势', '每日运势', '奇门遁甲', 'AI运势'],
-    schemaType: 'WebPage',
-  },
   liuyao: {
     pageTitle: '六爻在线占卜',
     description:

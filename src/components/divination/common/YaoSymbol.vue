@@ -24,8 +24,8 @@ withDefaults(defineProps<Props>(), {
 
 <style scoped>
 .yao-symbol {
-  width: 65px;
-  height: 18px;
+  width: clamp(34px, 10vw, 58px);
+  height: 14px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -46,33 +46,37 @@ withDefaults(defineProps<Props>(), {
 /* 阳爻：实线 */
 .yang-line {
   width: 100%;
-  height: 8px;
+  height: 5px;
   background-color: var(--color-text-primary);
-  border-radius: 1px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
-  transition: all 0.2s ease;
+  border-radius: var(--radius-full);
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.18);
+  transition:
+    background-color var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
 /* 阴爻：断线 */
 .yin-line {
   display: flex;
-  gap: 6px;
+  gap: clamp(4px, 1.4vw, 7px);
   width: 100%;
   align-items: center;
 }
 
 .yin-segment {
   flex: 1;
-  height: 8px;
+  height: 5px;
   background-color: var(--color-text-primary);
-  border-radius: 1px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
-  transition: all 0.2s ease;
+  border-radius: var(--radius-full);
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.18);
+  transition:
+    background-color var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
 .yin-gap {
-  width: 6px;
-  height: 6px;
+  width: clamp(4px, 1.4vw, 7px);
+  height: 5px;
 }
 
 /* 主卦和变卦样式已通过CSS变量统一处理 */
@@ -80,8 +84,7 @@ withDefaults(defineProps<Props>(), {
 /* 响应式调整 */
 @media (max-width: 768px) {
   .yao-symbol {
-    width: 55px;
-    height: 16px;
+    height: 13px;
   }
 
   .yao-line {
@@ -89,11 +92,11 @@ withDefaults(defineProps<Props>(), {
   }
 
   .yang-line {
-    height: 7px;
+    height: 4px;
   }
 
   .yin-segment {
-    height: 7px;
+    height: 4px;
   }
 
   .yin-gap {
@@ -104,8 +107,7 @@ withDefaults(defineProps<Props>(), {
 
 @media (max-width: 480px) {
   .yao-symbol {
-    width: 48px;
-    height: 14px;
+    height: 12px;
   }
 
   .yao-line {
@@ -113,11 +115,11 @@ withDefaults(defineProps<Props>(), {
   }
 
   .yang-line {
-    height: 6px;
+    height: 4px;
   }
 
   .yin-segment {
-    height: 6px;
+    height: 4px;
   }
 
   .yin-gap {
@@ -128,7 +130,6 @@ withDefaults(defineProps<Props>(), {
 
 @media (max-width: 360px) {
   .yao-symbol {
-    width: 42px;
     height: 12px;
   }
 

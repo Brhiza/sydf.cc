@@ -126,40 +126,50 @@ const externalSelectFields = computed(() => [
 @import './supplementary-info.shared.css';
 
 .method-panel {
-  margin-top: 12px;
-  padding: 14px 16px;
+  margin-top: var(--spacing-3);
+  padding: var(--spacing-4);
   background: var(--color-background-muted);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   border: 1px solid var(--color-border-light);
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .method-panel-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 70px minmax(0, 1fr);
   align-items: center;
-  gap: 16px;
+  gap: var(--spacing-4);
 }
 
 .method-number-input {
-  width: 280px;
+  width: min(280px, 100%);
   max-width: 100%;
-  padding: 8px 12px;
+  min-width: 0;
+  padding: var(--spacing-2) var(--spacing-3);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: var(--color-background);
   color: var(--color-text-primary);
-  font-size: 14px;
+  font-size: var(--font-size-sm);
   box-sizing: border-box;
+  transition:
+    border-color var(--transition-fast),
+    background-color var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
 .method-number-input:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px rgba(107, 70, 193, 0.1);
+  background: var(--color-background-soft);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 16%, transparent);
 }
 
 .method-panel-notice {
-  margin-bottom: 12px;
-  font-size: 13px;
+  margin-bottom: var(--spacing-3);
+  font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
   line-height: 1.5;
 }
@@ -167,12 +177,16 @@ const externalSelectFields = computed(() => [
 .method-panel-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px 16px;
+  gap: var(--spacing-3) var(--spacing-4);
+  min-width: 0;
 }
 
 .method-panel-item {
-  display: flex;
+  display: grid;
+  grid-template-columns: 70px minmax(0, 1fr);
   align-items: center;
+  gap: var(--spacing-3);
+  min-width: 0;
 }
 
 .method-panel-item-wide {
@@ -180,11 +194,15 @@ const externalSelectFields = computed(() => [
 }
 
 @media (max-width: 768px) {
+  .method-panel {
+    padding: var(--spacing-3);
+  }
+
   .method-panel-row,
   .method-panel-item {
-    flex-direction: column;
+    grid-template-columns: 1fr;
     align-items: flex-start;
-    gap: 8px;
+    gap: var(--spacing-2);
   }
 
   .method-panel-grid {

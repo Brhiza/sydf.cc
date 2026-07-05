@@ -1,8 +1,8 @@
 <template>
   <div class="date-picker-container">
-    <label for="fortune-date" class="date-picker-label">选择日期:</label>
+    <label :for="dateInputId" class="date-picker-label">选择日期</label>
     <input
-      id="fortune-date"
+      :id="dateInputId"
       type="date"
       :value="modelValue"
       class="date-picker-input"
@@ -12,6 +12,8 @@
 </template>
 
 <script setup lang="ts">
+import { useId } from 'vue';
+
 interface Props {
   modelValue: string; // YYYY-MM-DD
 }
@@ -22,6 +24,7 @@ interface Emits {
 
 defineProps<Props>();
 const emit = defineEmits<Emits>();
+const dateInputId = useId();
 
 const updateDate = (event: Event) => {
   const target = event.target;
@@ -35,32 +38,68 @@ const updateDate = (event: Event) => {
 
 <style scoped>
 .date-picker-container {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--spacing-2);
+  min-width: 0;
+  padding: var(--spacing-1);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  background: var(--color-background-soft);
+  box-sizing: border-box;
+  transition:
+    border-color var(--transition-fast),
+    background-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.date-picker-container:focus-within {
+  border-color: var(--color-primary);
+  background: var(--color-background-soft);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 14%, transparent);
 }
 
 .date-picker-label {
-  font-size: 13px;
+  padding-left: var(--spacing-2);
+  font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
   white-space: nowrap;
+  font-weight: var(--font-weight-medium);
 }
 
 .date-picker-input {
-  padding: 4px 8px;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  font-size: 13px;
-  background: var(--color-background);
+  min-height: 36px;
+  padding: 0 var(--spacing-2);
+  border: 0;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  background: color-mix(in srgb, var(--color-background) 88%, transparent);
   color: var(--color-text-primary);
   cursor: pointer;
-  width: 130px;
+  width: 142px;
+  min-width: 0;
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast);
+}
+
+.date-picker-input:hover {
+  background: var(--color-background);
 }
 
 .date-picker-input:focus {
   outline: none;
-  border-color: var(--color-primary);
   background: var(--color-background);
-  box-shadow: 0 0 0 3px rgba(107, 70, 193, 0.15);
+}
+
+@media (max-width: 768px) {
+  .date-picker-container {
+    width: 100%;
+  }
+
+  .date-picker-input {
+    flex: 1;
+    width: auto;
+  }
 }
 </style>

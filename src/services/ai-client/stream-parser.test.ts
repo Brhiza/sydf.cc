@@ -138,11 +138,12 @@ describe('applyStreamDelta', () => {
     expect(onChunk).toHaveBeenCalledWith('');
   });
 
-  it('reasoning_content 累加到 buffer', () => {
+  it('reasoning_content 只进入思考态，不累加到正文 buffer', () => {
     const { state, onChunk, flush } = setup();
     applyStreamDelta({ reasoning_content: '让我想想' }, state, onChunk, flush);
-    expect(state.contentBuffer).toBe('让我想想');
+    expect(state.contentBuffer).toBe('');
     expect(state.inThinkingState).toBe(true);
+    expect(onChunk).toHaveBeenCalledWith('');
   });
 });
 

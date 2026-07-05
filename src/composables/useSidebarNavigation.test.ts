@@ -39,12 +39,12 @@ describe('useSidebarNavigation', () => {
     );
   });
 
-  it('今日运势导航应统一指向 /divination/daily', async () => {
+  it('侧栏不再显示今日运势入口', async () => {
     const { useSidebarNavigation } = await import('./useSidebarNavigation');
     const navigation = useSidebarNavigation();
     const dailyItem = navigation.primaryNavItems.value.find((item) => item.title === '今日运势');
 
-    expect(dailyItem?.path).toBe('/divination/daily');
+    expect(dailyItem).toBeUndefined();
   });
 
   it('带 historyId 直达历史详情时应同步高亮当前历史记录', async () => {

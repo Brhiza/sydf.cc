@@ -1,12 +1,19 @@
 <template>
   <div class="paipan-section">
+    <div class="paipan-section-header">
+      <h3 class="paipan-section-title">奇门九宫</h3>
+      <span class="paipan-section-meta">盘面焦点已标记</span>
+    </div>
     <div class="jiugong-container">
       <div class="jiugong-grid">
         <div
           v-for="(gong, index) in arrangedGongs"
           :key="gong.gong"
           class="gong-cell"
-          :class="[getQimenGongClass(index), { 'question-focus': highlightedGongs.includes(gong.gong) }]"
+          :class="[
+            getQimenGongClass(index),
+            { 'question-focus': highlightedGongs.includes(gong.gong) },
+          ]"
         >
           <div class="gong-header">
             <span class="gong-name">{{ gong.name }}</span>
@@ -54,17 +61,16 @@ const highlightedGongs = computed(() => props.highlightedGongs || []);
 </script>
 
 <style scoped>
-.paipan-section {
-  margin-bottom: var(--spacing-4);
-}
+@import '@/styles/components/results.css';
 
 .jiugong-container {
   display: flex;
   justify-content: center;
-  margin: var(--spacing-4) 0;
+  margin-top: var(--spacing-2);
 }
 
 .jiugong-grid {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(3, 1fr);
@@ -75,10 +81,32 @@ const highlightedGongs = computed(() => props.highlightedGongs || []);
   overflow: hidden;
   border: 2px solid var(--color-border);
   border-radius: 8px;
+  background:
+    linear-gradient(90deg, transparent 49.5%, rgba(30, 118, 58, 0.06) 50%, transparent 50.5%),
+    linear-gradient(0deg, transparent 49.5%, rgba(30, 118, 58, 0.06) 50%, transparent 50.5%),
+    var(--color-background-soft);
+  isolation: isolate;
+}
+
+.jiugong-grid::before {
+  content: '';
+  position: absolute;
+  inset: -40%;
+  z-index: 0;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    rgba(30, 118, 58, 0.12) 42deg,
+    transparent 96deg
+  );
+  opacity: 0.56;
+  pointer-events: none;
+  animation: qimen-plate-sweep 18s linear infinite;
 }
 
 .gong-cell {
   position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -98,6 +126,16 @@ const highlightedGongs = computed(() => props.highlightedGongs || []);
   background:
     linear-gradient(180deg, rgba(53, 150, 95, 0.06), rgba(53, 150, 95, 0)),
     var(--color-background-soft);
+}
+
+.gong-cell.question-focus::after {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border: 1px solid rgba(30, 118, 58, 0.38);
+  border-radius: 6px;
+  pointer-events: none;
+  animation: qimen-focus-pulse 2.8s ease-in-out infinite;
 }
 
 .gong-header {
@@ -220,6 +258,23 @@ const highlightedGongs = computed(() => props.highlightedGongs || []);
 
   .shen-pan {
     font-size: 9px;
+  }
+}
+
+@keyframes qimen-plate-sweep {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes qimen-focus-pulse {
+  0%,
+  100% {
+    opacity: 0.38;
+  }
+
+  50% {
+    opacity: 1;
   }
 }
 </style>

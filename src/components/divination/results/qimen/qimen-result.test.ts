@@ -103,7 +103,7 @@ describe('qimen-result', () => {
       '经典格局',
       '应期参考',
       '方位建议',
-      '问事焦点',
+      '盘面焦点',
     ]);
     expect(items[2]?.value).toBe('阳遁3局');
     expect(items[3]?.value).toBe('日家');

@@ -10,7 +10,10 @@
       },
     ]"
     :type="tag === 'button' ? buttonType : undefined"
-    @click="$emit('click', $event)"
+    :role="tag === 'div' && interactive ? 'button' : undefined"
+    :tabindex="tag === 'div' && interactive ? 0 : undefined"
+    @click="handleClick"
+    @keydown="handleKeydown"
   >
     <slot></slot>
     <div v-if="$slots.actions" class="history-item-actions">
@@ -20,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-withDefaults(
+const props = withDefaults(
   defineProps<{
     tag?: 'div' | 'button';
     size?: 'compact' | 'regular';
@@ -37,9 +40,34 @@ withDefaults(
   }
 );
 
-defineEmits<{
+const emit = defineEmits<{
   (e: 'click', event: MouseEvent): void;
 }>();
+
+function handleClick(event: MouseEvent) {
+  if (!props.interactive) {
+    return;
+  }
+
+  emit('click', event);
+}
+
+function handleKeydown(event: KeyboardEvent) {
+  if (props.tag !== 'div' || !props.interactive) {
+    return;
+  }
+
+  if (event.target !== event.currentTarget || !event.currentTarget) {
+    return;
+  }
+
+  if (event.key !== 'Enter' && event.key !== ' ') {
+    return;
+  }
+
+  event.preventDefault();
+  emit('click', new MouseEvent('click'));
+}
 </script>
 
 <style scoped>
@@ -47,11 +75,16 @@ defineEmits<{
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 8px;
-  border: none;
+  gap: var(--spacing-2);
+  border: 1px solid transparent;
   text-align: left;
   position: relative;
-  transition: all 0.2s ease;
+  color: var(--color-text-secondary);
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    color var(--transition-fast);
 }
 
 button.history-item {
@@ -60,16 +93,16 @@ button.history-item {
 }
 
 .history-item-compact {
-  padding: 6px 8px;
-  border-radius: 6px;
+  padding: var(--spacing-2);
+  border-radius: var(--radius-lg);
   background: transparent;
 }
 
 .history-item-regular {
   padding: var(--spacing-4);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   background: var(--color-background);
-  border: 1px solid var(--color-border);
+  border-color: var(--color-border-light);
 }
 
 .history-item.interactive {
@@ -77,29 +110,31 @@ button.history-item {
 }
 
 .history-item-compact.interactive:hover {
-  background: rgba(0, 0, 0, 0.04);
-}
-
-html.dark .history-item-compact.interactive:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--color-background-soft);
+  color: var(--color-text-primary);
 }
 
 .history-item-regular.interactive:hover {
-  border-color: var(--color-primary);
+  border-color: color-mix(in srgb, var(--color-primary) 28%, var(--color-border));
   box-shadow: var(--shadow-sm);
 }
 
+.history-item:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
 .history-item.active {
-  background: #eae7f8;
-  color: #6b46c1;
-  font-weight: 600;
-  box-shadow: 0 2px 8px rgba(234, 231, 248, 0.5);
+  background: var(--color-primary-muted);
+  border-color: color-mix(in srgb, var(--color-primary) 18%, transparent);
+  color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+  box-shadow: var(--shadow-sm);
 }
 
 html.dark .history-item.active {
-  background: #232426;
-  color: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  background: var(--color-background-soft);
+  color: var(--color-text-primary);
 }
 
 .history-item-actions {
@@ -108,8 +143,8 @@ html.dark .history-item.active {
 
 @media (max-width: 768px) {
   .history-item-compact {
-    padding: 4px 6px;
-    gap: 6px;
+    padding: var(--spacing-2);
+    gap: var(--spacing-2);
   }
 }
 </style>

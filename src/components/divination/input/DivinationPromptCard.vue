@@ -28,14 +28,7 @@
     <div class="button-wrapper" :class="{ 'ai-thinking': loading }">
       <button id="submitButton" :disabled="disableSubmit" class="submit-button" @click="$emit('submit')">
         <span v-if="!loading">{{ buttonText }}</span>
-        <span v-else class="loading-text">
-          {{ loadingText }}
-          <span class="loading-dots">
-            <span class="dot"></span>
-            <span class="dot"></span>
-            <span class="dot"></span>
-          </span>
-        </span>
+        <AIThinkingIndicator v-else class="button-thinking-indicator" />
       </button>
     </div>
   </div>
@@ -44,6 +37,7 @@
 <script setup lang="ts">
 import type { DivinationType } from '@/types/divination'
 import { QUESTION_TEXT_MAX_LENGTH } from '@/shared/question-text'
+import AIThinkingIndicator from '@/components/common/AIThinkingIndicator.vue'
 import TarotSpreadSelector from '../TarotSpreadSelector.vue'
 
 defineProps<{
@@ -52,7 +46,6 @@ defineProps<{
   description: string
   placeholder: string
   buttonText: string
-  loadingText: string
   loading: boolean
   question: string
   selectedSpread: string
@@ -89,45 +82,49 @@ function handleQuestionInput(event: Event) {
 .card-image {
   width: 200px;
   height: auto;
-  border-radius: 12px;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-xl);
+  margin-bottom: var(--spacing-5);
+  box-shadow: var(--shadow-md);
 }
 
 .card-title {
   text-align: center;
   color: var(--color-text-primary);
   margin-top: 0;
-  margin-bottom: 16px;
-  font-size: 1.8em;
-  font-weight: 700;
+  margin-bottom: var(--spacing-4);
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
 }
 
 .card-description {
   text-align: center;
   color: var(--color-text-secondary);
-  margin-bottom: 32px;
-  font-size: 16px;
-  line-height: 1.6;
+  margin-bottom: var(--spacing-8);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-relaxed);
   max-width: 700px;
 }
 
 .input-container {
   position: relative;
-  margin-bottom: 24px;
+  margin-bottom: var(--spacing-6);
   width: 100%;
   max-width: 600px;
 }
 
 .question-input {
   width: 100%;
-  padding: 16px;
+  padding: var(--spacing-4);
   border: 2px solid var(--color-border);
-  border-radius: 12px;
-  font-size: 16px;
+  border-radius: var(--radius-xl);
+  font-size: var(--font-size-base);
   box-sizing: border-box;
   text-align: center;
-  transition: all 0.3s ease;
+  transition:
+    background-color var(--transition-base),
+    border-color var(--transition-base),
+    box-shadow var(--transition-base);
   background: var(--color-background-muted);
   color: var(--color-text-primary);
 }
@@ -140,7 +137,7 @@ function handleQuestionInput(event: Event) {
   outline: none;
   border-color: var(--color-primary);
   background: var(--color-background);
-  box-shadow: 0 0 0 3px rgba(107, 70, 193, 0.15);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 16%, transparent);
 }
 
 .question-input:disabled {
@@ -156,7 +153,7 @@ function handleQuestionInput(event: Event) {
   width: 0;
   height: 2px;
   background: var(--color-primary);
-  transition: all 0.3s ease;
+  transition: width var(--transition-base);
   transform: translateX(-50%);
 }
 
@@ -167,14 +164,19 @@ function handleQuestionInput(event: Event) {
 .button-wrapper {
   position: relative;
   z-index: 1;
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   width: 100%;
   max-width: 600px;
 }
 
 .button-wrapper::before {
   content: '';
-  background: linear-gradient(45deg, #6b46c1, #805ad5, #6b46c1);
+  background: linear-gradient(
+    45deg,
+    var(--color-primary),
+    var(--color-primary-light),
+    var(--color-primary)
+  );
   position: absolute;
   top: -2px;
   left: -2px;
@@ -185,8 +187,8 @@ function handleQuestionInput(event: Event) {
   height: calc(100% + 4px);
   animation: glowing 20s linear infinite;
   opacity: 0;
-  transition: opacity 0.3s ease-in-out;
-  border-radius: 12px;
+  transition: opacity var(--transition-base);
+  border-radius: var(--radius-xl);
 }
 
 .button-wrapper.ai-thinking::before {
@@ -207,15 +209,18 @@ function handleQuestionInput(event: Event) {
 
 .submit-button {
   width: 100%;
-  padding: 16px;
+  padding: var(--spacing-4);
   border: none;
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   background: var(--color-primary);
-  color: white;
-  font-size: 16px;
-  font-weight: 600;
+  color: var(--color-white);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition:
+    background-color var(--transition-base),
+    box-shadow var(--transition-base),
+    transform var(--transition-base);
   position: relative;
   z-index: 2;
 }
@@ -223,7 +228,7 @@ function handleQuestionInput(event: Event) {
 .submit-button:hover:not(:disabled) {
   background: var(--color-primary-dark);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(107, 70, 193, 0.3);
+  box-shadow: var(--shadow-md);
 }
 
 .submit-button:disabled {
@@ -232,99 +237,74 @@ function handleQuestionInput(event: Event) {
 }
 
 html.dark .submit-button:disabled {
-  background: #3a3a3a;
-  color: #6b7280;
+  background: var(--color-primary-disabled);
+  color: var(--color-text-muted);
 }
 
-.loading-text {
-  display: flex;
-  align-items: center;
+.button-thinking-indicator {
+  min-height: 20px;
   justify-content: center;
+  color: var(--color-white);
 }
 
-.loading-dots {
-  display: inline-flex;
-  margin-left: 8px;
+.button-thinking-indicator :deep(.thinking-mark) {
+  width: 24px;
+  height: 24px;
 }
 
-.dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: white;
-  margin: 0 2px;
-  animation: dot-pulse 1.5s infinite ease-in-out;
-}
-
-.dot:nth-child(2) {
-  animation-delay: 0.2s;
-}
-
-.dot:nth-child(3) {
-  animation-delay: 0.4s;
-}
-
-@keyframes dot-pulse {
-  0%,
-  60%,
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  30% {
-    transform: scale(2);
-    opacity: 0.5;
-  }
+.button-thinking-indicator :deep(.thinking-seal) {
+  inset: 4px;
+  border-width: 1.5px;
 }
 
 @media (max-width: 768px) {
   .card-title {
-    font-size: 1.6em;
+    font-size: var(--font-size-2xl);
   }
 
   .card-description {
-    font-size: 15px;
-    margin-bottom: 20px;
+    font-size: var(--font-size-base);
+    margin-bottom: var(--spacing-5);
   }
 
   .input-container {
-    margin-bottom: 20px;
+    margin-bottom: var(--spacing-5);
   }
 
   .question-input {
-    padding: 14px;
-    font-size: 16px;
+    padding: var(--spacing-3);
+    font-size: var(--font-size-base);
   }
 
   .submit-button {
-    padding: 14px;
-    font-size: 15px;
+    padding: var(--spacing-3);
+    font-size: var(--font-size-base);
   }
 }
 
 @media (max-width: 480px) {
   .card-title {
-    font-size: 1.4em;
-    margin-bottom: 12px;
+    font-size: var(--font-size-xl);
+    margin-bottom: var(--spacing-3);
   }
 
   .card-description {
-    font-size: 14px;
-    margin-bottom: 16px;
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--spacing-4);
   }
 
   .input-container {
-    margin-bottom: 16px;
+    margin-bottom: var(--spacing-4);
   }
 
   .question-input {
-    padding: 12px;
-    font-size: 16px;
+    padding: var(--spacing-3);
+    font-size: var(--font-size-base);
   }
 
   .submit-button {
-    padding: 12px;
-    font-size: 14px;
+    padding: var(--spacing-3);
+    font-size: var(--font-size-sm);
   }
 }
 </style>

@@ -53,15 +53,6 @@
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://sydf.cc/divination/tarot" />
   </url>
   
-  <!-- 其他重要页面 -->
-  <url>
-    <loc>https://sydf.cc/divination/daily</loc>
-    <lastmod>2026-03-25</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.95</priority>
-    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://sydf.cc/divination/daily" />
-  </url>
-  
   <url>
     <loc>https://sydf.cc/divination/ssgw</loc>
     <lastmod>2026-03-25</lastmod>

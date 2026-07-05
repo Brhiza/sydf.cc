@@ -14,9 +14,9 @@ describe('getPrerenderRoutes', () => {
     const routePaths = routes.map((route) => route.path);
 
     expect(routePaths).toContain('/');
-    expect(routePaths).toContain('/divination/daily');
     expect(routePaths).toContain('/divination/tarot');
     expect(routePaths).toContain('/about');
+    expect(routePaths).not.toContain('/divination/daily');
     expect(routePaths).not.toContain('/gongdebox');
     expect(routePaths).not.toContain('/gongdeboard');
     expect(routePaths).not.toContain('/settings');

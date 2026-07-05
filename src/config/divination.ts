@@ -120,7 +120,7 @@ export const DIVINATION_CONFIGS: Record<DivinationConfigType, DivinationConfig> 
   },
 };
 
-export const divinationNavItems = Object.values(DIVINATION_CONFIGS);
+export const divinationNavItems = Object.values(DIVINATION_CONFIGS).filter((item) => item.type !== 'daily');
 
 export function getDivinationConfig(type: DivinationType): DivinationConfig | null {
   return DIVINATION_CONFIGS[type] || null;

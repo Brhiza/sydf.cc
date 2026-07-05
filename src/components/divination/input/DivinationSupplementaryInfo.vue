@@ -180,35 +180,39 @@ const qimenMethodOptions = [
 
 .supplementary-info {
   width: 100%;
-  max-width: 600px;
-  margin-top: 16px;
-  margin-bottom: 24px;
+  max-width: min(100%, 640px);
+  margin-top: var(--spacing-4);
+  margin-bottom: var(--spacing-6);
   text-align: left;
+  box-sizing: border-box;
 }
 
 .info-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 16px;
+  gap: var(--spacing-4);
   width: 100%;
+  min-width: 0;
 }
 
 .info-header-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--spacing-3);
   flex-wrap: wrap;
   justify-content: flex-end;
+  min-width: 0;
 }
 
 .toggle-info {
   color: var(--color-text-secondary);
   cursor: pointer;
-  font-size: 14px;
+  font-size: var(--font-size-sm);
   display: inline-flex;
   align-items: center;
-  transition: color 0.3s;
+  flex: 0 0 auto;
+  transition: color var(--transition-base);
 }
 
 .toggle-info:hover {
@@ -219,10 +223,10 @@ const qimenMethodOptions = [
   display: inline-block;
   width: 0;
   height: 0;
-  margin-left: 6px;
+  margin-left: var(--spacing-2);
   border-left: 5px solid transparent;
   border-right: 5px solid transparent;
-  transition: transform 0.3s;
+  transition: transform var(--transition-base);
 }
 
 .arrow.down {
@@ -234,33 +238,41 @@ const qimenMethodOptions = [
 }
 
 .info-form {
-  margin-top: 12px;
-  padding: 16px;
+  margin-top: var(--spacing-3);
+  padding: var(--spacing-4);
   background: var(--color-background-muted);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   border: 1px solid var(--color-border-light);
+  box-sizing: border-box;
 }
 
 .method-switcher {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px;
+  gap: var(--spacing-1);
+  padding: var(--spacing-1);
   border: 1px solid var(--color-border-light);
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--color-background-muted);
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .method-chip {
   border: none;
   background: transparent;
   color: var(--color-text-secondary);
-  padding: 6px 12px;
-  border-radius: 999px;
-  font-size: 13px;
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
   line-height: 1;
   cursor: pointer;
-  transition: all 0.2s ease;
+  min-width: 0;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
 .method-chip:hover {
@@ -269,32 +281,33 @@ const qimenMethodOptions = [
 
 .method-chip.active {
   background: var(--color-primary);
-  color: #fff;
+  color: var(--color-text-inverse);
+  box-shadow: var(--shadow-sm);
 }
 
 .method-switcher.compact {
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
 }
 
 .qimen-settings {
   display: grid;
-  gap: 12px;
-  margin-bottom: 16px;
-  padding-bottom: 16px;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-4);
+  padding-bottom: var(--spacing-4);
   border-bottom: 1px solid var(--color-border-light);
 }
 
 .qimen-settings-row {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: var(--spacing-4);
 }
 
 .qimen-settings-label {
   width: 70px;
   flex-shrink: 0;
   color: var(--color-text-primary);
-  font-size: 14px;
+  font-size: var(--font-size-sm);
 }
 
 .fade-enter-active,
@@ -311,28 +324,44 @@ const qimenMethodOptions = [
   .info-header {
     align-items: flex-start;
     flex-direction: column;
+    gap: var(--spacing-2);
   }
 
   .info-header-actions {
     width: 100%;
-    justify-content: space-between;
+    justify-content: stretch;
   }
 
   .method-switcher {
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     width: 100%;
     border-radius: 16px;
+  }
+
+  .method-switcher.compact {
+    grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));
+  }
+
+  .method-chip {
+    width: 100%;
+    padding-inline: var(--spacing-2);
+    text-align: center;
+  }
+
+  .info-form {
+    padding: var(--spacing-3);
   }
 
   .qimen-settings-row {
     flex-direction: column;
     align-items: flex-start;
-    gap: 8px;
+    gap: var(--spacing-2);
   }
 
   .qimen-settings-label {
     width: auto;
-    font-size: 13px;
+    font-size: var(--font-size-xs);
   }
 }
 </style>

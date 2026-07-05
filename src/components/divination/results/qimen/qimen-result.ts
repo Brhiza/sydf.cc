@@ -1,5 +1,5 @@
 import { formatDateTime, formatGanZhi } from '@/utils/date-formatter';
-import type { QimenData, QimenJiuGongGe, SupplementaryInfo } from '@/types/divination';
+import type { QimenData, QimenJiuGongGe } from '@/types/divination';
 import { createQimenPriorityPalaces } from '@/utils/qimen-guidance';
 import { formatQimenScopeLabel } from '@/shared/qimen-settings';
 
@@ -72,11 +72,7 @@ export function isCenterGong(gong: Pick<QimenJiuGongGe, 'gong' | 'name'>): boole
 }
 
 export function createQimenInfoItems(
-  data: QimenData,
-  options?: {
-    question?: string;
-    supplementaryInfo?: SupplementaryInfo;
-  }
+  data: QimenData
 ): QimenInfoItem[] {
   const items: QimenInfoItem[] = [
     {
@@ -173,17 +169,13 @@ export function createQimenInfoItems(
     });
   }
 
-  const focusPalaces = createQimenPriorityPalaces(
-    options?.question,
-    data,
-    options?.supplementaryInfo
-  )
+  const focusPalaces = createQimenPriorityPalaces(data)
     .slice(0, 2)
     .map((item) => `${item.name}（${item.score}分）`);
 
   if (focusPalaces.length > 0) {
     items.push({
-      label: '问事焦点',
+      label: '盘面焦点',
       value: focusPalaces.join('、'),
     });
   }

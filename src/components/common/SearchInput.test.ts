@@ -31,4 +31,15 @@ describe('SearchInput', () => {
     expect(wrapper.emitted('clear')).toHaveLength(1);
   });
 
+  it('输入框应提供明确的可访问名称', () => {
+    const wrapper = mount(SearchInput, {
+      props: {
+        modelValue: '',
+        placeholder: '搜索历史记录...',
+        ariaLabel: '搜索历史记录',
+      },
+    });
+
+    expect(wrapper.get('input').attributes('aria-label')).toBe('搜索历史记录');
+  });
 });
