@@ -74,6 +74,25 @@ describe('HistoryService', () => {
     expect(mockEmit).toHaveBeenCalledWith('history:updated');
   });
 
+  it('导出历史时不应包含自定义 API 密钥', async () => {
+    localStorage.setItem('sydf-history', JSON.stringify([]));
+
+    const { historyService } = await import('./history');
+    historyService.updateSettings({
+      useCustomApi: true,
+      customApiKey: 'sk-secret',
+      customApiEndpoint: 'https://api.example.com/v1',
+    });
+
+    const exported = JSON.parse(historyService.exportRecords()) as {
+      settings?: Record<string, unknown>;
+    };
+
+    expect(JSON.stringify(exported)).not.toContain('sk-secret');
+    expect(exported.settings?.customApiKey).toBeUndefined();
+    expect(exported.settings?.customApiEndpoint).toBe('https://api.example.com/v1');
+  });
+
   it('导入历史文件过大时应拒绝且不改变现有记录', async () => {
     localStorage.setItem(
       'sydf-history',
@@ -372,12 +391,12 @@ describe('HistoryService', () => {
         ],
       },
     ]);
-    expect(storedRecords.find((record) => record.id === 'daily-bad-conversation')).not.toHaveProperty(
-      'conversationHistory'
-    );
-    expect(storedRecords.find((record) => record.id === 'daily-clean-conversation')?.conversationHistory).toEqual(
-      historyService.getRecord('daily-clean-conversation')?.conversationHistory
-    );
+    expect(
+      storedRecords.find((record) => record.id === 'daily-bad-conversation')
+    ).not.toHaveProperty('conversationHistory');
+    expect(
+      storedRecords.find((record) => record.id === 'daily-clean-conversation')?.conversationHistory
+    ).toEqual(historyService.getRecord('daily-clean-conversation')?.conversationHistory);
   });
 
   it('加载异常本地设置时应回到安全默认值', async () => {

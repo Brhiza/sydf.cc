@@ -36,7 +36,7 @@
 
       <FormFieldGroup
         label="API 端点"
-        hint="请输入基础API地址，系统会自动添加 /chat/completions 路径"
+        hint="请输入 HTTPS 基础 API 地址，本机调试可使用 http://localhost"
         label-for="custom-api-endpoint"
         hint-id="custom-api-endpoint-hint"
         :disabled="!settings.useCustomApi"
@@ -104,6 +104,7 @@
           点击"获取模型列表"按钮将从您配置的API端点获取可用的模型列表。
           如果获取失败，将使用默认模型列表。
         </p>
+        <p>为避免密钥发往不安全地址，自定义 API 仅支持 HTTPS，本机调试地址除外。</p>
       </div>
     </ContentSectionCard>
   </div>
