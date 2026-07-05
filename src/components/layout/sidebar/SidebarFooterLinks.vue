@@ -1,5 +1,5 @@
 <template>
-  <div v-if="items.length > 0" class="sidebar-footer">
+  <nav v-if="items.length > 0" class="sidebar-footer" aria-label="辅助链接">
     <ul class="footer-list">
       <FooterLink
         v-for="item in items"
@@ -10,34 +10,34 @@
         @navigate="$emit('navigate', $event)"
       />
     </ul>
-  </div>
+  </nav>
 </template>
 
 <script setup lang="ts">
-import FooterLink from '@/components/sidebar/FooterLink.vue'
+import FooterLink from '@/components/sidebar/FooterLink.vue';
 
 export interface SidebarFooterLinkItem {
-  path: string
-  title: string
-  isActive: boolean
+  path: string;
+  title: string;
+  isActive: boolean;
 }
 
 defineProps<{
-  items: SidebarFooterLinkItem[]
-}>()
+  items: SidebarFooterLinkItem[];
+}>();
 
 defineEmits<{
-  (e: 'navigate', path: string): void
-}>()
+  (e: 'navigate', path: string): void;
+}>();
 </script>
 
 <style scoped>
 .sidebar-footer {
-  padding: 6px 8px 8px 8px;
+  padding: var(--spacing-2);
   border-top: none;
   flex-shrink: 0;
   background: inherit;
-  margin-top: 2px;
+  margin-top: var(--spacing-1);
 }
 
 .footer-list {
@@ -48,7 +48,7 @@ defineEmits<{
 
 @media (max-width: 768px) {
   .sidebar-footer {
-    padding: 4px 8px 6px 8px;
+    padding: var(--spacing-1) var(--spacing-2) var(--spacing-2);
   }
 }
 </style>

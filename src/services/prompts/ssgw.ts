@@ -27,7 +27,7 @@ export function generateSsgwPrompt(
     timeInfo,
     supplementaryInfo,
     formatData: (currentData) => formatSsgwData(currentData),
-    appendPrompt: (basePrompt, context) => {
+    appendPrompt: (basePrompt) => {
       const ssgwSpecific = `
 
 ## 三山国王灵签补充解读要求
@@ -37,7 +37,7 @@ export function generateSsgwPrompt(
 - **签文层次**：从字面层、象征层、哲理层和实践层多层次解读签文
 - **问题关联**：综合分析签诗如何直接回应用户的具体疑问
 
-**专业术语解释**：${context.analysis.userExperience.level === 'beginner' ? '请用简单语言解释签文、典故等概念' : context.analysis.userExperience.level === 'intermediate' ? '可适当使用解签术语并简要解释' : '可使用较专业的解签表达，但结论必须清晰直白'}
+**专业术语解释**：请根据用户表达自行决定术语深度；签文、典故和寓意要解释清楚，结论必须清晰直白。
 
 **具体要求**：
 - 给出1-2个具体可行的建议

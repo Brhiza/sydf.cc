@@ -17,12 +17,13 @@ describe('AI 时间工具请求策略', () => {
     vi.resetModules();
   });
 
-  it('普通占卜提示词不应向上游附带干支工具', async () => {
+  it('普通占卜提示词也应交给模型自动决定是否调用工具', async () => {
     const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
       const payload = JSON.parse(String(init?.body || '{}'));
 
-      expect(payload.tools).toBeUndefined();
-      expect(payload.tool_choice).toBeUndefined();
+      expect(payload.tools).toBeInstanceOf(Array);
+      expect(payload.tools).toHaveLength(4);
+      expect(payload.tool_choice).toBe('auto');
 
       return new Response(
         JSON.stringify({
@@ -59,16 +60,15 @@ describe('AI 时间工具请求策略', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
-  it('明确日期查询应注入本地干支上下文并避免再次开 tool', async () => {
+  it('明确日期查询不应本地预解析，应交给模型按需调用工具', async () => {
     const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
       const payload = JSON.parse(String(init?.body || '{}'));
 
-      expect(payload.tools).toBeUndefined();
-      expect(payload.tool_choice).toBeUndefined();
-      expect(payload.messages[0].role).toBe('system');
-      expect(payload.messages[0].content).toContain('已经由程序精确计算');
-      expect(payload.messages[0].content).toContain('2026年3月20日');
-      expect(payload.messages[0].content).toContain('干支：');
+      expect(payload.tools).toBeInstanceOf(Array);
+      expect(payload.tools).toHaveLength(4);
+      expect(payload.tool_choice).toBe('auto');
+      expect(payload.messages[0].role).toBe('user');
+      expect(payload.messages[0].content).toBe('请告诉我 2026年3月20日 的干支信息');
 
       return new Response(
         JSON.stringify({
@@ -99,7 +99,7 @@ describe('AI 时间工具请求策略', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
-  it('超出本地解析能力的时间范围问题应继续保留工具能力', async () => {
+  it('时间范围问题应同样由模型自动决定工具调用', async () => {
     const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
       const payload = JSON.parse(String(init?.body || '{}'));
 

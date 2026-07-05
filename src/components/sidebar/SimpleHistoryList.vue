@@ -1,5 +1,5 @@
 <template>
-  <div class="history-section">
+  <section class="history-section" aria-label="历史记录">
     <HistoryListToolbar
       :show-main-menu="showMainMenu"
       @toggle-search="toggleSearch"
@@ -19,7 +19,7 @@
     />
 
     <!-- 历史记录列表 -->
-    <div class="history-list">
+    <div class="history-list" aria-live="polite">
       <EmptyState
         v-if="displayRecords.length === 0"
         icon="📜"
@@ -40,7 +40,7 @@
         />
       </div>
     </div>
-  </div>
+  </section>
 </template>
 
 <script setup lang="ts">
@@ -125,13 +125,13 @@ function handleClearAll() {
 .history-list {
   flex: 1;
   overflow-y: auto;
-  padding: 4px 8px; /* 减少内边距以节省空间 */
+  padding: var(--spacing-1) var(--spacing-2);
   min-height: 0;
 }
 
 .records-container {
   display: flex;
   flex-direction: column;
-  gap: 2px; /* 减少间距以节省空间 */
+  gap: var(--spacing-1);
 }
 </style>

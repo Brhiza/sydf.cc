@@ -3,24 +3,28 @@
     ref="rootRef"
     class="custom-select"
     :class="[sizeClass, { disabled }]"
-    :tabindex="disabled ? -1 : 0"
     @keydown="handleKeydown"
   >
     <button
+      :id="id"
       type="button"
       class="selected"
       :class="{ open, placeholder: !selectedOption }"
       :disabled="disabled"
       :aria-expanded="open"
+      :aria-controls="listboxId"
+      :aria-activedescendant="activeOptionId"
+      :aria-describedby="ariaDescribedby"
       aria-haspopup="listbox"
       @click="toggleOpen"
     >
       <span class="selected-text">{{ selectedLabel }}</span>
     </button>
 
-    <div class="items" :class="{ selectHide: !open }" role="listbox">
+    <div :id="listboxId" class="items" :class="{ selectHide: !open }" role="listbox">
       <button
         v-for="(option, index) in options"
+        :id="getOptionId(index)"
         :key="option.name"
         type="button"
         class="option-item"
@@ -56,11 +60,15 @@ const props = withDefaults(
     placeholder?: string;
     disabled?: boolean;
     size?: 'default' | 'compact';
+    id?: string;
+    ariaDescribedby?: string;
   }>(),
   {
     placeholder: '请选择',
     disabled: false,
     size: 'default',
+    id: undefined,
+    ariaDescribedby: undefined,
   }
 );
 
@@ -71,13 +79,20 @@ const emit = defineEmits<{
 const rootRef = ref<HTMLElement | null>(null);
 const open = ref(false);
 const activeIndex = ref(-1);
+const selectId = `custom-select-${Math.random().toString(36).slice(2, 10)}`;
 const sizeClass = computed(() => `custom-select-${props.size}`);
+const listboxId = `${selectId}-listbox`;
 
 const selectedIndex = computed(() => props.options.findIndex(opt => opt.name === props.modelValue));
 const selectedOption = computed(() => props.options[selectedIndex.value] || null);
 const selectedLabel = computed(
   () => selectedOption.value?.displayName || selectedOption.value?.name || props.placeholder
 );
+const activeOptionId = computed(() => (activeIndex.value >= 0 ? getOptionId(activeIndex.value) : undefined));
+
+function getOptionId(index: number) {
+  return `${selectId}-option-${index}`;
+}
 
 watch(
   () => props.modelValue,
@@ -245,7 +260,7 @@ onUnmounted(() => {
   width: 100%;
   text-align: left;
   outline: none;
-  font-size: 14px;
+  font-size: var(--font-size-sm);
 }
 
 .custom-select.disabled {
@@ -257,17 +272,18 @@ onUnmounted(() => {
 }
 
 .custom-select-compact {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
 }
 
-.selected {
+button.selected {
   position: relative;
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: 12px;
+  gap: var(--spacing-3);
+  min-height: 44px;
+  padding: 0 var(--spacing-3);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background-color: var(--color-background);
@@ -283,36 +299,38 @@ onUnmounted(() => {
   text-align: left;
 }
 
-.custom-select-compact .selected {
-  min-height: 32px;
-  padding: 6px 8px;
+.custom-select-compact button.selected {
+  min-height: 36px;
+  padding: 0 var(--spacing-2);
   border-radius: var(--radius-base);
 }
 
-.selected:hover:not(:disabled) {
-  border-color: var(--color-primary);
+button.selected:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--color-primary) 38%, var(--color-border));
+  background: var(--color-background-soft);
 }
 
-.selected:focus-visible {
+button.selected:focus-visible {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(107, 70, 193, 0.1);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 16%, transparent);
 }
 
-.selected:disabled {
+button.selected:disabled {
   cursor: not-allowed;
 }
 
-.selected.open {
+button.selected.open {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(107, 70, 193, 0.1);
+  background: var(--color-background-soft);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 16%, transparent);
 }
 
-.selected.placeholder {
+button.selected.placeholder {
   color: var(--color-text-muted);
 }
 
-.selected::after {
+button.selected::after {
   content: '';
   flex-shrink: 0;
   width: 0;
@@ -323,7 +341,7 @@ onUnmounted(() => {
   transition: transform 0.3s ease;
 }
 
-.selected.open::after {
+button.selected.open::after {
   transform: rotate(180deg) translateY(2px);
 }
 
@@ -335,24 +353,25 @@ onUnmounted(() => {
 
 .items {
   color: var(--color-text-primary);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   overflow: hidden auto;
-  border: 1px solid var(--color-primary);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 24%, var(--color-border));
   position: absolute;
   background-color: var(--color-background);
   left: 0;
   right: 0;
-  z-index: 10;
-  margin-top: 4px;
+  z-index: var(--z-dropdown);
+  margin-top: var(--spacing-1);
   max-height: 250px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-lg);
+  scrollbar-width: thin;
 }
 
 .option-item {
   width: 100%;
   display: block;
   color: var(--color-text-primary);
-  padding: 10px 12px;
+  padding: var(--spacing-3);
   cursor: pointer;
   user-select: none;
   border: none;
@@ -364,7 +383,7 @@ onUnmounted(() => {
 }
 
 .custom-select-compact .option-item {
-  padding: 8px;
+  padding: var(--spacing-2);
 }
 
 .option-item:last-child {
@@ -377,7 +396,8 @@ onUnmounted(() => {
 }
 
 .option-item.selected {
-  background-color: rgba(107, 70, 193, 0.08);
+  background-color: color-mix(in srgb, var(--color-primary) 12%, var(--color-background));
+  color: var(--color-primary);
 }
 
 .selectHide {
@@ -386,6 +406,7 @@ onUnmounted(() => {
 
 .option-name {
   font-weight: 500;
+  line-height: var(--line-height-tight);
 }
 
 .option-remark {

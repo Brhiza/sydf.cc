@@ -2,14 +2,15 @@
   <div class="section-block">
     <h4 class="category-heading">{{ heading }}</h4>
     <div class="questions-wrapper">
-      <p
+      <button
         v-for="question in questions"
         :key="question"
         :class="{ clicked: clickedQuestion === question }"
+        type="button"
         @click="$emit('select', question)"
       >
         {{ question }}
-      </p>
+      </button>
     </div>
   </div>
 </template>
@@ -29,12 +30,13 @@ defineEmits<{
 <style scoped>
 .category-heading {
   color: var(--color-text-primary);
-  font-size: 18px;
-  font-weight: 600;
-  margin: 24px 0 16px;
-  padding-bottom: 8px;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  margin: var(--spacing-6) 0 var(--spacing-4);
+  padding-bottom: var(--spacing-2);
   border-bottom: 1px solid var(--color-border);
   position: relative;
+  line-height: var(--line-height-tight);
 }
 
 .category-heading::after {
@@ -45,50 +47,60 @@ defineEmits<{
   width: 60px;
   height: 3px;
   background: var(--color-primary);
-  border-radius: 3px;
+  border-radius: var(--radius-full);
 }
 
 .questions-wrapper {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 12px;
-  margin-bottom: 28px;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-8);
 }
 
-.questions-wrapper p {
+.questions-wrapper button {
   margin: 0;
-  padding: 12px 16px;
-  background: var(--color-background-muted);
+  padding: var(--spacing-3) var(--spacing-4);
+  background: var(--color-background-soft);
   border: 1px solid var(--color-border);
-  border-radius: 10px;
-  font-size: 14px;
+  border-radius: var(--radius-lg);
+  font: inherit;
+  font-size: var(--font-size-sm);
   color: var(--color-text-primary);
   cursor: pointer;
-  transition: all 0.25s ease;
-  line-height: 1.5;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+  line-height: var(--line-height-normal);
   position: relative;
   overflow: hidden;
+  text-align: left;
 }
 
-.questions-wrapper p:hover {
+.questions-wrapper button:hover {
   background: var(--color-background);
   color: var(--color-text-primary);
   transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(139, 92, 246, 0.1);
+  box-shadow: var(--shadow-sm);
   border-color: var(--color-primary);
 }
 
-.questions-wrapper p.clicked::after {
+.questions-wrapper button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.questions-wrapper button.clicked::after {
   content: '';
   position: absolute;
   top: 50%;
   left: 50%;
   width: 5px;
   height: 5px;
-  background: rgba(107, 70, 193, 0.3);
+  background: color-mix(in srgb, var(--color-primary) 30%, transparent);
   opacity: 0;
-  border-radius: 100%;
+  border-radius: var(--radius-full);
   transform: scale(1) translate(-50%, -50%);
   animation: ripple 0.6s ease-out;
 }
@@ -110,8 +122,8 @@ defineEmits<{
   }
 
   .category-heading {
-    font-size: 16px;
-    margin: 20px 0 12px;
+    font-size: var(--font-size-base);
+    margin: var(--spacing-5) 0 var(--spacing-3);
   }
 }
 </style>

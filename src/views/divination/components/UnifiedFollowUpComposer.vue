@@ -8,15 +8,17 @@
         @input="handleInput"
         @keydown.enter.prevent="$emit('send')"
       ></textarea>
-      <button :disabled="disabled" @click="$emit('send')">
+      <button :disabled="disabled" type="button" @click="$emit('send')">
         <span v-if="!disabled">发送</span>
-        <span v-else>发送中...</span>
+        <AIThinkingIndicator v-else class="button-thinking-indicator" />
       </button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import AIThinkingIndicator from '@/components/common/AIThinkingIndicator.vue';
+
 const props = defineProps<{
   modelValue: string;
   disabled?: boolean;
@@ -50,21 +52,26 @@ function handleInput(event: Event) {
 .follow-up-input textarea {
   width: 100%;
   min-height: 58px;
-  padding: 16px 20px;
+  padding: var(--spacing-4) var(--spacing-5);
   padding-right: 100px;
-  border-radius: 16px;
-  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-xl);
+  background-color: var(--color-background-soft);
   color: var(--color-text-primary);
-  font-size: 16px;
-  line-height: 1.6;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-relaxed);
   resize: vertical;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
 .follow-up-input textarea:focus {
   outline: none;
-  border-color: var(--color-primary-light);
-  box-shadow: 0 0 0 4px rgba(var(--color-primary-rgb), 0.1);
+  background-color: var(--color-background);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 16%, transparent);
 }
 
 .follow-up-input button {
@@ -72,20 +79,44 @@ function handleInput(event: Event) {
   top: 50%;
   right: 8px;
   height: 42px;
-  padding: 0 24px;
+  min-width: 76px;
+  padding: 0 var(--spacing-5);
   border: none;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   background-color: var(--color-primary);
-  color: white;
+  color: var(--color-white);
   cursor: pointer;
-  font-size: 16px;
-  font-weight: 600;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
   transform: translateY(-50%);
-  transition: background-color 0.2s;
+  transition:
+    background-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.follow-up-input button:hover:not(:disabled) {
+  background-color: var(--color-primary-dark);
+  box-shadow: var(--shadow-sm);
 }
 
 .follow-up-input button:disabled {
-  background-color: var(--color-gray-400);
+  background-color: var(--color-primary-disabled);
   cursor: not-allowed;
+}
+
+.button-thinking-indicator {
+  min-height: 20px;
+  justify-content: center;
+  color: var(--color-white);
+}
+
+.button-thinking-indicator :deep(.thinking-mark) {
+  width: 22px;
+  height: 22px;
+}
+
+.button-thinking-indicator :deep(.thinking-seal) {
+  inset: 4px;
+  border-width: 1.5px;
 }
 </style>

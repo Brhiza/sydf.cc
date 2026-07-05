@@ -1,7 +1,11 @@
 <template>
   <aside
+    id="app-sidebar"
     class="sidebar"
     :class="{ 'sidebar-collapsed': props.isCollapsed, 'sidebar-initialized': isInitialized }"
+    aria-label="主导航"
+    :aria-hidden="props.isCollapsed ? 'true' : undefined"
+    :inert="props.isCollapsed ? true : undefined"
   >
     <SidebarHeader
       :title="sidebarTitle"
@@ -60,7 +64,7 @@ defineExpose({})
   position: fixed;
   left: 0;
   top: 0;
-  z-index: 1000;
+  z-index: var(--z-fixed);
   box-shadow: none;
   border: none;
   flex-shrink: 0;
@@ -68,11 +72,13 @@ defineExpose({})
 }
 
 .sidebar.sidebar-initialized {
-  transition: all 0.3s ease;
+  transition: transform var(--transition-slow);
 }
 
 .sidebar-collapsed {
   transform: translateX(-100%);
+  box-shadow: none;
+  pointer-events: none;
 }
 
 @media (max-width: 768px) {
@@ -83,16 +89,20 @@ defineExpose({})
     min-height: 100dvh;
     position: fixed;
     background: var(--color-background);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    box-shadow: none;
+  }
+
+  .sidebar:not(.sidebar-collapsed) {
+    box-shadow: var(--shadow-lg);
+    pointer-events: auto;
   }
 
   .sidebar.sidebar-initialized {
-    transition: transform 0.3s ease;
+    transition: transform var(--transition-slow);
   }
 
   html.dark .sidebar {
     background: var(--color-sidebar-background);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
   }
 }
 

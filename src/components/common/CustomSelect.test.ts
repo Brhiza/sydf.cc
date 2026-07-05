@@ -60,6 +60,18 @@ describe('CustomSelect', () => {
     expect(wrapper.find('.custom-select').classes()).toContain('disabled');
   });
 
+  it('应支持外部标签和提示说明关联', () => {
+    const wrapper = createWrapper({
+      id: 'custom-api-model',
+      ariaDescribedby: 'custom-api-model-hint',
+    });
+
+    const button = wrapper.get('.selected');
+
+    expect(button.attributes('id')).toBe('custom-api-model');
+    expect(button.attributes('aria-describedby')).toBe('custom-api-model-hint');
+  });
+
   it('点击 document 本身时应关闭面板且不报错', async () => {
     const wrapper = createWrapper();
 

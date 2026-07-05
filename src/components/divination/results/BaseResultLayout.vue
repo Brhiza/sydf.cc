@@ -10,10 +10,31 @@
 
 <style scoped>
 .base-result-layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
   margin-bottom: var(--spacing-6);
-  padding: var(--spacing-3);
+  padding: var(--spacing-5);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--color-primary) 3%, transparent), transparent),
+    var(--color-background);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-xl);
   font-size: 16px;
   line-height: 1.6;
   color: var(--color-text-primary);
+}
+
+@media (max-width: 768px) {
+  .base-result-layout {
+    gap: var(--spacing-3);
+    padding: var(--spacing-4);
+  }
+}
+
+@media (max-width: 480px) {
+  .base-result-layout {
+    padding: var(--spacing-3);
+  }
 }
 </style>

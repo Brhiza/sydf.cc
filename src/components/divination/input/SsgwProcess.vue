@@ -71,23 +71,23 @@ defineEmits<{
 
 <style scoped>
 .ssgw-process {
-  margin-top: 20px;
+  margin-top: var(--spacing-5);
 }
 
 .shaking-animation {
-  margin-top: 30px;
+  margin-top: var(--spacing-8);
   text-align: center;
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: var(--spacing-5);
+  background: var(--color-background-soft);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border-light);
 }
 
 .shaking-text {
-  font-size: 16px;
+  font-size: var(--font-size-base);
   color: var(--color-text-primary);
-  margin-bottom: 20px;
-  font-weight: 500;
+  margin-bottom: var(--spacing-5);
+  font-weight: var(--font-weight-medium);
 }
 
 .shaking-visual {
@@ -98,24 +98,28 @@ defineEmits<{
 
 .sign-container {
   display: flex;
-  gap: 8px;
+  gap: var(--spacing-2);
   align-items: flex-end;
 }
 
 .sign-stick {
   width: 6px;
   height: 30px;
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 3px;
-  transition: all 0.3s ease;
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+  transition:
+    background-color var(--transition-base),
+    box-shadow var(--transition-base),
+    height var(--transition-base),
+    transform var(--transition-base);
   transform-origin: bottom;
 }
 
 .sign-stick.active {
-  background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(45deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
   height: 40px;
   animation: shake 0.5s ease-in-out;
-  box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--color-primary) 38%, transparent);
 }
 
 @keyframes shake {
@@ -132,21 +136,21 @@ defineEmits<{
 }
 
 .tossing-section {
-  margin-top: 20px;
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: var(--spacing-5);
+  padding: var(--spacing-5);
+  background: var(--color-background-soft);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border-light);
 }
 
 .result-section {
-  margin-bottom: 15px;
+  margin-bottom: var(--spacing-4);
   color: var(--color-text-primary);
-  line-height: 1.6;
+  line-height: var(--line-height-relaxed);
 }
 
 .result-section p {
-  margin: 8px 0;
+  margin: var(--spacing-2) 0;
 }
 
 .result-section strong {
@@ -156,8 +160,8 @@ defineEmits<{
 .bei-container {
   display: flex;
   justify-content: center;
-  gap: 15px;
-  margin: 20px 0;
+  gap: var(--spacing-4);
+  margin: var(--spacing-5) 0;
 }
 
 .bei-image {
@@ -168,21 +172,23 @@ defineEmits<{
 .button-wrapper {
   position: relative;
   z-index: 1;
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   width: 100%;
   max-width: 600px;
 }
 
 .toss-button {
-  background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(45deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  color: var(--color-white);
   border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 500;
+  padding: var(--spacing-3) var(--spacing-6);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition:
+    box-shadow var(--transition-base),
+    transform var(--transition-base);
   width: 100%;
   max-width: 200px;
   margin: 0 auto;
@@ -191,7 +197,7 @@ defineEmits<{
 
 .toss-button:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+  box-shadow: var(--shadow-md);
 }
 
 .toss-button:disabled {

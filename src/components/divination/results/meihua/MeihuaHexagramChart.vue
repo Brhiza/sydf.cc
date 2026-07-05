@@ -1,58 +1,52 @@
 <template>
   <div class="paipan-section">
-    <div class="hexagram-container">
-      <div class="main-hexagram">
-        <div
-          v-for="(yaoDetail, index) in reversedYaosDetail"
-          :key="index"
-          class="yao-line"
-        >
-          <span class="yao-position">{{ getYaoPositionName(yaoDetail.position) }}</span>
-          <YaoSymbol :yao-type="yaoDetail.yaoType" :is-main="true" />
-          <span class="change-mark">
-            <span v-if="yaoDetail.isChanging">●</span>
-          </span>
-          <span class="trigram-info">
-            <template v-if="'tiYong' in yaoDetail">
-              {{ yaoDetail.tiYong }}
-            </template>
-          </span>
+    <div class="paipan-section-header">
+      <h3 class="paipan-section-title">梅花排盘</h3>
+      <span class="paipan-section-meta">主卦 / 互卦 / 变卦</span>
+    </div>
+    <div class="paipan-scroll">
+      <div class="hexagram-container">
+        <div class="main-hexagram">
+          <div v-for="(yaoDetail, index) in reversedYaosDetail" :key="index" class="yao-line">
+            <span class="yao-position">{{ getYaoPositionName(yaoDetail.position) }}</span>
+            <YaoSymbol :yao-type="yaoDetail.yaoType" :is-main="true" />
+            <span class="change-mark">
+              <span v-if="yaoDetail.isChanging">●</span>
+            </span>
+            <span class="trigram-info">
+              <template v-if="'tiYong' in yaoDetail">
+                {{ yaoDetail.tiYong }}
+              </template>
+            </span>
+          </div>
         </div>
-      </div>
 
-      <div v-if="data.interName" class="inter-hexagram">
-        <div
-          v-for="(yaoDetail, index) in reversedYaosDetail"
-          :key="index"
-          class="yao-line"
-        >
-          <YaoSymbol
-            :yao-type="getInterYaoType(data.yaosDetail, yaoDetail.position, !!data.interHexagram)"
-            :is-main="false"
-          />
-          <span class="inter-trigram-info">
-            {{ getTrigramInfo(yaoDetail.position, data.interHexagram) }}
-          </span>
+        <div v-if="data.interName" class="inter-hexagram">
+          <div v-for="(yaoDetail, index) in reversedYaosDetail" :key="index" class="yao-line">
+            <YaoSymbol
+              :yao-type="getInterYaoType(data.yaosDetail, yaoDetail.position, !!data.interHexagram)"
+              :is-main="false"
+            />
+            <span class="inter-trigram-info">
+              {{ getTrigramInfo(yaoDetail.position, data.interHexagram) }}
+            </span>
+          </div>
         </div>
-      </div>
 
-      <div class="changed-hexagram">
-        <div
-          v-for="(yaoDetail, index) in reversedYaosDetail"
-          :key="index"
-          class="yao-line"
-        >
-          <YaoSymbol
-            :yao-type="
-              yaoDetail.isChanging
-                ? LiuyaoHelpers.getChangedYaoType(yaoDetail.yaoType)
-                : yaoDetail.yaoType
-            "
-            :is-main="false"
-          />
-          <span class="changed-trigram-info">
-            {{ getTrigramInfo(yaoDetail.position, data.changedHexagram) }}
-          </span>
+        <div class="changed-hexagram">
+          <div v-for="(yaoDetail, index) in reversedYaosDetail" :key="index" class="yao-line">
+            <YaoSymbol
+              :yao-type="
+                yaoDetail.isChanging
+                  ? LiuyaoHelpers.getChangedYaoType(yaoDetail.yaoType)
+                  : yaoDetail.yaoType
+              "
+              :is-main="false"
+            />
+            <span class="changed-trigram-info">
+              {{ getTrigramInfo(yaoDetail.position, data.changedHexagram) }}
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -78,68 +72,64 @@ const { reversedYaosDetail } = useHexagramDisplay(toRef(props, 'data'));
 @import '@/styles/components/results.css';
 
 .main-hexagram {
-  flex: 0 0 auto;
-  width: auto;
-  min-width: 180px;
+  flex: 1 1 40%;
+  min-width: 0;
 }
 
 .inter-hexagram {
-  flex: 0 0 auto;
-  width: auto;
-  min-width: 120px;
+  flex: 1 1 28%;
+  min-width: 0;
 }
 
 .changed-hexagram {
-  flex: 0 0 auto;
-  width: auto;
-  min-width: 120px;
+  flex: 1 1 28%;
+  min-width: 0;
 }
 
 .yao-position {
-  width: 24px;
+  width: clamp(14px, 4vw, 24px);
   flex-shrink: 0;
   color: var(--color-text-secondary);
-  font-size: 16px;
+  font-size: 15px;
   font-weight: var(--font-weight-medium);
   text-align: left;
 }
 
 .trigram-info {
-  width: 40px;
-  flex-shrink: 0;
+  flex: 1 1 auto;
+  min-width: 0;
   color: var(--color-text-primary);
-  font-size: 16px;
+  font-size: 15px;
   text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .inter-trigram-info {
-  width: 40px;
-  flex-shrink: 0;
+  flex: 1 1 auto;
+  min-width: 0;
   color: var(--color-text-secondary);
-  font-size: 16px;
+  font-size: 15px;
   text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .changed-trigram-info {
-  width: 40px;
-  flex-shrink: 0;
+  flex: 1 1 auto;
+  min-width: 0;
   color: var(--color-text-primary);
-  font-size: 16px;
+  font-size: 15px;
   text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 @media (max-width: 768px) {
-  .main-hexagram {
-    min-width: 140px;
-  }
-
-  .inter-hexagram,
-  .changed-hexagram {
-    min-width: 90px;
-  }
-
   .yao-position {
-    width: 20px;
     font-size: 13px;
   }
 
@@ -156,17 +146,7 @@ const { reversedYaosDetail } = useHexagramDisplay(toRef(props, 'data'));
 }
 
 @media (max-width: 480px) {
-  .main-hexagram {
-    min-width: 120px;
-  }
-
-  .inter-hexagram,
-  .changed-hexagram {
-    min-width: 80px;
-  }
-
   .yao-position {
-    width: 16px;
     font-size: 12px;
   }
 

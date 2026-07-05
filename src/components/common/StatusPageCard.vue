@@ -53,47 +53,72 @@ withDefaults(
 }
 
 .status-page-card-spacious {
-  padding: var(--spacing-16) var(--spacing-8);
+  padding: var(--spacing-10) var(--spacing-8);
 }
 
 .status-page-card-error {
-  border-color: var(--color-error);
-  background-color: var(--color-error-light, #fee);
+  border-color: color-mix(in srgb, var(--color-danger) 42%, var(--color-border));
+  background: color-mix(in srgb, var(--color-danger) 8%, var(--color-background));
 }
 
 .status-icon {
-  font-size: 4rem;
-  margin-bottom: var(--spacing-4);
+  width: 64px;
+  height: 64px;
+  margin: 0 auto var(--spacing-4);
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-full);
+  background: var(--color-primary-muted);
+  border: 1px solid var(--color-border-light);
+  color: var(--color-primary);
+  font-size: 2.25rem;
+  line-height: 1;
+}
+
+.status-page-card-error .status-icon {
+  background: color-mix(in srgb, var(--color-danger) 12%, var(--color-background));
+  border-color: color-mix(in srgb, var(--color-danger) 32%, var(--color-border));
 }
 
 .status-headline {
-  font-size: 4rem;
+  font-size: clamp(2.25rem, 8vw, 3.5rem);
   font-weight: 700;
   color: var(--color-primary);
-  margin: 0 0 var(--spacing-4) 0;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 0 0 var(--spacing-2) 0;
+  letter-spacing: 0;
+  line-height: 1;
 }
 
 .status-title {
-  margin-bottom: var(--spacing-4);
+  margin-bottom: var(--spacing-3);
 }
 
 .status-description {
   margin-bottom: 0;
+  max-width: 640px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .status-page-card-error .status-description {
-  color: var(--color-error);
+  color: var(--color-danger);
 }
 
 @media (max-width: 768px) {
   .status-page-card-spacious {
-    padding: var(--spacing-10) var(--spacing-5);
+    padding: var(--spacing-8) var(--spacing-5);
   }
 
-  .status-headline,
   .status-icon {
-    font-size: 3rem;
+    width: 52px;
+    height: 52px;
+    font-size: 1.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .status-page-card-spacious {
+    padding: var(--spacing-6) var(--spacing-4);
   }
 }
 </style>

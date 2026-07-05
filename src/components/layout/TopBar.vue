@@ -4,11 +4,15 @@
       <button
         class="menu-toggle"
         :class="{ 'menu-active': !sidebarCollapsed }"
+        type="button"
+        aria-label="切换侧边栏"
+        aria-controls="app-sidebar"
+        :aria-expanded="String(!sidebarCollapsed)"
         @click="$emit('toggle-sidebar')"
       >
-        <span class="hamburger-line"></span>
-        <span class="hamburger-line"></span>
-        <span class="hamburger-line"></span>
+        <span class="hamburger-line" aria-hidden="true"></span>
+        <span class="hamburger-line" aria-hidden="true"></span>
+        <span class="hamburger-line" aria-hidden="true"></span>
       </button>
 
       <div class="top-bar-title">
@@ -40,7 +44,9 @@ interface Emits {
   (e: 'toggle-sidebar'): void;
 }
 
-defineProps<Props>();
+withDefaults(defineProps<Props>(), {
+  sidebarCollapsed: true,
+});
 defineEmits<Emits>();
 </script>
 
@@ -53,25 +59,19 @@ defineEmits<Emits>();
   width: 100%;
   height: 60px;
   background: var(--color-background);
-  border-bottom: 1px solid var(--color-border);
-  z-index: 999;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-  transition: left 0.3s ease;
+  border-bottom: 1px solid var(--color-border-light);
+  z-index: var(--z-sticky);
+  box-shadow: var(--shadow-sm);
+  transition: left var(--transition-slow);
   display: none; /* 默认隐藏 */
 }
-
-/* 暗色模式下的阴影适配 */
-html.dark .top-bar {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-}
-
 
 .top-bar-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
   height: 100%;
-  padding: 0 20px;
+  padding: 0 var(--spacing-5);
   position: relative;
 }
 
@@ -82,18 +82,26 @@ html.dark .top-bar {
   align-items: center;
   width: 40px;
   height: 40px;
-  background: none;
-  border: none;
+  background: transparent;
+  border: 1px solid transparent;
   cursor: pointer;
-  padding: 8px;
-  border-radius: 6px;
-  transition: background-color 0.3s ease;
+  padding: var(--spacing-2);
+  border-radius: var(--radius-lg);
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast);
   position: absolute;
-  left: 20px;
+  left: var(--spacing-5);
 }
 
 .menu-toggle:hover {
-  background-color: var(--color-background-muted);
+  background-color: var(--color-background-soft);
+  border-color: var(--color-border-light);
+}
+
+.menu-toggle:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .hamburger-line {
@@ -101,8 +109,10 @@ html.dark .top-bar {
   height: 2px;
   background-color: var(--color-text-primary);
   margin: 2px 0;
-  transition: all 0.3s ease;
-  border-radius: 1px;
+  transition:
+    opacity var(--transition-fast),
+    transform var(--transition-fast);
+  border-radius: var(--radius-full);
 }
 
 .menu-active .hamburger-line:nth-child(1) {
@@ -125,17 +135,18 @@ html.dark .top-bar {
 
 .top-bar-title h1 {
   font-size: 30px;
-  font-weight: 900;
+  font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
   margin: 0;
+  line-height: var(--line-height-tight);
 }
 
 .top-bar-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--spacing-3);
   position: absolute;
-  right: 20px;
+  right: var(--spacing-5);
 }
 
 /* 响应式设计 */

@@ -63,7 +63,6 @@ function createDailyFortuneState(overrides: Record<string, unknown> = {}) {
     isFollowUpLoading: ref(false),
     hasAiResponse: computed(() => true),
     pageTitle: computed(() => '今日运势'),
-    loadingTip: computed(() => '正在解析天机，请稍候...'),
     hasVisibleConversation: computed(() => false),
     startDailyFortune: vi.fn(),
     handleClear: vi.fn(),

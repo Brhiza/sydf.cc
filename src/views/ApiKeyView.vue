@@ -6,7 +6,11 @@
     <ContentSectionCard title="API 配置">
       <FormFieldGroup hint="启用后将使用您自己的 API，否则使用内置 AI 服务">
         <template #label>
-          <input v-model="settings.useCustomApi" type="checkbox" class="form-checkbox" />
+          <input
+            v-model="settings.useCustomApi"
+            type="checkbox"
+            class="form-checkbox"
+          />
           启用自定义 API
         </template>
       </FormFieldGroup>
@@ -14,13 +18,18 @@
       <FormFieldGroup
         label="API 密钥"
         hint="请输入与 OpenAI 格式兼容的 API 密钥"
+        label-for="custom-api-key"
+        hint-id="custom-api-key-hint"
         :disabled="!settings.useCustomApi"
       >
         <input
+          id="custom-api-key"
           v-model="settings.customApiKey"
-          type="text"
+          type="password"
           class="form-input"
           placeholder="输入您的 API Key"
+          autocomplete="off"
+          aria-describedby="custom-api-key-hint"
           :disabled="!settings.useCustomApi"
         />
       </FormFieldGroup>
@@ -28,26 +37,39 @@
       <FormFieldGroup
         label="API 端点"
         hint="请输入基础API地址，系统会自动添加 /chat/completions 路径"
+        label-for="custom-api-endpoint"
+        hint-id="custom-api-endpoint-hint"
         :disabled="!settings.useCustomApi"
       >
         <input
+          id="custom-api-endpoint"
           v-model="settings.customApiEndpoint"
-          type="text"
+          type="url"
           class="form-input"
           placeholder="https://api.example.com/v1"
+          autocomplete="url"
+          aria-describedby="custom-api-endpoint-hint"
           :disabled="!settings.useCustomApi"
         />
       </FormFieldGroup>
 
-      <FormFieldGroup label="选择模型" :disabled="!settings.useCustomApi">
+      <FormFieldGroup
+        label="选择模型"
+        label-for="custom-api-model"
+        hint-id="custom-api-model-hint"
+        :disabled="!settings.useCustomApi"
+      >
         <div class="model-selection-wrapper">
           <CustomSelect
+            id="custom-api-model"
             v-model="settings.selectedModel"
             :options="availableModelOptions"
             placeholder="请先获取模型列表"
+            aria-describedby="custom-api-model-hint"
             :disabled="!settings.useCustomApi || settings.availableModels.length === 0"
           />
           <button
+            type="button"
             class="btn-primary fetch-models-button"
             :disabled="!settings.useCustomApi || !settings.customApiKey || !settings.customApiEndpoint || isLoadingModels"
             :class="{ loading: isLoadingModels }"
@@ -65,8 +87,8 @@
       </FormFieldGroup>
 
       <div class="form-actions">
-        <button class="btn-primary" @click="saveSettings">保存设置</button>
-        <button class="btn-secondary" @click="resetSettings">重置</button>
+        <button type="button" class="btn-primary" @click="saveSettings">保存设置</button>
+        <button type="button" class="btn-secondary" @click="resetSettings">重置</button>
       </div>
     </ContentSectionCard>
 

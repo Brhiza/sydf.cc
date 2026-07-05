@@ -33,17 +33,17 @@ import CompactDropdownMenu, {
 import CompactIconButton from '@/components/common/CompactIconButton.vue';
 
 const props = defineProps<{
-  pinned: boolean
-  showMenu: boolean
-  isActive: boolean
-}>()
+  pinned: boolean;
+  showMenu: boolean;
+  isActive: boolean;
+}>();
 
 const emit = defineEmits<{
-  (e: 'toggle-menu'): void
-  (e: 'pin'): void
-  (e: 'edit'): void
-  (e: 'delete'): void
-}>()
+  (e: 'toggle-menu'): void;
+  (e: 'pin'): void;
+  (e: 'edit'): void;
+  (e: 'delete'): void;
+}>();
 
 const menuItems = computed<CompactDropdownMenuItem[]>(() => [
   {
@@ -62,21 +62,21 @@ const menuItems = computed<CompactDropdownMenuItem[]>(() => [
     icon: '🗑️',
     tone: 'danger',
   },
-])
+]);
 
 function handleMenuSelect(key: string) {
   if (key === 'pin') {
-    emit('pin')
-    return
+    emit('pin');
+    return;
   }
 
   if (key === 'edit') {
-    emit('edit')
-    return
+    emit('edit');
+    return;
   }
 
   if (key === 'delete') {
-    emit('delete')
+    emit('delete');
   }
 }
 </script>

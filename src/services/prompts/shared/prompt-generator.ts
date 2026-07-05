@@ -1,12 +1,9 @@
 import type { DivinationData, DivinationType, SupplementaryInfo } from '@/types';
-import { analyzeQuestion } from './question-analyzer';
 import { buildPrompt } from './prompt-builder';
 import { getFormattedTimeInfoForDivination } from './time-utils';
-import type { QuestionAnalysis } from './types';
 
 export interface PromptFormatterContext {
   question: string;
-  analysis: QuestionAnalysis;
   supplementaryInfo?: SupplementaryInfo;
 }
 
@@ -78,10 +75,8 @@ export function formatGenericPromptData(data: DivinationData): string {
 function buildPromptWithFormatter<TData>(
   options: SyncPromptGenerationOptions<TData>
 ): string {
-  const analysis = analyzeQuestion(options.question);
   const formatterContext: PromptFormatterContext = {
     question: options.question,
-    analysis,
     supplementaryInfo: options.supplementaryInfo,
   };
 
@@ -91,7 +86,6 @@ function buildPromptWithFormatter<TData>(
     question: options.question,
     formattedData,
     timeInfo: options.timeInfo,
-    analysis,
     ...(options.supplementaryInfo && { supplementaryInfo: options.supplementaryInfo }),
   });
 

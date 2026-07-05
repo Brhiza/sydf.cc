@@ -88,6 +88,5 @@ async function generateGenericPrompt(
 
 // 导出共享模块，供其他地方使用
 export * from './shared/types';
-export * from './shared/question-analyzer';
 export * from './shared/prompt-builder';
 export * from './shared/time-utils';

@@ -24,21 +24,29 @@ withDefaults(
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 12px 4px 12px;
+  gap: var(--spacing-2);
+  min-height: 36px;
+  padding: var(--spacing-2) var(--spacing-3) var(--spacing-1);
 }
 
 .compact-toolbar-title {
-  font-size: 12px;
-  font-weight: 600;
+  min-width: 0;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
   color: var(--color-text-secondary);
   margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
+  line-height: var(--line-height-tight);
+  letter-spacing: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .compact-toolbar-actions {
   display: flex;
-  gap: 2px;
+  gap: var(--spacing-1);
   align-items: center;
+  flex: 0 0 auto;
+  min-width: 0;
 }
 </style>

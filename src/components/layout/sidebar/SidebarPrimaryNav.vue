@@ -1,5 +1,5 @@
 <template>
-  <nav class="sidebar-nav">
+  <nav class="sidebar-nav" aria-label="主要功能">
     <div class="nav-section">
       <ul class="nav-list">
         <NavItem
@@ -17,27 +17,27 @@
 </template>
 
 <script setup lang="ts">
-import NavItem from '@/components/sidebar/NavItem.vue'
+import NavItem from '@/components/sidebar/NavItem.vue';
 
 export interface SidebarPrimaryNavItem {
-  path: string
-  title: string
-  icon: string
-  isActive: boolean
+  path: string;
+  title: string;
+  icon: string;
+  isActive: boolean;
 }
 
 defineProps<{
-  items: SidebarPrimaryNavItem[]
-}>()
+  items: SidebarPrimaryNavItem[];
+}>();
 
 defineEmits<{
-  (e: 'navigate', path: string): void
-}>()
+  (e: 'navigate', path: string): void;
+}>();
 </script>
 
 <style scoped>
 .sidebar-nav {
-  padding: 8px 0 12px 0;
+  padding: var(--spacing-2) 0 var(--spacing-3);
 }
 
 .nav-section {

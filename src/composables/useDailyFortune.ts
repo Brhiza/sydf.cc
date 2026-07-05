@@ -86,19 +86,7 @@ export function useDailyFortune(options: UseDailyFortuneOptions = {}) {
     divinationService: currentDivinationService,
   });
 
-  const loadingTips = [
-    '正在解析天机，请稍候...',
-    '奇门遁甲排盘中...',
-    'AI大师正在为您解读运势...',
-    '正在分析今日吉凶...',
-    '正在计算幸运元素...',
-  ];
-
   const pageTitle = computed(() => getDailyPageTitle(selectedDate.value));
-  const loadingTip = computed(() => {
-    const randomIndex = Math.floor(Math.random() * loadingTips.length);
-    return loadingTips[randomIndex];
-  });
   const isDevMode = computed(() => options.isDevMode ?? import.meta.env.DEV);
   const hasVisibleConversation = computed(() => {
     return hasVisibleDailyConversation(conversationHistory.value, isFollowUpLoading.value);
@@ -153,7 +141,6 @@ export function useDailyFortune(options: UseDailyFortuneOptions = {}) {
     isCancelled,
     hasAiResponse,
     pageTitle,
-    loadingTip,
     isDevMode,
     hasVisibleConversation,
     startDailyFortune: flows.startDailyFortune,

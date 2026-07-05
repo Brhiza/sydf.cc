@@ -1,13 +1,14 @@
 <template>
   <li class="nav-item">
-    <div
+    <button
       :class="{ 'nav-link-active': isActive }"
       class="nav-link-content"
+      type="button"
       @click="handleClick"
     >
       <span class="nav-icon">{{ icon }}</span>
       <span class="nav-text">{{ title }}</span>
-    </div>
+    </button>
   </li>
 </template>
 
@@ -30,48 +31,57 @@ const handleClick = () => {
 
 <style scoped>
 .nav-item {
-  margin-bottom: 4px;
+  margin-bottom: var(--spacing-1);
 }
 
 .nav-link-content {
+  width: 100%;
   display: flex;
   align-items: center;
-  padding: 10px 16px;
+  gap: var(--spacing-3);
+  padding: var(--spacing-2) var(--spacing-4);
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg);
+  background: transparent;
   color: var(--color-text-secondary);
-  transition: all 0.2s ease;
-  border-radius: 8px;
   cursor: pointer;
   margin: 0;
-  font-weight: 500;
-  gap: 12px;
+  font: inherit;
+  font-weight: var(--font-weight-medium);
+  text-align: left;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    transform var(--transition-fast);
 }
 
 .nav-link-content:hover {
-  background: rgba(0, 0, 0, 0.04);
+  background: var(--color-background-soft);
   color: var(--color-text-primary);
   transform: translateX(2px);
 }
 
-html.dark .nav-link-content:hover {
-  background: rgba(255, 255, 255, 0.06);
+.nav-link-content:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .nav-link-content.nav-link-active {
   background: var(--color-primary-muted);
+  border-color: color-mix(in srgb, var(--color-primary) 18%, transparent);
   color: var(--color-primary);
-  font-weight: 600;
-  box-shadow: 0 2px 8px rgba(234, 231, 248, 0.5);
+  font-weight: var(--font-weight-semibold);
+  box-shadow: var(--shadow-sm);
 }
 
 html.dark .nav-link-content.nav-link-active {
-  background: #232426;
-  color: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  background: var(--color-background-soft);
+  color: var(--color-text-primary);
 }
 
 .nav-icon {
   font-size: 18px;
-  margin-right: 12px;
   width: 20px;
   text-align: center;
   flex-shrink: 0;
@@ -82,30 +92,30 @@ html.dark .nav-link-content.nav-link-active {
 }
 
 html.dark .nav-link-content.nav-link-active .nav-icon {
-  color: #ffffff;
+  color: var(--color-text-primary);
 }
 
 .nav-text {
-  font-size: 15px;
+  font-size: var(--font-size-sm);
   font-weight: inherit;
-  line-height: 1.4;
+  line-height: var(--line-height-normal);
 }
 
 @media (max-width: 768px) {
   .nav-link-content {
-    padding: 10px 14px;
-    margin: 0 12px;
+    padding: var(--spacing-2) var(--spacing-3);
+    margin: 0 var(--spacing-3);
   }
 }
 
 @media (max-width: 480px) {
   .nav-text {
-    font-size: 13px;
+    font-size: var(--font-size-sm);
   }
 
   .nav-link-content {
-    padding: 5px 10px;
-    margin: 0 4px;
+    padding: var(--spacing-2);
+    margin: 0 var(--spacing-1);
   }
 }
 </style>

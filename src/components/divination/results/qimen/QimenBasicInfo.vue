@@ -16,9 +16,6 @@ const props = defineProps<{
 }>();
 
 const infoItems = computed(() => {
-  return createQimenInfoItems(props.data, {
-    question: props.question,
-    supplementaryInfo: props.supplementaryInfo,
-  });
+  return createQimenInfoItems(props.data);
 });
 </script>

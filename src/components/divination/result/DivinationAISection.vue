@@ -15,9 +15,7 @@
         />
       </div>
       <div v-else-if="isAiLoading || isFollowUpLoading" class="ai-loading-state">
-        <div class="loading-dots">
-          <span></span><span></span><span></span>
-        </div>
+        <AIThinkingIndicator class="ai-thinking-status" />
       </div>
     </div>
 
@@ -28,6 +26,7 @@
 <script setup lang="ts">
 import type { ChatMessage, ChatMessageRetryTarget, DivinationType } from '@/types'
 import { computed } from 'vue'
+import AIThinkingIndicator from '@/components/common/AIThinkingIndicator.vue'
 import { isCustomBuild } from '@/utils/build-target'
 import DivinationAIDisclaimer from './ai/DivinationAIDisclaimer.vue'
 import DivinationAIHeader from './ai/DivinationAIHeader.vue'
@@ -162,42 +161,6 @@ const showDisclaimer = computed(() => {
   display: flex;
   justify-content: center;
   padding: var(--spacing-6) 0;
-}
-
-.loading-dots {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  height: 24px;
-}
-
-.loading-dots span {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: currentColor;
-  opacity: 0;
-  animation: blink 1.4s infinite both;
-}
-
-.loading-dots span:nth-child(2) {
-  animation-delay: 0.2s;
-}
-
-.loading-dots span:nth-child(3) {
-  animation-delay: 0.4s;
-}
-
-@keyframes blink {
-  0%,
-  80%,
-  100% {
-    opacity: 0;
-  }
-  40% {
-    opacity: 1;
-  }
 }
 
 @media (max-width: 768px) {

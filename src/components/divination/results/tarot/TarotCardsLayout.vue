@@ -83,6 +83,7 @@ const tarotLayout = computed(() => resolveTarotLayout(props.cards.length, props.
   --tarot-current-align-items: var(--tarot-layout-align-items);
   margin: var(--spacing-6) auto;
   width: 100%;
+  min-width: 0;
   box-sizing: border-box;
   max-width: var(--tarot-current-max-width);
   gap: var(--tarot-current-gap);
@@ -108,8 +109,8 @@ const tarotLayout = computed(() => resolveTarotLayout(props.cards.length, props.
 }
 
 .cards-layout .tarot-card {
-  width: var(--tarot-current-card-width);
-  max-width: var(--tarot-current-card-max-width);
+  width: min(100%, var(--tarot-current-card-width));
+  max-width: min(100%, var(--tarot-current-card-max-width));
 }
 
 .celtic-position-1 {
@@ -152,6 +153,17 @@ const tarotLayout = computed(() => resolveTarotLayout(props.cards.length, props.
     --tarot-current-flex-direction: var(--tarot-layout-mobile-flex-direction);
     --tarot-current-justify-content: var(--tarot-layout-mobile-justify-content);
     --tarot-current-align-items: var(--tarot-layout-mobile-align-items);
+    aspect-ratio: auto;
+  }
+
+  .layout-mode-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 112px), 1fr));
+    grid-template-rows: auto;
+  }
+
+  .cards-layout .tarot-card {
+    grid-area: auto !important;
+    transform: none !important;
   }
 }
 
@@ -165,6 +177,11 @@ const tarotLayout = computed(() => resolveTarotLayout(props.cards.length, props.
     --tarot-current-flex-direction: var(--tarot-layout-compact-flex-direction);
     --tarot-current-justify-content: var(--tarot-layout-compact-justify-content);
     --tarot-current-align-items: var(--tarot-layout-compact-align-items);
+    aspect-ratio: auto;
+  }
+
+  .layout-mode-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 96px), 1fr));
   }
 }
 </style>

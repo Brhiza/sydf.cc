@@ -49,4 +49,27 @@ const rendererComponent = computed(() => {
 .result-content {
   margin-bottom: 0;
 }
+
+.result-content :deep(.base-result-layout) {
+  gap: var(--spacing-3);
+  padding: var(--spacing-4);
+}
+
+@media (max-width: 480px) {
+  .result-content :deep(.base-result-layout) {
+    gap: var(--spacing-3);
+    padding: var(--spacing-3);
+  }
+}
+
+@media (max-width: 768px) {
+  .result-content :deep(.base-result-layout) {
+    gap: var(--spacing-2);
+    margin-bottom: var(--spacing-3);
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+}
 </style>

@@ -1,57 +1,66 @@
 <template>
-  <div ref="selectorRef" class="tarot-spread-selector">
-    <div class="spread-bubbles-container">
-      <div class="spread-bubbles">
-        <TarotSpreadBubble
-          v-for="spreadKey in visibleSpreadKeys"
-          :key="spreadKey"
-          :icon="getTarotSpreadIcon(spreadKey)"
-          :label="TAROT_SPREADS[spreadKey].name"
-          :is-active="selectedSpread === spreadKey"
-          @select="selectSpread(spreadKey)"
-        />
-
-        <TarotSpreadBubble icon="⋯" label="全部" expand-button @select="toggleShowAll" />
+  <div class="tarot-spread-selector">
+    <div class="spread-selector-header">
+      <div class="spread-selector-copy">
+        <span class="spread-selector-label">牌阵</span>
       </div>
+
+      <button
+        v-if="canExpand"
+        type="button"
+        class="spread-toggle"
+        :aria-expanded="showAllSpreads"
+        @click="showAllSpreads = !showAllSpreads"
+      >
+        {{ showAllSpreads ? '收起' : '更多牌阵' }}
+      </button>
     </div>
 
-    <transition name="slide-fade">
-      <div v-if="showAllSpreads" class="all-spreads-panel">
-        <div class="panel-header">
-          <h3 class="panel-title">选择一个牌阵</h3>
-          <button class="close-button" @click="closeAllSpreads">&times;</button>
-        </div>
-        <div class="panel-content">
-          <TarotSpreadPanelItem
-            v-for="spreadKey in orderedSpreadKeys"
-            :key="spreadKey"
-            :icon="getTarotSpreadIcon(spreadKey)"
-            :title="TAROT_SPREADS[spreadKey].name"
-            :description="TAROT_SPREADS[spreadKey].description"
-            :card-count="TAROT_SPREADS[spreadKey].cardCount"
-            :is-active="selectedSpread === spreadKey"
-            @select="selectSpreadFromPanel(spreadKey)"
-          />
-        </div>
-      </div>
-    </transition>
+    <div class="spread-options" :class="{ expanded: showAllSpreads }">
+      <button
+        v-for="spread in displayedSpreads"
+        :key="spread.key"
+        type="button"
+        class="spread-option"
+        :class="{ active: selectedSpread === spread.key }"
+        :aria-pressed="selectedSpread === spread.key"
+        @click="selectSpread(spread.key)"
+      >
+        <span class="spread-option-main">
+          <span class="spread-option-name">{{ spread.name }}</span>
+          <span class="spread-option-count">{{ spread.cardCount }}张</span>
+        </span>
+        <span class="spread-option-description">{{ spread.description }}</span>
+      </button>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue';
-import { TAROT_SPREADS } from '@/shared/tarot-spreads';
-import TarotSpreadBubble from './tarot-selector/TarotSpreadBubble.vue';
-import TarotSpreadPanelItem from './tarot-selector/TarotSpreadPanelItem.vue';
-import {
-  DEFAULT_VISIBLE_TAROT_SPREAD_KEYS,
-  ORDERED_TAROT_SPREAD_KEYS,
-  getTarotSpreadIcon,
-  type TarotSpreadKey,
-} from './tarot-selector/tarot-spread-selector.config';
+import { computed, ref } from 'vue';
+import { TAROT_SPREADS, type TarotSpreadKey } from '@/shared/tarot-spreads';
 
-// 定义 Props 和 Emits
-defineProps<{
+interface SpreadOption {
+  key: TarotSpreadKey;
+  name: string;
+  description: string;
+  cardCount: number;
+}
+
+const SPREAD_SUMMARIES: Partial<Record<TarotSpreadKey, string>> = {
+  single: '快速聚焦当下，适合简单提问。',
+  three: '按时间脉络看过去、现在与趋势。',
+  love: '分析关系状态、双方心意与发展建议。',
+  career: '梳理职场处境、机会挑战和行动方向。',
+  decision: '比较选择利弊，辅助做出判断。',
+  celtic: '深度拆解复杂问题，覆盖多重影响。',
+  chakra: '查看身心灵能量状态与平衡点。',
+  year: '按年度视角观察整体运势走向。',
+  mindBodySpirit: '检视思想、身体与精神状态。',
+  horseshoe: '概览问题起因、建议与最终结果。',
+};
+
+const props = defineProps<{
   selectedSpread: string;
 }>();
 
@@ -60,125 +69,216 @@ const emit = defineEmits<{
 }>();
 
 const showAllSpreads = ref(false);
-const selectorRef = ref<HTMLElement | null>(null);
-const orderedSpreadKeys = ORDERED_TAROT_SPREAD_KEYS;
-const visibleSpreadKeys = DEFAULT_VISIBLE_TAROT_SPREAD_KEYS;
 
-// 方法
+const spreadOptions = computed<SpreadOption[]>(() =>
+  (Object.keys(TAROT_SPREADS) as TarotSpreadKey[]).map((key) => ({
+    key,
+    name: TAROT_SPREADS[key].name,
+    description: SPREAD_SUMMARIES[key] ?? TAROT_SPREADS[key].description,
+    cardCount: TAROT_SPREADS[key].cardCount,
+  }))
+);
+
+const selectedSpreadMeta = computed(() =>
+  spreadOptions.value.find((spread) => spread.key === props.selectedSpread)
+);
+
+const compactSpreads = computed(() => {
+  const visible = spreadOptions.value.slice(0, 4);
+
+  if (!selectedSpreadMeta.value || visible.some((spread) => spread.key === selectedSpreadMeta.value?.key)) {
+    return visible;
+  }
+
+  return [...visible.slice(0, 3), selectedSpreadMeta.value];
+});
+
+const displayedSpreads = computed(() => (showAllSpreads.value ? spreadOptions.value : compactSpreads.value));
+const canExpand = computed(() => spreadOptions.value.length > compactSpreads.value.length);
+
 function selectSpread(spreadKey: string) {
   emit('update:selectedSpread', spreadKey);
 }
-
-function selectSpreadFromPanel(spreadKey: string) {
-  selectSpread(spreadKey);
-  closeAllSpreads();
-}
-
-function toggleShowAll() {
-  showAllSpreads.value = !showAllSpreads.value;
-}
-
-function closeAllSpreads() {
-  showAllSpreads.value = false;
-}
-
-function handleClickOutside(event: MouseEvent) {
-  const target = event.target;
-  if (!(target instanceof Node)) {
-    closeAllSpreads();
-    return;
-  }
-
-  if (selectorRef.value && !selectorRef.value.contains(target)) {
-    closeAllSpreads();
-  }
-}
-
-// 生命周期钩子
-onMounted(() => {
-  document.addEventListener('click', handleClickOutside);
-});
-
-onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside);
-});
 </script>
 
 <style scoped>
 .tarot-spread-selector {
-  margin-bottom: 24px;
+  display: grid;
+  gap: var(--spacing-3);
   width: 100%;
-  position: relative;
+  margin-bottom: var(--spacing-4);
 }
 
-.spread-bubbles-container {
-  width: 100%;
-}
-
-.spread-bubbles {
+.spread-selector-header {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: center;
-  margin-bottom: 0;
-}
-
-.all-spreads-panel {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  background: var(--color-background);
-  border: 1px solid var(--color-border-light);
-  border-radius: 16px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-  overflow: hidden;
-}
-
-html.dark .all-spreads-panel {
-  background: var(--color-background-elevated);
-  border-color: var(--color-border);
-}
-
-.panel-header {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--color-border-light);
+  justify-content: space-between;
+  gap: var(--spacing-3);
+  min-width: 0;
 }
 
-.panel-title {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 600;
+.spread-selector-copy {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-2);
+  min-width: 0;
+}
+
+.spread-selector-label {
   color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  white-space: nowrap;
 }
 
-.close-button {
-  background: none;
-  border: none;
-  font-size: 24px;
-  line-height: 1;
-  cursor: pointer;
+.spread-toggle {
+  flex: 0 0 auto;
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-full);
+  background: var(--color-background);
   color: var(--color-text-secondary);
-  padding: 0 4px;
+  cursor: pointer;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-tight);
+  padding: var(--spacing-1) var(--spacing-3);
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
-.panel-content {
-  max-height: 400px;
-  overflow-y: auto;
-  padding: 8px;
-}
-.slide-fade-enter-active,
-.slide-fade-leave-active {
-  transition: all 0.3s ease;
+.spread-toggle:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 30%, var(--color-border));
+  background: var(--color-background-soft);
+  color: var(--color-primary);
 }
 
-.slide-fade-enter-from,
-.slide-fade-leave-to {
-  opacity: 0;
-  transform: translateY(-10px);
+.spread-toggle:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.spread-options {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--spacing-2);
+}
+
+.spread-options.expanded {
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+}
+
+.spread-option {
+  display: grid;
+  gap: var(--spacing-1);
+  min-width: 0;
+  min-height: 70px;
+  padding: var(--spacing-3);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--color-primary) 3%, transparent), transparent),
+    var(--color-background);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  text-align: left;
+  box-shadow: none;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.spread-option:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border));
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+
+.spread-option:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.spread-option.active {
+  border-color: color-mix(in srgb, var(--color-primary) 52%, var(--color-border));
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--color-primary) 10%, transparent), transparent),
+    var(--color-primary-muted);
+  box-shadow: var(--shadow-sm);
+}
+
+.spread-option-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-2);
+  min-width: 0;
+}
+
+.spread-option-name {
+  min-width: 0;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.spread-option-count {
+  flex: 0 0 auto;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-tight);
+}
+
+.spread-option.active .spread-option-name,
+.spread-option.active .spread-option-count {
+  color: var(--color-primary);
+}
+
+.spread-option-description {
+  display: -webkit-box;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  line-height: 1.35;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+@media (max-width: 768px) {
+  .tarot-spread-selector {
+    gap: var(--spacing-2);
+    margin-bottom: var(--spacing-3);
+  }
+
+  .spread-options,
+  .spread-options.expanded {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .spread-option {
+    min-height: 62px;
+    padding: var(--spacing-2);
+  }
+}
+
+@media (max-width: 360px) {
+  .spread-selector-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: var(--spacing-2);
+  }
+
+  .spread-toggle {
+    width: 100%;
+  }
 }
 </style>

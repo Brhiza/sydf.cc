@@ -115,7 +115,6 @@ export function applyStreamDelta(
       flushContentBuffer();
       onChunk('');
     }
-    state.contentBuffer += reasoningChunk;
   }
 }
 

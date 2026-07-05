@@ -5,53 +5,16 @@
 
 import type { LiuyaoData, SupplementaryInfo } from '@/types';
 import { generatePromptWithFormatter, type PromptFormatterContext } from './shared/prompt-generator';
-import type { QuestionType } from './shared/types';
-
-function getLiuyaoYongShenHint(types: QuestionType, supplementaryInfo?: SupplementaryInfo): string {
-  const hints: string[] = [];
-
-  if (types.isFinance) {
-    hints.push('妻财为主用神');
-  }
-  if (types.isCareer) {
-    hints.push('官鬼为主用神');
-  }
-  if (types.isStudy) {
-    hints.push('父母为主用神');
-  }
-  if (types.isHealth) {
-    hints.push('官鬼为病，子孙为药，两者都要参看');
-  }
-
-  const relationshipHint = getRelationshipYongShenHint(types, supplementaryInfo);
-  if (relationshipHint) {
-    hints.push(relationshipHint);
-  }
-
-  return hints.length > 0 ? hints.join('；') : '未命中明确分类，需结合问事对象自行取用神。';
-}
-
-function getRelationshipYongShenHint(types: QuestionType, supplementaryInfo?: SupplementaryInfo): string | '' {
-  if (!types.isRelationship) {
-    return '';
-  }
-
-  if (supplementaryInfo?.gender === '男') {
-    return '感情问事以妻财为主用神';
-  }
-  if (supplementaryInfo?.gender === '女') {
-    return '感情问事以官鬼为主用神';
-  }
-  return '感情问事若未给性别，宜官鬼、妻财并参';
-}
 
 /**
  * 格式化六爻数据为可读的文本
  */
 function formatLiuyaoData(data: LiuyaoData, context: PromptFormatterContext): string {
-  const { supplementaryInfo, analysis } = context;
+  const { supplementaryInfo } = context;
   const ganzhi = data.ganzhi ? `干支：${data.ganzhi.year}年 ${data.ganzhi.month}月 ${data.ganzhi.day}日 ${data.ganzhi.hour}时` : '干支信息未知';
-  const yongShenHint = getLiuyaoYongShenHint(analysis.types, supplementaryInfo);
+  const genderHint = supplementaryInfo?.gender
+    ? `用户补充性别：${supplementaryInfo.gender}，仅作为取用神时的辅助信息。`
+    : '用户未补充性别；如问题涉及人物关系，请自行判断是否需要并参相关用神。';
   let prompt = `六爻卦象信息：
 ${ganzhi}
 主卦：${data.originalName}（${data.palace?.name || ''}宫）
@@ -60,7 +23,7 @@ ${ganzhi}
 空亡：${data.voidBranches?.join('、') || '无'}
 特殊卦式：${data.specialPattern || '常规卦'}
 特殊提示：${data.specialAdvice || '无'}
-用神参考：${yongShenHint}
+用神取用：请根据用户原始问题、卦象和补充信息自行确定用神。${genderHint}
 
 爻象详情：`;
 

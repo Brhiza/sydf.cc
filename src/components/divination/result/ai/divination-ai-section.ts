@@ -36,25 +36,9 @@ export function getLastAssistantMessage(messages: ChatMessage[]): ChatMessage | 
 }
 
 export function getAISectionTitle(
-  messages: ChatMessage[],
-  isAiLoading: boolean,
-  isFollowUpLoading: boolean
+  _messages: ChatMessage[],
+  _isAiLoading: boolean,
+  _isFollowUpLoading: boolean
 ): string {
-  if (isAiLoading || isFollowUpLoading) {
-    const hasAssistantPlaceholder = messages.some(
-      (message) => message.role === 'assistant' && !message.content
-    );
-
-    if (hasAssistantPlaceholder || messages.length === 0) {
-      return 'AI正在思考...';
-    }
-  }
-
-  const lastAssistantMessage = getLastAssistantMessage(messages);
-
-  if ((isAiLoading || isFollowUpLoading) && lastAssistantMessage && !lastAssistantMessage.content) {
-    return 'AI正在思考...';
-  }
-
   return 'AI深度解读';
 }

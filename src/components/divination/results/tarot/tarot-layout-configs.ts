@@ -77,15 +77,23 @@ export const TAROT_LAYOUT_CONFIGS: Record<string, TarotLayoutConfig> = {
     gap: 'var(--spacing-4)',
     padding: 'var(--spacing-6) var(--spacing-4)',
     background: 'linear-gradient(135deg, rgba(135, 206, 235, 0.1), rgba(173, 216, 230, 0.1))',
-    cardWidth: 'min(200px, calc((100vw - 120px) / 3 - var(--spacing-4)))',
+    cardWidth: 'clamp(126px, 30%, 200px)',
     cardMaxWidth: '200px',
     responsive: {
       tablet: {
-        cardWidth: 'min(180px, calc((100vw - 120px) / 3 - var(--spacing-4)))',
+        cardWidth: 'clamp(118px, 30%, 180px)',
+      },
+      mobile: {
+        gap: 'var(--spacing-2)',
+        padding: 'var(--spacing-3) 0',
+        cardWidth: 'clamp(104px, 30%, 160px)',
+        cardMaxWidth: '160px',
       },
       compact: {
-        gap: 'var(--spacing-3)',
-        flexDirection: 'column',
+        gap: 'var(--spacing-2)',
+        padding: 'var(--spacing-2) 0',
+        cardWidth: 'clamp(92px, 30%, 140px)',
+        cardMaxWidth: '140px',
         alignItems: 'center',
       },
     },
@@ -99,7 +107,7 @@ export const TAROT_LAYOUT_CONFIGS: Record<string, TarotLayoutConfig> = {
     maxWidth: 'min(80vw, 600px)',
     padding: 'var(--spacing-6) var(--spacing-4)',
     background: 'linear-gradient(135deg, rgba(255, 182, 193, 0.1), rgba(255, 105, 180, 0.1))',
-    cardWidth: 'min(150px, calc((100vw - 120px) / 4 - var(--spacing-3)))',
+    cardWidth: 'min(150px, 100%)',
     cardMaxWidth: '150px',
     responsive: {
       desktop: {
@@ -128,7 +136,7 @@ export const TAROT_LAYOUT_CONFIGS: Record<string, TarotLayoutConfig> = {
     maxWidth: 'min(70vw, 580px)',
     padding: 'var(--spacing-6) var(--spacing-4)',
     background: 'linear-gradient(135deg, rgba(70, 130, 180, 0.1), rgba(100, 149, 237, 0.1))',
-    cardWidth: 'min(170px, calc((100vw - 120px) / 3 - var(--spacing-3)))',
+    cardWidth: 'min(170px, 100%)',
     cardMaxWidth: '170px',
     responsive: {
       desktop: {
@@ -157,7 +165,7 @@ export const TAROT_LAYOUT_CONFIGS: Record<string, TarotLayoutConfig> = {
     maxWidth: 'min(60vw, 550px)',
     padding: 'var(--spacing-6) var(--spacing-4)',
     background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 165, 0, 0.1))',
-    cardWidth: 'min(160px, calc((100vw - 120px) / 3 - var(--spacing-3)))',
+    cardWidth: 'min(160px, 100%)',
     cardMaxWidth: '160px',
     responsive: {
       desktop: {
@@ -169,15 +177,15 @@ export const TAROT_LAYOUT_CONFIGS: Record<string, TarotLayoutConfig> = {
       mobile: {
         maxWidth: '350px',
         padding: 'var(--spacing-4) var(--spacing-3)',
-        cardWidth: 'min(100px, calc((100vw - 100px) / 3 - var(--spacing-3)))',
+        cardWidth: 'min(104px, 100%)',
         cardMaxWidth: '100px',
       },
       compact: {
         maxWidth: '100%',
         gap: 'var(--spacing-2)',
         padding: 'var(--spacing-6) var(--spacing-4)',
-        cardWidth: 'min(80px, calc((100vw - 120px) / 3 - var(--spacing-2)))',
-        cardMaxWidth: '80px',
+        cardWidth: 'min(96px, 100%)',
+        cardMaxWidth: '96px',
       },
     },
   },
@@ -190,7 +198,7 @@ export const TAROT_LAYOUT_CONFIGS: Record<string, TarotLayoutConfig> = {
     maxWidth: 'min(70vw, 700px)',
     padding: 'var(--spacing-6) var(--spacing-4)',
     background: 'linear-gradient(135deg, rgba(138, 43, 226, 0.1), rgba(75, 0, 130, 0.1))',
-    cardWidth: 'min(140px, calc((100vw - 120px) / 4 - var(--spacing-2)))',
+    cardWidth: 'min(140px, 100%)',
     cardMaxWidth: '140px',
     aspectRatio: '4 / 4',
     responsive: {
@@ -222,7 +230,7 @@ export const TAROT_LAYOUT_CONFIGS: Record<string, TarotLayoutConfig> = {
     padding: 'var(--spacing-6) var(--spacing-4)',
     background:
       'linear-gradient(180deg, rgba(255, 0, 0, 0.1) 0%, rgba(255, 165, 0, 0.1) 16%, rgba(255, 255, 0, 0.1) 32%, rgba(0, 128, 0, 0.1) 48%, rgba(0, 191, 255, 0.1) 64%, rgba(75, 0, 130, 0.1) 80%, rgba(148, 0, 211, 0.1) 100%)',
-    cardWidth: 'min(180px, calc(100vw - 160px))',
+    cardWidth: 'min(180px, 100%)',
     cardMaxWidth: '180px',
     responsive: {
       desktop: {
@@ -232,14 +240,20 @@ export const TAROT_LAYOUT_CONFIGS: Record<string, TarotLayoutConfig> = {
         maxWidth: 'min(22vw, 220px)',
       },
       mobile: {
-        maxWidth: '180px',
+        maxWidth: '100%',
         gap: 'var(--spacing-2)',
         padding: 'var(--spacing-4) var(--spacing-3)',
+        flexDirection: 'row',
+        cardWidth: 'min(104px, 100%)',
+        cardMaxWidth: '104px',
       },
       compact: {
         maxWidth: '100%',
         gap: 'var(--spacing-2)',
         padding: 'var(--spacing-6) var(--spacing-4)',
+        flexDirection: 'row',
+        cardWidth: 'min(96px, 100%)',
+        cardMaxWidth: '96px',
       },
     },
   },
@@ -251,7 +265,7 @@ export const TAROT_LAYOUT_CONFIGS: Record<string, TarotLayoutConfig> = {
     maxWidth: 'min(90vw, 1000px)',
     padding: 'var(--spacing-6) var(--spacing-4)',
     background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 140, 0, 0.1))',
-    cardWidth: 'min(130px, calc((100vw - 120px) / 6 - var(--spacing-2)))',
+    cardWidth: 'min(130px, 100%)',
     cardMaxWidth: '130px',
     responsive: {
       desktop: {
@@ -276,7 +290,7 @@ export const TAROT_LAYOUT_CONFIGS: Record<string, TarotLayoutConfig> = {
     className: 'layout-mind-body-spirit',
     mode: 'flex',
     gap: 'var(--spacing-4)',
-    cardWidth: 'min(200px, calc((100vw - 120px) / 3 - var(--spacing-4)))',
+    cardWidth: 'clamp(118px, 30%, 200px)',
     cardMaxWidth: '200px',
   },
   horseshoe: {
@@ -287,7 +301,7 @@ export const TAROT_LAYOUT_CONFIGS: Record<string, TarotLayoutConfig> = {
     gap: 'var(--spacing-3)',
     maxWidth: 'min(70vw, 600px)',
     padding: '0 var(--spacing-2)',
-    cardWidth: 'min(160px, calc((100vw - 120px) / 3 - var(--spacing-3)))',
+    cardWidth: 'min(160px, 100%)',
     cardMaxWidth: '160px',
   },
   grid: {
@@ -298,7 +312,7 @@ export const TAROT_LAYOUT_CONFIGS: Record<string, TarotLayoutConfig> = {
     maxWidth: 'min(80vw, 800px)',
     padding: 'var(--spacing-6) var(--spacing-4)',
     background: 'linear-gradient(135deg, rgba(128, 128, 128, 0.1), rgba(169, 169, 169, 0.1))',
-    cardWidth: 'min(170px, calc((100vw - 120px) / 3 - var(--spacing-4)))',
+    cardWidth: 'min(170px, 100%)',
     cardMaxWidth: '170px',
     responsive: {
       desktop: {
@@ -327,7 +341,7 @@ export const TAROT_LAYOUT_CONFIGS: Record<string, TarotLayoutConfig> = {
     maxWidth: 'min(85vw, 900px)',
     padding: 'var(--spacing-6) var(--spacing-4)',
     background: 'linear-gradient(135deg, rgba(255, 99, 71, 0.1), rgba(255, 69, 0, 0.1))',
-    cardWidth: 'min(150px, calc((100vw - 120px) / 4 - var(--spacing-3)))',
+    cardWidth: 'min(150px, 100%)',
     cardMaxWidth: '150px',
     responsive: {
       desktop: {
@@ -356,7 +370,7 @@ export const TAROT_LAYOUT_CONFIGS: Record<string, TarotLayoutConfig> = {
     maxWidth: 'min(95vw, 1200px)',
     padding: 'var(--spacing-6) var(--spacing-4)',
     background: 'linear-gradient(135deg, rgba(72, 61, 139, 0.1), rgba(106, 90, 205, 0.1))',
-    cardWidth: 'min(130px, calc((100vw - 120px) / 6 - var(--spacing-2)))',
+    cardWidth: 'min(130px, 100%)',
     cardMaxWidth: '130px',
     responsive: {
       desktop: {

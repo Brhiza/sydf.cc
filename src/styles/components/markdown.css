@@ -1,54 +1,51 @@
-/* Markdown内容渲染样式 */
-
 .markdown-content {
-  line-height: 1.6;
   color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-relaxed);
+  overflow-wrap: anywhere;
 }
 
-/* 标题样式 */
-.markdown-content h1 {
-  font-size: 1.5em;
-  font-weight: 600;
-  margin: 1.2em 0 0.8em 0;
+.markdown-content h1,
+.markdown-content h2 {
+  margin: 1.2em 0 0.55em;
   color: var(--color-text-primary);
-  border-bottom: 2px solid var(--color-border);
-  padding-bottom: 0.3em;
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+}
+
+.markdown-content h1 {
+  font-size: var(--font-size-2xl);
 }
 
 .markdown-content h2 {
-  font-size: 1.3em;
-  font-weight: 600;
-  margin: 1em 0 0.6em 0;
-  color: var(--color-text-primary);
+  font-size: var(--font-size-xl);
 }
 
 .markdown-content h3 {
-  font-size: 1.1em;
-  font-weight: 600;
-  margin: 0.8em 0 0.4em 0;
+  margin: 1em 0 0.4em;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
+  line-height: var(--line-height-tight);
 }
 
-/* 段落样式 */
 .markdown-content p {
-  margin: 0.8em 0;
-  text-align: justify;
+  margin: 0.75em 0;
 }
 
-/* 列表样式 */
 .markdown-content ul,
 .markdown-content ol {
-  margin: 0.8em 0;
-  padding-left: 1.5em;
+  margin: 0.75em 0;
+  padding-left: 1.4em;
 }
 
 .markdown-content li {
-  margin: 0.3em 0;
+  margin: 0.25em 0;
+  padding-left: 0.15em;
 }
 
-/* 强调样式 */
 .markdown-content strong {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
 }
 
@@ -57,136 +54,105 @@
   color: var(--color-text-secondary);
 }
 
-/* 代码样式 */
 .markdown-content code {
-  background-color: var(--color-background-muted);
+  background: var(--color-background-soft);
   color: var(--color-primary);
-  padding: 0.2em 0.4em;
-  border-radius: 3px;
-  font-family: 'Courier New', monospace;
-  font-size: 0.9em;
+  padding: 0.16em 0.38em;
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  font-family: var(--font-family-mono);
+  font-size: 0.88em;
 }
 
 .markdown-content pre {
-  background-color: var(--color-background-muted);
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  padding: 1em;
-  overflow-x: auto;
   margin: 1em 0;
+  padding: var(--spacing-4);
+  background: var(--color-background-soft);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
 }
 
 .markdown-content pre code {
   background: none;
   color: inherit;
+  border: 0;
   padding: 0;
 }
 
-/* 引用样式 */
 .markdown-content blockquote {
-  border-left: 4px solid var(--color-primary);
-  background-color: var(--color-background-muted);
   margin: 1em 0;
-  padding: 0.8em 1.2em;
-  font-style: italic;
+  padding: var(--spacing-3) var(--spacing-4);
+  background: color-mix(in srgb, var(--color-primary) 6%, var(--color-background));
+  border-left: 3px solid color-mix(in srgb, var(--color-primary) 56%, var(--color-border));
+  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
   color: var(--color-text-secondary);
 }
 
-/* 表格样式 */
 .markdown-content table {
-  border-collapse: collapse;
+  display: block;
   width: 100%;
+  max-width: 100%;
   margin: 1em 0;
+  border-collapse: collapse;
+  overflow-x: auto;
 }
 
 .markdown-content th,
 .markdown-content td {
-  border: 1px solid var(--color-border);
-  padding: 0.6em 1em;
+  padding: 0.55em 0.75em;
+  border: 1px solid var(--color-border-light);
   text-align: left;
+  vertical-align: top;
 }
 
 .markdown-content th {
-  background-color: var(--color-background-muted);
-  font-weight: 600;
+  background: var(--color-background-soft);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-semibold);
 }
 
-/* 分隔线样式 */
 .markdown-content hr {
   border: none;
-  border-top: 2px solid var(--color-border);
-  margin: 2em 0;
+  border-top: 1px solid var(--color-border-light);
+  margin: 1.5em 0;
 }
 
-/* 链接样式 */
 .markdown-content a {
   color: var(--color-primary);
-  text-decoration: none;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .markdown-content a:hover {
-  text-decoration: underline;
+  color: var(--color-primary-dark);
 }
 
-/* 响应式设计 */
 @media (max-width: 768px) {
   .markdown-content h1 {
-    font-size: 1.3em;
+    font-size: var(--font-size-xl);
   }
 
   .markdown-content h2 {
-    font-size: 1.2em;
+    font-size: var(--font-size-lg);
   }
 
   .markdown-content h3 {
-    font-size: 1.1em;
+    font-size: var(--font-size-base);
   }
 
   .markdown-content pre {
-    padding: 0.8em;
-    font-size: 0.9em;
+    padding: var(--spacing-3);
+    font-size: var(--font-size-sm);
   }
 
   .markdown-content table {
-    font-size: 0.9em;
+    font-size: var(--font-size-sm);
   }
 
   .markdown-content th,
   .markdown-content td {
-    padding: 0.4em 0.6em;
+    padding: 0.45em 0.6em;
   }
 }
 
-/* thinking 标签 (details/summary) 样式 */
-.markdown-content details {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  margin: 1em 0;
-  background-color: var(--color-background-muted);
-  transition: all 0.3s ease;
-}
-
-.markdown-content details[open] {
-  box-shadow: var(--shadow-sm);
-}
-
-.markdown-content summary {
-  padding: 0.8em 1.2em;
-  font-weight: 500;
-  cursor: pointer;
-  color: var(--color-text-secondary);
-  outline: none;
-  transition: color 0.3s ease;
-}
-
-.markdown-content summary:hover {
-  color: var(--color-primary);
-}
-
-.markdown-content details .thinking-content {
-  padding: 0 1.2em 1.2em 1.2em;
-  border-top: 1px solid var(--color-border);
-  color: var(--color-text-secondary);
-  font-size: 0.9em;
-  opacity: 0.8;
-}

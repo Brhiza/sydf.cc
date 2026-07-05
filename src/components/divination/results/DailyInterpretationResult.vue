@@ -4,13 +4,14 @@
       <MarkdownRenderer :content="content" />
     </div>
     <div v-else-if="isLoading" class="daily-interpretation-placeholder">
-      AI 正在解读今日运势...
+      <AIThinkingIndicator />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import AIThinkingIndicator from '@/components/common/AIThinkingIndicator.vue';
 import MarkdownRenderer from '@/components/common/MarkdownRenderer.vue';
 
 interface Props {

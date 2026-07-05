@@ -137,13 +137,16 @@ function selectAndSubmitQuestion(question: string) {
 .inspiration-card {
   width: 100%;
   background: var(--color-background);
-  border-radius: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-base);
   border: 1px solid var(--color-border-light);
-  padding: 32px;
+  padding: var(--spacing-8);
   box-sizing: border-box;
-  margin-bottom: 24px;
-  transition: all 0.3s ease;
+  margin-bottom: var(--spacing-6);
+  transition:
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    transform var(--transition-base);
   max-width: 800px;
   margin-left: auto;
   margin-right: auto;
@@ -162,7 +165,11 @@ html.dark .inspiration-card {
   right: 0;
   width: 150px;
   height: 150px;
-  background: radial-gradient(circle, rgba(107, 70, 193, 0.05) 0%, rgba(255, 255, 255, 0) 70%);
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--color-primary) 6%, transparent) 0%,
+    transparent 70%
+  );
   border-radius: 50%;
   z-index: 0;
 }
@@ -171,9 +178,10 @@ html.dark .inspiration-card {
   text-align: center;
   color: var(--color-text-primary);
   margin-top: 0;
-  margin-bottom: 20px;
-  font-size: 1.6em;
-  font-weight: 700;
+  margin-bottom: var(--spacing-5);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
   position: relative;
 }
 
@@ -181,22 +189,27 @@ html.dark .inspiration-card {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 24px;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-6);
   position: relative;
   z-index: 1;
 }
 
 .tab-btn {
-  padding: 10px 18px;
+  padding: var(--spacing-2) var(--spacing-4);
   background: transparent;
   border: 1px solid var(--color-border);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   cursor: pointer;
-  font-size: 14px;
-  transition: all 0.3s ease;
+  font-size: var(--font-size-sm);
+  transition:
+    background-color var(--transition-base),
+    border-color var(--transition-base),
+    color var(--transition-base),
+    box-shadow var(--transition-base),
+    transform var(--transition-base);
   color: var(--color-text-secondary);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   position: relative;
   overflow: hidden;
 }
@@ -209,9 +222,9 @@ html.dark .inspiration-card {
 
 .tab-btn.active {
   background: var(--color-primary);
-  color: white;
+  color: var(--color-text-inverse);
   border-color: var(--color-primary);
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+  box-shadow: var(--shadow-sm);
 }
 
 .tab-btn.active::before {
@@ -248,16 +261,16 @@ html.dark .inspiration-card {
 
 @media (max-width: 768px) {
   .inspiration-card {
-    padding: 24px 16px;
+    padding: var(--spacing-6) var(--spacing-4);
   }
 
   .inspiration-tabs {
-    gap: 4px;
+    gap: var(--spacing-1);
   }
 
   .tab-btn {
-    padding: 4px 8px;
-    font-size: 12px;
+    padding: var(--spacing-1) var(--spacing-2);
+    font-size: var(--font-size-xs);
   }
 }
 </style>

@@ -18,57 +18,6 @@ export interface FollowUpContext {
   } | null;
 }
 
-export interface FollowUpPromptConfig {
-  followUpType: 'clarification' | 'deeper_analysis' | 'action_guidance' | 'time_related' | 'choice_comparison';
-  urgency: 'low' | 'medium' | 'high';
-  detailLevel: 'brief' | 'detailed' | 'comprehensive';
-}
-
-/**
- * 追问类型检测器
- */
-export function detectFollowUpType(question: string): FollowUpPromptConfig['followUpType'] {
-  const clarificationPatterns = /什么意思|什么是|解释一下| clarify|explain/i;
-  const deeperAnalysisPatterns = /为什么|why|深入|详细|进一步|分析/i;
-  const actionGuidancePatterns = /怎么办|如何|怎么|how|应该|建议/i;
-  const timeRelatedPatterns = /什么时候|何时|几时|多久|when|time/i;
-  const choiceComparisonPatterns = /还是|或者|比较|对比|哪个|or|compare/i;
-
-  if (clarificationPatterns.test(question)) return 'clarification';
-  if (deeperAnalysisPatterns.test(question)) return 'deeper_analysis';
-  if (actionGuidancePatterns.test(question)) return 'action_guidance';
-  if (timeRelatedPatterns.test(question)) return 'time_related';
-  if (choiceComparisonPatterns.test(question)) return 'choice_comparison';
-  
-  return 'clarification'; // 默认为澄清类问题
-}
-
-/**
- * 追问紧急程度检测器
- */
-export function detectUrgency(question: string): FollowUpPromptConfig['urgency'] {
-  const urgentPatterns = /急|紧急|马上|立即|urgent|asap|现在/i;
-  const relaxedPatterns = /慢慢|不急|考虑|think|consider/i;
-  
-  if (urgentPatterns.test(question)) return 'high';
-  if (relaxedPatterns.test(question)) return 'low';
-  return 'medium';
-}
-
-/**
- * 详细程度检测器
- */
-export function detectDetailLevel(question: string): FollowUpPromptConfig['detailLevel'] {
-  const briefPatterns = /简单|简短|概括|summary|brief/i;
-  const detailedPatterns = /详细|具体|深入|comprehensive|detailed/i;
-  const comprehensivePatterns = /全面|完整|thorough|complete/i;
-  
-  if (briefPatterns.test(question)) return 'brief';
-  if (comprehensivePatterns.test(question)) return 'comprehensive';
-  if (detailedPatterns.test(question)) return 'detailed';
-  return 'detailed'; // 默认为详细
-}
-
 /**
  * 生成追问模式专用提示词
  * 重用原始占卜的完整数据，确保追问的准确性和一致性
