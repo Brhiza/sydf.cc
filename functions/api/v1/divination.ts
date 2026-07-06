@@ -436,13 +436,14 @@ function buildUserPrompt(args: {
       : type === 'daily'
         ? '【问题】今日运势（通用解读）'
         : '【问题】（未提供，按通用解读处理）';
+  const divinationDataJson = JSON.stringify(divinationData);
 
   return [
     `【类型】${type}`,
     questionLine,
     supplementaryLines.length > 0 ? `【补充信息】\n${supplementaryLines.join('\n')}` : '',
     `【时间信息】\n${timeInfoText}`,
-    `【占卜数据（JSON）】\n${JSON.stringify(divinationData, null, 2)}`,
+    `【占卜数据（JSON）】\n${divinationDataJson}`,
     '',
     '请严格基于占卜数据进行解读，并把结论落到可执行的建议上。',
   ]

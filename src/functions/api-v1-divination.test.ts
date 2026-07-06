@@ -321,14 +321,14 @@ describe('开发者 API 兼容性', () => {
     expect(data.ok).toBe(true);
     expect(data.type).toBe('meihua');
     expect(data.interpretation).toBe('梅花测试解读');
-    expect(data.divination.originalName).toBe('坤为地');
-    expect(data.divination.changedName).toBe('雷地豫');
+    expect(data.divination.originalName).toBe('地山谦');
+    expect(data.divination.changedName).toBe('地火明夷');
     expect(data.divination.calculation).toMatchObject({
       method: '数字起卦法',
       number: 123456,
       upperTrigramIndex: 8,
-      lowerTrigramIndex: 8,
-      movingYaoIndex: 6,
+      lowerTrigramIndex: 7,
+      movingYaoIndex: 1,
     });
   });
 

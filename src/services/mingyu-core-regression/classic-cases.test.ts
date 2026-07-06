@@ -51,22 +51,22 @@ describe('经典盘例回归', () => {
       hour: '壬子',
     });
     expect(data.originalName).toBe('火雷噬嗑');
-    expect(data.interName).toBe('泽风大过');
-    expect(data.changedName).toBe('山雷颐');
+    expect(data.interName).toBe('水山蹇');
+    expect(data.changedName).toBe('震为雷');
     expect(data.movingYao.position).toBe(6);
     expect(data.tiGua.name).toBe('震');
     expect(data.yongGua.name).toBe('离');
     expect(data.changedTiGua).toEqual({ name: '震', element: '木', nature: '雷' });
-    expect(data.changedYongGua).toEqual({ name: '艮', element: '土', nature: '山' });
+    expect(data.changedYongGua).toEqual({ name: '震', element: '木', nature: '雷' });
     expect(data.analysis).toMatchObject({
       season: '春',
       tiYongRelation: '体生用',
       tiSeasonState: '旺',
       yongSeasonState: '相',
-      inter1Relation: '体克用',
-      inter2Relation: '用克体',
-      changedRelation: '体克用',
-      changedTiYongRelation: '体克用',
+      inter1Relation: '用克体',
+      inter2Relation: '用生体',
+      changedRelation: '体用比和',
+      changedTiYongRelation: '体用比和',
     });
     expect(data.calculation).toMatchObject({
       method: '年月日时起卦法',
@@ -90,8 +90,8 @@ describe('经典盘例回归', () => {
       day: '辛酉',
       hour: '甲午',
     });
-    expect(data.zhiFu).toBe('天英');
-    expect(data.zhiShi).toBe('景门');
+    expect(data.zhiFu).toBe('天蓬');
+    expect(data.zhiShi).toBe('休门');
     expect(data.isYangDun).toBe(false);
     expect(data.specialConditions).toMatchObject({
       isLiuJiaHour: true,
@@ -100,17 +100,17 @@ describe('经典盘例回归', () => {
       isWuBuYuShi: false,
     });
     expect(gong4).toMatchObject({
-      tianPan: { star: '天心', stem: '丙' },
+      tianPan: { star: '天柱', stem: '丁' },
       diPan: { stem: '戊' },
       renPan: { door: '死门' },
     });
     expect(gong8).toMatchObject({
-      tianPan: { star: '天芮', stem: '庚' },
+      tianPan: { star: '天冲', stem: '己' },
       diPan: { stem: '癸' },
       renPan: { door: '开门' },
     });
     expect(gong9).toMatchObject({
-      tianPan: { star: '天蓬', stem: '辛' },
+      tianPan: { star: '天芮', stem: '庚' },
       diPan: { stem: '壬' },
       renPan: { door: '景门' },
     });

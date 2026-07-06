@@ -1,18 +1,4 @@
 import { ref, computed } from 'vue';
-import {
-  type MeihuaAnimalOptionName,
-  type MeihuaColorOptionName,
-  type MeihuaDirectionOptionName,
-  type MeihuaObjectOptionName,
-  type MeihuaPersonOptionName,
-  type MeihuaSoundOptionName,
-  meihuaAnimalOptions,
-  meihuaColorOptions,
-  meihuaDirectionOptions,
-  meihuaObjectOptions,
-  meihuaPersonOptions,
-  meihuaSoundOptions,
-} from '@/shared/meihua-omens';
 import type {
   MeihuaDivinationMethod,
   QimenMethod,
@@ -42,13 +28,6 @@ export function useSupplementaryInfo() {
   const dayPillarEarthlyBranch = ref<string>('');
   const meihuaMethod = ref<MeihuaDivinationMethod>('time');
   const meihuaNumber = ref<number | undefined>();
-  const meihuaExternalDirection = ref<MeihuaDirectionOptionName | undefined>();
-  const meihuaExternalCount = ref<number | undefined>();
-  const meihuaExternalPerson = ref<MeihuaPersonOptionName | undefined>();
-  const meihuaExternalAnimal = ref<MeihuaAnimalOptionName | undefined>();
-  const meihuaExternalObject = ref<MeihuaObjectOptionName | undefined>();
-  const meihuaExternalSound = ref<MeihuaSoundOptionName | undefined>();
-  const meihuaExternalColor = ref<MeihuaColorOptionName | undefined>();
   const qimenMethod = ref<QimenMethod>(DEFAULT_QIMEN_METHOD);
   const qimenScope = ref<QimenScope>(DEFAULT_QIMEN_SCOPE);
 
@@ -56,16 +35,7 @@ export function useSupplementaryInfo() {
     if (meihuaMethod.value !== 'time') {
       return true;
     }
-    return !!(
-      meihuaNumber.value ||
-      meihuaExternalDirection.value ||
-      meihuaExternalCount.value ||
-      meihuaExternalPerson.value ||
-      meihuaExternalAnimal.value ||
-      meihuaExternalObject.value ||
-      meihuaExternalSound.value ||
-      meihuaExternalColor.value
-    );
+    return !!meihuaNumber.value;
   });
 
   const supplementaryInfoToggleText = computed(() => {
@@ -101,15 +71,6 @@ export function useSupplementaryInfo() {
     const meihuaSettings = normalizeMeihuaSettings({
       method: meihuaMethod.value,
       number: meihuaNumber.value,
-      externalOmens: {
-        direction: meihuaExternalDirection.value,
-        count: meihuaExternalCount.value,
-        person: meihuaExternalPerson.value,
-        animal: meihuaExternalAnimal.value,
-        object: meihuaExternalObject.value,
-        sound: meihuaExternalSound.value,
-        color: meihuaExternalColor.value,
-      },
     });
     if (meihuaSettings) info.meihuaSettings = meihuaSettings;
     if (!isDefaultQimenSettings({ method: qimenMethod.value, scope: qimenScope.value })) {
@@ -133,13 +94,6 @@ export function useSupplementaryInfo() {
     dayPillarEarthlyBranch.value = '';
     meihuaMethod.value = 'time';
     meihuaNumber.value = undefined;
-    meihuaExternalDirection.value = undefined;
-    meihuaExternalCount.value = undefined;
-    meihuaExternalPerson.value = undefined;
-    meihuaExternalAnimal.value = undefined;
-    meihuaExternalObject.value = undefined;
-    meihuaExternalSound.value = undefined;
-    meihuaExternalColor.value = undefined;
     qimenMethod.value = DEFAULT_QIMEN_METHOD;
     qimenScope.value = DEFAULT_QIMEN_SCOPE;
   };
@@ -153,13 +107,6 @@ export function useSupplementaryInfo() {
     dayPillarEarthlyBranch,
     meihuaMethod,
     meihuaNumber,
-    meihuaExternalDirection,
-    meihuaExternalCount,
-    meihuaExternalPerson,
-    meihuaExternalAnimal,
-    meihuaExternalObject,
-    meihuaExternalSound,
-    meihuaExternalColor,
     qimenMethod,
     qimenScope,
   });
@@ -176,21 +123,8 @@ export function useSupplementaryInfo() {
     earthlyBranches,
     meihuaMethod,
     meihuaNumber,
-    meihuaExternalDirection,
-    meihuaExternalCount,
-    meihuaExternalPerson,
-    meihuaExternalAnimal,
-    meihuaExternalObject,
-    meihuaExternalSound,
-    meihuaExternalColor,
     qimenMethod,
     qimenScope,
-    meihuaDirectionOptions,
-    meihuaPersonOptions,
-    meihuaAnimalOptions,
-    meihuaObjectOptions,
-    meihuaSoundOptions,
-    meihuaColorOptions,
     supplementaryInfoToggleText,
     getSupplementaryInfo,
     resetSupplementaryInfo,

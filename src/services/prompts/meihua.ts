@@ -16,13 +16,10 @@ function formatMeihuaData(data: MeihuaData, _context: PromptFormatterContext): s
     : '时间信息未知';
   const methodInfo = data.calculation?.method || '未知';
   const numberInfo = typeof data.calculation?.number === 'number' ? `\n- **起卦数字**: ${data.calculation.number}` : '';
-  const externalInfo = typeof data.calculation?.externalSummary === 'string' && data.calculation.externalSummary
-    ? `\n- **外应信息**: ${data.calculation.externalSummary}`
-    : '';
 
   const prompt = `**梅花易数卦象信息**：
 - **时间**: ${timeInfo}
-- **起卦方式**: ${methodInfo}${numberInfo}${externalInfo}
+- **起卦方式**: ${methodInfo}${numberInfo}
 - **主卦**: ${data.originalName}
 - **互卦**: ${data.interName || '无'}
 - **变卦**: ${data.changedName || '无'}

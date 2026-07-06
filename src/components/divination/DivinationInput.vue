@@ -29,13 +29,6 @@
       v-model:output-length="outputLength"
       v-model:meihua-method="meihuaMethod"
       v-model:meihua-number="meihuaNumber"
-      v-model:meihua-external-direction="meihuaExternalDirection"
-      v-model:meihua-external-count="meihuaExternalCount"
-      v-model:meihua-external-person="meihuaExternalPerson"
-      v-model:meihua-external-animal="meihuaExternalAnimal"
-      v-model:meihua-external-object="meihuaExternalObject"
-      v-model:meihua-external-sound="meihuaExternalSound"
-      v-model:meihua-external-color="meihuaExternalColor"
       v-model:qimen-method="qimenMethod"
       v-model:qimen-scope="qimenScope"
       :divination-type="divinationType"
@@ -44,12 +37,6 @@
       :supplementary-info-toggle-text="supplementaryInfoToggleText"
       :heavenly-stems="heavenlyStems"
       :earthly-branches="earthlyBranches"
-      :meihua-direction-options="meihuaDirectionOptions"
-      :meihua-person-options="meihuaPersonOptions"
-      :meihua-animal-options="meihuaAnimalOptions"
-      :meihua-object-options="meihuaObjectOptions"
-      :meihua-sound-options="meihuaSoundOptions"
-      :meihua-color-options="meihuaColorOptions"
       @reset="resetSupplementaryInfo"
     />
 
@@ -135,23 +122,10 @@ const {
   dayPillarEarthlyBranch,
   meihuaMethod,
   meihuaNumber,
-  meihuaExternalDirection,
-  meihuaExternalCount,
-  meihuaExternalPerson,
-  meihuaExternalAnimal,
-  meihuaExternalObject,
-  meihuaExternalSound,
-  meihuaExternalColor,
   qimenMethod,
   qimenScope,
   heavenlyStems,
   earthlyBranches,
-  meihuaDirectionOptions,
-  meihuaPersonOptions,
-  meihuaAnimalOptions,
-  meihuaObjectOptions,
-  meihuaSoundOptions,
-  meihuaColorOptions,
   supplementaryInfoToggleText,
   getSupplementaryInfo,
   resetSupplementaryInfo,

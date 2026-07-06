@@ -71,22 +71,14 @@ describe('DataGenerationService', () => {
   it('梅花应透传自定义起卦设置', async () => {
     await dataGenerationService.generateDivination('meihua', undefined, {
       meihuaSettings: {
-        method: 'external',
-        externalOmens: {
-          direction: '东',
-          person: '少女',
-          count: 5,
-        },
+        method: 'number',
+        number: 123456,
       },
     });
 
     expect(mockGenerateMingyuMeihua).toHaveBeenCalledWith({
-      method: 'external',
-      externalOmens: {
-        direction: '东',
-        person: '少女',
-        count: 5,
-      },
+      method: 'number',
+      number: 123456,
     });
   });
 

@@ -24,13 +24,13 @@
   },
   "dependencies": {
     "marked": "^18.0.5",
-    "mingyu-core": "^0.1.8",
+    "mingyu-core": "^0.1.14",
     "pinia": "^3.0.3",
     "vue": "^3.5.22",
     "vue-router": "^5.1.0"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^5.20260703.1",
+    "@cloudflare/workers-types": "^5.20260705.1",
     "@eslint/js": "^10.0.1",
     "@types/node": "^26.1.0",
     "@vitejs/plugin-vue": "^6.0.1",
@@ -45,7 +45,7 @@
     "prettier": "^3.6.2",
     "sharp": "^0.35.3",
     "tsconfig-paths": "^4.2.0",
-    "tsx": "^4.22.5",
+    "tsx": "^4.23.0",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.45.0",
     "unplugin-auto-import": "^21.0.0",

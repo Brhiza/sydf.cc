@@ -1,18 +1,4 @@
 import { onMounted, watch, type Ref } from 'vue';
-import {
-  meihuaAnimalOptions,
-  meihuaColorOptions,
-  meihuaDirectionOptions,
-  meihuaObjectOptions,
-  meihuaPersonOptions,
-  meihuaSoundOptions,
-  type MeihuaAnimalOptionName,
-  type MeihuaColorOptionName,
-  type MeihuaDirectionOptionName,
-  type MeihuaObjectOptionName,
-  type MeihuaPersonOptionName,
-  type MeihuaSoundOptionName,
-} from '@/shared/meihua-omens';
 import type {
   MeihuaDivinationMethod,
   QimenMethod,
@@ -29,7 +15,7 @@ import {
   DEFAULT_MEIHUA_METHOD,
   normalizeMeihuaSettings,
   resolveMeihuaMethod,
-  resolveMeihuaOptionName,
+  resolveOptionName,
 } from '@/shared/meihua-settings';
 import { earthlyBranches, heavenlyStems } from './useSupplementaryInfo.constants';
 import {
@@ -49,13 +35,6 @@ export interface SupplementaryInfoRefs {
   dayPillarEarthlyBranch: Ref<string>;
   meihuaMethod: Ref<MeihuaDivinationMethod>;
   meihuaNumber: Ref<number | undefined>;
-  meihuaExternalDirection: Ref<MeihuaDirectionOptionName | undefined>;
-  meihuaExternalCount: Ref<number | undefined>;
-  meihuaExternalPerson: Ref<MeihuaPersonOptionName | undefined>;
-  meihuaExternalAnimal: Ref<MeihuaAnimalOptionName | undefined>;
-  meihuaExternalObject: Ref<MeihuaObjectOptionName | undefined>;
-  meihuaExternalSound: Ref<MeihuaSoundOptionName | undefined>;
-  meihuaExternalColor: Ref<MeihuaColorOptionName | undefined>;
   qimenMethod: Ref<QimenMethod>;
   qimenScope: Ref<QimenScope>;
 }
@@ -90,9 +69,9 @@ function restoreFromStorage(refs: SupplementaryInfoRefs) {
   if (basicInfo?.dayPillar) {
     const dayPillar = basicInfo.dayPillar;
     refs.dayPillarHeavenlyStem.value =
-      resolveMeihuaOptionName(dayPillar.heavenlyStem, heavenlyStems) || '';
+      resolveOptionName(dayPillar.heavenlyStem, heavenlyStems) || '';
     refs.dayPillarEarthlyBranch.value =
-      resolveMeihuaOptionName(dayPillar.earthlyBranch, earthlyBranches) || '';
+      resolveOptionName(dayPillar.earthlyBranch, earthlyBranches) || '';
   } else {
     refs.dayPillarHeavenlyStem.value = '';
     refs.dayPillarEarthlyBranch.value = '';
@@ -104,42 +83,9 @@ function restoreFromStorage(refs: SupplementaryInfoRefs) {
     refs.meihuaMethod.value = meihuaSettings.method || DEFAULT_MEIHUA_METHOD;
     refs.meihuaNumber.value =
       meihuaSettings.method === 'number' ? meihuaSettings.number : undefined;
-    refs.meihuaExternalDirection.value =
-      meihuaSettings.method === 'external'
-        ? resolveMeihuaOptionName(meihuaSettings.externalOmens?.direction, meihuaDirectionOptions)
-        : undefined;
-    refs.meihuaExternalCount.value =
-      meihuaSettings.method === 'external' ? meihuaSettings.externalOmens?.count : undefined;
-    refs.meihuaExternalPerson.value =
-      meihuaSettings.method === 'external'
-        ? resolveMeihuaOptionName(meihuaSettings.externalOmens?.person, meihuaPersonOptions)
-        : undefined;
-    refs.meihuaExternalAnimal.value =
-      meihuaSettings.method === 'external'
-        ? resolveMeihuaOptionName(meihuaSettings.externalOmens?.animal, meihuaAnimalOptions)
-        : undefined;
-    refs.meihuaExternalObject.value =
-      meihuaSettings.method === 'external'
-        ? resolveMeihuaOptionName(meihuaSettings.externalOmens?.object, meihuaObjectOptions)
-        : undefined;
-    refs.meihuaExternalSound.value =
-      meihuaSettings.method === 'external'
-        ? resolveMeihuaOptionName(meihuaSettings.externalOmens?.sound, meihuaSoundOptions)
-        : undefined;
-    refs.meihuaExternalColor.value =
-      meihuaSettings.method === 'external'
-        ? resolveMeihuaOptionName(meihuaSettings.externalOmens?.color, meihuaColorOptions)
-        : undefined;
   } else {
     refs.meihuaMethod.value = DEFAULT_MEIHUA_METHOD;
     refs.meihuaNumber.value = undefined;
-    refs.meihuaExternalDirection.value = undefined;
-    refs.meihuaExternalCount.value = undefined;
-    refs.meihuaExternalPerson.value = undefined;
-    refs.meihuaExternalAnimal.value = undefined;
-    refs.meihuaExternalObject.value = undefined;
-    refs.meihuaExternalSound.value = undefined;
-    refs.meihuaExternalColor.value = undefined;
   }
 
   if (savedQimenSettings && typeof savedQimenSettings === 'object' && savedQimenSettings !== null) {
@@ -161,13 +107,6 @@ function buildPersistedSnapshot(values: {
   dayPillarEarthlyBranch: string;
   meihuaMethod: MeihuaDivinationMethod;
   meihuaNumber: number | undefined;
-  meihuaExternalDirection: SupplementaryInfoRefs['meihuaExternalDirection']['value'];
-  meihuaExternalCount: number | undefined;
-  meihuaExternalPerson: SupplementaryInfoRefs['meihuaExternalPerson']['value'];
-  meihuaExternalAnimal: SupplementaryInfoRefs['meihuaExternalAnimal']['value'];
-  meihuaExternalObject: SupplementaryInfoRefs['meihuaExternalObject']['value'];
-  meihuaExternalSound: SupplementaryInfoRefs['meihuaExternalSound']['value'];
-  meihuaExternalColor: SupplementaryInfoRefs['meihuaExternalColor']['value'];
   qimenMethod: QimenMethod;
   qimenScope: QimenScope;
 }) {
@@ -175,15 +114,6 @@ function buildPersistedSnapshot(values: {
   const meihuaSettings = normalizeMeihuaSettings({
     method: meihuaMethod,
     number: values.meihuaNumber,
-    externalOmens: {
-      direction: values.meihuaExternalDirection,
-      count: values.meihuaExternalCount,
-      person: values.meihuaExternalPerson,
-      animal: values.meihuaExternalAnimal,
-      object: values.meihuaExternalObject,
-      sound: values.meihuaExternalSound,
-      color: values.meihuaExternalColor,
-    },
   });
   const qimenSettings = resolveQimenSettings({
     method: values.qimenMethod,
@@ -221,13 +151,6 @@ export function setupSupplementaryInfoPersistence(refs: SupplementaryInfoRefs) {
       refs.dayPillarEarthlyBranch,
       refs.meihuaMethod,
       refs.meihuaNumber,
-      refs.meihuaExternalDirection,
-      refs.meihuaExternalCount,
-      refs.meihuaExternalPerson,
-      refs.meihuaExternalAnimal,
-      refs.meihuaExternalObject,
-      refs.meihuaExternalSound,
-      refs.meihuaExternalColor,
       refs.qimenMethod,
       refs.qimenScope,
     ],
@@ -240,13 +163,6 @@ export function setupSupplementaryInfoPersistence(refs: SupplementaryInfoRefs) {
       dayPillarEarthlyBranch,
       meihuaMethod,
       meihuaNumber,
-      meihuaExternalDirection,
-      meihuaExternalCount,
-      meihuaExternalPerson,
-      meihuaExternalAnimal,
-      meihuaExternalObject,
-      meihuaExternalSound,
-      meihuaExternalColor,
       qimenMethod,
       qimenScope,
     ]) => {
@@ -259,13 +175,6 @@ export function setupSupplementaryInfoPersistence(refs: SupplementaryInfoRefs) {
         dayPillarEarthlyBranch,
         meihuaMethod,
         meihuaNumber,
-        meihuaExternalDirection,
-        meihuaExternalCount,
-        meihuaExternalPerson,
-        meihuaExternalAnimal,
-        meihuaExternalObject,
-        meihuaExternalSound,
-        meihuaExternalColor,
         qimenMethod,
         qimenScope,
       });

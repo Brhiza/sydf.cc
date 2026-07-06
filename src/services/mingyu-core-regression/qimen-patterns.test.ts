@@ -18,7 +18,7 @@ describe('奇门格局标签', () => {
   it('应能识别星伏吟', () => {
     setBothTimezones(480);
 
-    const data = generateQimen(new Date('2025-01-02T08:00:00+08:00'));
+    const data = generateQimen(new Date('2025-01-01T16:00:00+08:00'));
 
     expect(data.patternTags).toContain('星伏吟');
   });
@@ -26,10 +26,10 @@ describe('奇门格局标签', () => {
   it('应能识别 mingyu-core 的反吟与增强格局', () => {
     setBothTimezones(480);
 
-    const data = generateQimen(new Date('2025-01-03T10:00:00+08:00'));
+    const data = generateQimen(new Date('2025-01-03T18:00:00+08:00'));
 
     expect(data.patternTags).toEqual(expect.arrayContaining(['星反吟']));
-    expect(data.patternTags?.some((tag) => tag.startsWith('门迫'))).toBe(true);
+    expect(data.patternTags?.some((tag) => tag.startsWith('三奇得'))).toBe(true);
     expect(data.classicPatterns?.length).toBeGreaterThan(0);
     expect(data.horseStar?.branch).toBeTypeOf('string');
   });
@@ -46,7 +46,7 @@ describe('奇门格局标签', () => {
       expect.arrayContaining([
         expect.objectContaining({
           tag: menpoTag,
-          summary: '门受宫克，该宫事项易受压制，行动阻力偏大。',
+          summary: '门克宫，该宫事项易受压制，行动阻力偏大。',
         }),
       ])
     );
