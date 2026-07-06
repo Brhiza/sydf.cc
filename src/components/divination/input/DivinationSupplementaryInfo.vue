@@ -27,20 +27,7 @@
     <MeihuaMethodFields
       v-model:meihua-method="meihuaMethod"
       v-model:meihua-number="meihuaNumber"
-      v-model:meihua-external-direction="meihuaExternalDirection"
-      v-model:meihua-external-count="meihuaExternalCount"
-      v-model:meihua-external-person="meihuaExternalPerson"
-      v-model:meihua-external-animal="meihuaExternalAnimal"
-      v-model:meihua-external-object="meihuaExternalObject"
-      v-model:meihua-external-sound="meihuaExternalSound"
-      v-model:meihua-external-color="meihuaExternalColor"
       :show-divination-method-selector="showDivinationMethodSelector"
-      :meihua-direction-options="meihuaDirectionOptions"
-      :meihua-person-options="meihuaPersonOptions"
-      :meihua-animal-options="meihuaAnimalOptions"
-      :meihua-object-options="meihuaObjectOptions"
-      :meihua-sound-options="meihuaSoundOptions"
-      :meihua-color-options="meihuaColorOptions"
     />
 
     <transition name="fade">
@@ -123,12 +110,6 @@ defineProps<{
   supplementaryInfoToggleText: string;
   heavenlyStems: SelectOption[];
   earthlyBranches: SelectOption[];
-  meihuaDirectionOptions: SelectOption[];
-  meihuaPersonOptions: SelectOption[];
-  meihuaAnimalOptions: SelectOption[];
-  meihuaObjectOptions: SelectOption[];
-  meihuaSoundOptions: SelectOption[];
-  meihuaColorOptions: SelectOption[];
 }>();
 
 defineEmits<{
@@ -145,13 +126,6 @@ const interpretationStyle = defineModel<InterpretationStyle>('interpretationStyl
 const outputLength = defineModel<OutputLength>('outputLength');
 const meihuaMethod = defineModel<MeihuaDivinationMethod>('meihuaMethod', { default: 'time' });
 const meihuaNumber = defineModel<number | undefined>('meihuaNumber');
-const meihuaExternalDirection = defineModel<string | undefined>('meihuaExternalDirection');
-const meihuaExternalCount = defineModel<number | undefined>('meihuaExternalCount');
-const meihuaExternalPerson = defineModel<string | undefined>('meihuaExternalPerson');
-const meihuaExternalAnimal = defineModel<string | undefined>('meihuaExternalAnimal');
-const meihuaExternalObject = defineModel<string | undefined>('meihuaExternalObject');
-const meihuaExternalSound = defineModel<string | undefined>('meihuaExternalSound');
-const meihuaExternalColor = defineModel<string | undefined>('meihuaExternalColor');
 const qimenMethod = defineModel<QimenMethod>('qimenMethod', { default: DEFAULT_QIMEN_METHOD });
 const qimenScope = defineModel<QimenScope>('qimenScope', { default: DEFAULT_QIMEN_SCOPE });
 
@@ -159,7 +133,6 @@ const methodOptions = [
   { label: '时间', value: 'time' },
   { label: '数字', value: 'number' },
   { label: '随机', value: 'random' },
-  { label: '外应', value: 'external' },
 ] as const;
 
 const qimenScopeOptions = [
@@ -334,7 +307,7 @@ const qimenMethodOptions = [
 
   .method-switcher {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     width: 100%;
     border-radius: 16px;
   }

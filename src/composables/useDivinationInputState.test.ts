@@ -150,12 +150,8 @@ describe('useDivinationInputState', () => {
     supplementaryInfo.getSupplementaryInfo.mockReturnValue({
       interpretationStyle: '专业',
       meihuaSettings: {
-        method: 'external',
-        externalOmens: {
-          direction: '东',
-          person: '少女',
-          count: 5,
-        },
+        method: 'number',
+        number: 123456,
       },
     });
 
@@ -169,12 +165,8 @@ describe('useDivinationInputState', () => {
       supplementaryInfo: {
         interpretationStyle: '专业',
         meihuaSettings: {
-          method: 'external',
-          externalOmens: {
-            direction: '东',
-            person: '少女',
-            count: 5,
-          },
+          method: 'number',
+          number: 123456,
         },
       },
     });

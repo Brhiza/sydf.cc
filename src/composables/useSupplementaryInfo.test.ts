@@ -72,20 +72,6 @@ describe('useSupplementaryInfo', () => {
     wrapper.unmount();
   });
 
-  it('梅花外应信息不完整时不应提交高级参数', async () => {
-    const { state, wrapper } = mountSupplementaryInfo();
-    await nextTick();
-
-    state.meihuaMethod.value = 'external';
-    state.meihuaExternalDirection.value = '东';
-    state.meihuaExternalCount.value = 7;
-    await nextTick();
-
-    expect(state.getSupplementaryInfo()).toBeUndefined();
-
-    wrapper.unmount();
-  });
-
   it('旧缓存中的非法高级参数应回到默认状态', async () => {
     localStorage.setItem(
       'supplementaryInfo',
@@ -93,10 +79,6 @@ describe('useSupplementaryInfo', () => {
         meihuaSettings: {
           method: 'bad-method',
           number: 8,
-          externalOmens: {
-            direction: '坏方向',
-            count: Number.NaN,
-          },
         },
         qimenSettings: {
           method: 'bad-method',
@@ -118,16 +100,12 @@ describe('useSupplementaryInfo', () => {
     wrapper.unmount();
   });
 
-  it('旧缓存中的不完整梅花外应应回到默认状态', async () => {
+  it('旧缓存中的已下线梅花起卦方式应回到默认状态', async () => {
     localStorage.setItem(
       'supplementaryInfo',
       JSON.stringify({
         meihuaSettings: {
           method: 'external',
-          externalOmens: {
-            direction: '东',
-            count: 3,
-          },
         },
       })
     );

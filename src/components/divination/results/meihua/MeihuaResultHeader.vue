@@ -41,9 +41,6 @@
           <template v-if="typeof data.calculation.number === 'number'">
             （数字：{{ data.calculation.number }}）
           </template>
-          <template v-else-if="data.calculation.externalSummary">
-            （{{ data.calculation.externalSummary }}）
-          </template>
         </span>
       </div>
       <div v-if="data.tiGua && data.yongGua && data.analysis" class="hexagram-line">
