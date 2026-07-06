@@ -119,6 +119,7 @@ npm run format
 | `OPENAI_API_KEY` | 服务端代理 AI 请求时必需 |
 | `OPENAI_API_BASE` | OpenAI 兼容接口地址 |
 | `OPENAI_API_MODEL` | 服务端默认模型 |
+| `AI_PROXY_MAX_MESSAGE_CONTENT_LENGTH` | AI 代理单条消息最大字符数，默认 `60000`，最高 `200000` |
 | `DEV_API_KEY` | 开发者 API 访问密钥 |
 
 ## 重要入口文件

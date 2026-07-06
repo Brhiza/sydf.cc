@@ -127,6 +127,91 @@ describe('/api/ai 安全限制', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
+  it('允许超过旧限制但低于默认限制的单条消息', async () => {
+    const longContent = '问'.repeat(30000);
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const upstreamRequest = input instanceof Request ? input : new Request(input);
+      const payload = await upstreamRequest.clone().json();
+
+      expect(payload.messages).toEqual([{ role: 'user', content: longContent }]);
+
+      return new Response(
+        JSON.stringify({
+          choices: [
+            {
+              message: {
+                content: '长消息测试成功',
+              },
+            },
+          ],
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const request = new Request('https://sydf.cc/api/ai', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Origin: 'https://sydf.cc',
+        Referer: 'https://sydf.cc/divination/qimen',
+      },
+      body: JSON.stringify({
+        stream: false,
+        messages: [{ role: 'user', content: longContent }],
+      }),
+    });
+
+    const response = await onRequest({
+      request,
+      env: {
+        OPENAI_API_KEY: 'test-openai-key',
+        OPENAI_API_MODEL: 'server-model',
+      },
+    });
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.choices[0].message.content).toBe('长消息测试成功');
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('允许通过环境变量收紧单条消息长度限制', async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+
+    const request = new Request('https://sydf.cc/api/ai', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Origin: 'https://sydf.cc',
+        Referer: 'https://sydf.cc/divination/qimen',
+      },
+      body: JSON.stringify({
+        stream: false,
+        messages: [{ role: 'user', content: '问'.repeat(1001) }],
+      }),
+    });
+
+    const response = await onRequest({
+      request,
+      env: {
+        OPENAI_API_KEY: 'test-openai-key',
+        OPENAI_API_MODEL: 'server-model',
+        AI_PROXY_MAX_MESSAGE_CONTENT_LENGTH: '1000',
+      },
+    });
+    const data = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(data.error).toContain('不能超过 1000 个字符');
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it('同一客户端超过限额时不再转发上游 AI', async () => {
     const fetchMock = vi.fn(
       async () =>

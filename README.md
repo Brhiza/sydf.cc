@@ -107,6 +107,7 @@ npm run build
 | `OPENAI_API_KEY` | `/api/ai` 与 `/api/v1/divination` 代理 AI 请求时必需 |
 | `OPENAI_API_BASE` | OpenAI 兼容接口根地址，可选 |
 | `OPENAI_API_MODEL` | 服务端默认模型，可选 |
+| `AI_PROXY_MAX_MESSAGE_CONTENT_LENGTH` | AI 代理单条消息最大字符数，可选，默认 `60000`，最高 `200000` |
 | `DEV_API_KEY` | 开发者 API 鉴权密钥，供 `/api/v1/divination` 使用 |
 
 ## 文档目录
