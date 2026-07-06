@@ -3,7 +3,8 @@ const DEFAULT_OPENAI_API_MODEL = 'gpt-3.5-turbo';
 const DEFAULT_MAX_TOKENS = 4096;
 const MAX_TOKENS = 8192;
 const MAX_MESSAGE_COUNT = 50;
-const MAX_MESSAGE_CONTENT_LENGTH = 20000;
+const DEFAULT_MAX_MESSAGE_CONTENT_LENGTH = 60000;
+const HARD_MAX_MESSAGE_CONTENT_LENGTH = 200000;
 const MAX_TOOL_COUNT = 8;
 const MAX_TOOL_ARGUMENT_LENGTH = 12000;
 const MAX_TOOL_SCHEMA_LENGTH = 20000;
@@ -54,6 +55,24 @@ function cloneJsonWithLimit(value, fieldName, maxLength) {
   return JSON.parse(serialized);
 }
 
+function parseBoundedPositiveInteger(value, fallback, max) {
+  const parsed = Number.parseInt(String(value ?? ''), 10);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return fallback;
+  }
+  return Math.min(max, parsed);
+}
+
+function getAiProxyLimits(env) {
+  return {
+    maxMessageContentLength: parseBoundedPositiveInteger(
+      env?.AI_PROXY_MAX_MESSAGE_CONTENT_LENGTH,
+      DEFAULT_MAX_MESSAGE_CONTENT_LENGTH,
+      HARD_MAX_MESSAGE_CONTENT_LENGTH
+    ),
+  };
+}
+
 function normalizeToolCalls(toolCalls, messageIndex) {
   if (toolCalls == null) return undefined;
   if (!Array.isArray(toolCalls)) {
@@ -87,7 +106,7 @@ function normalizeToolCalls(toolCalls, messageIndex) {
   });
 }
 
-function normalizeMessages(messages) {
+function normalizeMessages(messages, limits) {
   if (!Array.isArray(messages) || messages.length === 0) {
     throw createHttpError('messages 必须为非空数组', 400);
   }
@@ -113,8 +132,11 @@ function normalizeMessages(messages) {
       }
 
       if (typeof message.content === 'string') {
-        if (message.content.length > MAX_MESSAGE_CONTENT_LENGTH) {
-          throw createHttpError(`messages[${index}].content 过长`, 400);
+        if (message.content.length > limits.maxMessageContentLength) {
+          throw createHttpError(
+            `messages[${index}].content 过长，不能超过 ${limits.maxMessageContentLength} 个字符`,
+            400
+          );
         }
         return message.content;
       }
@@ -217,14 +239,16 @@ function normalizeMaxTokens(maxTokens) {
   return Math.min(MAX_TOKENS, Math.max(1, Math.floor(maxTokens)));
 }
 
-function normalizeAiRequestBody(requestBody, forcedModel) {
+function normalizeAiRequestBody(requestBody, forcedModel, env) {
   if (!isPlainObject(requestBody)) {
     throw createHttpError('请求体必须为 JSON 对象', 400);
   }
 
+  const limits = getAiProxyLimits(env);
+
   const normalizedBody = {
     model: forcedModel,
-    messages: normalizeMessages(requestBody.messages),
+    messages: normalizeMessages(requestBody.messages, limits),
     stream: Boolean(requestBody.stream),
     max_tokens: normalizeMaxTokens(requestBody.max_tokens),
   };
@@ -256,7 +280,7 @@ export function createAiProxyRequest(env, requestBody, init = {}) {
     throw createHttpError('OPENAI_API_KEY is not configured.', 500);
   }
 
-  const normalizedBody = normalizeAiRequestBody(requestBody, apiModel);
+  const normalizedBody = normalizeAiRequestBody(requestBody, apiModel, env);
   const normalizedApiBase = apiBase.replace(/\/+$/, '');
 
   return new Request(`${normalizedApiBase}/chat/completions`, {
